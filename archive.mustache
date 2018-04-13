@@ -1,0 +1,13 @@
+{{> header}}
+
+<h1>{{title}}</h1>
+
+{{#posts}}
+<div>
+    {{{html}}}
+
+    <a href="{{url}}">{{created}}</a>
+</div>
+{{/posts}}
+
+{{> footer}}

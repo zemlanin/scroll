@@ -12,13 +12,37 @@ const sqlite = require("sqlite");
 const marked = require("marked");
 const mustache = require("mustache");
 const groupBy = require("lodash.groupby");
-marked.setOptions({
-  gfm: true
-});
 
-const _id = require("nanoid/generate");
-const id = () =>
-  _id("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 12);
+const renderer = new marked.Renderer();
+const ogImage = renderer.image.bind(renderer);
+renderer.image = function(href, title, text) {
+  const youtubeId = href.match(
+    /(youtu\.be\/|youtube\.com\/watch\?v=)([^&\\]+)/
+  );
+  if (youtubeId) {
+    href = `https://www.youtube.com/embed/${youtubeId[2]}`;
+  }
+
+  const vimeoId = href.match(/(vimeo\.com\/)(\d+)/);
+  if (vimeoId) {
+    href = `https://player.vimeo.com/video/${vimeoId[2]}`;
+  }
+
+  if (href.indexOf("//www.youtube.com/embed/") > -1) {
+    return `<iframe src="${href}" width="640" height="360" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+  }
+
+  if (href.indexOf("//player.vimeo.com/video/") > -1) {
+    return `<iframe src="${href}" width="640" height="360" frameborder="0" allowfullscreen></iframe>`;
+  }
+
+  return ogImage(href, title, text);
+};
+
+marked.setOptions({
+  gfm: true,
+  renderer: renderer
+});
 
 const rmrf = require("./rmrf.js");
 
@@ -55,7 +79,9 @@ async function generate() {
     const firstHeading = markedTokens.find(t => t.type === "heading");
     const firstParagraph = markedTokens.find(t => t.type === "paragraph");
     const title =
-      (firstHeading ? firstHeading.text : firstParagraph.text) || "";
+      (firstHeading && firstHeading.text) ||
+      (firstParagraph && firstParagraph.text) ||
+      "";
 
     return {
       url,
@@ -66,7 +92,7 @@ async function generate() {
   });
 
   for (const post of preparedPosts) {
-    const url = post.url
+    const url = post.url;
 
     await fs.writeFile(
       `./dist/${url}`,

@@ -1,4 +1,4 @@
 dist/
 node_modules/
-tweets/
 posts.db
+.DS_Store

@@ -1,4 +1,5 @@
 const _fs = require("fs");
+const request = require("request-promise-native");
 const { promisify, inspect } = require("util");
 
 const fs = {
@@ -11,30 +12,65 @@ const fs = {
 
 const sqlite = require("sqlite");
 const _id = require("nanoid/generate");
-const id = () =>
-  _id("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 12);
-
-let _seconds = 0;
-function fakeClocks() {
-  if (++_seconds > 3599) {
-    _seconds = 0;
-  }
-
-  const m = parseInt(_seconds / 60);
-  const s = parseInt(_seconds % 60);
-
-  return `10:${m > 9 ? m : "0" + m}:${s > 9 ? s : "0" + s}`;
-}
-function resetClocks() {
-  _seconds = 0;
-}
+const getMediaId = () =>
+  _id("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 26);
 
 function escape(text) {
   return text
     .replace(/\n/g, "  \n")
-    .replace(/([\\\`\[\]])/g, "\\$1")
-    .replace(/^\s*([\+\-\_\*])/gm, "\\$1")
-    .replace(/\\\_\(ツ\)\_/gm, "\\\\_(ツ)\\_");
+    .replace(/([\\`[\]])/g, "\\$1")
+    .replace(/^\s*([+\-_*])/gm, "\\$1")
+    .replace(/\\_\(ツ\)_/gm, "\\\\_(ツ)\\_");
+}
+
+async function getTime(tweet) {
+  if (tweet.created_at.indexOf("00:00:00") > -1) {
+    const twitterUrl = `https://twitter.com/${tweet.user.screen_name}/status/${
+      tweet.id_str
+    }`;
+    const resp = await request.get(twitterUrl);
+
+    const timestamp = resp.match(/data-time-ms="(\d+)"/);
+    if (timestamp) {
+      return new Date(+timestamp[1]).toISOString();
+    }
+  }
+
+  return new Date(tweet.created_at).toISOString();
+}
+
+async function loadMedia(src, db) {
+  const alreadyLoaded = await db.get("SELECT * from media WHERE src = ?1", [
+    src
+  ]);
+
+  if (alreadyLoaded) {
+    return {
+      id: alreadyLoaded.id,
+      ext: alreadyLoaded.ext,
+      src: alreadyLoaded.src
+    };
+  }
+
+  const resp = await request.get(src, { encoding: null });
+
+  const result = {
+    id: getMediaId(),
+    ext: src.match(/\.([a-z0-9]+)$/)[1],
+    src: src
+  };
+
+  await db.run(
+    "INSERT INTO media (id, ext, data, src) VALUES (?1, ?2, ?3, ?4)",
+    {
+      1: result.id,
+      2: result.ext,
+      3: resp,
+      4: result.src
+    }
+  );
+
+  return result;
 }
 
 async function importTweets() {
@@ -53,7 +89,6 @@ async function importTweets() {
 
       return a.id_str > b.id_str ? 1 : -1;
     });
-    resetClocks();
 
     for (let tweet of tweets) {
       if (
@@ -63,16 +98,16 @@ async function importTweets() {
         continue;
       }
 
-      let created = tweet.created_at;
-      if (
-        (created.startsWith("200") || created.startsWith("2010")) &&
-        created.indexOf("00:00:00") > -1
-      ) {
-        created = created.replace("00:00:00", fakeClocks());
+      const id = `twitter-${tweet.id_str}`;
+      const url = `https://twitter.com/${tweet.user.screen_name}/status/${
+        tweet.id_str
+      }`;
+
+      if (await db.get("SELECT * FROM posts WHERE import_url = ?1", [url])) {
+        continue;
       }
 
-      const slug = `twitter-${tweet.id_str}`;
-
+      const created = await getTime(tweet);
       let raw = tweet.text;
       let text = escape(tweet.text);
       if (tweet.in_reply_to_status_id_str) {
@@ -122,7 +157,16 @@ async function importTweets() {
             .replace("tweet_video_thumb", "tweet_video")
             .replace(/\.[a-z0-9]+$/i, ".mp4");
 
-          text = text + `\n\n![${media.alt_text || ""}](${video_url})`;
+          let srcUrl = video_url;
+
+          try {
+            const loaded = await loadMedia(srcUrl, db);
+            srcUrl = `/media/${loaded.id}.${loaded.ext}`;
+          } catch (e) {
+            //
+          }
+
+          text = text + `\n\n![${media.alt_text || ""}](${srcUrl})`;
           // } else if (media.media_url.indexOf("ext_tw_video_thumb") > -1) {
           //   // thumbnail "https://pbs.twimg.com/ext_tw_video_thumb/664723514167955456/pu/img/VNigdIRMGCn_tvIO.jpg"
           //   // video     "https://video.twimg.com/ext_tw_video/664723514167955456/pu/vid/640x360/pqxg8_jI0Kh0p4G6.mp4"
@@ -135,20 +179,25 @@ async function importTweets() {
 
           //   text = text + `\n\n![${media.alt_text || ''}](${video_url})`
         } else {
-          text = text + `\n\n![${media.alt_text || ""}](${media.media_url})`;
+          let srcUrl = media.media_url;
+
+          try {
+            const loaded = await loadMedia(srcUrl, db);
+            srcUrl = `/media/${loaded.id}.${loaded.ext}`;
+          } catch (e) {
+            //
+          }
+
+          text = text + `\n\n![${media.alt_text || ""}](${srcUrl})`;
         }
       }
-
-      const url = `https://twitter.com/${tweet.user.screen_name}/status/${
-        tweet.id_str
-      }`;
 
       console.log(
         inspect(
           {
             text: text,
             created: created,
-            slug: slug,
+            id: id,
             url: url
           },
           { showHidden: false, depth: null }
@@ -156,11 +205,10 @@ async function importTweets() {
       );
 
       await db.run(
-        "INSERT INTO posts (id, text, slug, link, created, raw_import) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+        "INSERT INTO posts (id, text, import_url, created, import_raw) VALUES (?1, ?2, ?4, ?5, ?6)",
         {
-          1: id(),
+          1: id,
           2: text,
-          3: slug,
           4: url,
           5: created,
           6: raw

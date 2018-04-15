@@ -17,6 +17,7 @@ const renderer = new marked.Renderer();
 const ogImage = renderer.image.bind(renderer);
 const ogLink = renderer.link.bind(renderer);
 const ogHTML = renderer.html.bind(renderer);
+const ogParagraph = renderer.paragraph.bind(renderer);
 renderer.image = function(href, title, text) {
   const youtubeId = href.match(
     /(youtu\.be\/|youtube\.com\/watch\?v=)([^&\\]+)/
@@ -68,6 +69,12 @@ renderer.html = function(html) {
   html = html.replace(/((src|href)=['"])\/media\//g, "$1media/");
 
   return ogHTML(html);
+};
+
+renderer.paragraph = function(text) {
+  text = text.replace(/((src|href)=['"])\/media\//g, "$1media/");
+
+  return ogParagraph(text);
 };
 
 marked.setOptions({

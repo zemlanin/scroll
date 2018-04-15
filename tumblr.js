@@ -97,14 +97,7 @@ async function importTumblrPosts() {
       (await fs.readFile("./tumblr/" + file)).toString()
     );
 
-    const posts = content.response.posts.sort((a, b) => {
-      if (a.created_at != b.created_at) {
-        return a.created_at > b.created_at ? 1 : -1;
-      }
-
-      return a.id_str > b.id_str ? 1 : -1;
-    });
-
+    const posts = content.response.posts;
     const blogName = content.response.blog.name;
 
     for (let post of posts) {

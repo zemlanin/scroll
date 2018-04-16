@@ -73,8 +73,49 @@ async function loadMedia(src, db) {
   return result;
 }
 
+async function loadTwitterVideo(expanded_url, tweet_id, db) {
+  /* generating with_video.json
+    BEARER_TOKEN="https://developer.twitter.com/en/docs/basics/authentication/overview/application-only" \
+    ls ./tweets/20* | xargs -I {} tail -n +2 {} | \
+    jq '.[] | (if .retweeted_status then .retweeted_status else . end) | select(.entities.media | any(.media_url | contains("ext_tw_video_thumb"))) | .id_str' -cr | \
+    xargs -I {} -n1 curl "https://api.twitter.com/1.1/statuses/show.json?include_user_entities=false&id={}" -H 'Authorization: Bearer $BEARER_TOKEN' > tweets/with_video.json
+  */
+
+  // for some reason, video in this tweet:
+  //   https://twitter.com/cabel/status/792210427732045824/video/1
+  // doesn't have an .entities.media :rolling_eyes:
+
+  const withVideo = JSON.parse(
+    (await fs.readFile("./tweets/with_video.json")).toString()
+  );
+
+  const fullTweet = withVideo.find(t => t.id_str == tweet_id);
+
+  if (!fullTweet) {
+    throw new Error("no tweet in tweets/with_video.json: " + tweet_id);
+  }
+
+  if (!fullTweet.extended_entities) {
+    throw new Error("no extended_entities in tweet: " + tweet_id);
+  }
+
+  const targetMedia = fullTweet.extended_entities.media.find(
+    m => m.type === "video" && m.expanded_url === expanded_url
+  );
+
+  if (!targetMedia) {
+    throw new Error("no video in tweet: " + tweet_id);
+  }
+
+  const video_url = targetMedia.video_info.variants
+    .filter(v => v.content_type === "video/mp4")
+    .sort((a, b) => b.bitrate - a.bitrate)[0].url;
+
+  return await loadMedia(video_url, db);
+}
+
 async function importTweets() {
-  const files = (await fs.readdir("./tweets/")).map(v => v); //.slice(-5)
+  const files = (await fs.readdir("./tweets/")).filter(v => v.startsWith("20")); //.slice(-5)
 
   const db = await sqlite.open("./posts.db");
 
@@ -167,17 +208,37 @@ async function importTweets() {
           }
 
           text = text + `\n\n![${media.alt_text || ""}](${srcUrl})`;
-          // } else if (media.media_url.indexOf("ext_tw_video_thumb") > -1) {
-          //   // thumbnail "https://pbs.twimg.com/ext_tw_video_thumb/664723514167955456/pu/img/VNigdIRMGCn_tvIO.jpg"
-          //   // video     "https://video.twimg.com/ext_tw_video/664723514167955456/pu/vid/640x360/pqxg8_jI0Kh0p4G6.mp4"
+        } else if (media.media_url.indexOf("ext_tw_video_thumb") > -1) {
+          // thumbnail "https://pbs.twimg.com/ext_tw_video_thumb/664723514167955456/pu/img/VNigdIRMGCn_tvIO.jpg"
+          // video     "https://video.twimg.com/ext_tw_video/664723514167955456/pu/vid/640x360/pqxg8_jI0Kh0p4G6.mp4"
 
-          //   const video_url = media.media_url
-          //     .replace('pbs.twimg', 'video.twimg')
-          //     .replace('ext_tw_video_thumb', 'ext_tw_video')
-          //     .replace(/\.[a-z0-9]+$/i, '.mp4')
-          //   }
+          let image_url = media.media_url;
+          try {
+            const loaded = await loadMedia(image_url, db);
+            image_url = `/media/${loaded.id}.${loaded.ext}`;
+          } catch (e) {
+            //
+          }
 
-          //   text = text + `\n\n![${media.alt_text || ''}](${video_url})`
+          let video_url;
+          try {
+            const loaded = await loadTwitterVideo(
+              media.expanded_url,
+              tweet.id_str,
+              db
+            );
+            video_url = `/media/${loaded.id}.${loaded.ext}`;
+          } catch (e) {
+            //
+          }
+
+          if (video_url) {
+            text =
+              text +
+              `\n\n<video controls src="${video_url}" poster="${image_url}"></video>`;
+          } else {
+            text = text + `\n\n![${media.alt_text || ""}](${image_url})`;
+          }
         } else {
           let srcUrl = media.media_url;
 

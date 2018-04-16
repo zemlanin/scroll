@@ -66,13 +66,13 @@ renderer.link = function(href, title, text) {
 };
 
 renderer.html = function(html) {
-  html = html.replace(/((src|href)=['"])\/media\//g, "$1media/");
+  html = html.replace(/((src|href|poster)=['"])\/media\//g, "$1media/");
 
   return ogHTML(html);
 };
 
 renderer.paragraph = function(text) {
-  text = text.replace(/((src|href)=['"])\/media\//g, "$1media/");
+  text = text.replace(/((src|href|poster)=['"])\/media\//g, "$1media/");
 
   return ogParagraph(text);
 };

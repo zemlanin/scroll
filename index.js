@@ -146,24 +146,27 @@ async function generate() {
 
   const db = await sqlite.open("./posts.db");
 
-  const posts = await db.all("SELECT * from posts ORDER BY created DESC");
+  const posts = await db.all(`
+    SELECT id, slug, draft, text, strftime('%s000', created) created, import_url from posts ORDER BY created DESC
+  `);
   // const posts = await db.all(`SELECT * from posts WHERE id LIKE "tumblr%" ORDER BY created DESC`);
 
   const postTitles = {};
 
   const preparedPosts = posts.map((post, i) => {
-    const firstMarkdownToken = marked
-      .lexer(post.text)
-      .find(t => t.token !== "space")[0];
+    const tokens = marked.lexer(post.text)
+
+    const gotHeader1Token = tokens.find(t => t.type === "heading" && t.depth === "1")
+    const firstMarkdownToken = tokens.find(t => t.type !== "space");
 
     const title =
-      firstMarkdownToken && firstMarkdownToken.type === "heading"
-        ? firstMarkdownToken.text
-        : "";
+      gotHeader1Token && gotHeader1Token.text ||
+      firstMarkdownToken && firstMarkdownToken.type === "heading" && firstMarkdownToken.text ||
+      "";
 
     postTitles[post.id] = title;
 
-    const html = marked(post.text);
+    const html = marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, '¯\\\\\\_(ツ)\\_/¯'));
 
     const prevPost = i ? posts[i - 1] : null;
     const nextPost = posts[i + 1];
@@ -183,7 +186,7 @@ async function generate() {
             : IMPORT_ICONS.tumblr.doremarkable,
           url: post.import_url
         };
-      } else if (post.id.startsWith("wordpress")) {
+      } else if (post.id.startsWith("wordpress-")) {
         imported = {
           icon: IMPORT_ICONS.wordpress
         };
@@ -195,7 +198,7 @@ async function generate() {
       url: getPostUrl(post),
       title,
       html,
-      created: post.created,
+      created: new Date(parseInt(post.created)).toISOString(),
       prev: prevPost && { id: prevPost.id, url: getPostUrl(prevPost) },
       next: nextPost && { id: nextPost.id, url: getPostUrl(nextPost) },
       imported

@@ -11,6 +11,7 @@ const fs = {
 };
 
 const sqlite = require("sqlite");
+const cheerio = require("cheerio");
 const _id = require("nanoid/generate");
 const getMediaId = () =>
   _id("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 26);
@@ -223,6 +224,17 @@ async function importTumblrPosts() {
 
     let raw = post.content;
     let text = post.content;
+
+    if (text.indexOf("plugins/audio-player/player.swf") > -1) {
+      const $ = cheerio.load(text);
+      const audioUrl = $('a[href$=".mp3"]').attr("href");
+
+      $(
+        'object[data^="http://zemlanin.info/wp-content/plugins/audio-player/player.swf"]'
+      ).replaceWith(`<audio src="${audioUrl}" controls></audio>`);
+
+      text = $.html();
+    }
 
     if (post.title && post.title.trim()) {
       const title = post.title.replace(/>/g, "&gt;").trim();

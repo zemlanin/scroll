@@ -3,17 +3,30 @@
 <head>
     <meta charset="utf-8">
     <title>
-        {{#title}}{{title}}{{/title}}
-        {{^title}}Something{{/title}}
+        {{#title}}{{title}} - {{/title}}
+        {{^title}}{{#post}}{{post.created}} - {{/post}}{{/title}}
+        {{blog.title}}
     </title>
     <style type="text/css">
         body {
-            max-width: 800px;
+            max-width: calc(800px - 2em);
+            min-height: 100vh;
             margin: auto;
 
             display: flex;
             flex-direction: column;
+            justify-content: center;
             font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+        }
+
+        @media (max-width: 800px) {
+            body {
+                margin: auto 2em;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         article {
@@ -38,13 +51,39 @@
 
         article time {
             display: block;
+            text-align: right;
+        }
+
+        article time a {
+            color: gray;
+            text-decoration: none;
+            vertical-align: top;
+        }
+
+        article time svg {
+            width: 1em;
+            height: 1em;
+        }
+
+        nav, footer {
+            display: flex;
+            flex-flow: row wrap;
+            margin-bottom: 1em;
+            margin-left: -1em;
+            margin-right: -1em;
+        }
+
+        nav {
+            justify-content: space-between;
         }
 
         footer {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            margin-bottom: 1em;
+            justify-content: space-around;
+        }
+
+        nav span, footer span {
+            margin-left: 1em;
+            margin-right: 1em;
         }
     </style>
 </head>

@@ -12,6 +12,7 @@ const sqlite = require("sqlite");
 const marked = require("marked");
 const mustache = require("mustache");
 const groupBy = require("lodash.groupby");
+const chunk = require("lodash.chunk");
 
 const renderer = new marked.Renderer();
 const ogImage = renderer.image.bind(renderer);
@@ -83,6 +84,36 @@ marked.setOptions({
   renderer: renderer
 });
 
+const IMPORT_ICONS = {
+  wordpress: `
+    <svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.523 122.523">
+      <path d="M8.708,61.26c0,20.802,12.089,38.779,29.619,47.298L13.258,39.872
+        C10.342,46.408,8.708,53.641,8.708,61.26z"/>
+      <path d="M96.74,58.608c0-6.495-2.333-10.993-4.334-14.494c-2.664-4.329-5.161-7.995-5.161-12.324
+        c0-4.831,3.664-9.328,8.825-9.328c0.233,0,0.454,0.029,0.681,0.042c-9.35-8.566-21.807-13.796-35.489-13.796
+        c-18.36,0-34.513,9.42-43.91,23.688c1.233,0.037,2.395,0.063,3.382,0.063c5.497,0,14.006-0.667,14.006-0.667
+        c2.833-0.167,3.167,3.994,0.337,4.329c0,0-2.847,0.335-6.015,0.501L48.2,93.547l11.501-34.493l-8.188-22.434
+        c-2.83-0.166-5.511-0.501-5.511-0.501c-2.832-0.166-2.5-4.496,0.332-4.329c0,0,8.679,0.667,13.843,0.667
+        c5.496,0,14.006-0.667,14.006-0.667c2.835-0.167,3.168,3.994,0.337,4.329c0,0-2.853,0.335-6.015,0.501l18.992,56.494
+        l5.242-17.517C95.011,68.328,96.74,63.107,96.74,58.608z"/>
+      <path d="M62.184,65.857l-15.768,45.819c4.708,1.384,9.687,2.141,14.846,2.141c6.12,0,11.989-1.058,17.452-2.979
+        c-0.141-0.225-0.269-0.464-0.374-0.724L62.184,65.857z"/>
+      <path d="M107.376,36.046c0.226,1.674,0.354,3.471,0.354,5.404c0,5.333-0.996,11.328-3.996,18.824l-16.053,46.413
+        c15.624-9.111,26.133-26.038,26.133-45.426C113.815,52.124,111.481,43.532,107.376,36.046z"/>
+      <path d="M61.262,0C27.483,0,0,27.481,0,61.26c0,33.783,27.483,61.263,61.262,61.263
+        c33.778,0,61.265-27.48,61.265-61.263C122.526,27.481,95.04,0,61.262,0z M61.262,119.715c-32.23,0-58.453-26.223-58.453-58.455
+        c0-32.23,26.222-58.451,58.453-58.451c32.229,0,58.45,26.221,58.45,58.451C119.712,93.492,93.491,119.715,61.262,119.715z"/>
+    </svg>`,
+  tumblr: {
+    zem: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><path fill="#36465d" d="M702.77,799.58C680.56,823.3,629.09,839.4,583,840.16l-5.06,0c-154.84,0-188.47-113.84-188.47-180.29V475.26h-61a12.79,12.79,0,0,1-12.79-12.79V375.29a21.72,21.72,0,0,1,14.47-20.46c79.49-28,104.42-97.37,108.11-150.1,1-14.09,8.37-20.92,20.6-20.92h90.92a12.79,12.79,0,0,1,12.79,12.79V344.25H669A12.79,12.79,0,0,1,681.8,357V461.77A12.79,12.79,0,0,1,669,474.55H562.08V645.28c0,42.87,28.25,54.7,45.7,54.7,16.74-.4,33.22-5.5,41.48-8.82,6.13-2.46,11.52-4.09,16.34-2.88,4.49,1.12,7.44,4.3,9.43,10.1l28.21,82.4C705.53,787.38,707.5,794.53,702.77,799.58Z"/></svg>`,
+    doremarkable: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><path fill="#ff6961" d="M702.77,799.58C680.56,823.3,629.09,839.4,583,840.16l-5.06,0c-154.84,0-188.47-113.84-188.47-180.29V475.26h-61a12.79,12.79,0,0,1-12.79-12.79V375.29a21.72,21.72,0,0,1,14.47-20.46c79.49-28,104.42-97.37,108.11-150.1,1-14.09,8.37-20.92,20.6-20.92h90.92a12.79,12.79,0,0,1,12.79,12.79V344.25H669A12.79,12.79,0,0,1,681.8,357V461.77A12.79,12.79,0,0,1,669,474.55H562.08V645.28c0,42.87,28.25,54.7,45.7,54.7,16.74-.4,33.22-5.5,41.48-8.82,6.13-2.46,11.52-4.09,16.34-2.88,4.49,1.12,7.44,4.3,9.43,10.1l28.21,82.4C705.53,787.38,707.5,794.53,702.77,799.58Z"/></svg>`
+  },
+  twitter: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 72 72"><path fill="#1da1f2" d="M67.812 16.141a26.246 26.246 0 0 1-7.519 2.06 13.134 13.134 0 0 0 5.756-7.244 26.127 26.127 0 0 1-8.313 3.176A13.075 13.075 0 0 0 48.182 10c-7.229 0-13.092 5.861-13.092 13.093 0 1.026.118 2.021.338 2.981-10.885-.548-20.528-5.757-26.987-13.679a13.048 13.048 0 0 0-1.771 6.581c0 4.542 2.312 8.551 5.824 10.898a13.048 13.048 0 0 1-5.93-1.638c-.002.055-.002.11-.002.162 0 6.345 4.513 11.638 10.504 12.84a13.177 13.177 0 0 1-3.449.457c-.846 0-1.667-.078-2.465-.231 1.667 5.2 6.499 8.986 12.23 9.09a26.276 26.276 0 0 1-16.26 5.606A26.21 26.21 0 0 1 4 55.976a37.036 37.036 0 0 0 20.067 5.882c24.083 0 37.251-19.949 37.251-37.249 0-.566-.014-1.134-.039-1.694a26.597 26.597 0 0 0 6.533-6.774z"></path></svg>`
+};
+
+const BLOG_TITLE = "zemlan.in";
+const BLOG_BASE_URL = ".";
+
 const rmrf = require("./rmrf.js");
 
 async function loadTemplate(tmpl) {
@@ -101,7 +132,9 @@ async function render(tmpl, data) {
 }
 
 function getPostUrl(post) {
-  return post.slug ? `${post.id}-${post.slug}.html` : `${post.id}.html`;
+  return post.slug
+    ? `${BLOG_BASE_URL}/${post.id}-${post.slug}.html`
+    : `${BLOG_BASE_URL}/${post.id}.html`;
 }
 
 async function generate() {
@@ -115,41 +148,87 @@ async function generate() {
 
   const posts = await db.all("SELECT * from posts ORDER BY created DESC");
   // const posts = await db.all(`SELECT * from posts WHERE id LIKE "tumblr%" ORDER BY created DESC`);
-  const preparedPosts = posts.map((post, i) => {
-    const markedTokens = marked.lexer(post.text);
 
-    const firstHeading = markedTokens.find(t => t.type === "heading");
-    const firstParagraph = markedTokens.find(t => t.type === "paragraph");
+  const postTitles = {};
+
+  const preparedPosts = posts.map((post, i) => {
+    const firstMarkdownToken = marked
+      .lexer(post.text)
+      .find(t => t.token !== "space")[0];
+
     const title =
-      (firstHeading && firstHeading.text) ||
-      (firstParagraph && firstParagraph.text) ||
-      "";
+      firstMarkdownToken && firstMarkdownToken.type === "heading"
+        ? firstMarkdownToken.text
+        : "";
+
+    postTitles[post.id] = title;
+
+    const html = marked(post.text);
 
     const prevPost = i ? posts[i - 1] : null;
-    const nextPost = i ? posts[i + 1] : null;
+    const nextPost = posts[i + 1];
+
+    let imported;
+
+    if (post.import_url) {
+      if (post.id.startsWith("twitter-")) {
+        imported = {
+          icon: IMPORT_ICONS.twitter,
+          url: post.import_url
+        };
+      } else if (post.id.startsWith("tumblr-")) {
+        imported = {
+          icon: post.id.startsWith("tumblr-zem")
+            ? IMPORT_ICONS.tumblr.zem
+            : IMPORT_ICONS.tumblr.doremarkable,
+          url: post.import_url
+        };
+      } else if (post.id.startsWith("wordpress")) {
+        imported = {
+          icon: IMPORT_ICONS.wordpress
+        };
+      }
+    }
 
     return {
       id: post.id,
       url: getPostUrl(post),
       title,
-      html: marked(post.text),
+      html,
       created: post.created,
-      prev: prevPost && getPostUrl(prevPost),
-      next: nextPost && getPostUrl(nextPost)
+      prev: prevPost && { id: prevPost.id, url: getPostUrl(prevPost) },
+      next: nextPost && { id: nextPost.id, url: getPostUrl(nextPost) },
+      imported
     };
   });
 
-  for (const post of preparedPosts) {
-    const url = post.url;
-
-    await fs.writeFile(
-      `./dist/${url}`,
-      await render("./post.mustache", {
-        title: post.title,
-        post,
-        prev: post.prev,
-        next: post.next,
-      })
+  for (const postsChunk of chunk(preparedPosts, 16)) {
+    await Promise.all(
+      postsChunk.map(async post =>
+        fs.writeFile(
+          `./dist/${post.url}`,
+          await render("./post.mustache", {
+            blog: {
+              title: BLOG_TITLE,
+              url: BLOG_BASE_URL + "/index.html"
+            },
+            title: post.title,
+            post,
+            prev: post.prev
+              ? {
+                  text: postTitles[post.prev.id] || post.prev.id,
+                  url: post.prev.url
+                }
+              : null,
+            next: post.next
+              ? {
+                  text: postTitles[post.next.id] || post.next.id,
+                  url: post.next.url
+                }
+              : null
+          })
+        )
+      )
     );
   }
 
@@ -177,11 +256,19 @@ async function generate() {
 
     await fs.writeFile(
       `./dist/${url}`,
-      await render("./archive.mustache", {
+      await render("./list.mustache", {
+        blog: {
+          title: BLOG_TITLE,
+          url: BLOG_BASE_URL + "/index.html"
+        },
         title: month,
         posts: groupByMonth[month],
-        prev: prevMonth ? prevMonth + ".html" : null,
-        next: nextMonth ? nextMonth + ".html" : null
+        prev: prevMonth
+          ? { text: prevMonth, url: `${BLOG_BASE_URL}/${prevMonth}.html` }
+          : null,
+        next: nextMonth
+          ? { text: nextMonth, url: `${BLOG_BASE_URL}/${nextMonth}.html` }
+          : null
       })
     );
   }
@@ -191,12 +278,34 @@ async function generate() {
 
   await fs.writeFile(
     `./dist/index.html`,
-    await render("./archive.mustache", {
-      title: "index.html",
+    await render("./list.mustache", {
+      blog: {
+        title: BLOG_TITLE,
+        url: BLOG_BASE_URL + "/index.html"
+      },
       posts: groupByMonth[latestMonth],
       prev: null,
-      next: oneBeforeTheLastMonth + ".html",
-      index: true,
+      next: {
+        text: oneBeforeTheLastMonth,
+        url: oneBeforeTheLastMonth + ".html"
+      },
+      index: true
+    })
+  );
+
+  await fs.writeFile(
+    `./dist/archive.html`,
+    await render("./archive.mustache", {
+      blog: {
+        title: BLOG_TITLE,
+        url: BLOG_BASE_URL + "/index.html"
+      },
+      title: BLOG_TITLE,
+      months: monthGroups.map(m => ({
+        url: `${BLOG_BASE_URL}/${m}.html`,
+        text: m,
+        count: groupByMonth[m].length
+      }))
     })
   );
 
@@ -204,10 +313,12 @@ async function generate() {
 
   await fs.mkdir("dist/media");
 
-  for (const m of media) {
-    const url = `${m.id}.${m.ext}`;
-
-    await fs.writeFile(`./dist/media/${url}`, m.data);
+  for (const mediaChunk of chunk(media, 16)) {
+    await Promise.all(
+      mediaChunk.map(async m =>
+        fs.writeFile(`./dist/media/${m.id}.${m.ext}`, m.data)
+      )
+    );
   }
 }
 

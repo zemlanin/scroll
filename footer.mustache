@@ -1,5 +1,14 @@
-{{#prev}}<a href="{{prev}}">&larr; {{prev}}</a>{{/prev}}
-{{#next}}<a href="{{next}}">{{next}} &rarr;</a>{{/next}}
+<footer>
+    <span>
+        {{#prev}}<a href="{{prev}}">&larr; {{prev}}</a>{{/prev}}
+    </span>
+    <span>
+        {{^index}}<a href="index.html">index.html</a>{{/index}}
+    </span>
+    <span>
+        {{#next}}<a href="{{next}}">{{next}} &rarr;</a>{{/next}}
+    </span>
+</footer>
 
 </body>
 </html>

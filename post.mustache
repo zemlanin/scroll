@@ -1,7 +1,15 @@
 {{> header}}
 
-{{{post.html}}}
+{{#post}}
+<article>
+    {{{html}}}
 
-<a href="{{post.url}}">{{post.created}}</a>
+    <time datetime="{{created}}">
+        <a href="{{url}}">
+            {{created}}
+        </a>
+    </time>
+</article>
+{{/post}}
 
 {{> footer}}

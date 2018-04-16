@@ -6,5 +6,46 @@
         {{#title}}{{title}}{{/title}}
         {{^title}}Something{{/title}}
     </title>
+    <style type="text/css">
+        body {
+            max-width: 800px;
+            margin: auto;
+
+            display: flex;
+            flex-direction: column;
+            font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+        }
+
+        article {
+            border-bottom: 1px solid lightgray;
+            margin-bottom: 1em;
+            padding-bottom: 1em;
+        }
+
+        article img, article video {
+            max-width: 640px;
+            max-height: 360px;
+            width: auto;
+            height: auto;
+            display: block;
+            margin: auto;
+        }
+
+        article iframe {
+            display: block;
+            margin: auto;
+        }
+
+        article time {
+            display: block;
+        }
+
+        footer {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            margin-bottom: 1em;
+        }
+    </style>
 </head>
 <body>

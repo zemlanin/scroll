@@ -3,11 +3,15 @@
 <h1>{{title}}</h1>
 
 {{#posts}}
-<div>
+<article>
     {{{html}}}
 
-    <a href="{{url}}">{{created}}</a>
-</div>
+    <time datetime="{{created}}">
+        <a href="{{url}}">
+            {{created}}
+        </a>
+    </time>
+</article>
 {{/posts}}
 
 {{> footer}}

@@ -146,7 +146,9 @@ async function generate() {
       `./dist/${url}`,
       await render("./post.mustache", {
         title: post.title,
-        post
+        post,
+        prev: post.prev,
+        next: post.next,
       })
     );
   }
@@ -193,7 +195,8 @@ async function generate() {
       title: "index.html",
       posts: groupByMonth[latestMonth],
       prev: null,
-      next: oneBeforeTheLastMonth + ".html"
+      next: oneBeforeTheLastMonth + ".html",
+      index: true,
     })
   );
 

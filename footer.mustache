@@ -1,14 +1,14 @@
     <nav>
-        <span>
+        <div>
             {{#prev}}<a href="{{prev.url}}">&larr; {{prev.text}}</a>{{/prev}}
-        </span>
-        <span>
+        </div>
+        <div style="text-align: right;">
             {{#next}}<a href="{{next.url}}">{{next.text}} &rarr;</a>{{/next}}
-        </span>
+        </div>
     </nav>
     <footer>
-        {{^index}}<a href="{{blog.url}}">{{blog.title}}</a>{{/index}}
-        <a href="./archive.html">Archive</a>
+        {{^index}}<div><a href="{{blog.url}}">{{blog.title}}</a></div>{{/index}}
+        <div><a href="./archive.html">Archive</a></div>
     </footer>
 </body>
 </html>

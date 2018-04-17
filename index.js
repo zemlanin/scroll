@@ -148,7 +148,9 @@ async function generate() {
   const db = await sqlite.open("./posts.db");
 
   const posts = await db.all(`
-    SELECT id, slug, draft, text, strftime('%s000', created) created, import_url from posts ORDER BY created DESC
+    SELECT id, slug, draft, text, strftime('%s000', created) created, import_url
+    from posts
+    ORDER BY created DESC
   `);
   // const posts = await db.all(`SELECT * from posts WHERE id LIKE "tumblr%" ORDER BY created DESC`);
 
@@ -175,9 +177,6 @@ async function generate() {
 
     const html = marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, '¯\\\\\\_(ツ)\\_/¯'));
 
-    const prevPost = i ? posts[i - 1] : null;
-    const nextPost = posts[i + 1];
-
     let imported;
 
     if (post.import_url) {
@@ -199,6 +198,9 @@ async function generate() {
         };
       }
     }
+
+    const prevPost = i ? posts[i - 1] : null;
+    const nextPost = posts[i + 1];
 
     return {
       id: post.id,

@@ -76,7 +76,7 @@ async function loadMedia(src, db) {
 async function loadTwitterVideo(expanded_url, tweet_id, db) {
   /* generating with_video.json
     BEARER_TOKEN="https://developer.twitter.com/en/docs/basics/authentication/overview/application-only" \
-    ls ./tweets/20* | xargs -I {} tail -n +2 {} | \
+    ls ./import/tweets/20* | xargs -I {} tail -n +2 {} | \
     jq '.[] | (if .retweeted_status then .retweeted_status else . end) | select(.entities.media | any(.media_url | contains("ext_tw_video_thumb"))) | .id_str' -cr | \
     xargs -I {} -n1 curl "https://api.twitter.com/1.1/statuses/show.json?include_user_entities=false&id={}" -H 'Authorization: Bearer $BEARER_TOKEN' > tweets/with_video.json
   */
@@ -86,7 +86,7 @@ async function loadTwitterVideo(expanded_url, tweet_id, db) {
   // doesn't have an .entities.media :rolling_eyes:
 
   const withVideo = JSON.parse(
-    (await fs.readFile("./tweets/with_video.json")).toString()
+    (await fs.readFile("./import/tweets/with_video.json")).toString()
   );
 
   const fullTweet = withVideo.find(t => t.id_str == tweet_id);
@@ -115,12 +115,12 @@ async function loadTwitterVideo(expanded_url, tweet_id, db) {
 }
 
 async function importTweets() {
-  const files = (await fs.readdir("./tweets/")).filter(v => v.startsWith("20")); //.slice(-5)
+  const files = (await fs.readdir("./import/tweets/")).filter(v => v.startsWith("20")); //.slice(-5)
 
   const db = await sqlite.open("./posts.db");
 
   for (const file of files) {
-    const content = (await fs.readFile("./tweets/" + file))
+    const content = (await fs.readFile("./import/tweets/" + file))
       .toString()
       .replace(/^.+=/, "");
     const tweets = JSON.parse(content).sort((a, b) => {
@@ -158,11 +158,17 @@ async function importTweets() {
           tweet.in_reply_to_screen_name
         }/status/${tweet.in_reply_to_status_id_str})\n\n${text}`;
       } else if (tweet.retweeted_status) {
+        if (tweet.retweeted_status.text.indexOf('@zemlanin') === -1) {
+          continue
+        }
+
         tweet = tweet.retweeted_status;
         raw = `RT @${tweet.user.screen_name}: ${tweet.text}`;
         text = `RT [@${tweet.user.screen_name}](https://twitter.com/${
           tweet.user.screen_name
         }): ${escape(tweet.text)}`;
+      } else if (tweet.text.startsWith('RT @') && tweet.text.indexOf('@zemlanin') === -1) {
+        continue
       }
 
       for (const url of tweet.entities.urls) {

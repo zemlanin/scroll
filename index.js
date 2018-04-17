@@ -13,6 +13,7 @@ const marked = require("marked");
 const mustache = require("mustache");
 const groupBy = require("lodash.groupby");
 const chunk = require("lodash.chunk");
+const cheerio = require("cheerio");
 
 const renderer = new marked.Renderer();
 const ogImage = renderer.image.bind(renderer);
@@ -159,10 +160,16 @@ async function generate() {
     const gotHeader1Token = tokens.find(t => t.type === "heading" && t.depth === "1")
     const firstMarkdownToken = tokens.find(t => t.type !== "space");
 
-    const title =
+    const titleToken =
       gotHeader1Token && gotHeader1Token.text ||
       firstMarkdownToken && firstMarkdownToken.type === "heading" && firstMarkdownToken.text ||
-      "";
+      null;
+
+    let title = post.id
+
+    if (titleToken) {
+      title = cheerio.load(marked(titleToken)).text()
+    }
 
     postTitles[post.id] = title;
 
@@ -217,6 +224,7 @@ async function generate() {
             },
             title: post.title,
             post,
+            url: post.url,
             prev: post.prev
               ? {
                   text: postTitles[post.prev.id] || post.prev.id,
@@ -265,6 +273,7 @@ async function generate() {
           url: BLOG_BASE_URL + "/index.html"
         },
         title: month,
+        url: url,
         posts: groupByMonth[month],
         prev: prevMonth
           ? { text: prevMonth, url: `${BLOG_BASE_URL}/${prevMonth}.html` }
@@ -303,7 +312,8 @@ async function generate() {
         title: BLOG_TITLE,
         url: BLOG_BASE_URL + "/index.html"
       },
-      title: BLOG_TITLE,
+      title: "archive",
+      url: "./archive.html",
       months: monthGroups.map(m => ({
         url: `${BLOG_BASE_URL}/${m}.html`,
         text: m,

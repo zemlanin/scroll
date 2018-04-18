@@ -19,7 +19,7 @@
     # - service: name=nginx state=stopped
 
     # - name: get letsencrypt certs
-    #   shell: certbot certonly -q -n -m {{cert_email}} --agree-tos --standalone -d bwd.cat -d www.bwd.cat
+    #   shell: certbot certonly -q -n -m {{cert_email}} --agree-tos --standalone -d zemlan.in -d www.zemlan.in
     #   notify: reload nginx
 
     - name: configure nginx

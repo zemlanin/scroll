@@ -1,11 +1,13 @@
     <nav>
-        {{#prev}}<a href="{{prev.url}}">&larr; {{prev.text}}</a>{{/prev}}
-        {{^prev}}<span></span>{{/prev}}
-        {{#next}}<a href="{{next.url}}">{{next.text}} &rarr;</a>{{/next}}
+        {{#newer}}<a href="{{newer.url}}">&larr; {{newer.text}}</a>{{/newer}}
+        {{^newer}}<span></span>{{/newer}}
+        {{#older}}<a href="{{older.url}}">{{older.text}} &rarr;</a>{{/older}}
     </nav>
     <footer>
-        {{^index}}<a href="{{blog.url}}">{{blog.title}}</a>{{/index}}
-        <a href="./archive.html">Archive</a>
+        <span>Anton Verinov</span>
+        <a href="./archive.html">archive</a>
+        <a href="https://anton.codes">whoami</a>
+        <a href="https://twitter.com/zemlanin">twitter</a>
     </footer>
 </body>
 </html>

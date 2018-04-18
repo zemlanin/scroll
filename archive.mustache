@@ -1,8 +1,11 @@
 {{> header}}
 
 {{#months}}
+<h3>{{month}}</h3>
 <div>
-    <a href="{{url}}">{{text}}</a> ({{count}})
+    {{#pages}}
+        <a href="{{url}}">{{text}}</a>
+    {{/pages}}
 </div>
 {{/months}}
 

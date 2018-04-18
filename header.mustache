@@ -10,12 +10,10 @@
     </title>
     <style type="text/css">
         body {
-            max-width: calc(800px - 2em);
-            min-height: 100vh;
+            max-width: 800px;
             margin: auto;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
             line-height: 1.5em;
         }
@@ -27,7 +25,17 @@
 
         @media (max-width: 800px) {
             body {
-                margin: auto 2em;
+                padding-bottom: 1em;
+                padding-left: 1em;
+                padding-right: 1em;
+            }
+        }
+
+        @supports(padding: max(0px)) {
+            body {
+                padding-bottom: max(1em, env(safe-area-inset-bottom));
+                padding-left: max(1em, env(safe-area-inset-left));
+                padding-right: max(1em, env(safe-area-inset-right));
             }
         }
 
@@ -77,6 +85,12 @@
             height: 1em;
         }
 
+        article blockquote {
+            margin-left: 0;
+            padding-left: 1em;
+            border-left: 2px solid rgba(0, 165, 0, 0.7);
+        }
+
         nav {
             display: flex;
             flex-flow: row;
@@ -90,9 +104,10 @@
 
         nav {
             justify-content: space-between;
+            word-break: break-word;
         }
 
-        nav a, footer a {
+        nav > *, footer > * {
             margin-left: 1em;
             margin-right: 1em;
         }
@@ -102,7 +117,7 @@
             border: solid 1px #dedede;
             padding: 0.2em 0.4em;
             font-size: 0.9em;
-            font-family: "SF Mono",Consolas,"Andale Mono WT","Andale Mono","Lucida Console","Lucida Sans Typewriter","DejaVu Sans Mono","Bitstream Vera Sans Mono","Liberation Mono","Nimbus Mono L",Monaco,"Courier New",Courier,monospace;
+            font-family: "SF Mono","Menlo-Regular",Consolas,"Andale Mono WT","Andale Mono","Lucida Console","Lucida Sans Typewriter","DejaVu Sans Mono","Bitstream Vera Sans Mono","Liberation Mono","Nimbus Mono L",Monaco,"Courier New",Courier,monospace;
         }
 
         article pre code {
@@ -117,6 +132,10 @@
             overflow-x: scroll;
         }
 
+        article h1 a, article h2 a, article h3 a {
+            text-decoration: none;
+        }
+
         body.dark article code, body.dark article pre {
             background: black;
             border-color: #414141;
@@ -128,6 +147,8 @@
 
         a, header a:visited, footer a:visited {
             color: #00a500;
+            -webkit-text-decoration-color: rgba(0, 165, 0, 0.4);
+            text-decoration-color: rgba(0, 165, 0, 0.4);
         }
 
         header a, nav a, footer a {
@@ -138,12 +159,19 @@
             display: flex;
             flex-direction: row;
             align-items: center;
+            justify-content: flex-start;
         }
 
         header h1, header h2 {
             flex-grow: 1;
             flex-shrink: 1;
+            display: flex;
+            flex-flow: row wrap;
             word-break: break-all;
+        }
+
+        #night-mode {
+            border: none;
         }
 
         #night-mode:after {
@@ -187,7 +215,7 @@
         {{#post}}<h2>{{/post}}
         {{^post}}<h1>{{/post}}
             <a href="{{blog.url}}">{{blog.title}}</a>
-            {{#title}} / <a href="./{{url}}">{{title}}</a>{{/title}}
+            {{#title}}&nbsp;<span>/ <a href="./{{url}}">{{title}}</a></span>{{/title}}
         {{#post}}</h2>{{/post}}
         {{^post}}</h1>{{/post}}
 

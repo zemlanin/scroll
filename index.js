@@ -159,18 +159,14 @@ async function generate() {
   const preparedPosts = posts.map((post, i) => {
     const tokens = marked.lexer(post.text)
 
-    const gotHeader1Token = tokens.find(t => t.type === "heading" && t.depth === "1")
-    const firstMarkdownToken = tokens.find(t => t.type !== "space");
-
-    const titleToken =
-      gotHeader1Token && gotHeader1Token.text ||
-      firstMarkdownToken && firstMarkdownToken.type === "heading" && firstMarkdownToken.text ||
-      null;
+    const header1Token = tokens.find(t => t.type === "heading" && t.text)
 
     let title = post.id
+    const url = getPostUrl(post)
 
-    if (titleToken) {
-      title = cheerio.load(marked(titleToken)).text()
+    if (header1Token) {
+      title = cheerio.load(marked(header1Token.text)).text()
+      post.text = post.text.replace(header1Token.text, `[${header1Token.text}](./${url})`)
     }
 
     postTitles[post.id] = title;
@@ -199,17 +195,17 @@ async function generate() {
       }
     }
 
-    const prevPost = i ? posts[i - 1] : null;
-    const nextPost = posts[i + 1];
+    const newerPost = i ? posts[i - 1] : null;
+    const olderPost = posts[i + 1];
 
     return {
       id: post.id,
-      url: getPostUrl(post),
+      url,
       title,
       html,
       created: new Date(parseInt(post.created)).toISOString(),
-      prev: prevPost && { id: prevPost.id, url: getPostUrl(prevPost) },
-      next: nextPost && { id: nextPost.id, url: getPostUrl(nextPost) },
+      newer: newerPost && { id: newerPost.id, url: getPostUrl(newerPost) },
+      older: olderPost && { id: olderPost.id, url: getPostUrl(olderPost) },
       imported
     };
   });
@@ -227,16 +223,16 @@ async function generate() {
             title: post.title,
             post,
             url: post.url,
-            prev: post.prev
+            older: post.older
               ? {
-                  text: postTitles[post.prev.id] || post.prev.id,
-                  url: post.prev.url
+                  text: postTitles[post.older.id] || post.older.id,
+                  url: post.older.url
                 }
               : null,
-            next: post.next
+            newer: post.newer
               ? {
-                  text: postTitles[post.next.id] || post.next.id,
-                  url: post.next.url
+                  text: postTitles[post.newer.id] || post.newer.id,
+                  url: post.newer.url
                 }
               : null
           })
@@ -245,27 +241,26 @@ async function generate() {
     );
   }
 
-  const groupByMonth = groupBy(preparedPosts, v =>
-    v.created.match(/^\d{4}-\d{2}/)
-  );
-  const monthGroups = Object.keys(groupByMonth).sort((a, b) => {
-    if (a === b) {
-      return 0;
+  const PAGE_SIZE = 20
+
+  if (preparedPosts.length % PAGE_SIZE) {
+    for (let i = 0; i < preparedPosts.length % PAGE_SIZE; i++) {
+      preparedPosts.unshift(null)
     }
+  }
 
-    if (a > b) {
-      return -1;
-    }
+  const pagination = chunk(preparedPosts, PAGE_SIZE)
 
-    return 1;
-  });
+  pagination[0] = pagination[0].filter(Boolean)
+  // if (pagination[0].length < 10) {
+  //   const incompleteFirstPage = pagination.shift()
+  //   pagination[0] = incompleteFirstPage.concat(pagination[0])
+  // }
 
-  for (const month in groupByMonth) {
-    const url = month + ".html";
-    const monthIndex = monthGroups.indexOf(month);
-    const prevMonth = monthIndex > 0 ? monthGroups[monthIndex - 1] : null;
-
-    const nextMonth = monthIndex > -1 ? monthGroups[monthIndex + 1] : null;
+  let pageNumber = pagination.length
+  for (const page of pagination) {
+    const url = `page-${pageNumber}.html`;
+    const title = `page-${pageNumber}`
 
     await fs.writeFile(
       `./dist/${url}`,
@@ -274,21 +269,31 @@ async function generate() {
           title: BLOG_TITLE,
           url: BLOG_BASE_URL + "/index.html"
         },
-        title: month,
+        title: title,
         url: url,
-        posts: groupByMonth[month],
-        prev: prevMonth
-          ? { text: prevMonth, url: `${BLOG_BASE_URL}/${prevMonth}.html` }
+        posts: page,
+        newer: pageNumber < pagination.length - 1
+          ? { text: `page-${pageNumber + 1}`, url: `${BLOG_BASE_URL}/page-${pageNumber + 1}.html` }
+          : { text: `index`, url: `${BLOG_BASE_URL}/index.html` },
+        older: pageNumber > 1
+          ? { text: `page-${pageNumber - 1}`, url: `${BLOG_BASE_URL}/page-${pageNumber - 1}.html` }
           : null,
-        next: nextMonth
-          ? { text: nextMonth, url: `${BLOG_BASE_URL}/${nextMonth}.html` }
-          : null
       })
     );
+
+    pageNumber = pageNumber - 1
   }
 
-  const latestMonth = monthGroups[0];
-  const oneBeforeTheLastMonth = monthGroups[1];
+  let indexPage
+  let olderPage
+
+  if (pagination[0].length < 10) {
+    indexPage = pagination[0].concat(pagination[1])
+    olderPage = { text: `page-${pagination.length - 2}`, url: `${BLOG_BASE_URL}/page-${pagination.length - 2}.html` }
+  } else {
+    indexPage = pagination[0]
+    olderPage = { text: `page-${pagination.length - 1}`, url: `${BLOG_BASE_URL}/page-${pagination.length - 1}.html` }
+  }
 
   await fs.writeFile(
     `./dist/index.html`,
@@ -297,15 +302,21 @@ async function generate() {
         title: BLOG_TITLE,
         url: BLOG_BASE_URL + "/index.html"
       },
-      posts: groupByMonth[latestMonth],
-      prev: null,
-      next: {
-        text: oneBeforeTheLastMonth,
-        url: oneBeforeTheLastMonth + ".html"
-      },
+      posts: indexPage,
+      newer: null,
+      older: olderPage,
       index: true
     })
   );
+
+  const groupByMonth = groupBy(pagination.map((v, i) => ({
+    month: v[0].created.match(/^\d{4}-\d{2}/)[0],
+    text: pagination.length - i,
+    url: `./page-${pagination.length - i}.html`
+  })), (v) => v.month)
+  const monthGroups = Object.keys(groupByMonth).sort((a, b) => {
+    return a > b ? -1 : 1;
+  })
 
   await fs.writeFile(
     `./dist/archive.html`,
@@ -316,10 +327,9 @@ async function generate() {
       },
       title: "archive",
       url: "./archive.html",
-      months: monthGroups.map(m => ({
-        url: `${BLOG_BASE_URL}/${m}.html`,
-        text: m,
-        count: groupByMonth[m].length
+      months: monthGroups.map(month => ({
+        month,
+        pages: groupByMonth[month]
       }))
     })
   );

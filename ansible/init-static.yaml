@@ -1,0 +1,43 @@
+---
+- hosts: all
+  remote_user: root
+  gather_facts: no
+
+  tasks:
+    - file: src=/usr/share/zoneinfo/UTC dest=/etc/localtime state=link force=yes
+    - file: path=/var/projects/ state=directory mode=0755
+    - file: path=/var/log/scroll/ state=directory mode=0755
+
+    - name: install nginx
+      apt: pkg=nginx state=installed update_cache=true
+      notify:
+        - start nginx
+
+    # - name: install certbot
+    #   apt: pkg=certbot state=installed
+
+    # - service: name=nginx state=stopped
+
+    # - name: get letsencrypt certs
+    #   shell: certbot certonly -q -n -m {{cert_email}} --agree-tos --standalone -d bwd.cat -d www.bwd.cat
+    #   notify: reload nginx
+
+    - name: configure nginx
+      copy: src=./nginx.conf dest=/etc/nginx/conf.d/default.conf
+      notify: reload nginx
+
+    # - name: set cert auto-renewal
+    #   cron: name="certbot renew"
+    #           job="certbot renew -q --standalone --pre-hook 'systemctl stop nginx' --post-hook 'systemctl start nginx'"
+    #           minute="30"
+    #           hour="4"
+    #           weekday="2,5"
+
+    - service: name=nginx state=started enabled=yes
+
+  handlers:
+    - name: start nginx
+      service: name=nginx state=started
+
+    - name: reload nginx
+      service: name=nginx state=reloaded

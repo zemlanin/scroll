@@ -1,4 +1,6 @@
 ---
+# ansible-playbook ansible/init-static.yaml -i '[IP],'
+
 - hosts: all
   remote_user: root
   gather_facts: no
@@ -13,25 +15,9 @@
       notify:
         - start nginx
 
-    # - name: install certbot
-    #   apt: pkg=certbot state=installed
-
-    # - service: name=nginx state=stopped
-
-    # - name: get letsencrypt certs
-    #   shell: certbot certonly -q -n -m {{cert_email}} --agree-tos --standalone -d zemlan.in -d www.zemlan.in
-    #   notify: reload nginx
-
     - name: configure nginx
       copy: src=./nginx.conf dest=/etc/nginx/conf.d/default.conf
       notify: reload nginx
-
-    # - name: set cert auto-renewal
-    #   cron: name="certbot renew"
-    #           job="certbot renew -q --standalone --pre-hook 'systemctl stop nginx' --post-hook 'systemctl start nginx'"
-    #           minute="30"
-    #           hour="4"
-    #           weekday="2,5"
 
     - service: name=nginx state=started enabled=yes
 

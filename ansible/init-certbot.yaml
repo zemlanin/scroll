@@ -1,0 +1,34 @@
+---
+# ansible-playbook ansible/init-certbot.yaml -i '[IP],' -e 'cert_email=[EMAIL]'
+
+- hosts: all
+  remote_user: root
+  gather_facts: no
+
+  tasks:
+    - name: install certbot prereq
+      apt: pkg=software-properties-common state=installed
+
+    - name: install certbot repo
+      apt_repository:
+        repo: ppa:certbot/certbot
+        state: present
+
+    - name: install certbot
+      apt: pkg=python-certbot-nginx state=installed
+
+    - name: stop nginx to allow for certbot's server to bind to port 80
+      service: name=nginx state=stopped
+
+    - name: get letsencrypt certs
+      shell: certbot certonly -q -n -m {{cert_email}} --agree-tos --standalone -d zemlan.in -d www.zemlan.in
+      notify: reload nginx
+
+    - service: name=nginx state=started
+
+    - name: set cert auto-renewal
+      cron: name="certbot renew"
+              job="certbot renew -q --standalone --pre-hook 'systemctl stop nginx' --post-hook 'systemctl start nginx'"
+              minute="35"
+              hour="4"
+              weekday="2,5"

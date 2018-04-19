@@ -3,3 +3,4 @@ node_modules/
 posts.db
 .DS_Store
 import/upload/
+ansible/*.retry

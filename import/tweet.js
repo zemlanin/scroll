@@ -288,7 +288,7 @@ async function importTweet(tweet, db) {
   );
 }
 
-if (require.main) {
+if (require.main === module) {
   /*
     BEARER_TOKEN="https://developer.twitter.com/en/docs/basics/authentication/overview/application-only" \
     curl "https://api.twitter.com/1.1/statuses/show.json?include_user_entities=false&id=986673788929675264" \

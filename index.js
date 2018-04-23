@@ -157,21 +157,26 @@ async function generate() {
   const postTitles = {};
 
   const preparedPosts = posts.map((post, i) => {
-    const tokens = marked.lexer(post.text)
+    const tokens = marked.lexer(post.text);
 
-    const header1Token = tokens.find(t => t.type === "heading" && t.text)
+    const header1Token = tokens.find(t => t.type === "heading" && t.text);
 
-    let title = post.id
-    const url = getPostUrl(post)
+    let title = post.id;
+    const url = getPostUrl(post);
 
     if (header1Token) {
-      title = cheerio.load(marked(header1Token.text)).text()
-      post.text = post.text.replace(header1Token.text, `[${header1Token.text}](./${url})`)
+      title = cheerio.load(marked(header1Token.text)).text();
+      post.text = post.text.replace(
+        header1Token.text,
+        `[${header1Token.text}](./${url})`
+      );
     }
 
     postTitles[post.id] = title;
 
-    const html = marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, '¯\\\\\\_(ツ)\\_/¯'));
+    const html = marked(
+      post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯")
+    );
 
     let imported;
 
@@ -241,26 +246,26 @@ async function generate() {
     );
   }
 
-  const PAGE_SIZE = 20
+  const PAGE_SIZE = 20;
 
   if (preparedPosts.length % PAGE_SIZE) {
     for (let i = 0; i < preparedPosts.length % PAGE_SIZE; i++) {
-      preparedPosts.unshift(null)
+      preparedPosts.unshift(null);
     }
   }
 
-  const pagination = chunk(preparedPosts, PAGE_SIZE)
+  const pagination = chunk(preparedPosts, PAGE_SIZE);
 
-  pagination[0] = pagination[0].filter(Boolean)
+  pagination[0] = pagination[0].filter(Boolean);
   // if (pagination[0].length < 10) {
   //   const incompleteFirstPage = pagination.shift()
   //   pagination[0] = incompleteFirstPage.concat(pagination[0])
   // }
 
-  let pageNumber = pagination.length
+  let pageNumber = pagination.length;
   for (const page of pagination) {
     const url = `page-${pageNumber}.html`;
-    const title = `page-${pageNumber}`
+    const title = `page-${pageNumber}`;
 
     await fs.writeFile(
       `./dist/${url}`,
@@ -272,27 +277,41 @@ async function generate() {
         title: title,
         url: url,
         posts: page,
-        newer: pageNumber < pagination.length - 1
-          ? { text: `page-${pageNumber + 1}`, url: `${BLOG_BASE_URL}/page-${pageNumber + 1}.html` }
-          : { text: `index`, url: `${BLOG_BASE_URL}/index.html` },
-        older: pageNumber > 1
-          ? { text: `page-${pageNumber - 1}`, url: `${BLOG_BASE_URL}/page-${pageNumber - 1}.html` }
-          : null,
+        newer:
+          pageNumber < pagination.length - 1
+            ? {
+                text: `page-${pageNumber + 1}`,
+                url: `${BLOG_BASE_URL}/page-${pageNumber + 1}.html`
+              }
+            : { text: `index`, url: `${BLOG_BASE_URL}/index.html` },
+        older:
+          pageNumber > 1
+            ? {
+                text: `page-${pageNumber - 1}`,
+                url: `${BLOG_BASE_URL}/page-${pageNumber - 1}.html`
+              }
+            : null
       })
     );
 
-    pageNumber = pageNumber - 1
+    pageNumber = pageNumber - 1;
   }
 
-  let indexPage
-  let olderPage
+  let indexPage;
+  let olderPage;
 
   if (pagination[0].length < 10) {
-    indexPage = pagination[0].concat(pagination[1])
-    olderPage = { text: `page-${pagination.length - 2}`, url: `${BLOG_BASE_URL}/page-${pagination.length - 2}.html` }
+    indexPage = pagination[0].concat(pagination[1]);
+    olderPage = {
+      text: `page-${pagination.length - 2}`,
+      url: `${BLOG_BASE_URL}/page-${pagination.length - 2}.html`
+    };
   } else {
-    indexPage = pagination[0]
-    olderPage = { text: `page-${pagination.length - 1}`, url: `${BLOG_BASE_URL}/page-${pagination.length - 1}.html` }
+    indexPage = pagination[0];
+    olderPage = {
+      text: `page-${pagination.length - 1}`,
+      url: `${BLOG_BASE_URL}/page-${pagination.length - 1}.html`
+    };
   }
 
   await fs.writeFile(
@@ -309,14 +328,17 @@ async function generate() {
     })
   );
 
-  const groupByMonth = groupBy(pagination.map((v, i) => ({
-    month: v[0].created.match(/^\d{4}-\d{2}/)[0],
-    text: pagination.length - i,
-    url: `./page-${pagination.length - i}.html`
-  })), (v) => v.month)
+  const groupByMonth = groupBy(
+    pagination.map((v, i) => ({
+      month: v[0].created.match(/^\d{4}-\d{2}/)[0],
+      text: pagination.length - i,
+      url: `./page-${pagination.length - i}.html`
+    })),
+    v => v.month
+  );
   const monthGroups = Object.keys(groupByMonth).sort((a, b) => {
     return a > b ? -1 : 1;
-  })
+  });
 
   await fs.writeFile(
     `./dist/archive.html`,

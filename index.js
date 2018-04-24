@@ -127,8 +127,8 @@ loadTemplate.cache = {};
 
 async function render(tmpl, data) {
   return mustache.render(await loadTemplate(tmpl), data, {
-    header: await loadTemplate("./header.mustache"),
-    footer: await loadTemplate("./footer.mustache")
+    header: await loadTemplate("./templates/header.mustache"),
+    footer: await loadTemplate("./templates/footer.mustache")
   });
 }
 
@@ -220,7 +220,7 @@ async function generate() {
       postsChunk.map(async post =>
         fs.writeFile(
           `./dist/${post.url}`,
-          await render("./post.mustache", {
+          await render("./templates/post.mustache", {
             blog: {
               title: BLOG_TITLE,
               url: BLOG_BASE_URL + "/index.html"
@@ -269,7 +269,7 @@ async function generate() {
 
     await fs.writeFile(
       `./dist/${url}`,
-      await render("./list.mustache", {
+      await render("./templates/list.mustache", {
         blog: {
           title: BLOG_TITLE,
           url: BLOG_BASE_URL + "/index.html"
@@ -316,7 +316,7 @@ async function generate() {
 
   await fs.writeFile(
     `./dist/index.html`,
-    await render("./list.mustache", {
+    await render("./templates/list.mustache", {
       blog: {
         title: BLOG_TITLE,
         url: BLOG_BASE_URL + "/index.html"
@@ -342,7 +342,7 @@ async function generate() {
 
   await fs.writeFile(
     `./dist/archive.html`,
-    await render("./archive.mustache", {
+    await render("./templates/archive.mustache", {
       blog: {
         title: BLOG_TITLE,
         url: BLOG_BASE_URL + "/index.html"

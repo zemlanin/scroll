@@ -1,0 +1,62 @@
+---
+- hosts: all
+  remote_user: root
+  gather_facts: yes
+  vars:
+    NODEJS_VERSION: "8"
+
+  tasks:
+    - name: Install the gpg key for nodejs LTS
+      apt_key:
+        url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+        state: present
+
+    - name: Install the nodejs LTS repos
+      apt_repository:
+        repo: "deb https://deb.nodesource.com/node_{{ NODEJS_VERSION }}.x {{ ansible_distribution_release }} main"
+        state: present
+        update_cache: yes
+
+    - name: Install the nodejs
+      apt:
+        name: nodejs
+        state: present
+
+    - name: Install pm2
+      npm:
+        name: pm2
+        global: yes
+
+    - name: synchronize source
+      synchronize:
+        src: .
+        dest: /root/scroll/
+        checksum: yes
+        times: no
+        recursive: yes
+        rsync_opts:
+          - "--delete"
+          - "--include=posts.db"
+          - "--exclude-from=.gitignore"
+          - "--exclude=.git/"
+          - "--update"
+
+    - name: Install deps
+      npm:
+        path: /root/scroll
+
+    - name: delete old pm2 process
+      command: pm2 delete scroll-backstage
+      ignore_errors: yes
+
+    - name: Start pm2
+      command: env PORT=8080 pm2 start /root/scroll/server.js --name scroll-backstage
+
+    - name: save pm2
+      command: pm2 save
+
+    - name: remove pm2 startup
+      command: pm2 unstartup --service-name=scroll-backstage
+
+    - name: update pm2 startup
+      command: pm2 startup --service-name=scroll-backstage

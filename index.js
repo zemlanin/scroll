@@ -150,7 +150,7 @@ function getPostUrl(post) {
 }
 
 async function generate() {
-  if (fs.access("dist", _fs.constants.W_OK)) {
+  if (await fs.access("dist", _fs.constants.W_OK)) {
     rmrf("dist");
   }
 

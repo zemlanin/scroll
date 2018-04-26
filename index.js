@@ -44,7 +44,7 @@ renderer.image = function(href, title, text) {
     const youtubeId = href.match(/\/embed\/([^?]+)/)[1]
 
     const imgSrc = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`
-    const dataSrc = href
+    const dataSrc = href + (href.indexOf('?') === -1 ? '?rel=0&modestbranding=1&playsinline=1' : '&rel0&modestbranding=1&playsinline=1')
     const ytHref = `https://www.youtube.com/watch?v=${youtubeId}`
 
     return `<a class="future-frame" href="${ytHref}" data-src="${dataSrc}">
@@ -185,10 +185,6 @@ async function generate() {
 
     postTitles[post.id] = title;
 
-    const html = marked(
-      post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯")
-    );
-
     let imported;
 
     if (post.import_url) {
@@ -223,7 +219,7 @@ async function generate() {
       filename: getPostFilename(post),
       url,
       title,
-      html,
+      text: post.text,
       created: new Date(parseInt(post.created)).toISOString(),
       createdUTC: new Date(parseInt(post.created)).toUTCString(),
       newer: newerPost && { id: newerPost.id, url: getPostUrl(newerPost) },
@@ -232,10 +228,27 @@ async function generate() {
     };
   });
 
+  console.log('post preparation done')
+
+  const postsCount = preparedPosts.length
+  const progressPadding = Math.log10(postsCount) + 1
+  let i = 0
+
+  process.stdout.write('');
+
   for (const postsChunk of chunk(preparedPosts, 16)) {
+    i = i + postsChunk.length
+    process.stdout.clearLine();
+    process.stdout.cursorTo(0);
+    process.stdout.write(`${postsChunk[0].created.slice(0, 4)} ${i.toString().padStart(progressPadding)}/${postsCount} ${'#'.repeat(parseInt(i*50/postsCount))}${'.'.repeat(parseInt((postsCount-i)*50/postsCount))}`);
+
     await Promise.all(
-      postsChunk.map(async post =>
-        fs.writeFile(
+      postsChunk.map(async post => {
+        post.html = marked(
+          post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯")
+        )
+
+         return fs.writeFile(
           `./dist/${post.filename}`,
           await render("./templates/post.mustache", {
             blog: {
@@ -263,9 +276,12 @@ async function generate() {
               : null
           })
         )
-      )
+      })
     );
   }
+
+  process.stdout.write("\n");
+  console.log('posts done')
 
   const PAGE_SIZE = 20;
 
@@ -317,6 +333,8 @@ async function generate() {
 
     pageNumber = pageNumber - 1;
   }
+
+  console.log('pagination done')
 
   let indexPage;
   let olderPage;
@@ -399,6 +417,8 @@ async function generate() {
     })
   );
 
+  console.log('archive done')
+
   const media = await db.all("SELECT * from media");
 
   await fs.mkdir("dist/media");
@@ -410,6 +430,8 @@ async function generate() {
       )
     );
   }
+
+  console.log('media done')
 }
 
 generate()

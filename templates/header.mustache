@@ -13,218 +13,298 @@
     </title>
     <style type="text/css">
         body {
-            max-width: 40em;
-            margin: auto;
-            display: flex;
-            flex-direction: column;
-            font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
-            line-height: 1.5em;
+          max-width: 40em;
+          margin: auto;
+          display: flex;
+          flex-direction: column;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+            Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+          line-height: 1.5em;
         }
 
         body.dark {
-            background-color: black;
-            color: white;
+          background-color: black;
+          color: white;
         }
 
         @media (max-width: 40em) {
-            body {
-                padding-bottom: 1em;
-                padding-left: 1em;
-                padding-right: 1em;
-            }
+          body {
+            padding-bottom: 1em;
+            padding-left: 1em;
+            padding-right: 1em;
+          }
         }
 
-        @supports(padding: max(0px)) {
-            body {
-                padding-bottom: max(1em, env(safe-area-inset-bottom));
-                padding-left: max(1em, env(safe-area-inset-left));
-                padding-right: max(1em, env(safe-area-inset-right));
-            }
+        @supports (padding: max(0px)) {
+          body {
+            padding-bottom: max(1em, env(safe-area-inset-bottom));
+            padding-left: max(1em, env(safe-area-inset-left));
+            padding-right: max(1em, env(safe-area-inset-right));
+          }
         }
 
         * {
-            box-sizing: border-box;
+          box-sizing: border-box;
         }
 
         article {
-            margin-bottom: 2em;
-            max-width: 100%;
-            overflow-wrap: break-word;
+          margin-bottom: 2em;
+          max-width: 100%;
+          overflow-wrap: break-word;
         }
 
-        article img, article video {
-            max-width: 100%;
-            width: auto;
-            max-height: 22.5em;
-            height: auto;
-            display: block;
-            margin: auto;
-            border: 1px solid black;
+        article img,
+        article video {
+          max-width: 100%;
+          width: auto;
+          max-height: 22.5em;
+          height: auto;
+          display: block;
+          margin: auto;
+          border: 1px solid black;
         }
 
-        body.dark article img, body.dark article video {
-            border-color: white;
+        body.dark article img,
+        body.dark article video {
+          border-color: white;
         }
 
-        article iframe {
-            display: block;
-            margin: auto;
-            max-width: 100%;
+        article iframe,
+        article a.future-frame {
+          display: block;
+          margin: auto;
+          max-width: 100%;
+        }
+
+        article a.future-frame {
+          position: relative;
+        }
+
+        article a[href*="youtube.com"].future-frame:after {
+          position: absolute;
+          width: 64px;
+          height: 64px;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          content: "";
+          background-image: url('data:image/svg+xml;utf8,\
+                        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1024 721" enable-background="new 0 0 1024 721" xml:space="preserve">\
+                        <path fill="white" d="M407,493l276-143L407,206V493z"/>\
+                        <path fill="red" d="M1013,156.3c0,0-10-70.4-40.6-101.4C933.6,14.2,890,14,870.1,11.6C727.1,1.3,512.7,1.3,512.7,1.3 h-0.4c0,0-214.4,0-357.4,10.3C135,14,91.4,14.2,52.6,54.9C22,85.9,12,156.3,12,156.3S1.8,238.9,1.8,321.6v77.5 C1.8,481.8,12,564.4,12,564.4s10,70.4,40.6,101.4c38.9,40.7,89.9,39.4,112.6,43.7c81.7,7.8,347.3,10.3,347.3,10.3 s214.6-0.3,357.6-10.7c20-2.4,63.5-2.6,102.3-43.3c30.6-31,40.6-101.4,40.6-101.4s10.2-82.7,10.2-165.3v-77.5 C1023.2,238.9,1013,156.3,1013,156.3z M407,493V206l276,144L407,493z"/>\
+                      </svg>');
+          background-repeat: no-repeat;
+          background-position: center;
+        }
+
+        article a[href*="youtube.com"].future-frame.loading:after {
+          display: none;
         }
 
         article time {
-            display: block;
-            text-align: right;
+          display: block;
+          text-align: right;
         }
 
         article time a {
-            color: gray;
-            text-decoration: none;
-            vertical-align: top;
+          color: gray;
+          text-decoration: none;
+          vertical-align: top;
         }
 
         article time svg {
-            width: 1em;
-            height: 1em;
+          width: 1em;
+          height: 1em;
         }
 
         article blockquote {
-            margin-left: 0;
-            padding-left: 1em;
-            border-left: 2px solid rgba(0, 165, 0, 0.7);
+          margin-left: 0;
+          padding-left: 1em;
+          border-left: 2px solid rgba(0, 165, 0, 0.7);
         }
 
         nav {
-            display: flex;
-            flex-flow: row;
+          display: flex;
+          flex-flow: row;
         }
 
-        nav, footer {
-            margin-bottom: 1em;
-            margin-left: -1em;
-            margin-right: -1em;
+        nav,
+        footer {
+          margin-bottom: 1em;
+          margin-left: -1em;
+          margin-right: -1em;
         }
 
         nav {
-            justify-content: space-between;
-            word-break: break-word;
+          justify-content: space-between;
+          word-break: break-word;
         }
 
-        nav > *, footer > * {
-            margin-left: 1em;
-            margin-right: 1em;
+        nav > *,
+        footer > * {
+          margin-left: 1em;
+          margin-right: 1em;
         }
 
         @media (max-width: 40em) {
-            nav, footer {
-                margin-right: 0;
-            }
+          nav,
+          footer {
+            margin-right: 0;
+          }
 
-            nav > *, footer > * {
-                margin-right: 0;
-            }
+          nav > *,
+          footer > * {
+            margin-right: 0;
+          }
         }
 
         article code {
-            background: white;
-            border: solid 1px #dedede;
-            padding: 0.2em 0.4em;
-            font-size: 0.9em;
-            font-family: "SF Mono","Menlo-Regular",Consolas,"Andale Mono WT","Andale Mono","Lucida Console","Lucida Sans Typewriter","DejaVu Sans Mono","Bitstream Vera Sans Mono","Liberation Mono","Nimbus Mono L",Monaco,"Courier New",Courier,monospace;
+          background: white;
+          border: solid 1px #dedede;
+          padding: 0.2em 0.4em;
+          font-size: 0.9em;
+          font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
+            "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
+            "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
+            "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
         }
 
         article pre code {
-            border: none;
-            padding: none;
+          border: none;
+          padding: none;
         }
 
         article pre {
-            background: white;
-            border: solid 1px #dedede;
-            padding: 0.2em 0.4em;
-            overflow-x: scroll;
+          background: white;
+          border: solid 1px #dedede;
+          padding: 0.2em 0.4em;
+          overflow-x: scroll;
         }
 
-        article h1 a, article h2 a, article h3 a {
-            text-decoration: none;
+        article h1 a,
+        article h2 a,
+        article h3 a {
+          text-decoration: none;
         }
 
-        body.dark article code, body.dark article pre {
-            background: black;
-            border-color: #414141;
+        body.dark article code,
+        body.dark article pre {
+          background: black;
+          border-color: #414141;
         }
 
         body.dark article pre code {
-            border: none;
+          border: none;
         }
 
-        a, header a:visited, footer a:visited {
-            color: #00a500;
-            -webkit-text-decoration-color: rgba(0, 165, 0, 0.4);
-            text-decoration-color: rgba(0, 165, 0, 0.4);
+        a,
+        header a:visited,
+        footer a:visited {
+          color: #00a500;
+          -webkit-text-decoration-color: rgba(0, 165, 0, 0.4);
+          text-decoration-color: rgba(0, 165, 0, 0.4);
         }
 
-        header a, nav a, footer a {
-            text-decoration: none;
+        header a,
+        nav a,
+        footer a {
+          text-decoration: none;
         }
 
-        nav a, footer a {
-            display: inline-block;
+        nav a,
+        footer a {
+          display: inline-block;
         }
 
         header {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            justify-content: flex-start;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: flex-start;
         }
 
-        header h1, header h2 {
-            flex-grow: 1;
-            flex-shrink: 1;
-            display: flex;
-            flex-flow: row wrap;
-            word-break: break-all;
+        header h1,
+        header h2 {
+          flex-grow: 1;
+          flex-shrink: 1;
+          display: flex;
+          flex-flow: row wrap;
+          word-break: break-all;
         }
 
         #night-mode {
-            border: none;
+          border: none;
         }
 
         #night-mode:after {
-            position: relative;
-            display: block;
-            width: 20px;
-            height: 20px;
-            content: "";
-            background: white url('data:image/svg+xml;utf8,<svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#000" d="M283.211 512c78.962 0 151.079-35.925 198.857-94.792 7.068-8.708-.639-21.43-11.562-19.35-124.203 23.654-238.262-71.576-238.262-196.954 0-72.222 38.662-138.635 101.498-174.394 9.686-5.512 7.25-20.197-3.756-22.23A258.156 258.156 0 0 0 283.211 0c-141.309 0-256 114.511-256 256 0 141.309 114.511 256 256 256z"></path></svg>');
+          position: relative;
+          display: block;
+          width: 20px;
+          height: 20px;
+          content: "";
+          background: white
+            url('data:image/svg+xml;utf8,<svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#000" d="M283.211 512c78.962 0 151.079-35.925 198.857-94.792 7.068-8.708-.639-21.43-11.562-19.35-124.203 23.654-238.262-71.576-238.262-196.954 0-72.222 38.662-138.635 101.498-174.394 9.686-5.512 7.25-20.197-3.756-22.23A258.156 258.156 0 0 0 283.211 0c-141.309 0-256 114.511-256 256 0 141.309 114.511 256 256 256z"></path></svg>');
         }
         #night-mode:checked:after {
-            background: black url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#fff" d="M274.835 12.646l25.516 62.393c4.213 10.301 16.671 14.349 26.134 8.492l57.316-35.479c15.49-9.588 34.808 4.447 30.475 22.142l-16.03 65.475c-2.647 10.81 5.053 21.408 16.152 22.231l67.224 4.987c18.167 1.348 25.546 24.057 11.641 35.826L441.81 242.26c-8.495 7.19-8.495 20.289 0 27.479l51.454 43.548c13.906 11.769 6.527 34.478-11.641 35.826l-67.224 4.987c-11.099.823-18.799 11.421-16.152 22.231l16.03 65.475c4.332 17.695-14.986 31.73-30.475 22.142l-57.316-35.479c-9.463-5.858-21.922-1.81-26.134 8.492l-25.516 62.393c-6.896 16.862-30.774 16.862-37.67 0l-25.516-62.393c-4.213-10.301-16.671-14.349-26.134-8.492l-57.317 35.479c-15.49 9.588-34.808-4.447-30.475-22.142l16.03-65.475c2.647-10.81-5.053-21.408-16.152-22.231l-67.224-4.987c-18.167-1.348-25.546-24.057-11.641-35.826L70.19 269.74c8.495-7.19 8.495-20.289 0-27.479l-51.454-43.548c-13.906-11.769-6.527-34.478 11.641-35.826l67.224-4.987c11.099-.823 18.799-11.421 16.152-22.231l-16.03-65.475c-4.332-17.695 14.986-31.73 30.475-22.142l57.317 35.479c9.463 5.858 21.921 1.81 26.134-8.492l25.516-62.393c6.896-16.861 30.774-16.861 37.67 0zM392 256c0-74.991-61.01-136-136-136-74.991 0-136 61.009-136 136s61.009 136 136 136c74.99 0 136-61.009 136-136zm-32 0c0 57.346-46.654 104-104 104s-104-46.654-104-104 46.654-104 104-104 104 46.654 104 104z"></path></svg>');
+          background: black
+            url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#fff" d="M274.835 12.646l25.516 62.393c4.213 10.301 16.671 14.349 26.134 8.492l57.316-35.479c15.49-9.588 34.808 4.447 30.475 22.142l-16.03 65.475c-2.647 10.81 5.053 21.408 16.152 22.231l67.224 4.987c18.167 1.348 25.546 24.057 11.641 35.826L441.81 242.26c-8.495 7.19-8.495 20.289 0 27.479l51.454 43.548c13.906 11.769 6.527 34.478-11.641 35.826l-67.224 4.987c-11.099.823-18.799 11.421-16.152 22.231l16.03 65.475c4.332 17.695-14.986 31.73-30.475 22.142l-57.316-35.479c-9.463-5.858-21.922-1.81-26.134 8.492l-25.516 62.393c-6.896 16.862-30.774 16.862-37.67 0l-25.516-62.393c-4.213-10.301-16.671-14.349-26.134-8.492l-57.317 35.479c-15.49 9.588-34.808-4.447-30.475-22.142l16.03-65.475c2.647-10.81-5.053-21.408-16.152-22.231l-67.224-4.987c-18.167-1.348-25.546-24.057-11.641-35.826L70.19 269.74c8.495-7.19 8.495-20.289 0-27.479l-51.454-43.548c-13.906-11.769-6.527-34.478 11.641-35.826l67.224-4.987c11.099-.823 18.799-11.421 16.152-22.231l-16.03-65.475c-4.332-17.695 14.986-31.73 30.475-22.142l57.317 35.479c9.463 5.858 21.921 1.81 26.134-8.492l25.516-62.393c6.896-16.861 30.774-16.861 37.67 0zM392 256c0-74.991-61.01-136-136-136-74.991 0-136 61.009-136 136s61.009 136 136 136c74.99 0 136-61.009 136-136zm-32 0c0 57.346-46.654 104-104 104s-104-46.654-104-104 46.654-104 104-104 104 46.654 104 104z"></path></svg>');
         }
     </style>
     <script type="text/javascript">
         /* eslint-env browser */
-        document.addEventListener("DOMContentLoaded", function () {
-          const nightModeCheckbox = document.getElementById('night-mode')
+        document.addEventListener("DOMContentLoaded", function() {
+          const nightModeCheckbox = document.getElementById("night-mode");
 
-          nightModeCheckbox.checked = document.cookie
-            && document.cookie.match(/(^|; )night-mode=1(;|$)/)
+          nightModeCheckbox.checked =
+            document.cookie && document.cookie.match(/(^|; )night-mode=1(;|$)/);
 
           if (nightModeCheckbox.checked) {
-            document.body.classList.add('dark')
+            document.body.classList.add("dark");
           }
 
-          nightModeCheckbox.addEventListener('change', () => {
+          nightModeCheckbox.addEventListener("change", () => {
             if (nightModeCheckbox.checked) {
-              document.body.classList.add('dark')
-              document.cookie = 'night-mode=1; path=/'
+              document.body.classList.add("dark");
+              document.cookie = "night-mode=1; path=/";
             } else {
-              document.body.classList.remove('dark')
-              document.cookie = 'night-mode=0; path=/'
+              document.body.classList.remove("dark");
+              document.cookie = "night-mode=0; path=/";
             }
-          })
+          });
         });
+
+        document.addEventListener("DOMContentLoaded", function() {
+          function handleFutureFrame(e) {
+            if (e.ctrlKey || e.metaKey) {
+              return true;
+            }
+
+            const target = e.currentTarget;
+            target.removeEventListener("click", handleFutureFrame);
+            target.classList.add("loading");
+            const i = document.createElement("iframe");
+            i.setAttribute("src", target.getAttribute("data-src"));
+            i.setAttribute("frameborder", 0);
+            i.setAttribute("width", 640);
+            i.setAttribute("height", 0);
+            i.setAttribute("allow", "autoplay; encrypted-media");
+            i.setAttribute("allowfullscreen", "1");
+            target.parentNode.insertBefore(i, target);
+            i.addEventListener("load", function() {
+              i.setAttribute("height", 360);
+              target.style.display = "none";
+            });
+            e.preventDefault();
+          }
+
+          Array.prototype.forEach.call(
+            document.querySelectorAll("a.future-frame[data-src]"),
+            function(ff) {
+              ff.addEventListener("click", handleFutureFrame);
+            }
+          );
+        });
+
     </script>
 </head>
 <body>

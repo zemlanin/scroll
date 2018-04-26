@@ -41,7 +41,15 @@ renderer.image = function(href, title, text) {
   }
 
   if (href.indexOf("//www.youtube.com/embed/") > -1) {
-    return `<iframe src="${href}" width="640" height="360" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+    const youtubeId = href.match(/\/embed\/([^?]+)/)[1]
+
+    const imgSrc = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`
+    const dataSrc = href
+    const ytHref = `https://www.youtube.com/watch?v=${youtubeId}`
+
+    return `<a class="future-frame" href="${ytHref}" data-src="${dataSrc}">
+      <img src="${imgSrc}">
+    </a>`
   }
 
   if (href.indexOf("//player.vimeo.com/video/") > -1) {

@@ -54,11 +54,14 @@ module.exports = async (req, res) => {
   });
 
   if (verification.me === query.me) {
-    auth({ me: verification.me }, res)
+    auth({ me: verification.me }, res);
 
-    return `ok: ${verification.me} <a href="${url.resolve(req.absolute, "/backstage")}">backstage</a>`;
+    return `ok: ${verification.me} <a href="${url.resolve(
+      req.absolute,
+      "/backstage"
+    )}">backstage</a>`;
   } else {
-    console.log(verification)
+    console.log(verification);
 
     return "fail";
   }

@@ -7,7 +7,8 @@ const handlers = {
 };
 
 const server = http.createServer((req, res) => {
-  const handler = handlers[`${req.method} ${url.parse(req.url).pathname.replace(/\/$/, '')}`];
+  const handler =
+    handlers[`${req.method} ${url.parse(req.url).pathname.replace(/\/$/, "")}`];
 
   if (!handler) {
     res.writeHead(404, { "Content-Type": "text/plain" });

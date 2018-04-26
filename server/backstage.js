@@ -14,16 +14,19 @@ module.exports = async (req, res) => {
   });
 
   if (url.parse(req.url, true).query.logout) {
-    logout(res)
+    logout(res);
 
     return `<a href="${indieAuthUrl}">auth</a>`;
   }
 
-  const user = authed(req, res)
+  const user = authed(req, res);
 
   if (!user) {
     return `<a href="${indieAuthUrl}">auth</a>`;
   }
 
-  return `hello ${user.me} <a href="${url.resolve(req.absolute, "/backstage/?logout=1")}">logout</a>`;
+  return `hello ${user.me} <a href="${url.resolve(
+    req.absolute,
+    "/backstage/?logout=1"
+  )}">logout</a>`;
 };

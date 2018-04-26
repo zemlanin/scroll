@@ -56,6 +56,21 @@ renderer.image = function(href, title, text) {
     href = href.slice(1);
   }
 
+  if (
+    (href.startsWith("media/") && href.endsWith(".mp4")) ||
+    (text && text.indexOf("poster=") > -1)
+  ) {
+    const attrs =
+      text &&
+      text
+        .replace(/&apos;/g, `'`)
+        .replace(/&quot;/g, `"`)
+        .replace(/([='"])\/media\//g, "$1media/");
+
+    return `<video playsinline controls preload="none" src="${href}" ${attrs ||
+      ""}></video>`;
+  }
+
   return ogImage(href, title, text);
 };
 

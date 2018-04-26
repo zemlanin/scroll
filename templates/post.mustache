@@ -6,10 +6,10 @@
 
     <time datetime="{{created}}">
         {{#imported}}
-            {{#imported.url}}<a href="{{url}}">{{{icon}}}</a>{{/imported.url}}
+            {{#imported.url}}<a href="{{{url}}}">{{{icon}}}</a>{{/imported.url}}
             {{^imported.url}}{{{icon}}}{{/imported.url}}
         {{/imported}}
-        <a href="{{url}}">
+        <a href="{{{url}}}">
             {{created}}
         </a>
     </time>

@@ -1,12 +1,12 @@
     <nav>
-        {{#newer}}<a href="{{newer.url}}">&larr; {{newer.text}}</a>{{/newer}}
+        {{#newer}}<a href="{{{newer.url}}}">&larr; {{newer.text}}</a>{{/newer}}
         {{^newer}}<span></span>{{/newer}}
-        {{#older}}<a href="{{older.url}}">{{older.text}} &rarr;</a>{{/older}}
+        {{#older}}<a href="{{{older.url}}}">{{older.text}} &rarr;</a>{{/older}}
     </nav>
     <footer>
         <a href="https://anton.codes" rel="me">Anton Verinov</a>
         <a href="./archive.html">archive</a>
-        <a href="https://send.monobank.com.ua/2JXn2BsUZ?text=for%20coffee">buy me a coffee</a>
+        <a href="{{{feed.url}}}">rss</a>
     </footer>
     <script type="text/javascript">
       /* eslint-env browser */

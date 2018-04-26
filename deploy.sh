@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-node index.js
+BLOG_BASE_URL=https://zemlan.in node index.js
 
 # deploy to own hosting
 TDIR=`mktemp -d`

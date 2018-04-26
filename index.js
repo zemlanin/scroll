@@ -53,7 +53,7 @@ renderer.image = function(href, title, text) {
   }
 
   if (href.startsWith("/media/")) {
-    href = href.slice(1);
+    href = process.env.BLOG_BASE_URL ? process.env.BLOG_BASE_URL + href : href.slice(1);
   }
 
   if (
@@ -65,7 +65,7 @@ renderer.image = function(href, title, text) {
       text
         .replace(/&apos;/g, `'`)
         .replace(/&quot;/g, `"`)
-        .replace(/([='"])\/media\//g, "$1media/");
+        .replace(/((src|href|poster)=['"]?)\/media\//g, `$1${process.env.BLOG_BASE_URL ? process.env.BLOG_BASE_URL + '/' : ''}media/`);
 
     return `<video playsinline controls preload="none" src="${href}" ${attrs ||
       ""}></video>`;
@@ -76,20 +76,20 @@ renderer.image = function(href, title, text) {
 
 renderer.link = function(href, title, text) {
   if (href.startsWith("/media/")) {
-    href = href.slice(1);
+    href = process.env.BLOG_BASE_URL ? process.env.BLOG_BASE_URL + href : href.slice(1);
   }
 
   return ogLink(href, title, text);
 };
 
 renderer.html = function(html) {
-  html = html.replace(/((src|href|poster)=['"])\/media\//g, "$1media/");
+  html = html.replace(/((src|href|poster)=['"]?)\/media\//g, `$1${process.env.BLOG_BASE_URL ? process.env.BLOG_BASE_URL + '/' : ''}media/`);
 
   return ogHTML(html);
 };
 
 renderer.paragraph = function(text) {
-  text = text.replace(/((src|href|poster)=['"])\/media\//g, "$1media/");
+  text = text.replace(/((src|href|poster)=['"]?)\/media\//g, `$1${process.env.BLOG_BASE_URL ? process.env.BLOG_BASE_URL + '/' : ''}media/`);
 
   return ogParagraph(text);
 };
@@ -97,7 +97,8 @@ renderer.paragraph = function(text) {
 marked.setOptions({
   gfm: true,
   smartypants: false,
-  renderer: renderer
+  renderer: renderer,
+  baseUrl: process.env.BLOG_BASE_URL || null
 });
 
 const IMPORT_ICONS = {
@@ -111,7 +112,7 @@ const IMPORT_ICONS = {
 };
 
 const BLOG_TITLE = "zemlan.in";
-const BLOG_BASE_URL = ".";
+const BLOG_BASE_URL = process.env.BLOG_BASE_URL || ".";
 
 const rmrf = require("./rmrf.js");
 
@@ -130,10 +131,14 @@ async function render(tmpl, data) {
   });
 }
 
-function getPostUrl(post) {
+function getPostFilename(post) {
   return post.slug
-    ? `${BLOG_BASE_URL}/${post.id}-${post.slug}.html`
-    : `${BLOG_BASE_URL}/${post.id}.html`;
+    ? `${post.id}-${post.slug}.html`
+    : `${post.id}.html`;
+}
+
+function getPostUrl(post) {
+  return `${BLOG_BASE_URL}/${getPostFilename(post)}`
 }
 
 async function generate() {
@@ -166,7 +171,7 @@ async function generate() {
       title = cheerio.load(marked(header1Token.text)).text();
       post.text = post.text.replace(
         header1Token.text,
-        `[${header1Token.text}](./${url})`
+        `[${header1Token.text}](${url})`
       );
     }
 
@@ -207,10 +212,12 @@ async function generate() {
 
     return {
       id: post.id,
+      filename: getPostFilename(post),
       url,
       title,
       html,
       created: new Date(parseInt(post.created)).toISOString(),
+      createdUTC: new Date(parseInt(post.created)).toUTCString(),
       newer: newerPost && { id: newerPost.id, url: getPostUrl(newerPost) },
       older: olderPost && { id: olderPost.id, url: getPostUrl(olderPost) },
       imported
@@ -221,11 +228,15 @@ async function generate() {
     await Promise.all(
       postsChunk.map(async post =>
         fs.writeFile(
-          `./dist/${post.url}`,
+          `./dist/${post.filename}`,
           await render("./templates/post.mustache", {
             blog: {
               title: BLOG_TITLE,
               url: BLOG_BASE_URL + "/index.html"
+            },
+            feed: {
+              description: `Everything feed - ${BLOG_TITLE}`,
+              url: BLOG_BASE_URL + "/rss.xml"
             },
             title: post.title,
             post,
@@ -259,10 +270,6 @@ async function generate() {
   const pagination = chunk(preparedPosts, PAGE_SIZE);
 
   pagination[0] = pagination[0].filter(Boolean);
-  // if (pagination[0].length < 10) {
-  //   const incompleteFirstPage = pagination.shift()
-  //   pagination[0] = incompleteFirstPage.concat(pagination[0])
-  // }
 
   let pageNumber = pagination.length;
   for (const page of pagination) {
@@ -275,6 +282,10 @@ async function generate() {
         blog: {
           title: BLOG_TITLE,
           url: BLOG_BASE_URL + "/index.html"
+        },
+        feed: {
+          description: `Everything feed - ${BLOG_TITLE}`,
+          url: BLOG_BASE_URL + "/rss.xml"
         },
         title: title,
         url: url,
@@ -323,10 +334,32 @@ async function generate() {
         title: BLOG_TITLE,
         url: BLOG_BASE_URL + "/index.html"
       },
+      feed: {
+        description: `Everything feed - ${BLOG_TITLE}`,
+        url: BLOG_BASE_URL + "/rss.xml"
+      },
       posts: indexPage,
       newer: null,
       older: olderPage,
       index: true
+    })
+  );
+
+  const feedPosts = indexPage.slice(0, PAGE_SIZE)
+
+  await fs.writeFile(
+    `./dist/rss.xml`,
+    await render("./templates/rss.mustache", {
+      blog: {
+        title: BLOG_TITLE,
+        url: BLOG_BASE_URL + "/index.html"
+      },
+      feed: {
+        pubDate: new Date(Math.max.apply(null, feedPosts.map(p => new Date(p.created)))).toUTCString(),
+        description: `Everything feed - ${BLOG_TITLE}`,
+        url: BLOG_BASE_URL + "/rss.xml"
+      },
+      posts: feedPosts,
     })
   );
 

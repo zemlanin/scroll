@@ -5,7 +5,8 @@ const fs = {
   mkdir: promisify(_fs.mkdir),
   access: promisify(_fs.access),
   readFile: promisify(_fs.readFile),
-  writeFile: promisify(_fs.writeFile)
+  writeFile: promisify(_fs.writeFile),
+  exists: promisify(_fs.exists)
 };
 
 const sqlite = require("sqlite");
@@ -150,7 +151,7 @@ function getPostUrl(post) {
 }
 
 async function generate() {
-  if (await fs.access("dist", _fs.constants.W_OK)) {
+  if (await fs.exists("dist") && await fs.access("dist", _fs.constants.W_OK)) {
     rmrf("dist");
   }
 

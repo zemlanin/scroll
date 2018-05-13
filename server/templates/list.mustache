@@ -5,10 +5,10 @@ hello {{user.me}} <a href="{{urls.logout}}">logout</a>
     <li>
         <a href="{{urls.edit}}">{{id}}</a> -
         {{#draft}}
-            draft
+            <a href="{{urls.preview}}">draft</a>
         {{/draft}}
         {{^draft}}
-            public
+            <a href="{{urls.preview}}">public</a>
         {{/draft}}
     </li>
 {{/posts}}

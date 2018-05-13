@@ -11,8 +11,18 @@ const fs = {
   exists: promisify(_fs.exists)
 };
 const { authed, logout } = require("./auth.js");
+const { IMPORT_ICONS, renderer } = require("../common.js");
 const sqlite = require("sqlite");
 const mustache = require("mustache");
+const marked = require("marked");
+const cheerio = require("cheerio");
+
+marked.setOptions({
+  gfm: true,
+  smartypants: false,
+  renderer: renderer,
+  baseUrl: null
+});
 
 async function loadTemplate(tmpl) {
   return (
@@ -26,6 +36,92 @@ async function render(tmpl, data) {
   return mustache.render(await loadTemplate(tmpl), data, {
     // header: await loadTemplate("./templates/header.mustache"),
     // footer: await loadTemplate("./templates/footer.mustache")
+  });
+}
+
+function prepare(req, post) {
+  const tokens = marked.lexer(post.text);
+
+  const header1Token = tokens.find(t => t.type === "heading" && t.text);
+
+  let title = post.id;
+  const url = url.resolve(
+    req.absolute,
+    `/backstage/?preview=${post.slug || post.id}`
+  );
+
+  if (header1Token) {
+    title = cheerio.load(marked(header1Token.text)).text();
+    post.text = post.text.replace(
+      header1Token.text,
+      `[${header1Token.text}](${url})`
+    );
+  }
+
+  let imported;
+
+  if (post.import_url) {
+    if (post.id.startsWith("twitter-")) {
+      imported = {
+        icon: IMPORT_ICONS.twitter,
+        url: post.import_url
+      };
+    } else if (post.id.startsWith("tumblr-")) {
+      imported = {
+        icon: post.id.startsWith("tumblr-zem")
+          ? IMPORT_ICONS.tumblr.zem
+          : IMPORT_ICONS.tumblr.doremarkable,
+        url: post.import_url
+      };
+    } else if (post.id.startsWith("wordpress-")) {
+      imported = {
+        icon: IMPORT_ICONS.wordpress
+      };
+    } else if (post.id.startsWith("instagram-")) {
+      imported = {
+        icon: IMPORT_ICONS.instagram
+      };
+    }
+  }
+
+  return {
+    id: post.id,
+    url,
+    title,
+    text: post.text,
+    html: marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯")),
+    created: new Date(parseInt(post.created)).toISOString(),
+    createdUTC: new Date(parseInt(post.created)).toUTCString(),
+    imported
+  };
+}
+
+async function preview(req) {
+  const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
+  const query = url.parse(req.url, true).query;
+
+  const post = await db.getall(
+    `
+    SELECT id, slug, draft, text, strftime('%s000', created) created, import_url
+    FROM posts
+    WHERE id = ?1
+    LIMIT 1
+  `,
+    { 1: query.preview }
+  );
+
+  const preparedPost = prepare(post);
+
+  return render(path.resolve(__dirname, "..", "templates", "post.mustache"), {
+    blog: {
+      title: "< backstage",
+      url: url.resolve(req.absolute, "/backstage")
+    },
+    title: preparedPost.title,
+    post: preparedPost,
+    url: preparedPost.url,
+    older: null,
+    newer: null
   });
 }
 
@@ -55,6 +151,10 @@ module.exports = async (req, res) => {
     return `<a href="${indieAuthUrl}">auth</a>`;
   }
 
+  if (query.preview) {
+    return preview(req, res);
+  }
+
   const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
   const posts = await db.all(
     `
@@ -70,7 +170,11 @@ module.exports = async (req, res) => {
     user: user,
     posts: posts.map(p =>
       Object.assign(p, {
-        urls: { edit: url.resolve(req.absolute, `/backstage/?edit=${p.id}`) }
+        urls: {
+          edit: url.resolve(req.absolute, `/backstage/?edit=${p.id}`),
+          preview: url.resolve(req.absolute, `/backstage/?preview=${p.id}`),
+          permalink: url.resolve(req.absolute, `/${p.slug || p.id}.html`)
+        }
       })
     ),
     urls: {

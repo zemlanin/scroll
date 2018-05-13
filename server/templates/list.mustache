@@ -1,15 +1,15 @@
 hello {{user.me}} <a href="{{urls.logout}}">logout</a>
 
 <ul>
-{#posts}
+{{#posts}}
     <li>
         <a href="{{urls.edit}}">{{id}}</a> -
-        {#draft}
+        {{#draft}}
             draft
-        {/draft}
-        {^draft}
+        {{/draft}}
+        {{^draft}}
             public
-        {/draft}
+        {{/draft}}
     </li>
-{/posts}
+{{/posts}}
 </ul>

@@ -55,7 +55,7 @@ module.exports = async (req, res) => {
     return `<a href="${indieAuthUrl}">auth</a>`;
   }
 
-  const db = await sqlite.open("./posts.db");
+  const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
   const posts = await db.all(
     `
     SELECT id, slug, draft, text, strftime('%s000', created) created, import_url

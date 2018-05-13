@@ -1,0 +1,15 @@
+hello {{user.me}} <a href="{{urls.logout}}">logout</a>
+
+<ul>
+{#posts}
+    <li>
+        <a href="{{urls.edit}}">{{id}}</a> -
+        {#draft}
+            draft
+        {/draft}
+        {^draft}
+            public
+        {/draft}
+    </li>
+{/posts}
+</ul>

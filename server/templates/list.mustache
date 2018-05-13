@@ -1,15 +1,29 @@
-hello {{user.me}} <a href="{{urls.logout}}">logout</a>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    hello {{user.me}} <a href="{{urls.logout}}">logout</a>
 
-<ul>
-{{#posts}}
-    <li>
-        <a href="{{urls.edit}}">{{id}}</a> -
-        {{#draft}}
-            <a href="{{urls.preview}}">draft</a>
-        {{/draft}}
-        {{^draft}}
-            <a href="{{urls.preview}}">public</a>
-        {{/draft}}
-    </li>
-{{/posts}}
-</ul>
+    <ul>
+    {{#posts}}
+        <li>
+            <a href="{{urls.edit}}">{{id}}</a> -
+            {{#draft}}
+                <a href="{{urls.preview}}">draft</a>
+            {{/draft}}
+            {{^draft}}
+                <a href="{{urls.preview}}">public</a>
+            {{/draft}}
+        </li>
+    {{/posts}}
+    </ul>
+    <nav>
+        {{#urls.newer}}<a href="{{{urls.newer}}}">&larr; newer</a>{{/urls.newer}}
+        {{^urls.newer}}<span></span>{{/urls.newer}}
+        {{#urls.older}}<a href="{{{urls.older}}}">older &rarr;</a>{{/urls.older}}
+    </nav>
+</body>
+</html>

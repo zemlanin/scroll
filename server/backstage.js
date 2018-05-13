@@ -125,6 +125,8 @@ async function preview(req) {
   });
 }
 
+const PAGE_SIZE = 20
+
 module.exports = async (req, res) => {
   const indieAuthUrl = url.format({
     protocol: "https",
@@ -161,14 +163,16 @@ module.exports = async (req, res) => {
     SELECT id, slug, draft, text, strftime('%s000', created) created, import_url
     FROM posts
     ORDER BY created DESC
-    LIMIT 20 OFFSET ?1
+    LIMIT ?2 OFFSET ?1
   `,
-    { 1: query.offset || 0 }
+    { 1: query.offset || 0, 2: PAGE_SIZE + 1 }
   );
+
+  const morePosts = posts.length > PAGE_SIZE;
 
   return render(path.resolve(__dirname, "templates", "list.mustache"), {
     user: user,
-    posts: posts.map(p =>
+    posts: posts.slice(0, PAGE_SIZE).map(p =>
       Object.assign(p, {
         urls: {
           edit: url.resolve(req.absolute, `/backstage/?edit=${p.id}`),
@@ -178,7 +182,9 @@ module.exports = async (req, res) => {
       })
     ),
     urls: {
-      logout: url.resolve(req.absolute, "/backstage/?logout=1")
+      logout: url.resolve(req.absolute, "/backstage/?logout=1"),
+      older: morePosts ? url.resolve(req.absolute, `/backstage/?offset=${(query.offset || 0) + PAGE_SIZE}`) : null,
+      newer: query.offset ? url.resolve(req.absolute, `/backstage/?offset=${Math.max(query.offset - PAGE_SIZE, 0)}`) : null,
     }
   });
 };

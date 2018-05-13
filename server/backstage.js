@@ -59,8 +59,8 @@ module.exports = async (req, res) => {
     `
     SELECT id, slug, draft, text, strftime('%s000', created) created, import_url
     FROM posts
-    LIMIT 20 OFFSET ?1
     ORDER BY created DESC
+    LIMIT 20 OFFSET ?1
   `,
     { 1: query.offset || 0 }
   );

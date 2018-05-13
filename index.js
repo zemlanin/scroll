@@ -45,7 +45,7 @@ renderer.image = function(href, title, text) {
     const youtubeId = href.match(/\/embed\/([^?]+)/)[1]
 
     const imgSrc = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`
-    const dataSrc = href + (href.indexOf('?') === -1 ? '?rel=0&modestbranding=1&playsinline=1' : '&rel0&modestbranding=1&playsinline=1')
+    const dataSrc = href + (href.indexOf('?') === -1 ? '?rel=0&modestbranding=1&playsinline=1' : '&rel=0&modestbranding=1&playsinline=1')
     const ytHref = `https://www.youtube.com/watch?v=${youtubeId}`
 
     return `<a class="future-frame" href="${ytHref}" data-src="${dataSrc}">

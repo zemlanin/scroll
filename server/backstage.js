@@ -158,6 +158,7 @@ module.exports = async (req, res) => {
   }
 
   const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
+  const offset = +query.offset || 0
   const posts = await db.all(
     `
     SELECT id, slug, draft, text, strftime('%s000', created) created, import_url
@@ -165,7 +166,7 @@ module.exports = async (req, res) => {
     ORDER BY created DESC
     LIMIT ?2 OFFSET ?1
   `,
-    { 1: query.offset || 0, 2: PAGE_SIZE + 1 }
+    { 1: offset, 2: PAGE_SIZE + 1 }
   );
 
   const morePosts = posts.length > PAGE_SIZE;
@@ -183,8 +184,8 @@ module.exports = async (req, res) => {
     ),
     urls: {
       logout: url.resolve(req.absolute, "/backstage/?logout=1"),
-      older: morePosts ? url.resolve(req.absolute, `/backstage/?offset=${(query.offset || 0) + PAGE_SIZE}`) : null,
-      newer: query.offset ? url.resolve(req.absolute, `/backstage/?offset=${Math.max(query.offset - PAGE_SIZE, 0)}`) : null,
+      older: morePosts ? url.resolve(req.absolute, `/backstage/?offset=${offset + PAGE_SIZE}`) : null,
+      newer: +offset ? url.resolve(req.absolute, `/backstage/?offset=${Math.max(offset - PAGE_SIZE, 0)}`) : null,
     }
   });
 };

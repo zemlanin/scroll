@@ -45,7 +45,7 @@ function prepare(req, post) {
   const header1Token = tokens.find(t => t.type === "heading" && t.text);
 
   let title = post.id;
-  const url = url.resolve(
+  const postUrl = url.resolve(
     req.absolute,
     `/backstage/?preview=${post.slug || post.id}`
   );
@@ -54,7 +54,7 @@ function prepare(req, post) {
     title = cheerio.load(marked(header1Token.text)).text();
     post.text = post.text.replace(
       header1Token.text,
-      `[${header1Token.text}](${url})`
+      `[${header1Token.text}](${postUrl})`
     );
   }
 
@@ -86,7 +86,7 @@ function prepare(req, post) {
 
   return {
     id: post.id,
-    url,
+    url: postUrl,
     title,
     text: post.text,
     html: marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯")),

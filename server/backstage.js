@@ -34,8 +34,8 @@ loadTemplate.cache = {};
 
 async function render(tmpl, data) {
   return mustache.render(await loadTemplate(tmpl), data, {
-    // header: await loadTemplate("./templates/header.mustache"),
-    // footer: await loadTemplate("./templates/footer.mustache")
+    header: await loadTemplate(path.resolve(__dirname, "..", "templates", "header.mustache")),
+    footer: await loadTemplate(path.resolve(__dirname, "..", "templates", "footer.mustache"))
   });
 }
 
@@ -100,7 +100,7 @@ async function preview(req) {
   const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
   const query = url.parse(req.url, true).query;
 
-  const post = await db.getall(
+  const post = await db.get(
     `
     SELECT id, slug, draft, text, strftime('%s000', created) created, import_url
     FROM posts

@@ -110,7 +110,7 @@ async function preview(req) {
     { 1: query.preview }
   );
 
-  const preparedPost = prepare(post);
+  const preparedPost = prepare(req, post);
 
   return render(path.resolve(__dirname, "..", "templates", "post.mustache"), {
     blog: {

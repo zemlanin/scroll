@@ -1,5 +1,6 @@
 const url = require("url");
 const _fs = require("fs");
+const path = require("path");
 const { promisify } = require("util");
 
 const fs = {
@@ -54,7 +55,7 @@ module.exports = async (req, res) => {
     return `<a href="${indieAuthUrl}">auth</a>`;
   }
 
-  const db = await sqlite.open("../posts.db");
+  const db = await sqlite.open("./posts.db");
   const posts = await db.all(
     `
     SELECT id, slug, draft, text, strftime('%s000', created) created, import_url
@@ -65,7 +66,7 @@ module.exports = async (req, res) => {
     { 1: query.offset || 0 }
   );
 
-  return render("./templates/list.mustache", {
+  return render(path.resolve(__dirname, "templates", "list.mustache"), {
     user: user,
     posts: posts.map(p =>
       Object.assign(p, {

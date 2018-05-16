@@ -85,7 +85,7 @@ function prepare(post, options) {
     url: options.url,
     title,
     text: post.text,
-    html: marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯")),
+    html: marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"), {baseUrl: options.baseUrl}),
     created: new Date(parseInt(post.created)).toISOString(),
     createdUTC: new Date(parseInt(post.created)).toUTCString(),
     imported
@@ -118,7 +118,7 @@ module.exports = {
 
     return render(path.resolve(__dirname, "templates", "edit.mustache"), {
       user: user,
-      post: post && prepare(post, {url: req.absolute}),
+      post: post && prepare(post, {url: req.absolute, baseUrl: url.resolve(req.absolute, '/')}),
       urls: {
         logout: url.resolve(req.absolute, "/backstage/?logout=1"),
       }
@@ -157,7 +157,7 @@ module.exports = {
 
     return render(path.resolve(__dirname, "templates", "edit.mustache"), {
       user: user,
-      post: prepare(post, {url: req.absolute}),
+      post: prepare(post, {url: req.absolute, baseUrl: url.resolve(req.absolute, '/')}),
       urls: {
         logout: url.resolve(req.absolute, "/backstage/?logout=1"),
       }

@@ -85,7 +85,7 @@ function prepare(post, options) {
     url: options.url,
     title,
     text: post.text,
-    html: marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯")),
+    html: marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"), {baseUrl: options.baseUrl}),
     created: new Date(parseInt(post.created)).toISOString(),
     createdUTC: new Date(parseInt(post.created)).toUTCString(),
     imported
@@ -110,7 +110,8 @@ async function preview(req) {
     url: url.resolve(
       req.absolute,
       `/backstage/?preview=${post.slug || post.id}`
-    )
+    ),
+    baseUrl: url.resolve(req.absolute, '/')
   });
 
   return render(path.resolve(__dirname, "..", "templates", "post.mustache"), {

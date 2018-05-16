@@ -124,43 +124,4 @@ module.exports = {
       }
     });
   },
-  post: async (req, res) => {
-    const user = authed(req, res);
-
-    if (!user) {
-      return `<a href="/backstage">auth</a>`;
-    }
-  
-    const query = url.parse(req.url, true).query;
-
-    let post = {
-      id: `id-${Math.random()}`,
-      slug: null,
-      draft: true,
-      created: +new Date,
-      import_url: null
-    }
-
-    if (query.id) {
-      const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
-      post = await db.get(
-      `
-      SELECT id, slug, draft, text, strftime('%s000', created) created, import_url
-      FROM posts
-      WHERE id = ?1
-    `,
-      { 1: query.id }
-    );
-    }
-    
-    post.text = req.post.text
-
-    return render(path.resolve(__dirname, "templates", "edit.mustache"), {
-      user: user,
-      post: prepare(post, {url: req.absolute, baseUrl: url.resolve(req.absolute, '/')}),
-      urls: {
-        logout: url.resolve(req.absolute, "/backstage/?logout=1"),
-      }
-    });
-  },
 };

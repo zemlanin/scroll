@@ -5,7 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-    <form method="POST" action="">
+    <form method="POST"
+        {{#post}}
+          action="/backstage/preview/?id={{post.id}}"
+        {{/post}}
+        {{^post}}
+          action="/backstage/preview/"
+        {{/post}}
+        target="preview"
+    >
         <textarea name="text">
             {{#post}}
                 {{{post.text}}}
@@ -16,10 +24,9 @@
         </button>
     </form>
     <hr />
-    {{#post}}
-        <article>
-            {{{post.html}}}
-        </article>
-    {{/post}}
+    <iframe name="preview"
+        width="100%"
+        {{#post}}src="/backstage/preview/?id={{post.id}}"{{/post}}
+    ></iframe>
 </body>
 </html>

@@ -92,63 +92,56 @@ function prepare(post, options) {
   };
 }
 
-const PAGE_SIZE = 20
-
 module.exports = async (req, res) => {
-  const indieAuthUrl = url.format({
-    protocol: "https",
-    hostname: "indieauth.com",
-    pathname: "/auth",
-    query: {
-      me: "zemlan.in",
-      client_id: url.resolve(req.absolute, "/backstage"),
-      redirect_uri: url.resolve(req.absolute, "/backstage/callback")
+    const user = authed(req, res);
+
+    if (!user) {
+      return `<a href="/backstage">auth</a>`;
     }
+  
+    const query = url.parse(req.url, true).query;
+
+    let post = {
+      id: `id-${Math.random()}`,
+      slug: null,
+      draft: true,
+      created: +new Date,
+      import_url: null
+    }
+
+    if (query.id) {
+      const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
+      post = await db.get(
+      `
+      SELECT id, slug, draft, text, strftime('%s000', created) created, import_url
+      FROM posts
+      WHERE id = ?1
+    `,
+      { 1: query.id }
+    );
+    }
+    
+    if (req.method === 'POST') {
+      post.text = req.post.text
+    }
+
+  const preparedPost = prepare(post, {
+    url: url.resolve(
+      req.absolute,
+      `/backstage/preview/?id=${post.id}`
+    ),
+    baseUrl: url.resolve(req.absolute, '/')
   });
 
-  const query = url.parse(req.url, true).query;
-
-  if (query.logout) {
-    logout(res);
-
-    return `<a href="${indieAuthUrl}">auth</a>`;
-  }
-
-  const user = authed(req, res);
-
-  if (!user) {
-    return `<a href="${indieAuthUrl}">auth</a>`;
-  }
-
-  const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
-  const offset = +query.offset || 0
-  const posts = await db.all(
-    `
-    SELECT id, slug, draft, text, strftime('%s000', created) created, import_url
-    FROM posts
-    ORDER BY created DESC
-    LIMIT ?2 OFFSET ?1
-  `,
-    { 1: offset, 2: PAGE_SIZE + 1 }
-  );
-
-  const morePosts = posts.length > PAGE_SIZE;
-
-  return render(path.resolve(__dirname, "templates", "list.mustache"), {
-    user: user,
-    posts: posts.slice(0, PAGE_SIZE).map(p =>
-      Object.assign(p, {
-        urls: {
-          edit: url.resolve(req.absolute, `/backstage/edit/?id=${p.id}`),
-          preview: url.resolve(req.absolute, `/backstage/preview/?id=${p.id}`),
-          permalink: url.resolve(req.absolute, `/${p.slug || p.id}.html`)
-        }
-      })
-    ),
-    urls: {
-      logout: url.resolve(req.absolute, "/backstage/?logout=1"),
-      older: morePosts ? url.resolve(req.absolute, `/backstage/?offset=${offset + PAGE_SIZE}`) : null,
-      newer: +offset ? url.resolve(req.absolute, `/backstage/?offset=${Math.max(offset - PAGE_SIZE, 0)}`) : null,
-    }
+  return render(path.resolve(__dirname, "..", "templates", "post.mustache"), {
+    blog: {
+      title: "< backstage",
+      url: url.resolve(req.absolute, "/backstage")
+    },
+    title: preparedPost.title,
+    post: preparedPost,
+    url: preparedPost.url,
+    older: null,
+    newer: null
   });
 };

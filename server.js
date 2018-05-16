@@ -51,8 +51,10 @@ const server = http.createServer((req, res) => {
     
     if (req.method === "POST") {
       const ogHandler = handler
-      handler = processPost(req, res)
-        .then(() => ogHandler(req, res))
+      handler = async () => {
+        await processPost(req, res)
+        return ogHandler(req, res)
+      }
     }
 
     handler(req, res)

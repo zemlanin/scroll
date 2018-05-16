@@ -30,7 +30,7 @@ async function processPost(request, response) {
 }
 
 const server = http.createServer((req, res) => {
-  const handler =
+  let handler =
     handlers[`${req.method} ${url.parse(req.url).pathname.replace(/\/$/, "")}`];
 
   if (!handler) {

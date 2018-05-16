@@ -93,7 +93,7 @@ function prepare(post, options) {
 }
 
 module.exports = {
-  async get (req, res) => {
+  get: async (req, res) => {
     const user = authed(req, res);
 
     if (!user) {
@@ -124,7 +124,7 @@ module.exports = {
       }
     });
   },
-  async post (req, res) => {
+  post: async (req, res) => {
     const user = authed(req, res);
 
     if (!user) {

@@ -3,7 +3,9 @@ const url = require("url");
 
 const handlers = {
   "GET /backstage": require("./server/backstage.js"),
-  "GET /backstage/callback": require("./server/callback.js")
+  "GET /backstage/callback": require("./server/callback.js"),
+  "GET /backstage/edit": require("./server/edit.js").get,
+  "POST /backstage/edit": require("./server/edit.js").post,
 };
 
 const server = http.createServer((req, res) => {

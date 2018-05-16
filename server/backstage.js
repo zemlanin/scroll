@@ -39,22 +39,18 @@ async function render(tmpl, data) {
   });
 }
 
-function prepare(req, post) {
+function prepare(post, options) {
   const tokens = marked.lexer(post.text);
 
   const header1Token = tokens.find(t => t.type === "heading" && t.text);
 
   let title = post.id;
-  const postUrl = url.resolve(
-    req.absolute,
-    `/backstage/?preview=${post.slug || post.id}`
-  );
 
   if (header1Token) {
     title = cheerio.load(marked(header1Token.text)).text();
     post.text = post.text.replace(
       header1Token.text,
-      `[${header1Token.text}](${postUrl})`
+      `[${header1Token.text}](${options.url})`
     );
   }
 
@@ -86,7 +82,7 @@ function prepare(req, post) {
 
   return {
     id: post.id,
-    url: postUrl,
+    url: options.url,
     title,
     text: post.text,
     html: marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯")),
@@ -110,7 +106,12 @@ async function preview(req) {
     { 1: query.preview }
   );
 
-  const preparedPost = prepare(req, post);
+  const preparedPost = prepare(post, {
+    url: url.resolve(
+      req.absolute,
+      `/backstage/?preview=${post.slug || post.id}`
+    )
+  });
 
   return render(path.resolve(__dirname, "..", "templates", "post.mustache"), {
     blog: {
@@ -176,7 +177,7 @@ module.exports = async (req, res) => {
     posts: posts.slice(0, PAGE_SIZE).map(p =>
       Object.assign(p, {
         urls: {
-          edit: url.resolve(req.absolute, `/backstage/?edit=${p.id}`),
+          edit: url.resolve(req.absolute, `/backstage/edit/?id=${p.id}`),
           preview: url.resolve(req.absolute, `/backstage/?preview=${p.id}`),
           permalink: url.resolve(req.absolute, `/${p.slug || p.id}.html`)
         }

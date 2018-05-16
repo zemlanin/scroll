@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-    <form method="POST">
+    <form method="POST" action="">
         <textarea>
             {{#post}}
                 {{{post.text}}}
             {{/post}}
         </textarea>
-        <button type="button">
+        <button type="submit">
             preview
         </button>
     </form>

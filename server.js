@@ -50,7 +50,7 @@ const server = http.createServer((req, res) => {
     );
     
     if (req.method === "POST") {
-      const ogHandler
+      const ogHandler = handler
       handler = processPost(req, res)
         .then(() => ogHandler(req, res))
     }

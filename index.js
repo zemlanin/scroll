@@ -323,6 +323,10 @@ async function generate() {
         title: BLOG_TITLE,
         url: BLOG_BASE_URL + "/index.html"
       },
+      feed: {
+              description: `Everything feed - ${BLOG_TITLE}`,
+              url: BLOG_BASE_URL + "/rss.xml"
+      },
       title: "archive",
       url: "./archive.html",
       months: monthGroups.map(month => ({

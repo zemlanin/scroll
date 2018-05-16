@@ -1,5 +1,6 @@
 const http = require("http");
 const url = require("url");
+const querystring = require('querystring');
 
 const handlers = {
   "GET /backstage": require("./server/backstage.js"),
@@ -7,6 +8,26 @@ const handlers = {
   "GET /backstage/edit": require("./server/edit.js").get,
   "POST /backstage/edit": require("./server/edit.js").post,
 };
+
+async function processPost(request, response) {
+    var queryData = "";
+  return new Promise((resolve, reject) => {
+        request.on('data', function(data) {
+            queryData += data;
+            if(queryData.length > 1e6) {
+                queryData = "";
+                response.writeHead(413, {'Content-Type': 'text/plain'}).end();
+                request.connection.destroy();
+                reject();
+            }
+        });
+
+        request.on('end', function() {
+            request.post = querystring.parse(queryData);
+            resolve(request.post);
+        });
+  })
+}
 
 const server = http.createServer((req, res) => {
   const handler =
@@ -27,6 +48,14 @@ const server = http.createServer((req, res) => {
         port
       })
     );
+    
+    if (req.method === "POST") {
+      try {
+        await processPost(req, res)
+      } catch (e) {
+        return
+      }
+    }
 
     handler(req, res)
       .then(body => {

@@ -153,7 +153,7 @@ module.exports = {
     );
     }
     
-    post.text = req.body.toString()
+    post.text = req.post.text
 
     return render(path.resolve(__dirname, "templates", "edit.mustache"), {
       user: user,

@@ -18,7 +18,7 @@ async function processPost(request, response) {
                 queryData = "";
                 response.writeHead(413, {'Content-Type': 'text/plain'}).end();
                 request.connection.destroy();
-                reject();
+                reject("413 Content Too Long");
             }
         });
 
@@ -50,11 +50,9 @@ const server = http.createServer((req, res) => {
     );
     
     if (req.method === "POST") {
-      try {
-        await processPost(req, res)
-      } catch (e) {
-        return
-      }
+      const ogHandler
+      handler = processPost(req, res)
+        .then(() => ogHandler(req, res))
     }
 
     handler(req, res)
@@ -80,10 +78,12 @@ const server = http.createServer((req, res) => {
         }
       })
       .catch(err => {
-        console.error(err);
+        if (!res.finished) {
+          console.error(err);
 
-        res.writeHead(500, { "Content-Type": "text/plain" });
-        res.end("500");
+          res.writeHead(500, { "Content-Type": "text/plain" });
+          res.end("500");
+        }
       });
   }
 });

@@ -118,7 +118,7 @@ module.exports = {
 
     return render(path.resolve(__dirname, "templates", "edit.mustache"), {
       user: user,
-      post: post && prepare(post, req.absolute),
+      post: post && prepare(post, {url: req.absolute}),
       urls: {
         logout: url.resolve(req.absolute, "/backstage/?logout=1"),
       }
@@ -157,7 +157,7 @@ module.exports = {
 
     return render(path.resolve(__dirname, "templates", "edit.mustache"), {
       user: user,
-      post: prepare(post, req.absolute),
+      post: prepare(post, {url: req.absolute}),
       urls: {
         logout: url.resolve(req.absolute, "/backstage/?logout=1"),
       }

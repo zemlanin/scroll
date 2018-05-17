@@ -381,8 +381,7 @@ async function generate() {
     const rsync = new Rsync()
       .set("progress")
       .set("delete")
-      .set("dirs")
-      .flags("Icu")
+      .flags("Icru")
       .source(tmpFolder + path.sep)
       .destination(process.env.DIST || "dist");
 

@@ -1,12 +1,15 @@
 const _fs = require("fs");
 const { promisify } = require("util");
+const os = require("os");
+const path = require("path");
 
 const fs = {
   mkdir: promisify(_fs.mkdir),
   access: promisify(_fs.access),
   readFile: promisify(_fs.readFile),
   writeFile: promisify(_fs.writeFile),
-  exists: promisify(_fs.exists)
+  exists: promisify(_fs.exists),
+  mkdtemp: promisify(_fs.mkdtemp)
 };
 
 const sqlite = require("sqlite");
@@ -15,6 +18,7 @@ const mustache = require("mustache");
 const groupBy = require("lodash.groupby");
 const chunk = require("lodash.chunk");
 const cheerio = require("cheerio");
+const Rsync = require("rsync");
 
 const { IMPORT_ICONS, renderer } = require("./common.js");
 
@@ -54,15 +58,8 @@ function getPostUrl(post) {
 }
 
 async function generate() {
-  if (await fs.exists("dist")) {
-    try {
-      rmrf("dist");
-    } catch (e) {
-      //
-    }
-  }
-
-  await fs.mkdir("dist");
+  const tmpFolder = await fs.mkdtemp(path.join(os.tmpdir(), 'scroll-'));
+  await fs.mkdir(path.join(tmpFolder, '/media'));
 
   const db = await sqlite.open("./posts.db");
 
@@ -74,7 +71,7 @@ async function generate() {
   // const posts = await db.all(`SELECT * from posts WHERE id LIKE "tumblr%" ORDER BY created DESC`);
 
   const postTitles = {};
-  const postsCount = posts.length
+  const postsCount = posts.length;
 
   const preparedPosts = posts.map((post, i) => {
     const tokens = marked.lexer(post.text);
@@ -120,20 +117,28 @@ async function generate() {
       }
     }
 
-    let newerPost, olderPost
+    let newerPost, olderPost;
 
     if (!post.draft && i) {
-      for (let newerIndex = i - 1; newerIndex >= 0 && posts[newerIndex] && !newerPost; newerIndex--) {
+      for (
+        let newerIndex = i - 1;
+        newerIndex >= 0 && posts[newerIndex] && !newerPost;
+        newerIndex--
+      ) {
         if (!posts[newerIndex].draft) {
-          newerPost = posts[newerIndex]
+          newerPost = posts[newerIndex];
         }
       }
     }
 
     if (!post.draft) {
-      for (let olderIndex = i + 1; olderIndex < postsCount && posts[olderIndex] && !olderPost; olderIndex++) {
+      for (
+        let olderIndex = i + 1;
+        olderIndex < postsCount && posts[olderIndex] && !olderPost;
+        olderIndex++
+      ) {
         if (!posts[olderIndex].draft) {
-          olderPost = posts[olderIndex]
+          olderPost = posts[olderIndex];
         }
       }
     }
@@ -205,10 +210,10 @@ async function generate() {
         });
 
         if (!post.draft && post.slug) {
-          await fs.writeFile(`./dist/${post.slug}.html`, renderedPage);
+          await fs.writeFile(`${tmpFolder}/${post.slug}.html`, renderedPage);
         }
 
-        return fs.writeFile(`./dist/${post.id}.html`, renderedPage);
+        return fs.writeFile(`${tmpFolder}/${post.id}.html`, renderedPage);
       })
     );
   }
@@ -218,7 +223,7 @@ async function generate() {
 
   const PAGE_SIZE = 20;
 
-  const publicPosts = preparedPosts.filter(p => !p.draft)
+  const publicPosts = preparedPosts.filter(p => !p.draft);
 
   if (publicPosts.length % PAGE_SIZE) {
     for (let i = 0; i < publicPosts.length % PAGE_SIZE; i++) {
@@ -236,7 +241,7 @@ async function generate() {
     const title = `page-${pageNumber}`;
 
     await fs.writeFile(
-      `./dist/${url}`,
+      `${tmpFolder}/${url}`,
       await render("./templates/list.mustache", {
         blog: {
           title: BLOG_TITLE,
@@ -289,7 +294,7 @@ async function generate() {
   }
 
   await fs.writeFile(
-    `./dist/index.html`,
+    `${tmpFolder}/index.html`,
     await render("./templates/list.mustache", {
       blog: {
         title: BLOG_TITLE,
@@ -309,7 +314,7 @@ async function generate() {
   const feedPosts = indexPage.slice(0, PAGE_SIZE);
 
   await fs.writeFile(
-    `./dist/rss.xml`,
+    `${tmpFolder}/rss.xml`,
     await render("./templates/rss.mustache", {
       blog: {
         title: BLOG_TITLE,
@@ -339,7 +344,7 @@ async function generate() {
   });
 
   await fs.writeFile(
-    `./dist/archive.html`,
+    `${tmpFolder}/archive.html`,
     await render("./templates/archive.mustache", {
       blog: {
         title: BLOG_TITLE,
@@ -362,17 +367,39 @@ async function generate() {
 
   const media = await db.all("SELECT * from media");
 
-  await fs.mkdir("dist/media");
-
   for (const mediaChunk of chunk(media, 16)) {
     await Promise.all(
       mediaChunk.map(async m =>
-        fs.writeFile(`./dist/media/${m.id}.${m.ext}`, m.data)
+        fs.writeFile(path.join(tmpFolder, 'media', `${m.id}.${m.ext}`), m.data)
       )
     );
   }
 
   console.log("media done");
+
+  await new Promise((resolve, reject) => {
+    const rsync = new Rsync()
+      .set("progress")
+      .set("delete")
+      .set("dirs")
+      .flags("Icu")
+      .source(tmpFolder + path.sep)
+      .destination(process.env.DIST || "dist");
+
+    rsync.execute(
+      function(error) {
+        if (error) {
+          return reject(error);
+        }
+
+        return resolve();
+      },
+      d => console.log(d.toString()),
+      d => console.error(d.toString())
+    );
+  });
+
+  rmrf(tmpFolder);
 }
 
 generate()

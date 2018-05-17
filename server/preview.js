@@ -107,24 +107,30 @@ module.exports = async (req, res) => {
 
   const query = url.parse(req.url, true).query;
 
+  const existingPostId = query.id || (req.post && req.post.id);
+
   let post = {
-    id: `id-${Math.random()}`,
+    id: existingPostId || `id-${Math.random()}`,
     slug: null,
     draft: true,
     created: +new Date(),
     import_url: null
   };
 
-  if (query.id) {
+  if (existingPostId) {
     const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
-    post = await db.get(
+    const dbPost = await db.get(
       `
       SELECT id, slug, draft, text, strftime('%s000', created) created, import_url
       FROM posts
       WHERE id = ?1
     `,
-      { 1: query.id }
+      { 1: existingPostId }
     );
+
+    if (dbPost) {
+      post = dbPost;
+    }
   }
 
   if (req.method === "POST") {

@@ -7,16 +7,18 @@
 <body>
     hello {{user.me}} <a href="{{urls.logout}}">logout</a>
 
+    <div>
+        <a href="/backstage/edit">new post</a>
+    </div>
+
     <ul>
     {{#posts}}
         <li>
             <a href="{{urls.edit}}">{{id}}</a> -
-            {{#draft}}
-                <a href="{{urls.preview}}">draft</a>
-            {{/draft}}
-            {{^draft}}
-                <a href="{{urls.preview}}">public</a>
-            {{/draft}}
+            {{#draft}}draft{{/draft}}
+            {{^draft}}public{{/draft}}
+            <a href="{{urls.edit}}">[edit]</a>
+            <a href="{{urls.preview}}">[preview]</a>
         </li>
     {{/posts}}
     </ul>

@@ -8,14 +8,17 @@
             box-sizing: border-box;
         }
 
-        textarea {
+        textarea, input[name="slug"] {
             width: 100%;
-            min-height: 50vh;
             font-size: 1em;
             font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
             "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
             "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
             "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+        }
+
+        textarea {
+            min-height: 40vh;
         }
 
         iframe {
@@ -31,7 +34,19 @@
         | <a href="/{{post.id}}.html" target="_blank">{{post.id}}</a>
     {{/post}}
     <form method="POST">
-        <textarea width="100%" name="text">{{#post}}{{{post.text}}}{{/post}}</textarea>
+        {{#post}}
+            <input type="hidden" name="id" value="{{post.id}}">
+        {{/post}}
+        <input style="width: 100%" name="slug" pattern="[a-zA-Z0-9_-]+"
+            {{#post}}
+                value="{{post.slug}}"
+            {{/post}}
+            placeholder="slug" 
+        >
+        <textarea
+            name="text"
+            placeholder="markdown text"
+        >{{#post}}{{{post.text}}}{{/post}}</textarea>
         <div style="width: 100%; display: flex; justify-content: space-between;">
             <button type="submit"
                 formtarget="preview"
@@ -52,14 +67,16 @@
                 </button>
                 {{#post.draft}}
                     <button type="submit"
-                        formaction="/backstage/edit/?id={{post.id}}&draft=0"
+                        name="draft"
+                        value=""
                     >
                         make public
                     </button>
                 {{/post.draft}}
                 {{^post.draft}}
                     <button type="submit"
-                        formaction="/backstage/edit/?id={{post.id}}&draft=1"
+                        name="draft"
+                        value="1"
                     >
                         make draft
                     </button>
@@ -77,7 +94,6 @@
     <iframe name="preview"
         width="100%"
         frameborder="0"
-        {{#post}}src="/backstage/preview/?id={{post.id}}"{{/post}}
     ></iframe>
 </body>
 </html>

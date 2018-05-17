@@ -10,7 +10,7 @@ const fs = {
   writeFile: promisify(_fs.writeFile),
   exists: promisify(_fs.exists)
 };
-const { authed, logout } = require("./auth.js");
+const { authed } = require("./auth.js");
 const { IMPORT_ICONS, renderer } = require("../common.js");
 const sqlite = require("sqlite");
 const mustache = require("mustache");
@@ -34,8 +34,12 @@ loadTemplate.cache = {};
 
 async function render(tmpl, data) {
   return mustache.render(await loadTemplate(tmpl), data, {
-    header: await loadTemplate(path.resolve(__dirname, "..", "templates", "header.mustache")),
-    footer: await loadTemplate(path.resolve(__dirname, "..", "templates", "footer.mustache"))
+    header: await loadTemplate(
+      path.resolve(__dirname, "..", "templates", "header.mustache")
+    ),
+    footer: await loadTemplate(
+      path.resolve(__dirname, "..", "templates", "footer.mustache")
+    )
   });
 }
 
@@ -85,7 +89,9 @@ function prepare(post, options) {
     url: options.url,
     title,
     text: post.text,
-    html: marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"), {baseUrl: options.baseUrl}),
+    html: marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"), {
+      baseUrl: options.baseUrl
+    }),
     created: new Date(parseInt(post.created)).toISOString(),
     createdUTC: new Date(parseInt(post.created)).toUTCString(),
     imported
@@ -93,25 +99,25 @@ function prepare(post, options) {
 }
 
 module.exports = async (req, res) => {
-    const user = authed(req, res);
+  const user = authed(req, res);
 
-    if (!user) {
-      return `<a href="/backstage">auth</a>`;
-    }
-  
-    const query = url.parse(req.url, true).query;
+  if (!user) {
+    return `<a href="/backstage">auth</a>`;
+  }
 
-    let post = {
-      id: `id-${Math.random()}`,
-      slug: null,
-      draft: true,
-      created: +new Date,
-      import_url: null
-    }
+  const query = url.parse(req.url, true).query;
 
-    if (query.id) {
-      const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
-      post = await db.get(
+  let post = {
+    id: `id-${Math.random()}`,
+    slug: null,
+    draft: true,
+    created: +new Date(),
+    import_url: null
+  };
+
+  if (query.id) {
+    const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
+    post = await db.get(
       `
       SELECT id, slug, draft, text, strftime('%s000', created) created, import_url
       FROM posts
@@ -119,23 +125,20 @@ module.exports = async (req, res) => {
     `,
       { 1: query.id }
     );
-    }
-    
-    if (req.method === 'POST') {
-      post.text = req.post.text
-    }
+  }
+
+  if (req.method === "POST") {
+    post.text = req.post.text;
+  }
 
   const preparedPost = prepare(post, {
-    url: url.resolve(
-      req.absolute,
-      `/backstage/preview/?id=${post.id}`
-    ),
-    baseUrl: url.resolve(req.absolute, '/')
+    url: url.resolve(req.absolute, `/backstage/preview/?id=${post.id}`),
+    baseUrl: url.resolve(req.absolute, "/")
   });
 
   return render(path.resolve(__dirname, "..", "templates", "post.mustache"), {
     blog: {
-      title: "< backstage",
+      title: preparedPost.title,
       url: url.resolve(req.absolute, "/backstage")
     },
     title: preparedPost.title,

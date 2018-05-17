@@ -324,8 +324,8 @@ async function generate() {
         url: BLOG_BASE_URL + "/index.html"
       },
       feed: {
-              description: `Everything feed - ${BLOG_TITLE}`,
-              url: BLOG_BASE_URL + "/rss.xml"
+        description: `Everything feed - ${BLOG_TITLE}`,
+        url: BLOG_BASE_URL + "/rss.xml"
       },
       title: "archive",
       url: "./archive.html",

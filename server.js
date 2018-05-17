@@ -1,33 +1,33 @@
 const http = require("http");
 const url = require("url");
-const querystring = require('querystring');
+const querystring = require("querystring");
 
 const handlers = {
   "GET /backstage": require("./server/backstage.js"),
   "GET /backstage/callback": require("./server/callback.js"),
   "GET /backstage/edit": require("./server/edit.js").get,
   "GET /backstage/preview": require("./server/preview.js"),
-  "POST /backstage/preview": require("./server/preview.js"),
+  "POST /backstage/preview": require("./server/preview.js")
 };
 
 async function processPost(request, response) {
-    var queryData = "";
+  var queryData = "";
   return new Promise((resolve, reject) => {
-        request.on('data', function(data) {
-            queryData += data;
-            if(queryData.length > 1e6) {
-                queryData = "";
-                response.writeHead(413, {'Content-Type': 'text/plain'}).end();
-                request.connection.destroy();
-                reject("413 Content Too Long");
-            }
-        });
+    request.on("data", function(data) {
+      queryData += data;
+      if (queryData.length > 1e6) {
+        queryData = "";
+        response.writeHead(413, { "Content-Type": "text/plain" }).end();
+        request.connection.destroy();
+        reject("413 Content Too Long");
+      }
+    });
 
-        request.on('end', function() {
-            request.post = querystring.parse(queryData);
-            resolve(request.post);
-        });
-  })
+    request.on("end", function() {
+      request.post = querystring.parse(queryData);
+      resolve(request.post);
+    });
+  });
 }
 
 const server = http.createServer((req, res) => {
@@ -49,13 +49,13 @@ const server = http.createServer((req, res) => {
         port
       })
     );
-    
+
     if (req.method === "POST") {
-      const ogHandler = handler
+      const ogHandler = handler;
       handler = async () => {
-        await processPost(req, res)
-        return ogHandler(req, res)
-      }
+        await processPost(req, res);
+        return ogHandler(req, res);
+      };
     }
 
     handler(req, res)

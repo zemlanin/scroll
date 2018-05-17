@@ -3,29 +3,80 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 50vh;
+            font-size: 1em;
+            font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
+            "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
+            "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
+            "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+        }
+
+        iframe {
+            width: 100%;
+            min-height: 40vh;
+            border: 1px solid gray;
+        }
+    </style>
 </head>
 <body>
-    <form method="POST"
-        {{#post}}
-          action="/backstage/preview/?id={{post.id}}"
-        {{/post}}
-        {{^post}}
-          action="/backstage/preview/"
-        {{/post}}
-        target="preview"
-    >
-        <textarea name="text">
+    <a href="/backstage">&lt; backstage</a>
+    {{#post}}
+        | <a href="/{{post.id}}.html" target="_blank">{{post.id}}</a>
+    {{/post}}
+    <form method="POST">
+        <textarea width="100%" name="text">{{#post}}{{{post.text}}}{{/post}}</textarea>
+        <div style="width: 100%; display: flex; justify-content: space-between;">
+            <button type="submit"
+                formtarget="preview"
+                {{#post}}
+                  formaction="/backstage/preview/?id={{post.id}}"
+                {{/post}}
+                {{^post}}
+                  formaction="/backstage/preview/"
+                {{/post}}
+            >
+                preview
+            </button>
             {{#post}}
-                {{{post.text}}}
+                <button type="submit"
+                    formaction="/backstage/delete/?id={{post.id}}"
+                >
+                    delete
+                </button>
+                {{#post.draft}}
+                    <button type="submit"
+                        formaction="/backstage/edit/?id={{post.id}}&draft=0"
+                    >
+                        make public
+                    </button>
+                {{/post.draft}}
+                {{^post.draft}}
+                    <button type="submit"
+                        formaction="/backstage/edit/?id={{post.id}}&draft=1"
+                    >
+                        make draft
+                    </button>
+                {{/post.draft}}
             {{/post}}
-        </textarea>
-        <button type="submit">
-            preview
-        </button>
+            {{^post}}
+                <div></div>
+                <div></div>
+            {{/post}}
+            <button type="submit">
+                save
+            </button>
+        </div>
     </form>
-    <hr />
     <iframe name="preview"
         width="100%"
+        frameborder="0"
         {{#post}}src="/backstage/preview/?id={{post.id}}"{{/post}}
     ></iframe>
 </body>

@@ -11,18 +11,8 @@ const fs = {
   exists: promisify(_fs.exists)
 };
 const { authed, logout } = require("./auth.js");
-const { IMPORT_ICONS, renderer } = require("../common.js");
 const sqlite = require("sqlite");
 const mustache = require("mustache");
-const marked = require("marked");
-const cheerio = require("cheerio");
-
-marked.setOptions({
-  gfm: true,
-  smartypants: false,
-  renderer: renderer,
-  baseUrl: null
-});
 
 async function loadTemplate(tmpl) {
   return (
@@ -34,65 +24,16 @@ loadTemplate.cache = {};
 
 async function render(tmpl, data) {
   return mustache.render(await loadTemplate(tmpl), data, {
-    header: await loadTemplate(path.resolve(__dirname, "..", "templates", "header.mustache")),
-    footer: await loadTemplate(path.resolve(__dirname, "..", "templates", "footer.mustache"))
+    header: await loadTemplate(
+      path.resolve(__dirname, "..", "templates", "header.mustache")
+    ),
+    footer: await loadTemplate(
+      path.resolve(__dirname, "..", "templates", "footer.mustache")
+    )
   });
 }
 
-function prepare(post, options) {
-  const tokens = marked.lexer(post.text);
-
-  const header1Token = tokens.find(t => t.type === "heading" && t.text);
-
-  let title = post.id;
-
-  if (header1Token) {
-    title = cheerio.load(marked(header1Token.text)).text();
-    post.text = post.text.replace(
-      header1Token.text,
-      `[${header1Token.text}](${options.url})`
-    );
-  }
-
-  let imported;
-
-  if (post.import_url) {
-    if (post.id.startsWith("twitter-")) {
-      imported = {
-        icon: IMPORT_ICONS.twitter,
-        url: post.import_url
-      };
-    } else if (post.id.startsWith("tumblr-")) {
-      imported = {
-        icon: post.id.startsWith("tumblr-zem")
-          ? IMPORT_ICONS.tumblr.zem
-          : IMPORT_ICONS.tumblr.doremarkable,
-        url: post.import_url
-      };
-    } else if (post.id.startsWith("wordpress-")) {
-      imported = {
-        icon: IMPORT_ICONS.wordpress
-      };
-    } else if (post.id.startsWith("instagram-")) {
-      imported = {
-        icon: IMPORT_ICONS.instagram
-      };
-    }
-  }
-
-  return {
-    id: post.id,
-    url: options.url,
-    title,
-    text: post.text,
-    html: marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"), {baseUrl: options.baseUrl}),
-    created: new Date(parseInt(post.created)).toISOString(),
-    createdUTC: new Date(parseInt(post.created)).toUTCString(),
-    imported
-  };
-}
-
-const PAGE_SIZE = 20
+const PAGE_SIZE = 20;
 
 module.exports = async (req, res) => {
   const indieAuthUrl = url.format({
@@ -121,7 +62,7 @@ module.exports = async (req, res) => {
   }
 
   const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
-  const offset = +query.offset || 0
+  const offset = +query.offset || 0;
   const posts = await db.all(
     `
     SELECT id, slug, draft, text, strftime('%s000', created) created, import_url
@@ -147,8 +88,15 @@ module.exports = async (req, res) => {
     ),
     urls: {
       logout: url.resolve(req.absolute, "/backstage/?logout=1"),
-      older: morePosts ? url.resolve(req.absolute, `/backstage/?offset=${offset + PAGE_SIZE}`) : null,
-      newer: +offset ? url.resolve(req.absolute, `/backstage/?offset=${Math.max(offset - PAGE_SIZE, 0)}`) : null,
+      older: morePosts
+        ? url.resolve(req.absolute, `/backstage/?offset=${offset + PAGE_SIZE}`)
+        : null,
+      newer: +offset
+        ? url.resolve(
+            req.absolute,
+            `/backstage/?offset=${Math.max(offset - PAGE_SIZE, 0)}`
+          )
+        : null
     }
   });
 };

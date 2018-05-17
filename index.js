@@ -58,8 +58,8 @@ function getPostUrl(post) {
 }
 
 async function generate() {
-  const tmpFolder = await fs.mkdtemp(path.join(os.tmpdir(), 'scroll-'));
-  await fs.mkdir(path.join(tmpFolder, '/media'));
+  const tmpFolder = await fs.mkdtemp(path.join(os.tmpdir(), "scroll-"));
+  await fs.mkdir(path.join(tmpFolder, "/media"));
 
   const db = await sqlite.open("./posts.db");
 
@@ -370,7 +370,7 @@ async function generate() {
   for (const mediaChunk of chunk(media, 16)) {
     await Promise.all(
       mediaChunk.map(async m =>
-        fs.writeFile(path.join(tmpFolder, 'media', `${m.id}.${m.ext}`), m.data)
+        fs.writeFile(path.join(tmpFolder, "media", `${m.id}.${m.ext}`), m.data)
       )
     );
   }

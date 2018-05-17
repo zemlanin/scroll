@@ -46,7 +46,7 @@ async function render(tmpl, data) {
 }
 
 function getPostFilename(post) {
-  return `${post.slug || post.id}.html`;
+  return (!post.draft && post.slug ? post.slug : post.id) + ".html";
 }
 
 function getPostUrl(post) {
@@ -54,11 +54,12 @@ function getPostUrl(post) {
 }
 
 async function generate() {
-  if (
-    (await fs.exists("dist")) &&
-    (await fs.access("dist", _fs.constants.W_OK))
-  ) {
-    rmrf("dist");
+  if (await fs.exists("dist")) {
+    try {
+      rmrf("dist");
+    } catch (e) {
+      //
+    }
   }
 
   await fs.mkdir("dist");
@@ -73,6 +74,7 @@ async function generate() {
   // const posts = await db.all(`SELECT * from posts WHERE id LIKE "tumblr%" ORDER BY created DESC`);
 
   const postTitles = {};
+  const postsCount = posts.length
 
   const preparedPosts = posts.map((post, i) => {
     const tokens = marked.lexer(post.text);
@@ -118,12 +120,28 @@ async function generate() {
       }
     }
 
-    const newerPost = i ? posts[i - 1] : null;
-    const olderPost = posts[i + 1];
+    let newerPost, olderPost
+
+    if (!post.draft && i) {
+      for (let newerIndex = i - 1; newerIndex >= 0 && posts[newerIndex] && !newerPost; newerIndex--) {
+        if (!posts[newerIndex].draft) {
+          newerPost = posts[newerIndex]
+        }
+      }
+    }
+
+    if (!post.draft) {
+      for (let olderIndex = i + 1; olderIndex < postsCount && posts[olderIndex] && !olderPost; olderIndex++) {
+        if (!posts[olderIndex].draft) {
+          olderPost = posts[olderIndex]
+        }
+      }
+    }
 
     return {
       id: post.id,
-      filename: getPostFilename(post),
+      slug: post.slug,
+      draft: post.draft,
       url,
       title,
       text: post.text,
@@ -137,7 +155,6 @@ async function generate() {
 
   console.log("post preparation done");
 
-  const postsCount = preparedPosts.length;
   const progressPadding = Math.log10(postsCount) + 1;
   let i = 0;
 
@@ -161,34 +178,37 @@ async function generate() {
           post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯")
         );
 
-        return fs.writeFile(
-          `./dist/${post.filename}`,
-          await render("./templates/post.mustache", {
-            blog: {
-              title: BLOG_TITLE,
-              url: BLOG_BASE_URL + "/index.html"
-            },
-            feed: {
-              description: `Everything feed - ${BLOG_TITLE}`,
-              url: BLOG_BASE_URL + "/rss.xml"
-            },
-            title: post.title,
-            post,
-            url: post.url,
-            older: post.older
-              ? {
-                  text: postTitles[post.older.id] || post.older.id,
-                  url: post.older.url
-                }
-              : null,
-            newer: post.newer
-              ? {
-                  text: postTitles[post.newer.id] || post.newer.id,
-                  url: post.newer.url
-                }
-              : null
-          })
-        );
+        const renderedPage = await render("./templates/post.mustache", {
+          blog: {
+            title: BLOG_TITLE,
+            url: BLOG_BASE_URL + "/index.html"
+          },
+          feed: {
+            description: `Everything feed - ${BLOG_TITLE}`,
+            url: BLOG_BASE_URL + "/rss.xml"
+          },
+          title: post.title,
+          post,
+          url: post.url,
+          older: post.older
+            ? {
+                text: postTitles[post.older.id] || post.older.id,
+                url: post.older.url
+              }
+            : null,
+          newer: post.newer
+            ? {
+                text: postTitles[post.newer.id] || post.newer.id,
+                url: post.newer.url
+              }
+            : null
+        });
+
+        if (!post.draft && post.slug) {
+          await fs.writeFile(`./dist/${post.slug}.html`, renderedPage);
+        }
+
+        return fs.writeFile(`./dist/${post.id}.html`, renderedPage);
       })
     );
   }
@@ -198,13 +218,15 @@ async function generate() {
 
   const PAGE_SIZE = 20;
 
-  if (preparedPosts.length % PAGE_SIZE) {
-    for (let i = 0; i < preparedPosts.length % PAGE_SIZE; i++) {
-      preparedPosts.unshift(null);
+  const publicPosts = preparedPosts.filter(p => !p.draft)
+
+  if (publicPosts.length % PAGE_SIZE) {
+    for (let i = 0; i < publicPosts.length % PAGE_SIZE; i++) {
+      publicPosts.unshift(null);
     }
   }
 
-  const pagination = chunk(preparedPosts, PAGE_SIZE);
+  const pagination = chunk(publicPosts, PAGE_SIZE);
 
   pagination[0] = pagination[0].filter(Boolean);
 

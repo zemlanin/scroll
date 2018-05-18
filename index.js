@@ -75,7 +75,7 @@ async function generate() {
 
     const header1Token = tokens.find(t => t.type === "heading" && t.text);
 
-    let title = post.id;
+    let title = post.slug || post.id;
     const url = getPostUrl(post);
 
     if (header1Token) {

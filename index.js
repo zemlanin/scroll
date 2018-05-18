@@ -69,8 +69,17 @@ async function generate(stdout, stderr) {
 
   const db = await sqlite.open(path.resolve(__dirname, "posts.db"));
 
-  const posts = await db.all(`
-    SELECT id, slug, draft, private, (NOT draft AND NOT private) public, text, strftime('%s000', created) created, import_url
+  let posts = await db.all(`
+    SELECT
+      id,
+      slug,
+      draft,
+      private,
+      (NOT draft AND NOT private) public,
+      text,
+      strftime('%s000', created) created,
+      strftime('%s000', modified) modified,
+      import_url
     FROM posts
     WHERE draft = 0
     ORDER BY created DESC
@@ -82,7 +91,7 @@ async function generate(stdout, stderr) {
   const postTitles = {};
   const postsCount = posts.length;
 
-  const preparedPosts = posts.map((post, i) => {
+  let preparedPosts = posts.map((post, i) => {
     const tokens = marked.lexer(post.text);
 
     const header1Token = tokens.find(t => t.type === "heading" && t.text);
@@ -168,6 +177,8 @@ async function generate(stdout, stderr) {
       imported
     };
   });
+
+  posts = null;
 
   stdout.write("post preparation done\n");
 
@@ -255,7 +266,7 @@ async function generate(stdout, stderr) {
     }
   }
 
-  const pagination = chunk(publicPosts, PAGE_SIZE);
+  let pagination = chunk(publicPosts, PAGE_SIZE);
 
   pagination[0] = pagination[0].filter(Boolean);
 
@@ -393,14 +404,28 @@ async function generate(stdout, stderr) {
 
   stdout.write("archive done\n");
 
-  const media = await db.all("SELECT * from media");
+  preparedPosts = null;
+  pagination = null;
+
+  const media = await db.all("SELECT id from media");
 
   for (const mediaChunk of chunk(media, 16)) {
-    await Promise.all(
-      mediaChunk.map(async m =>
-        fs.writeFile(path.join(tmpFolder, "media", `${m.id}.${m.ext}`), m.data)
+    await db
+      .all(
+        `SELECT * from media WHERE id IN (${mediaChunk
+          .map(s => `"${s.id}"`)
+          .join(",")})`
       )
-    );
+      .then(loaded =>
+        Promise.all(
+          loaded.map(async m =>
+            fs.writeFile(
+              path.join(tmpFolder, "media", `${m.id}.${m.ext}`),
+              m.data
+            )
+          )
+        )
+      );
   }
 
   stdout.write("media done\n");

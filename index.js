@@ -209,10 +209,14 @@ async function generate() {
         });
 
         if (post.slug && post.id !== post.slug) {
-          await fs.writeFile(`${tmpFolder}/${post.slug}.html`, renderedPage);
+          await fs.writeFile(`${tmpFolder}/${post.slug}.html`, renderedPage, {
+            flag: "wx"
+          });
         }
 
-        return fs.writeFile(`${tmpFolder}/${post.id}.html`, renderedPage);
+        return fs.writeFile(`${tmpFolder}/${post.id}.html`, renderedPage, {
+          flag: "wx"
+        });
       })
     );
   }
@@ -267,7 +271,8 @@ async function generate() {
                 url: `${BLOG_BASE_URL}/page-${pageNumber - 1}.html`
               }
             : null
-      })
+      }),
+      { flag: "wx" }
     );
 
     pageNumber = pageNumber - 1;
@@ -307,7 +312,8 @@ async function generate() {
       newer: null,
       older: olderPage,
       index: true
-    })
+    }),
+    { flag: "wx" }
   );
 
   const feedPosts = indexPage.slice(0, PAGE_SIZE);
@@ -327,7 +333,8 @@ async function generate() {
         url: BLOG_BASE_URL + "/rss.xml"
       },
       posts: feedPosts
-    })
+    }),
+    { flag: "wx" }
   );
 
   const groupByMonth = groupBy(
@@ -359,7 +366,8 @@ async function generate() {
         month,
         pages: groupByMonth[month]
       }))
-    })
+    }),
+    { flag: "wx" }
   );
 
   console.log("archive done");

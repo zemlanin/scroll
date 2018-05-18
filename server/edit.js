@@ -158,20 +158,48 @@ module.exports = {
       post.slug = null;
     }
 
-    await db.run(
-      `INSERT OR REPLACE INTO posts
-        (id, slug, draft, private, text, import_url, modified)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)`,
-      {
-        1: post.id,
-        2: post.slug,
-        3: post.draft,
-        4: post.private,
-        5: post.text,
-        6: post.import_url,
-        7: postExists ? new Date().toISOString() : null
-      }
-    );
+    if (req.post.import_url) {
+      post.import_url = req.post.import_url;
+    } else if (post.import_url) {
+      post.import_url = null;
+    }
+
+    if (postExists) {
+      await db.run(
+        `UPDATE posts SET
+          slug = ?2,
+          draft = ?3,
+          private = ?4,
+          text = ?5, 
+          import_url = ?6, 
+          modified = ?7
+          WHERE id = ?1`,
+        {
+          1: post.id,
+          2: post.slug,
+          3: post.draft,
+          4: post.private,
+          5: post.text,
+          6: post.import_url,
+          7: new Date().toISOString()
+        }
+      );
+    } else {
+      await db.run(
+        `INSERT INTO posts
+          (id, slug, draft, private, text, import_url, created)
+          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)`,
+        {
+          1: post.id,
+          2: post.slug,
+          3: post.draft,
+          4: post.private,
+          5: post.text,
+          6: post.import_url,
+          7: new Date().toISOString()
+        }
+      );
+    }
 
     if (!existingPostId) {
       res.writeHead(303, {

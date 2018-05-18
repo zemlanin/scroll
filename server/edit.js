@@ -46,8 +46,17 @@ module.exports = {
     }
 
     const query = url.parse(req.url, true).query;
+    const existingPostId = query.id || (req.post && req.post.id);
 
-    let post;
+    let post = {
+      id: existingPostId || getPostId(),
+      slug: null,
+      draft: true,
+      private: false,
+      public: false,
+      created: +new Date(),
+      import_url: null
+    };
 
     if (query.id) {
       const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
@@ -103,8 +112,10 @@ module.exports = {
       import_url: null
     };
 
+    const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
+
+    let postExists = false
     if (existingPostId) {
-      const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
       const dbPost = await db.get(
         `
           SELECT
@@ -125,6 +136,7 @@ module.exports = {
 
       if (dbPost) {
         post = dbPost;
+        postExists = true
       }
     }
 
@@ -142,6 +154,29 @@ module.exports = {
 
     if (req.post.slug) {
       post.slug = req.post.slug;
+    }
+
+    await db.run(
+      `INSERT OR REPLACE INTO posts
+        (id, slug, draft, private, text, import_url, modified)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)`,
+      {
+        1: post.id,
+        2: post.slug,
+        3: post.draft,
+        4: post.private,
+        5: post.text,
+        6: post.import_url,
+        7: postExists ? new Date().toISOString() : null,
+      }
+    );
+
+    if (!existingPostId) {
+      res.writeHead(303, {
+        Location: url.resolve(req.absolute, `/backstage/edit/?id=${post.id}`)
+      });
+
+      return;
     }
 
     return render(path.resolve(__dirname, "templates", "edit.mustache"), {

@@ -20,7 +20,13 @@ module.exports = {
     }
 
     try {
-      return jwt.verify(jwtCookie, SECRET);
+      const verified = jwt.verify(jwtCookie, SECRET);
+
+      if (verified && verified.exp && verified.exp * 1000 < +new Date()) {
+        module.exports.auth(verified, res);
+      }
+
+      return verified;
     } catch (e) {
       module.exports.logout(res);
       return null;
@@ -28,7 +34,13 @@ module.exports = {
   },
 
   auth(payload, res) {
-    const jwtToken = jwt.sign(payload, SECRET, { expiresIn: 60 * 60 * 24 * 7 });
+    const jwtToken = jwt.sign(
+      {
+        me: payload.me
+      },
+      SECRET,
+      { expiresIn: 60 * 60 * 24 * 7 }
+    );
 
     res.setHeader(
       "Set-Cookie",

@@ -13,7 +13,7 @@ const SECRET = (() => {
 
 module.exports = {
   authed(req, res) {
-    const jwtCookie = cookie.parse(req.headers.cookie || "").jwt || req.headers.authorization && req.headers.authorization.match(/^Bearer [a-zA-Z0-9]+\.[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/) && req.headers.authorization.slice(7);
+    const jwtCookie = cookie.parse(req.headers.cookie || "").jwt || req.headers.authorization && req.headers.authorization.match(/^Bearer [a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/) && req.headers.authorization.slice(7);
 
     if (!jwtCookie) {
       return null;

@@ -36,7 +36,13 @@
         {{^urls.newer}}<span></span>{{/urls.newer}}
         {{#urls.older}}<a href="{{{urls.older}}}">older &rarr;</a>{{/urls.older}}
     </nav>
-
-    <a href="{{urls.logout}}">logout</a>
+    
+    <form method="POST" action="{{urls.jwt}}">
+        <button>jwt</button>
+    </form>
+    
+    <div>
+        <a href="{{urls.logout}}">logout</a>
+    </div>
 </body>
 </html>

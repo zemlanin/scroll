@@ -11,7 +11,8 @@ const handlers = {
   "GET /backstage/preview": require("./server/preview.js"),
   "POST /backstage/preview": require("./server/preview.js"),
   "GET /backstage/generate": require("./server/generate.js").get,
-  "POST /backstage/generate": require("./server/generate.js").post
+  "POST /backstage/generate": require("./server/generate.js").post,
+  "POST /backstage/jwt": require("./server/jwt.js")
 };
 
 async function processPost(request, response) {

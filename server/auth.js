@@ -13,7 +13,7 @@ const SECRET = (() => {
 
 module.exports = {
   authed(req, res) {
-    const jwtCookie = cookie.parse(req.headers.cookie || "").jwt;
+    const jwtCookie = cookie.parse(req.headers.cookie || "").jwt || req.headers.authorization && req.headers.authorization.match(/^Bearer [a-zA-Z0-9]+\.[a-zA-Z0-9]+\.[a-zA-Z0-9]+$/) && req.headers.authorization.slice(7);
 
     if (!jwtCookie) {
       return null;
@@ -32,15 +32,19 @@ module.exports = {
       return null;
     }
   },
-
-  auth(payload, res) {
-    const jwtToken = jwt.sign(
+  
+  generateToken(payload, expiresIn = 60 * 60 * 24 * 7) {
+    return jwt.sign(
       {
         me: payload.me
       },
       SECRET,
-      { expiresIn: 60 * 60 * 24 * 7 }
+      { expiresIn }
     );
+  },
+
+  auth(payload, res) {
+    const jwtToken = generateToken(payload);
 
     res.setHeader(
       "Set-Cookie",

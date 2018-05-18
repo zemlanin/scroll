@@ -208,7 +208,7 @@ async function generate() {
             : null
         });
 
-        if (post.slug) {
+        if (post.slug && post.id !== post.slug) {
           await fs.writeFile(`${tmpFolder}/${post.slug}.html`, renderedPage);
         }
 

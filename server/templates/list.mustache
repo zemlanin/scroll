@@ -14,7 +14,7 @@
     <ul>
     {{#posts}}
         <li>
-            <a href="{{urls.edit}}">{{id}}</a> -
+            <a href="{{urls.edit}}">{{#slug}}{{slug}} / {{/slug}}{{id}}</a> -
             {{#draft}}draft{{/draft}}
             {{#private}}private{{/private}}
             {{#public}}public{{/public}}

@@ -114,7 +114,7 @@ module.exports = {
 
     const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
 
-    let postExists = false
+    let postExists = false;
     if (existingPostId) {
       const dbPost = await db.get(
         `
@@ -136,7 +136,7 @@ module.exports = {
 
       if (dbPost) {
         post = dbPost;
-        postExists = true
+        postExists = true;
       }
     }
 
@@ -154,6 +154,8 @@ module.exports = {
 
     if (req.post.slug) {
       post.slug = req.post.slug;
+    } else if (post.slug) {
+      post.slug = null;
     }
 
     await db.run(
@@ -167,7 +169,7 @@ module.exports = {
         4: post.private,
         5: post.text,
         6: post.import_url,
-        7: postExists ? new Date().toISOString() : null,
+        7: postExists ? new Date().toISOString() : null
       }
     );
 

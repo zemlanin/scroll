@@ -43,10 +43,18 @@ async function loadTemplate(tmpl) {
 loadTemplate.cache = {};
 
 async function render(tmpl, data) {
-  return mustache.render(await loadTemplate(tmpl), data, {
-    header: await loadTemplate("./templates/header.mustache"),
-    footer: await loadTemplate("./templates/footer.mustache")
-  });
+  return mustache.render(
+    await loadTemplate(path.resolve(__dirname, tmpl)),
+    data,
+    {
+      header: await loadTemplate(
+        path.resolve(__dirname, "templates", "header.mustache")
+      ),
+      footer: await loadTemplate(
+        path.resolve(__dirname, "templates", "footer.mustache")
+      )
+    }
+  );
 }
 
 function getPostUrl(post) {
@@ -57,7 +65,9 @@ async function generate(stdout, stderr) {
   const tmpFolder = await fs.mkdtemp(path.join(os.tmpdir(), "scroll-"));
   await fs.mkdir(path.join(tmpFolder, "/media"));
 
-  const db = await sqlite.open("./posts.db");
+  stdout.write(`made tmp dir: ${tmpFolder}\n`);
+
+  const db = await sqlite.open(path.resolve(__dirname, "posts.db"));
 
   const posts = await db.all(`
     SELECT id, slug, draft, private, (NOT draft AND NOT private) public, text, strftime('%s000', created) created, import_url
@@ -66,6 +76,8 @@ async function generate(stdout, stderr) {
     ORDER BY created DESC
   `);
   // const posts = await db.all(`SELECT * from posts WHERE id LIKE "tumblr%" ORDER BY created DESC`);
+
+  stdout.write(`loaded posts from db\n`);
 
   const postTitles = {};
   const postsCount = posts.length;
@@ -162,24 +174,28 @@ async function generate(stdout, stderr) {
   const progressPadding = Math.log10(postsCount) + 1;
   let i = 0;
 
-  stdout.write("");
+  if (stdout.clearLine && stdout.cursorTo) {
+    stdout.write("");
+  } else {
+    stdout.write(`${postsCount} => `);
+  }
 
   for (const postsChunk of chunk(preparedPosts, 16)) {
     i = i + postsChunk.length;
+
     if (stdout.clearLine && stdout.cursorTo) {
       stdout.clearLine();
       stdout.cursorTo(0);
+      stdout.write(
+        `${postsChunk[0].created.slice(0, 4)} ${i
+          .toString()
+          .padStart(progressPadding)}/${postsCount} ${"#".repeat(
+          parseInt(i * 50 / postsCount)
+        )}${".".repeat(parseInt((postsCount - i) * 50 / postsCount))}`
+      );
     } else {
-      stdout.write("\n");
+      stdout.write(postsChunk[0].created.slice(3, 4));
     }
-
-    stdout.write(
-      `${postsChunk[0].created.slice(0, 4)} ${i
-        .toString()
-        .padStart(progressPadding)}/${postsCount} ${"#".repeat(
-        parseInt(i * 50 / postsCount)
-      )}${".".repeat(parseInt((postsCount - i) * 50 / postsCount))}`
-    );
 
     await Promise.all(
       postsChunk.map(async post => {
@@ -406,7 +422,7 @@ async function generate(stdout, stderr) {
         return resolve();
       },
       d => stdout.write(d.toString() + "\n"),
-      d => stdout.write(d.toString() + "\n")
+      d => stderr.write(d.toString() + "\n")
     );
   });
 

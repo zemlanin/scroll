@@ -50,7 +50,7 @@
       ignore_errors: yes
 
     - name: Start pm2
-      command: env PORT=8080 pm2 start /root/scroll/server.js --name scroll-backstage
+      command: env PORT=8080 BLOG_BASE_URL=https://zemlan.in DIST=/var/projects/scroll/dist pm2 start /root/scroll/server.js --name scroll-backstage
 
     - name: save pm2
       command: pm2 save

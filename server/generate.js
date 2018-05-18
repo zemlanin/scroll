@@ -50,14 +50,14 @@ module.exports = {
       return `<a href="/backstage">auth</a>`;
     }
 
-    res.setHeader("Content-Type", "text/plain");
+    res.writeHead(200, { "Content-Type": "text/plain" });
 
     return generate(res, res)
       .then(() => {
         res.end("done");
       })
-      .catch(() => {
-        res.writeHead(500);
+      .catch(e => {
+        res.write(e.toString());
         res.end("fail");
       });
   }

@@ -83,6 +83,13 @@ module.exports = async (req, res) => {
   );
 
   const morePosts = posts.length > PAGE_SIZE;
+  const suggestion =
+    query.src && query.src.toString().match(/^[a-z0-9_-]+$/i)
+      ? {
+          text: `edit ${query.src}`,
+          url: `/backstage/edit/?id=${query.src}`
+        }
+      : null;
 
   return render(path.resolve(__dirname, "templates", "list.mustache"), {
     user: user,
@@ -95,6 +102,7 @@ module.exports = async (req, res) => {
         }
       })
     ),
+    suggestion: suggestion,
     urls: {
       logout: url.resolve(req.absolute, "/backstage/?logout=1"),
       older: morePosts

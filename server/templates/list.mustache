@@ -7,6 +7,12 @@
 <body>
     hello {{user.me}} <a href="{{urls.logout}}">logout</a>
 
+    {{#suggestion}}
+        <div>
+            <a href="{{{url}}}">{{text}}</a>
+        </div>
+    {{/suggestion}}
+
     <div>
         <a href="/backstage/edit">new post</a>
     </div>

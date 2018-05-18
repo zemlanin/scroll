@@ -52,6 +52,8 @@ module.exports = {
     const query = url.parse(req.url, true).query;
     const existingPostId = query.id || (req.post && req.post.id);
     
+    const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
+    
     if (query.latest != null) {
       const latestPost = await db.get(`SELECT id FROM posts ORDER BY created desc LIMIT 1`)
 
@@ -73,7 +75,6 @@ module.exports = {
     };
 
     if (query.id) {
-      const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
       const dbPost = await db.get(
         `
           SELECT

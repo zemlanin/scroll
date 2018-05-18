@@ -4,8 +4,12 @@ const path = require("path");
 const { promisify } = require("util");
 const _id = require("nanoid/generate");
 const getPostId = () =>
-  "post-" +
-  _id("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 16);
+  `post-${new Date().getFullYear()}-${(new Date().getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}-${_id(
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    10
+  )}`;
 
 const fs = {
   mkdir: promisify(_fs.mkdir),

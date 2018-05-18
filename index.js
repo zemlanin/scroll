@@ -53,7 +53,7 @@ function getPostUrl(post) {
   return `${BLOG_BASE_URL}/${post.slug || post.id}.html`;
 }
 
-async function generate() {
+async function generate(stdout, stderr) {
   const tmpFolder = await fs.mkdtemp(path.join(os.tmpdir(), "scroll-"));
   await fs.mkdir(path.join(tmpFolder, "/media"));
 
@@ -157,18 +157,23 @@ async function generate() {
     };
   });
 
-  console.log("post preparation done");
+  stdout.write("post preparation done\n");
 
   const progressPadding = Math.log10(postsCount) + 1;
   let i = 0;
 
-  process.stdout.write("");
+  stdout.write("");
 
   for (const postsChunk of chunk(preparedPosts, 16)) {
     i = i + postsChunk.length;
-    process.stdout.clearLine();
-    process.stdout.cursorTo(0);
-    process.stdout.write(
+    if (stdout.clearLine && stdout.cursorTo) {
+      stdout.clearLine();
+      stdout.cursorTo(0);
+    } else {
+      stdout.write("\n");
+    }
+
+    stdout.write(
       `${postsChunk[0].created.slice(0, 4)} ${i
         .toString()
         .padStart(progressPadding)}/${postsCount} ${"#".repeat(
@@ -221,8 +226,8 @@ async function generate() {
     );
   }
 
-  process.stdout.write("\n");
-  console.log("posts done");
+  stdout.write("\n");
+  stdout.write("posts done\n");
 
   const PAGE_SIZE = 20;
 
@@ -278,7 +283,7 @@ async function generate() {
     pageNumber = pageNumber - 1;
   }
 
-  console.log("pagination done");
+  stdout.write("pagination done\n");
 
   let indexPage;
   let olderPage;
@@ -370,7 +375,7 @@ async function generate() {
     { flag: "wx" }
   );
 
-  console.log("archive done");
+  stdout.write("archive done\n");
 
   const media = await db.all("SELECT * from media");
 
@@ -382,7 +387,7 @@ async function generate() {
     );
   }
 
-  console.log("media done");
+  stdout.write("media done\n");
 
   await new Promise((resolve, reject) => {
     const rsync = new Rsync()
@@ -400,20 +405,24 @@ async function generate() {
 
         return resolve();
       },
-      d => console.log(d.toString()),
-      d => console.error(d.toString())
+      d => stdout.write(d.toString() + "\n"),
+      d => stdout.write(d.toString() + "\n")
     );
   });
 
   rmrf(tmpFolder);
 }
 
-generate()
-  .then(() => {
-    console.log("done");
-    process.exit(0);
-  })
-  .catch(err => {
-    console.error(err);
-    process.exit(1);
-  });
+if (require.main === module) {
+  generate(process.stdout, process.stderr)
+    .then(() => {
+      console.log("done");
+      process.exit(0);
+    })
+    .catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
+} else {
+  module.exports = generate;
+}

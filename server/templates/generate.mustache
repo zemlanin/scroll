@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        iframe {
+            width: 100%;
+            min-height: 80vh;
+            border: 1px solid gray;
+        }
+
+        form, form button {
+            font-size: 1em;
+            font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
+            "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
+            "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
+            "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+        }
+    </style>
+</head>
+<body>
+    <a href="/backstage">&lt; backstage</a>
+    <form method="POST" target="stdout">
+        <button>generate</button>
+    </form>
+    <iframe name="stdout"
+        width="100%"
+        frameborder="0"
+    ></iframe>
+</body>
+</html>

@@ -9,7 +9,9 @@ const handlers = {
   "POST /backstage/edit": require("./server/edit.js").post,
   "POST /backstage/delete": require("./server/delete.js"),
   "GET /backstage/preview": require("./server/preview.js"),
-  "POST /backstage/preview": require("./server/preview.js")
+  "POST /backstage/preview": require("./server/preview.js"),
+  "GET /backstage/generate": require("./server/generate.js").get,
+  "POST /backstage/generate": require("./server/generate.js").post
 };
 
 async function processPost(request, response) {

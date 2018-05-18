@@ -51,6 +51,16 @@ module.exports = {
 
     const query = url.parse(req.url, true).query;
     const existingPostId = query.id || (req.post && req.post.id);
+    
+    if (query.latest != null) {
+      const latestPost = await db.get(`SELECT id FROM posts ORDER BY created desc LIMIT 1`)
+
+      res.writeHead(302, {
+        Location: url.resolve(req.absolute, `/backstage/edit/?id=${latestPost.id}`)
+      });
+
+      return;
+    }
 
     let post = {
       id: existingPostId || getPostId(),
@@ -117,16 +127,6 @@ module.exports = {
     };
 
     const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
-    
-    if (query.latest === "1") {
-      const latestPost = await db.get(`SELECT id FROM posts ORDER BY created desc LIMIT 1`)
-
-      res.writeHead(302, {
-        Location: url.resolve(req.absolute, `/backstage/edit/?id=${latestPost.id}`)
-      });
-
-      return;
-    }
 
     let postExists = false;
     if (existingPostId) {

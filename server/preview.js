@@ -87,6 +87,9 @@ function prepare(post, options) {
   return {
     id: post.id,
     url: options.url,
+    draft: post.draft,
+    private: post.private,
+    public: post.public,
     title,
     text: post.text,
     html: marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"), {
@@ -113,6 +116,8 @@ module.exports = async (req, res) => {
     id: existingPostId || `id-${Math.random()}`,
     slug: null,
     draft: true,
+    private: false,
+    public: false,
     created: +new Date(),
     import_url: null
   };
@@ -121,10 +126,19 @@ module.exports = async (req, res) => {
     const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
     const dbPost = await db.get(
       `
-      SELECT id, slug, draft, text, strftime('%s000', created) created, import_url
-      FROM posts
-      WHERE id = ?1
-    `,
+        SELECT
+          id,
+          slug,
+          draft,
+          private,
+          (NOT draft AND NOT private) public,
+          text,
+          strftime('%s000', created) created,
+          strftime('%s000', modified) modified,
+          import_url
+        FROM posts
+        WHERE id = ?1
+      `,
       { 1: existingPostId }
     );
 

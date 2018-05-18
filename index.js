@@ -49,12 +49,8 @@ async function render(tmpl, data) {
   });
 }
 
-function getPostFilename(post) {
-  return (!post.draft && post.slug ? post.slug : post.id) + ".html";
-}
-
 function getPostUrl(post) {
-  return `${BLOG_BASE_URL}/${getPostFilename(post)}`;
+  return `${BLOG_BASE_URL}/${post.slug || post.id}.html`;
 }
 
 async function generate() {
@@ -64,8 +60,9 @@ async function generate() {
   const db = await sqlite.open("./posts.db");
 
   const posts = await db.all(`
-    SELECT id, slug, draft, text, strftime('%s000', created) created, import_url
-    from posts
+    SELECT id, slug, draft, private, (NOT draft AND NOT private) public, text, strftime('%s000', created) created, import_url
+    FROM posts
+    WHERE draft = 0
     ORDER BY created DESC
   `);
   // const posts = await db.all(`SELECT * from posts WHERE id LIKE "tumblr%" ORDER BY created DESC`);
@@ -119,25 +116,25 @@ async function generate() {
 
     let newerPost, olderPost;
 
-    if (!post.draft && i) {
+    if (post.public && i) {
       for (
         let newerIndex = i - 1;
         newerIndex >= 0 && posts[newerIndex] && !newerPost;
         newerIndex--
       ) {
-        if (!posts[newerIndex].draft) {
+        if (posts[newerIndex].public) {
           newerPost = posts[newerIndex];
         }
       }
     }
 
-    if (!post.draft) {
+    if (post.public) {
       for (
         let olderIndex = i + 1;
         olderIndex < postsCount && posts[olderIndex] && !olderPost;
         olderIndex++
       ) {
-        if (!posts[olderIndex].draft) {
+        if (posts[olderIndex].public) {
           olderPost = posts[olderIndex];
         }
       }
@@ -147,6 +144,8 @@ async function generate() {
       id: post.id,
       slug: post.slug,
       draft: post.draft,
+      private: post.private,
+      public: post.public,
       url,
       title,
       text: post.text,
@@ -209,7 +208,7 @@ async function generate() {
             : null
         });
 
-        if (!post.draft && post.slug) {
+        if (post.slug) {
           await fs.writeFile(`${tmpFolder}/${post.slug}.html`, renderedPage);
         }
 
@@ -223,7 +222,7 @@ async function generate() {
 
   const PAGE_SIZE = 20;
 
-  const publicPosts = preparedPosts.filter(p => !p.draft);
+  const publicPosts = preparedPosts.filter(p => p.public);
 
   if (publicPosts.length % PAGE_SIZE) {
     for (let i = 0; i < publicPosts.length % PAGE_SIZE; i++) {

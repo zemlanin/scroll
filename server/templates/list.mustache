@@ -16,7 +16,8 @@
         <li>
             <a href="{{urls.edit}}">{{id}}</a> -
             {{#draft}}draft{{/draft}}
-            {{^draft}}public{{/draft}}
+            {{#private}}private{{/private}}
+            {{#public}}public{{/public}}
             <a href="{{urls.edit}}">[edit]</a>
             <a href="{{urls.preview}}">[preview]</a>
         </li>

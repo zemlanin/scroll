@@ -65,11 +65,20 @@ module.exports = async (req, res) => {
   const offset = +query.offset || 0;
   const posts = await db.all(
     `
-    SELECT id, slug, draft, text, strftime('%s000', created) created, import_url
-    FROM posts
-    ORDER BY created DESC
-    LIMIT ?2 OFFSET ?1
-  `,
+      SELECT
+        id,
+        slug,
+        draft,
+        private,
+        (NOT draft AND NOT private) public,
+        text,
+        strftime('%s000', created) created,
+        strftime('%s000', modified) modified,
+        import_url
+      FROM posts
+      ORDER BY created DESC
+      LIMIT ?2 OFFSET ?1
+    `,
     { 1: offset, 2: PAGE_SIZE + 1 }
   );
 

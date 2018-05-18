@@ -51,14 +51,27 @@ module.exports = {
 
     if (query.id) {
       const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
-      post = await db.get(
+      const dbPost = await db.get(
         `
-      SELECT id, slug, draft, text, strftime('%s000', created) created, import_url
-      FROM posts
-      WHERE id = ?1
-    `,
+          SELECT
+            id,
+            slug,
+            draft,
+            private,
+            (NOT draft AND NOT private) public,
+            text,
+            strftime('%s000', created) created,
+            strftime('%s000', modified) modified,
+            import_url
+          FROM posts
+          WHERE id = ?1
+        `,
         { 1: query.id }
       );
+
+      if (dbPost) {
+        post = dbPost;
+      }
     }
 
     return render(path.resolve(__dirname, "templates", "edit.mustache"), {
@@ -84,6 +97,8 @@ module.exports = {
       id: existingPostId || getPostId(),
       slug: null,
       draft: true,
+      private: false,
+      public: false,
       created: +new Date(),
       import_url: null
     };
@@ -92,7 +107,16 @@ module.exports = {
       const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
       const dbPost = await db.get(
         `
-          SELECT id, slug, draft, text, strftime('%s000', created) created, import_url
+          SELECT
+            id,
+            slug,
+            draft,
+            private,
+            (NOT draft AND NOT private) public,
+            text,
+            strftime('%s000', created) created,
+            strftime('%s000', modified) modified,
+            import_url
           FROM posts
           WHERE id = ?1
         `,
@@ -106,8 +130,14 @@ module.exports = {
 
     post.text = req.post.text;
 
-    if (req.post.draft != null) {
+    if (
+      req.post.draft != null ||
+      req.post.private != null ||
+      req.post.public != null
+    ) {
       post.draft = Boolean(+req.post.draft);
+      post.private = Boolean(+req.post.private);
+      post.public = Boolean(+req.post.public);
     }
 
     if (req.post.slug) {

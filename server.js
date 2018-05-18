@@ -7,6 +7,7 @@ const handlers = {
   "GET /backstage/callback": require("./server/callback.js"),
   "GET /backstage/edit": require("./server/edit.js").get,
   "POST /backstage/edit": require("./server/edit.js").post,
+  "POST /backstage/delete": require("./server/delete.js"),
   "GET /backstage/preview": require("./server/preview.js"),
   "POST /backstage/preview": require("./server/preview.js")
 };

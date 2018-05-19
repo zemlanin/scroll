@@ -70,16 +70,11 @@
             el.parentNode.removeChild(el)
             fetch(`/backstage/media/?offset=${document.querySelectorAll("section > div").length}`)
             .then(async r => {
-              const div = document.createElement('html')
-              div.innerHTML = await r.text()
-              
-              const pre = document.createElement('pre')
-              pre.innerHTML = div.querySelector('a').innerHTML
-              parent.appendChild(pre)
-              return
-              // parent.innerText = div.innerText
-              // return
-parent.appendChild(div.querySelector('section > div'))
+              const htmlTag = document.createElement('html')
+              htmlTag.innerHTML = await r.text()
+              for (const div of htmlTag.querySelectorAll("section > *")) {
+                parent.appendChild(div)
+              }
             })
             .catch(e => {
             

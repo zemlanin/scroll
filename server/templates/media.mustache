@@ -73,7 +73,9 @@
               text = await r.text()
               const div = document.createElement('div')
               div.innerHTML = text
-              parent.appendChild(div.querySelector('section'))
+              parent.innerText = div.innerText
+              return
+parent.appendChild(div.querySelector('section'))
             })
             .catch(e => {
             

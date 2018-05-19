@@ -73,8 +73,8 @@
               const div = document.createElement('html')
               div.innerHTML = await r.text()
               
-              const pre = document.createElemet('pre')
-              pre.innerHTML = div.innerHTML
+              const pre = document.createElement('pre')
+              pre.innerHTML = div.querySelector('a').innerHTML
               parent.appendChild(pre)
               return
               // parent.innerText = div.innerText

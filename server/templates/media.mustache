@@ -54,12 +54,16 @@
     <a href="/backstage">&lt; backstage</a>
     <section>
       {{#media}}
-        <div>
+        <div
+          {{#type.image}}
+            style="background-image: url('/media/{{id}}.{{ext}}')"
+          {{/type.image}}
+        >
             {{ext}}
         </div>
       {{/media}}
       {{#moreMedia}}
-        <div onclick="loadMore(this)">
+        <div onclick="window.loadMore(this)">
            ...
         </div>
       {{/moreMedia}}
@@ -67,7 +71,7 @@
     <script>
     window.loadMore = function (el) {
             const parent = el.parentNode
-            el.parentNode.removeChild(el)
+            parent.removeChild(el)
             fetch(`/backstage/media/?offset=${document.querySelectorAll("section > div").length}`)
             .then(async r => {
               const htmlTag = document.createElement('html')

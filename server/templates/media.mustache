@@ -70,9 +70,8 @@
             el.parentNode.removeChild(el)
             fetch(`/backstage/media/?offset=${document.querySelectorAll("section > div").length}`)
             .then(async r => {
-              text = await r.text()
               const div = document.createElement('html')
-              div.innerHTML = text
+              div.innerHTML = await r.text()
               // parent.innerText = div.innerText
               // return
 parent.appendChild(div.querySelector('section').innerHTML)

@@ -71,7 +71,7 @@
             fetch(`/backstage/media/?offset=${document.querySelectorAll("section > div").length}`)
             .then(async r => {
               text = await r.text()
-              const div = document.createElement('div')
+              const div = document.createElement('html')
               div.innerHTML = text
               parent.innerText = div.innerText
               return

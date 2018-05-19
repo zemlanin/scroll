@@ -75,6 +75,9 @@
               div.innerHTML = text
               parent.appendChild(div.querySelector('section'))
             })
+            .catch(e => {
+            
+            parent.innerText = e.toString()})
     }
     </script>
 </body>

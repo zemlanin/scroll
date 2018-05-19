@@ -51,8 +51,7 @@ get: async (req, res) => {
     `
       SELECT
         id,
-        ext,
-        data
+        ext
       FROM media
       ORDER BY created DESC
       LIMIT ?2 OFFSET ?1

@@ -73,7 +73,7 @@
             const parent = el.parentNode
             const url = el.dataset.src;
             parent.removeChild(el)
-            fetch(url)
+            fetch(url, {credentials: 'include'})
             .then(async r => {
               const htmlTag = document.createElement('html')
               htmlTag.innerHTML = await r.text()

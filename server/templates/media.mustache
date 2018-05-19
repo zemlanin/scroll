@@ -42,11 +42,11 @@
         }
         
         section > div {
-            width: 200px;
-            height: 200px;
+            width: 64px;
+            height: 64px;
             background: gray;
             word-break: all;
-            margin: 5px;
+            margin: 2px;
         }
     </style>
 </head>
@@ -65,7 +65,7 @@
       {{/moreMedia}}
     </section>
     <script>
-    widnow.loadMore = function (el) {
+    window.loadMore = function (el) {
             el.parentNode.removeChild(el)
     }
     </script>

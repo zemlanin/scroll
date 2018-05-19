@@ -46,7 +46,7 @@
         section > div {
             width: 64px;
             height: 64px;
-            background: gray;
+            background: lightgray;
             word-break: all;
             margin: 2px;
         }
@@ -73,8 +73,7 @@
     <script>
     window.loadMore = function (el) {
             const parent = el.parentNode
-            const url = el.dataset.src;
-            parent.removeChild(el)
+            const url = el.dataset.src
             fetch(url, {credentials: 'include'})
             .then(async r => {
               const htmlTag = document.createElement('html')
@@ -82,10 +81,11 @@
               for (const div of htmlTag.querySelectorAll("section > *")) {
                 parent.appendChild(div)
               }
+              parent.removeChild(el)
             })
             .catch(e => {
             
-            parent.innerText = e.toString()})
+            el.innerText = e.toString()})
     }
     </script>
 </body>

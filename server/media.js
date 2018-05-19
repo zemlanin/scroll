@@ -72,7 +72,7 @@ get: async (req, res) => {
         text: m.ext.match("^(md|txt|markdown|html|js|css)$"),
       }
     })),
-    moreMedia: moreMedia
+    urls: { moreMedia: moreMedia && `/backstage/media/?offset=${offset + PAGE_SIZE}` },
   });
 }
 };

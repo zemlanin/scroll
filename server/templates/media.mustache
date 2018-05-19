@@ -62,17 +62,18 @@
            {{^type.image}}{{ext}}{{/type.image}}
         </div>
       {{/media}}
-      {{#moreMedia}}
-        <div onclick="window.loadMore(this)">
+      {{#urls.moreMedia}}
+        <div onclick="window.loadMore(this)" data-src="{{urls.moreMedia}}">
            ...
         </div>
-      {{/moreMedia}}
+      {{/urls.moreMedia}}
     </section>
     <script>
     window.loadMore = function (el) {
             const parent = el.parentNode
+            const url = el.dataset.src;
             parent.removeChild(el)
-            fetch(`/backstage/media/?offset=${document.querySelectorAll("section > div").length}`)
+            fetch(url)
             .then(async r => {
               const htmlTag = document.createElement('html')
               htmlTag.innerHTML = await r.text()

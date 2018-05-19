@@ -72,9 +72,14 @@
             .then(async r => {
               const div = document.createElement('html')
               div.innerHTML = await r.text()
+              
+              const pre = document.createElemet('pre')
+              pre.innerHTML = div.innerHTML
+              parent.appendChild(pre)
+              return
               // parent.innerText = div.innerText
               // return
-parent.appendChild(div.querySelector('section').innerHTML)
+parent.appendChild(div.querySelector('section > div'))
             })
             .catch(e => {
             

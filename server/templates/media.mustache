@@ -56,10 +56,10 @@
       {{#media}}
         <div
           {{#type.image}}
-            style="background-image: url('/media/{{id}}.{{ext}}')"
+            style="background-image: url('/media/{{id}}.{{ext}}'); background-size: cover;"
           {{/type.image}}
         >
-            {{ext}}
+           {{^type.image}}{{ext}}{{/type.image}}
         </div>
       {{/media}}
       {{#moreMedia}}

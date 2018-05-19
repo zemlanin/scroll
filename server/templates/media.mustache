@@ -38,7 +38,9 @@
         section {
             display: flex;
             flex-wrap: wrap;
+            justify-content: space-around;
             width: 100%;
+            margin-bottom: 64px;
         }
         
         section > div {
@@ -63,7 +65,7 @@
         </div>
       {{/media}}
       {{#urls.moreMedia}}
-        <div onclick="window.loadMore(this)" data-src="{{urls.moreMedia}}">
+        <div style="flex-grow: 1;" onclick="window.loadMore(this)" data-src="{{urls.moreMedia}}">
            ...
         </div>
       {{/urls.moreMedia}}

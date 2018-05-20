@@ -43,7 +43,7 @@
             margin-bottom: 64px;
         }
         
-        section .media-thumbnail, section .more-media{
+        section .media-thumbnail, section .more-media {
             width: 64px;
             height: 64px;
             background: lightgray;
@@ -57,6 +57,7 @@
         }
         
         section .media-expanded {
+            display: block;
             width: 100%;
         }
         
@@ -64,6 +65,12 @@
         section .media-expanded video[src=""],
         section .media-expanded audio[src=""] {
             display: none;
+        }
+        
+        section .media-expanded img,
+        section .media-expanded video,
+        section .media-expanded audio {
+            width: 100%
         }
     </style>
 </head>
@@ -79,7 +86,7 @@
             data-type="image"
             style="background-image: url('/media/{{id}}.{{ext}}'); background-size: cover;"
           {{/type.image}}
-          onclick="window.expandMedia(this)"
+          onclick="window.expandMedia(event, this)"
         >
             {{^type.image}}{{ext}}{{/type.image}}
         </div>
@@ -114,7 +121,8 @@
             el.innerText = e.toString()})
     }
     
-    window.expandMedia = function(el) {
+    window.expandMedia = function(event, el) {
+            event.preventDefault()
             const expanded = document.querySelector('.media-expanded')
             const newHidden = !expanded.hidden
             !newHidden && expanded.parentNode.removeChild(expanded)

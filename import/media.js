@@ -8,7 +8,8 @@ const fs = {
   access: promisify(_fs.access),
   readdir: promisify(_fs.readdir),
   readFile: promisify(_fs.readFile),
-  writeFile: promisify(_fs.writeFile)
+  writeFile: promisify(_fs.writeFile),
+  copyFile: promisify(_fs.copyFile)
 };
 
 function escape(text) {
@@ -103,6 +104,8 @@ async function openFileMedia(src, filePath, db) {
       4: new Date().toISOString()
     }
   );
+
+  await fs.copyFile(filePath, `${process.env.DIST}/media/${result.id}.${result.ext}`)
 
   return result;
 }

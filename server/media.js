@@ -95,10 +95,10 @@ post: async (req, res) => {
   console.log(files.files)
 
   for (const f of files.files) {
-    await fs.rename(f.file.path, `${process.env.DIST}/media/testing-${f.file.originalFilename}`)
+    await fs.rename(f.path, `${process.env.DIST}/media/testing-${f.originalFilename}`)
   }
   
-  res.writeHead(302, { Location: `/media/testing-${files.files[0].file.originalFilename}`})
+  res.writeHead(302, { Location: `/media/testing-${files.files[0].originalFilename}`})
   res.end()
   return
 }

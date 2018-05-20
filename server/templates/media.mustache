@@ -74,6 +74,10 @@
 </head>
 <body>
     <a href="/backstage">&lt; backstage</a>
+    <form encrypt="multipart/form-data" action="/backstage/media/" method="POST">
+            <input name="files" type="file" multiple />
+            <button>+</button>
+    </form>
     <section>
       {{#media}}
         <a

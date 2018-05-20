@@ -51,7 +51,7 @@
         }
         
         section .more-media {
-            width: 100%;
+            flex-grow: 1;
         }
         
         section .media-expanded {
@@ -112,7 +112,7 @@
             .then(async r => {
               const htmlTag = document.createElement('html')
               htmlTag.innerHTML = await r.text()
-              for (const div of htmlTag.querySelectorAll("section .media-thumbnail")) {
+              for (const div of htmlTag.querySelectorAll("section .media-thumbnail, section .more-media")) {
                 parent.appendChild(div)
               }
               parent.removeChild(el)

@@ -82,23 +82,24 @@ post: async (req, res) => {
   if (!user) {
     return `<a href="/backstage/">auth</a>`;
   }
-  
+
   const {fields, files} = await new Promise((resolve, reject) => {
     const form = new multiparty.Form();
     form.parse(req, (err, fields, files) => {
       if (err) { return reject(err) }
       
-      return {fields, files}
+      return resolve({fields, files})
     })
   })
-  
+
   console.log(files.files)
-  
+
   for (const f of files.files) {
     await fs.rename(f.file.path, `${process.env.DIST}/media/testing-${f.file.originalFilename}`)
   }
   
   res.writeHead(302, { Location: `/media/testing-${files.files[0].file.originalFilename}`})
+  res.end()
   return
 }
 };

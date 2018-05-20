@@ -44,7 +44,7 @@ module.exports = {
   },
 
   auth(payload, res) {
-    const jwtToken = generateToken(payload);
+    const jwtToken = module.exports.generateToken(payload);
 
     res.setHeader(
       "Set-Cookie",

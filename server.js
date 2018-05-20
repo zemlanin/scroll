@@ -13,7 +13,8 @@ const handlers = {
   "GET /backstage/generate": require("./server/generate.js").get,
   "POST /backstage/generate": require("./server/generate.js").post,
   "POST /backstage/jwt": require("./server/jwt.js"),
-  "GET /backstage/media": require("./server/media.js").get
+  "GET /backstage/media": require("./server/media.js").get,
+  "POST /backstage/media": require("./server/media.js").post
 };
 
 async function processPost(request, response) {

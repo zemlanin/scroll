@@ -2,13 +2,15 @@ const url = require("url");
 const _fs = require("fs");
 const path = require("path");
 const { promisify } = require("util");
+const multiparty = require("multiparty");
 
 const fs = {
   mkdir: promisify(_fs.mkdir),
   access: promisify(_fs.access),
   readFile: promisify(_fs.readFile),
   writeFile: promisify(_fs.writeFile),
-  exists: promisify(_fs.exists)
+  exists: promisify(_fs.exists),
+  rename: promisify(_fs.rename)
 };
 const { authed, logout } = require("./auth.js");
 const sqlite = require("sqlite");
@@ -73,5 +75,30 @@ get: async (req, res) => {
     })),
     urls: { moreMedia: moreMedia && `/backstage/media/?offset=${offset + PAGE_SIZE}` },
   });
+},
+post: async (req, res) => {
+  const user = authed(req, res);
+
+  if (!user) {
+    return `<a href="/backstage/">auth</a>`;
+  }
+  
+  const {fields, files} = await new Promise((resolve, reject) => {
+    const form = new multiparty.Form();
+    form.parse(req, (err, fields, files) => {
+      if (err) { return reject(err) }
+      
+      return {fields, files}
+    })
+  })
+  
+  console.log(files.files)
+  
+  for (const f of files.files) {
+    await fs.rename(f.file.path, `/media/testing-${f.file.originalFilename}`)
+  }
+  
+  res.writeHead(302, { Location: `/media/testing-${files.files[0].file.originalFilename}`})
+  return
 }
 };

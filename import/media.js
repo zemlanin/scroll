@@ -73,6 +73,40 @@ async function loadMedia(src, db) {
   return result;
 }
 
+async function openFileMedia(src, filePath, db) {
+  const alreadyLoaded = await db.get("SELECT * from media WHERE src = ?1", [
+    src
+  ]);
+
+  if (alreadyLoaded) {
+    return {
+      id: alreadyLoaded.id,
+      ext: alreadyLoaded.ext,
+      src: alreadyLoaded.src
+    };
+  }
+
+  const resp = await fs.readFile(filePath);
+
+  const result = {
+    id: getMediaId(),
+    ext: src.match(/\.([a-z0-9]+)$/)[1],
+    src: src
+  };
+
+  await db.run(
+    "INSERT INTO media (id, ext, data, created) VALUES (?1, ?2, ?3, ?4)",
+    {
+      1: result.id,
+      2: result.ext,
+      3: resp,
+      4: new Date().toISOString()
+    }
+  );
+
+  return result;
+}
+
 if (require.main === module) {
   process.stdin.setEncoding("utf8");
 
@@ -105,6 +139,7 @@ if (require.main === module) {
   });
 } else {
   module.exports = {
-    loadMedia
+    loadMedia,
+    openFileMedia
   };
 }

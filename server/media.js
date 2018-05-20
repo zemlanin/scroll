@@ -91,14 +91,17 @@ post: async (req, res) => {
       return resolve({fields, files})
     })
   })
-
-  console.log(files.files)
+  
+  const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
 
   for (const f of files.files) {
     await fs.rename(f.path, `${process.env.DIST}/media/testing-${f.originalFilename}`)
+    const src = `:upload/size-${f.headers.size}/${f.originalFilename}`
+    await openFileMedia(src, f.path, db)
+    await fs.remove(f.path)
   }
   
-  res.writeHead(302, { Location: `/media/testing-${files.files[0].originalFilename}`})
+  res.writeHead(303, { Location: `/backstage/media/`})
   res.end()
   return
 }

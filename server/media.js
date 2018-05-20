@@ -86,6 +86,15 @@ post: async (req, res) => {
     return `<a href="/backstage/">auth</a>`;
   }
 
+  const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
+  if (req.post && req.post.delete) {
+    await db.run(`DELETE FROM media WHERE id = ?1 AND ext = ?2`, req.post.delete.match(/^([a-z0-9_-]).([a-z0-9]+)$/i))
+    await fs.unlink(`${process.env.DIST}/media/${req.post.delete}`)
+    res.writeHead(303, { Location: `/backstage/media/`})
+    res.end()
+    return 
+  }
+
   const {fields, files} = await new Promise((resolve, reject) => {
     const form = new multiparty.Form();
     form.parse(req, (err, fields, files) => {
@@ -94,8 +103,6 @@ post: async (req, res) => {
       return resolve({fields, files})
     })
   })
-  
-  const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
 
   for (const f of files.files) {
     const src = `:upload/size-${f.headers.size}/${f.originalFilename}`

@@ -84,6 +84,7 @@
           class="media-thumbnail"
           target="_blank"
           href="/media/{{id}}.{{ext}}"
+          data-filename="{{id}}.{{ext}}"
           {{#type.image}}data-type="image"{{/type.image}}
           {{#type.video}}data-type="video"{{/type.video}}
           {{#type.audio}}data-type="audio"{{/type.audio}}
@@ -103,6 +104,9 @@
       {{/urls.moreMedia}}
       <div class="media-expanded" hidden>
           <button type="button" onclick="window.appendMedia(this)" data-src="">append media</button>
+          <form method="POST">
+            <button name="delete" value="" onclick="return confirm('are you sure?')">delete</button>
+          </form>
           <img src="" />
           <video src="" controls playsinline></video>
           <audio src="" controls></audio>
@@ -136,6 +140,7 @@
             expanded.querySelector('img').src = !newHidden && el.dataset.type === 'image' ? el.href : "";
             expanded.querySelector('video').src = !newHidden && el.dataset.type === 'video' ? el.href : "";
             expanded.querySelector('audio').src = !newHidden && el.dataset.type === 'audio' ? el.href : "";
+            expanded.querySelector('form button[name="delete"]').value = !newHidden ? el.dataset.filename : "";
             !newHidden && el.parentNode.insertBefore(expanded, el.nextSibling)
     }
     

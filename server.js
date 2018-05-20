@@ -57,7 +57,7 @@ const server = http.createServer((req, res) => {
       })
     );
 
-    if (req.method === "POST" && req.getHeader("content-type") === "application/x-www-form-urlencoded") {
+    if (req.method === "POST" && req.headers["content-type"] === "application/x-www-form-urlencoded") {
       const ogHandler = handler;
       handler = async () => {
         await processPost(req, res);

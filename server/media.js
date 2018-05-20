@@ -10,7 +10,9 @@ const fs = {
   readFile: promisify(_fs.readFile),
   writeFile: promisify(_fs.writeFile),
   exists: promisify(_fs.exists),
-  rename: promisify(_fs.rename)
+  rename: promisify(_fs.rename),
+  unlink: promisify(_fs.unlink)
+  
 };
 const { authed, logout } = require("./auth.js");
 const { openFileMedia } = require("../import/media.js");
@@ -96,10 +98,9 @@ post: async (req, res) => {
   const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
 
   for (const f of files.files) {
-    await fs.rename(f.path, `${process.env.DIST}/media/testing-${f.originalFilename}`)
     const src = `:upload/size-${f.headers.size}/${f.originalFilename}`
     await openFileMedia(src, f.path, db)
-    await fs.remove(f.path)
+    await fs.unlink(f.path)
   }
   
   res.writeHead(303, { Location: `/backstage/media/`})

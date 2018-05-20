@@ -51,11 +51,12 @@
         }
         
         section .more-media {
-            flex-grow: 1;
+            width: 100%;
         }
         
         section .media-expanded {
             width: 100%;
+            background-color: lightgray;
         }
         
         section .media-expanded img[src=""],
@@ -99,7 +100,7 @@
       <div class="media-expanded" hidden>
           <button type="button" onclick="window.appendMedia(this)" data-src="">append media</button>
           <img src="" />
-          <video src="" controls playinline />
+          <video src="" controls playsinline />
           <audio src="" controls />
       </div>
     </section>

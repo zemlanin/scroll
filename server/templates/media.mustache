@@ -129,9 +129,9 @@
             !newHidden && expanded.parentNode.removeChild(expanded)
             expanded.hidden = newHidden
             expanded.querySelector('button').setAttribute('data-src', el.href)
-            expanded.querySelector('img').src = !newHidden && el.dataset.type === 'image' ? el.href : ""
-            expanded.querySelector('video').src = !newHidden && el.dataset.type === 'video' ? el.href : ""
-            expanded.querySelector('audio').src = !newHidden && el.dataset.type === 'audio' ? el.href : ""
+            expanded.querySelector('img').src = !newHidden && el.dataset.type === 'image' ? el.href : "";
+            expanded.querySelector('video').src = !newHidden && el.dataset.type === 'video' ? el.href : "";
+            expanded.querySelector('audio').src = !newHidden && el.dataset.type === 'audio' ? el.href : "";
             !newHidden && el.parentNode.insertBefore(expanded, el.nextSibling)
     }
     

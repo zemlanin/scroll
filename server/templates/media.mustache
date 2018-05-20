@@ -38,7 +38,6 @@
         section {
             display: flex;
             flex-wrap: wrap;
-            justify-content: space-around;
             width: 100%;
             margin-bottom: 64px;
         }
@@ -49,7 +48,6 @@
             background: lightgray;
             word-break: all;
             margin: 2px;
-            display: block
         }
         
         section .more-media {
@@ -57,7 +55,6 @@
         }
         
         section .media-expanded {
-            display: block;
             width: 100%;
         }
         
@@ -82,8 +79,11 @@
           class="media-thumbnail"
           target="_blank"
           href="/media/{{id}}.{{ext}}"
+          {{#type.image}}data-type="image"{{/type.image}}
+          {{#type.video}}data-type="video"{{/type.video}}
+          {{#type.audio}}data-type="audio"{{/type.audio}}
+          {{#type.text}}data-type="text"{{/type.text}}
           {{#type.image}}
-            data-type="image"
             style="background-image: url('/media/{{id}}.{{ext}}'); background-size: cover;"
           {{/type.image}}
           onclick="window.expandMedia(event, this)"
@@ -124,7 +124,7 @@
     window.expandMedia = function(event, el) {
             event.preventDefault()
             const expanded = document.querySelector('.media-expanded')
-            const newHidden = !expanded.hidden
+            const newHidden = expanded.querySelector('button').getAttribute('data-src') === el.href && !expanded.hidden
             !newHidden && expanded.parentNode.removeChild(expanded)
             expanded.hidden = newHidden
             expanded.querySelector('button').setAttribute('data-src', el.href)

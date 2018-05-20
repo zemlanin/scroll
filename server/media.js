@@ -88,7 +88,7 @@ post: async (req, res) => {
 
   const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
   if (req.post && req.post.delete) {
-    await db.run(`DELETE FROM media WHERE id = ?1 AND ext = ?2`, req.post.delete.match(/^([a-z0-9_-]).([a-z0-9]+)$/i))
+    await db.run(`DELETE FROM media WHERE id = ?1 AND ext = ?2`, req.post.delete.match(/^([a-z0-9_-]+).([a-z0-9]+)$/i))
     await fs.unlink(`${process.env.DIST}/media/${req.post.delete}`)
     res.writeHead(303, { Location: `/backstage/media/`})
     res.end()

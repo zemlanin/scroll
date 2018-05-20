@@ -13,6 +13,7 @@ const fs = {
   rename: promisify(_fs.rename)
 };
 const { authed, logout } = require("./auth.js");
+const { openFileMedia } = require("../import/media.js");
 const sqlite = require("sqlite");
 const mustache = require("mustache");
 

@@ -43,12 +43,27 @@
             margin-bottom: 64px;
         }
         
-        section > div {
+        section .media-thumbnail, section .more-media{
             width: 64px;
             height: 64px;
             background: lightgray;
             word-break: all;
             margin: 2px;
+            display: block
+        }
+        
+        section .more-media {
+            flex-grow: 1;
+        }
+        
+        section .media-expanded {
+            width: 100%;
+        }
+        
+        section .media-expanded img[src=""],
+        section .media-expanded video[src=""],
+        section .media-expanded audio[src=""] {
+            display: none;
         }
     </style>
 </head>
@@ -56,19 +71,30 @@
     <a href="/backstage">&lt; backstage</a>
     <section>
       {{#media}}
-        <div
+        <a
+          class="media-thumbnail"
+          target="_blank"
+          href="/media/{{id}}.{{ext}}"
           {{#type.image}}
+            data-type="image"
             style="background-image: url('/media/{{id}}.{{ext}}'); background-size: cover;"
           {{/type.image}}
+          onclick="window.expandMedia(this)"
         >
-           {{^type.image}}{{ext}}{{/type.image}}
+            {{^type.image}}{{ext}}{{/type.image}}
         </div>
       {{/media}}
       {{#urls.moreMedia}}
-        <div style="flex-grow: 1;" onclick="window.loadMore(this)" data-src="{{urls.moreMedia}}">
+        <div class="more-media" onclick="window.loadMore(this)" data-src="{{urls.moreMedia}}">
            ...
         </div>
       {{/urls.moreMedia}}
+      <div class="media-expanded" hidden>
+          <button type="button" onclick="window.appendMedia(this)" data-src="">append media</button>
+          <img src="" />
+          <video src="" controls playinline />
+          <audio src="" controls />
+      </div>
     </section>
     <script>
     window.loadMore = function (el) {
@@ -78,7 +104,7 @@
             .then(async r => {
               const htmlTag = document.createElement('html')
               htmlTag.innerHTML = await r.text()
-              for (const div of htmlTag.querySelectorAll("section > *")) {
+              for (const div of htmlTag.querySelectorAll("section .media-thumbnail")) {
                 parent.appendChild(div)
               }
               parent.removeChild(el)
@@ -86,6 +112,22 @@
             .catch(e => {
             
             el.innerText = e.toString()})
+    }
+    
+    window.expandMedia = function(el) {
+            const expanded = document.querySelector('.media-expanded')
+            const newHidden = !expanded.hidden
+            !newHidden && expanded.parentNode.removeChild(expanded)
+            expanded.hidden = newHidden
+            expanded.querySelector('button').setAttribute('data-src', el.href)
+            expanded.querySelector('img').src = !newHidden && el.dataset.type === 'image' ? el.href : ""
+            expanded.querySelector('video').src = !newHidden && el.dataset.type === 'video' ? el.href : ""
+            expanded.querySelector('audio').src = !newHidden && el.dataset.type === 'audio' ? el.href : ""
+            !newHidden && el.parentNode.insertBefore(expanded, el.nextSibling)
+    }
+    
+    window.appendMedia = function(el) {
+            alert(el.dataset.src)
     }
     </script>
 </body>

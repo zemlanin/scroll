@@ -1,39 +1,70 @@
 const url = require("url");
-const _fs = require("fs");
 const path = require("path");
-const { promisify } = require("util");
 
-const fs = {
-  mkdir: promisify(_fs.mkdir),
-  access: promisify(_fs.access),
-  readFile: promisify(_fs.readFile),
-  writeFile: promisify(_fs.writeFile),
-  exists: promisify(_fs.exists)
-};
 const { authed, logout } = require("./auth.js");
+const { render } = require("./templates/index.js");
+const { renderer } = require("../common.js");
+const marked = require("marked");
 const sqlite = require("sqlite");
-const mustache = require("mustache");
-
-async function loadTemplate(tmpl) {
-  return (
-    loadTemplate.cache[tmpl] ||
-    (loadTemplate.cache[tmpl] = (await fs.readFile(tmpl)).toString())
-  );
-}
-loadTemplate.cache = {};
-
-async function render(tmpl, data) {
-  return mustache.render(await loadTemplate(tmpl), data, {
-    header: await loadTemplate(
-      path.resolve(__dirname, "..", "templates", "header.mustache")
-    ),
-    footer: await loadTemplate(
-      path.resolve(__dirname, "..", "templates", "footer.mustache")
-    )
-  });
-}
+const cheerio = require("cheerio");
 
 const PAGE_SIZE = 20;
+
+marked.setOptions({
+  gfm: true,
+  smartypants: false,
+  renderer: renderer,
+  baseUrl: null
+});
+
+function prepare(post, options) {
+  let tokens = marked.lexer(post.text);
+
+  let title = post.slug || post.id;
+  const urls = {
+    edit: url.resolve(options.baseUrl, `/backstage/edit/?id=${post.id}`),
+    preview: url.resolve(options.baseUrl, `/backstage/preview/?id=${post.id}`),
+    permalink: url.resolve(options.baseUrl, `/${post.slug || post.id}.html`)
+  };
+
+  const header1Token = tokens.find(t => t.type === "heading" && t.text);
+
+  if (header1Token) {
+    const headerUrl =
+      post.public || post.private ? urls.permalink : urls.preview;
+    title = cheerio.load(marked(header1Token.text)).text();
+    post.text = post.text.replace(
+      header1Token.text,
+      `[${header1Token.text}](${headerUrl})`
+    );
+  }
+
+  post.text = post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯");
+
+  tokens = marked.lexer(post.text);
+  const shortTokens = [];
+  let paragraphsCounter = 0;
+  for (const token of tokens) {
+    shortTokens.push(token);
+
+    if (token.type === "paragraph") {
+      paragraphsCounter = paragraphsCounter + 1;
+    }
+
+    if (paragraphsCounter >= 3) {
+      break;
+    }
+  }
+  shortTokens.links = tokens.links;
+
+  return Object.assign(post, {
+    title: title,
+    short: marked.parser(shortTokens, {
+      baseUrl: options.baseUrl
+    }),
+    urls: urls
+  });
+}
 
 module.exports = async (req, res) => {
   const indieAuthUrl = url.format({
@@ -51,6 +82,7 @@ module.exports = async (req, res) => {
 
   if (query.logout) {
     logout(res);
+    res.statusCode = 401;
 
     return `<a href="${indieAuthUrl}">auth</a>`;
   }
@@ -58,6 +90,7 @@ module.exports = async (req, res) => {
   const user = authed(req, res);
 
   if (!user) {
+    res.statusCode = 401;
     return `<a href="${indieAuthUrl}">auth</a>`;
   }
 
@@ -91,15 +124,11 @@ module.exports = async (req, res) => {
         }
       : null;
 
-  return render(path.resolve(__dirname, "templates", "list.mustache"), {
+  return render("list.mustache", {
     user: user,
     posts: posts.slice(0, PAGE_SIZE).map(p =>
-      Object.assign(p, {
-        urls: {
-          edit: url.resolve(req.absolute, `/backstage/edit/?id=${p.id}`),
-          preview: url.resolve(req.absolute, `/backstage/preview/?id=${p.id}`),
-          permalink: url.resolve(req.absolute, `/${p.slug || p.id}.html`)
-        }
+      prepare(p, {
+        baseUrl: req.absolute
       })
     ),
     suggestion: suggestion,

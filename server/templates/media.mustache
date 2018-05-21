@@ -4,79 +4,93 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        * {
-            box-sizing: border-box;
-        }
+        {{> bulma.css}}
+    </style>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
 
-        textarea, input[name="slug"], input[name="import_url"] {
-            width: 100%;
-            font-size: 1em;
-            font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
-            "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
-            "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
-            "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
-        }
+      textarea,
+      input[name="slug"],
+      input[name="import_url"] {
+        width: 100%;
+        font-size: 1em;
+        font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
+          "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
+          "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
+          "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+      }
 
-        textarea {
-            min-height: 40vh;
-        }
+      textarea {
+        min-height: 40vh;
+      }
 
-        iframe {
-            width: 100%;
-            min-height: 40vh;
-            border: 1px solid gray;
-        }
+      iframe {
+        width: 100%;
+        min-height: 40vh;
+        border: 1px solid gray;
+      }
 
-        form, form button {
-            font-size: 1em;
-            font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
-            "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
-            "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
-            "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
-        }
-        
-        section {
-            display: flex;
-            flex-wrap: wrap;
-            width: 100%;
-            margin-bottom: 64px;
-        }
-        
-        section .media-thumbnail, section .more-media {
-            width: 64px;
-            height: 64px;
-            background: lightgray;
-            word-break: all;
-            margin: 2px;
-        }
-        
-        section .more-media {
-            flex-grow: 1;
-        }
-        
-        section .media-expanded {
-            width: 100%;
-            background-color: lightgray;
-        }
-        
-        section .media-expanded img[src=""],
-        section .media-expanded video[src=""],
-        section .media-expanded audio[src=""] {
-            display: none;
-        }
-        
-        section .media-expanded img,
-        section .media-expanded video,
-        section .media-expanded audio {
-            width: 100%
-        }
+      section {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        margin-bottom: 64px;
+      }
+
+      section .media-thumbnail,
+      section .more-media {
+        width: 64px;
+        height: 64px;
+        background: lightgray;
+        word-break: all;
+        margin: 2px;
+      }
+
+      section .more-media {
+        flex-grow: 1;
+      }
+
+      section .media-expanded {
+        width: 100%;
+        background-color: lightgray;
+      }
+
+      section .media-expanded img[src=""],
+      section .media-expanded video[src=""],
+      section .media-expanded audio[src=""] {
+        display: none;
+      }
+
+      section .media-expanded img,
+      section .media-expanded video,
+      section .media-expanded audio {
+        max-width: 100%;
+        width: auto;
+        max-height: 22.5em;
+        height: auto;
+        display: block;
+        margin: auto;
+      }
     </style>
 </head>
-<body>
-    <a href="/backstage">&lt; backstage</a>
-    <form enctype="multipart/form-data" action="/backstage/media/" method="POST">
-            <input name="files" type="file" multiple />
-            <button>+</button>
+<body class="container is-fluid" style="margin-top: 1em; margin-bottom: 80px">
+    <nav class="field">
+        <a class="button" href="/backstage">&larr; backstage</a>
+    </nav>
+
+    <form enctype="multipart/form-data"
+      action="/backstage/media/"
+      method="POST"
+      class="field has-addons"
+    >
+      <div class="control is-expanded">
+        <input name="files" type="file" multiple class="input" />
+      </div>
+      <div class="control">
+        <button class="button">+</button>
+      </div>
     </form>
     <section>
       {{#media}}
@@ -103,50 +117,68 @@
         </div>
       {{/urls.moreMedia}}
       <div class="media-expanded" hidden>
-          <button type="button" onclick="window.appendMedia(this)" data-src="">append media</button>
-          <form method="POST">
-            <button name="delete" value="" onclick="return confirm('are you sure?')">delete</button>
+        <div class="field is-horizontal">
+          <div class="control">
+            <button class="button" type="button" onclick="window.appendMedia(this)" data-src="">append media</button>
+          </div>
+          <form method="POST" class="control">
+            <button class="button" name="delete" value="" onclick="return confirm('are you sure?')">delete</button>
           </form>
+        </div>
           <img src="" />
           <video src="" controls playsinline></video>
           <audio src="" controls></audio>
       </div>
     </section>
     <script>
-    window.loadMore = function (el) {
-            const parent = el.parentNode
-            const url = el.dataset.src
-            fetch(url, {credentials: 'include'})
-            .then(async r => {
-              const htmlTag = document.createElement('html')
-              htmlTag.innerHTML = await r.text()
-              for (const div of htmlTag.querySelectorAll("section .media-thumbnail, section .more-media")) {
-                parent.appendChild(div)
-              }
-              parent.removeChild(el)
-            })
-            .catch(e => {
-            
-            el.innerText = e.toString()})
-    }
-    
-    window.expandMedia = function(event, el) {
-            event.preventDefault()
-            const expanded = document.querySelector('.media-expanded')
-            const newHidden = expanded.querySelector('button').getAttribute('data-src') === el.href && !expanded.hidden
-            !newHidden && expanded.parentNode.removeChild(expanded)
-            expanded.hidden = newHidden
-            expanded.querySelector('button').setAttribute('data-src', el.href)
-            expanded.querySelector('img').src = !newHidden && el.dataset.type === 'image' ? el.href : "";
-            expanded.querySelector('video').src = !newHidden && el.dataset.type === 'video' ? el.href : "";
-            expanded.querySelector('audio').src = !newHidden && el.dataset.type === 'audio' ? el.href : "";
-            expanded.querySelector('form button[name="delete"]').value = !newHidden ? el.dataset.filename : "";
-            !newHidden && el.parentNode.insertBefore(expanded, el.nextSibling)
-    }
-    
-    window.appendMedia = function(el) {
-            alert(el.dataset.src)
-    }
+      /* eslint-env browser */
+      if (window.top != window) {
+        document.querySelector('nav').hidden = true;
+      }
+
+      window.loadMore = function(el) {
+        const parent = el.parentNode;
+        const url = el.dataset.src;
+        fetch(url, { credentials: "include" })
+          .then(async r => {
+            const htmlTag = document.createElement("html");
+            htmlTag.innerHTML = await r.text();
+            for (const div of htmlTag.querySelectorAll(
+              "section .media-thumbnail, section .more-media"
+            )) {
+              parent.appendChild(div);
+            }
+            parent.removeChild(el);
+          })
+          .catch(e => {
+            el.innerText = e.toString();
+          });
+      };
+
+      window.expandMedia = function(event, el) {
+        event.preventDefault();
+        const expanded = document.querySelector(".media-expanded");
+        const newHidden =
+          expanded.querySelector("button").dataset.filename === el.dataset.filename &&
+          !expanded.hidden;
+        !newHidden && expanded.parentNode.removeChild(expanded);
+        expanded.hidden = newHidden;
+        expanded.querySelector("button").setAttribute("data-filename", el.dataset.filename);
+        expanded.querySelector("img").src =
+          !newHidden && el.dataset.type === "image" ? el.href : "";
+        expanded.querySelector("video").src =
+          !newHidden && el.dataset.type === "video" ? el.href : "";
+        expanded.querySelector("audio").src =
+          !newHidden && el.dataset.type === "audio" ? el.href : "";
+        expanded.querySelector('form button[name="delete"]').value = !newHidden
+          ? el.dataset.filename
+          : "";
+        !newHidden && el.parentNode.insertBefore(expanded, el.nextSibling);
+      };
+
+      window.appendMedia = function(el) {
+        window.top.appendText && window.top.appendText(`![](/media/${el.dataset.filename})`);
+      };
     </script>
 </body>
 </html>

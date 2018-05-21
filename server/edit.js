@@ -1,7 +1,5 @@
 const url = require("url");
-const _fs = require("fs");
 const path = require("path");
-const { promisify } = require("util");
 const _id = require("nanoid/generate");
 const getPostId = () =>
   `post-${new Date().getFullYear()}-${(new Date().getMonth() + 1)
@@ -11,54 +9,34 @@ const getPostId = () =>
     10
   )}`;
 
-const fs = {
-  mkdir: promisify(_fs.mkdir),
-  access: promisify(_fs.access),
-  readFile: promisify(_fs.readFile),
-  writeFile: promisify(_fs.writeFile),
-  exists: promisify(_fs.exists)
-};
 const { authed } = require("./auth.js");
+const { render } = require("./templates/index.js");
 const sqlite = require("sqlite");
-const mustache = require("mustache");
-
-async function loadTemplate(tmpl) {
-  return (
-    loadTemplate.cache[tmpl] ||
-    (loadTemplate.cache[tmpl] = (await fs.readFile(tmpl)).toString())
-  );
-}
-loadTemplate.cache = {};
-
-async function render(tmpl, data) {
-  return mustache.render(await loadTemplate(tmpl), data, {
-    header: await loadTemplate(
-      path.resolve(__dirname, "..", "templates", "header.mustache")
-    ),
-    footer: await loadTemplate(
-      path.resolve(__dirname, "..", "templates", "footer.mustache")
-    )
-  });
-}
 
 module.exports = {
   get: async (req, res) => {
     const user = authed(req, res);
 
     if (!user) {
+      res.statusCode = 401;
       return `<a href="/backstage">auth</a>`;
     }
 
     const query = url.parse(req.url, true).query;
     const existingPostId = query.id || (req.post && req.post.id);
-    
+
     const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
-    
+
     if (query.latest != null) {
-      const latestPost = await db.get(`SELECT id FROM posts ORDER BY created desc LIMIT 1`)
+      const latestPost = await db.get(
+        `SELECT id FROM posts ORDER BY created desc LIMIT 1`
+      );
 
       res.writeHead(302, {
-        Location: url.resolve(req.absolute, `/backstage/edit/?id=${latestPost.id}`)
+        Location: url.resolve(
+          req.absolute,
+          `/backstage/edit/?id=${latestPost.id}`
+        )
       });
 
       return;
@@ -98,7 +76,7 @@ module.exports = {
       }
     }
 
-    return render(path.resolve(__dirname, "templates", "edit.mustache"), {
+    return render("edit.mustache", {
       user: user,
       post: post,
       urls: {
@@ -110,6 +88,7 @@ module.exports = {
     const user = authed(req, res);
 
     if (!user) {
+      res.statusCode = 401;
       return `<a href="/backstage">auth</a>`;
     }
 
@@ -224,7 +203,7 @@ module.exports = {
       return;
     }
 
-    return render(path.resolve(__dirname, "templates", "edit.mustache"), {
+    return render("edit.mustache", {
       user: user,
       post: post,
       urls: {

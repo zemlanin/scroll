@@ -8,6 +8,7 @@ module.exports = async (req, res) => {
   const user = authed(req, res);
 
   if (!user) {
+    res.statusCode = 401;
     return `<a href="/backstage">auth</a>`;
   }
 

@@ -3,38 +3,63 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        {{> bulma.css}}
+
+        .card-content img,
+        .card-content video,
+        .card-content audio {
+          max-width: 100%;
+          width: auto;
+          max-height: 18em;
+          height: auto;
+          display: block;
+          margin: auto;
+        }
+
+    </style>
 </head>
-<body>
+<body class="container is-fluid" style="margin-top: 1em; margin-bottom: 80px">
+    <nav class="field">
+        <a href="/backstage/edit" class="button">new post</a>
+        <a href="/backstage/media" class="button">media</a>
+        <a href="/backstage/generate" class="button">generate</a>
+    </nav>
+
     {{#suggestion}}
-        <div>
-            <a href="{{{url}}}">{{text}}</a>
-        </div>
+        <article class="message is-link">
+            <div class="message-body">
+              <a href="{{{url}}}">
+                {{text}}
+              </a>
+            </div>
+        </article>
     {{/suggestion}}
 
-    <div>
-        <a href="/backstage/edit">new post</a>
-    </div>
-
-    <div>
-        <a href="/backstage/generate">generate</a>
-    </div>
-
-    <ul>
     {{#posts}}
-        <li>
-            <a href="{{urls.edit}}">{{#slug}}{{slug}} / {{/slug}}{{id}}</a> -
-            {{#draft}}draft{{/draft}}
-            {{#private}}private{{/private}}
-            {{#public}}public{{/public}}
-            <a href="{{urls.edit}}">[edit]</a>
-            <a href="{{urls.preview}}">[preview]</a>
-        </li>
+        <div class="card">
+            <div class="card-content">
+                {{{short}}}
+            </div>
+            <footer class="card-footer">
+                {{#draft}}<div class="card-footer-item">draft</div>{{/draft}}
+                {{^draft}}
+                    <a class="card-footer-item" href="{{urls.permalink}}">
+                        {{#private}}private{{/private}}
+                        {{#public}}public{{/public}}
+                    </a>
+                {{/draft}}
+                <a class="card-footer-item" href="{{urls.edit}}">edit</a>
+                <a class="card-footer-item" href="{{urls.preview}}">preview</a>
+            </footer>
+        </div>
     {{/posts}}
-    </ul>
-    <nav>
-        {{#urls.newer}}<a href="{{{urls.newer}}}">&larr; newer</a>{{/urls.newer}}
-        {{^urls.newer}}<span></span>{{/urls.newer}}
-        {{#urls.older}}<a href="{{{urls.older}}}">older &rarr;</a>{{/urls.older}}
+
+    <nav class="field" style="margin-top: 0.5em">
+        {{#urls.newer}}<a class="button" href="{{{urls.newer}}}">&larr; newer</a>{{/urls.newer}}
+        {{^urls.newer}}<button class="button" disabled>&larr; newer</button>{{/urls.newer}}
+        {{#urls.older}}<a class="button" href="{{{urls.older}}}">older &rarr;</a>{{/urls.older}}
+        {{^urls.older}}<button class="button" disabled>older &rarr;</button>{{/urls.older}}
     </nav>
     
     <form method="POST" action="{{urls.jwt}}">

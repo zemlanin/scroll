@@ -1,7 +1,8 @@
 const _fs = require("fs");
+const path = require("path");
 const sqlite = require("sqlite");
 const request = require("request-promise-native");
-const { promisify, inspect } = require("util");
+const { promisify } = require("util");
 
 const fs = {
   mkdir: promisify(_fs.mkdir),
@@ -11,30 +12,6 @@ const fs = {
   writeFile: promisify(_fs.writeFile),
   copyFile: promisify(_fs.copyFile)
 };
-
-function escape(text) {
-  return text
-    .replace(/\n/g, "  \n")
-    .replace(/([\\`[\]])/g, "\\$1")
-    .replace(/^\s*([+\-_*])/gm, "\\$1")
-    .replace(/\\_\(ツ\)_/gm, "\\\\_(ツ)\\_");
-}
-
-async function getTime(tweet) {
-  if (tweet.created_at.indexOf("00:00:00") > -1) {
-    const twitterUrl = `https://twitter.com/${tweet.user.screen_name}/status/${
-      tweet.id_str
-    }`;
-    const resp = await request.get(twitterUrl);
-
-    const timestamp = resp.match(/data-time-ms="(\d+)"/);
-    if (timestamp) {
-      return new Date(+timestamp[1]).toISOString();
-    }
-  }
-
-  return new Date(tweet.created_at).toISOString();
-}
 
 const _id = require("nanoid/generate");
 const getMediaId = () =>
@@ -105,7 +82,15 @@ async function openFileMedia(src, filePath, db) {
     }
   );
 
-  await fs.copyFile(filePath, `${process.env.DIST}/media/${result.id}.${result.ext}`)
+  await fs.copyFile(
+    filePath,
+    path.resolve(
+      __dirname,
+      process.env.DIST || "../dist",
+      "media",
+      `${result.id}.${result.ext}`
+    )
+  );
 
   return result;
 }

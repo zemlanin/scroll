@@ -60,7 +60,10 @@ function prepare(post, options) {
   return Object.assign(post, {
     title: title,
     short: marked.parser(shortTokens, {
-      baseUrl: options.baseUrl
+      baseUrl: options.baseUrl,
+      gfm: true,
+      smartypants: false,
+      renderer: renderer,
     }),
     urls: urls
   });

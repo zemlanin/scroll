@@ -34,7 +34,7 @@ async function loadMedia(src, db) {
 
   const result = {
     id: getMediaId(),
-    ext: src.match(/\.([a-z0-9]+)$/)[1],
+    ext: src.match(/\.([a-z0-9]+)$/i)[1].toLowerCase(),
     src: src
   };
 
@@ -68,7 +68,7 @@ async function openFileMedia(src, filePath, db) {
 
   const result = {
     id: getMediaId(),
-    ext: src.match(/\.([a-z0-9]+)$/)[1],
+    ext: src.match(/\.([a-z0-9]+)$/i)[1].toLowerCase(),
     src: src
   };
 

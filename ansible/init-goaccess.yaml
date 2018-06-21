@@ -1,0 +1,29 @@
+---
+# ansible-playbook ansible/init-goaccess.yaml -i '[IP],'
+
+- hosts: all
+  remote_user: root
+  gather_facts: yes
+
+  tasks:
+    - file: path=/var/projects/goaccess/scroll state=directory mode=0755
+
+    - name: Install the gpg key for goaccess
+      apt_key:
+        url: "https://deb.goaccess.io/gnugpg.key"
+        state: present
+
+    - name: Install the goaccess repos
+      apt_repository:
+        repo: "deb http://deb.goaccess.io/ {{ ansible_distribution_release }} main"
+        state: present
+        update_cache: yes
+
+    - name: install goaccess
+      apt: pkg=goaccess state=installed update_cache=true
+
+    - cron:
+        name: "generate goaccess report"
+        minute: "*"
+        job: |
+          goaccess -f /var/log/scroll/nginx_access.log --log-format=COMBINED -o /var/projects/goaccess/scroll/index.html

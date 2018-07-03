@@ -63,7 +63,7 @@ function prepare(post, options) {
       baseUrl: options.baseUrl,
       gfm: true,
       smartypants: false,
-      renderer: renderer,
+      renderer: renderer
     }),
     urls: urls
   });

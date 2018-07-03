@@ -35,6 +35,11 @@ renderer.image = function(href, title, text) {
     href = `https://www.funnyordie.com/embed/${funnyOrDieId[1]}`;
   }
 
+  const appleMusicPath = href.match(/https:\/\/itunes\.apple\.com\/(.+)/);
+  if (appleMusicPath) {
+    href = `https://embed.music.apple.com/${appleMusicPath[1]}`;
+  }
+
   if (href.indexOf("//www.youtube.com/embed/") > -1) {
     const youtubeId = href.match(/\/embed\/([^?]+)/)[1];
 
@@ -57,6 +62,10 @@ renderer.image = function(href, title, text) {
 
   if (href.indexOf("//www.funnyordie.com/embed/") > -1) {
     return `<iframe src="${href}" width="640" height="360" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+  }
+
+  if (href.indexOf("//embed.music.apple.com/") > -1) {
+    return `<iframe width="640" height="150" allow="autoplay *; encrypted-media *;" frameborder="0" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation" src="${href}"></iframe>`;
   }
 
   if (href.startsWith("/media/")) {

@@ -27,3 +27,11 @@
         minute: "*"
         job: |
           goaccess -f /var/log/scroll/nginx_access.log --log-format=COMBINED -o /var/projects/goaccess/scroll/index.html
+
+    - cron:
+        name: "cleanup last month's logs"
+        minute: "16"
+        hour: "4"
+        day: "25"
+        job: |
+          awk -i inplace "/"$(date +%b)"/ { print }" /var/log/scroll/nginx_access.log

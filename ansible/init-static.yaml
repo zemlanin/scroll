@@ -10,6 +10,9 @@
     - file: path=/var/projects/ state=directory mode=0755
     - file: path=/var/log/scroll/ state=directory mode=0755
 
+    - name: static
+      copy: src=../static/ dest=/var/projects/scroll/static/
+
     - name: install nginx
       apt: pkg=nginx state=installed update_cache=true
       notify:

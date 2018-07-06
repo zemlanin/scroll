@@ -175,6 +175,7 @@ async function generate(stdout, stderr) {
       created: created.toISOString().replace(/\.\d{3}Z$/, "Z"),
       createdDate: created.toISOString().split("T")[0],
       createdUTC: created.toUTCString(),
+      modified: new Date(parseInt(post.modified)).toISOString(),
       newer: newerPost && { id: newerPost.id, url: getPostUrl(newerPost) },
       older: olderPost && { id: olderPost.id, url: getPostUrl(olderPost) },
       imported

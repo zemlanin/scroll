@@ -48,7 +48,7 @@ module.exports = {
       draft: true,
       private: false,
       public: false,
-      created: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+      created: new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, ''),
       import_url: null
     };
 
@@ -72,7 +72,7 @@ module.exports = {
       );
 
       if (dbPost) {
-        dbPost.created = new Date(parseInt(dbPost.created)).toISOString().replace(/\.\d{3}Z$/, 'Z');
+        dbPost.created = new Date(parseInt(dbPost.created)).toISOString().replace(/:\d{2}\.\d{3}Z$/, '');
         post = dbPost;
       }
     }
@@ -103,7 +103,7 @@ module.exports = {
       draft: true,
       private: false,
       public: false,
-      created: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
+      created: new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, ''),
       import_url: null
     };
 
@@ -130,7 +130,7 @@ module.exports = {
       );
 
       if (dbPost) {
-        dbPost.created = new Date(parseInt(dbPost.created)).toISOString().replace(/\.\d{3}Z$/, 'Z');
+        dbPost.created = new Date(parseInt(dbPost.created)).toISOString().replace(/:\d{2}\.\d{3}Z$/, '');
         post = dbPost;
         postExists = true;
       }
@@ -161,7 +161,7 @@ module.exports = {
     }
 
     if (req.post.created) {
-      post.created = new Date(req.post.created).toISOString().replace(/\.\d{3}Z$/, 'Z');
+      post.created = new Date(req.post.created + ':00Z').toISOString();
     }
 
     if (postExists) {

@@ -56,12 +56,16 @@ module.exports = {
       "Set-Cookie",
       cookie.serialize("jwt", jwtToken, {
         httpOnly: true,
-        maxAge: 60 * 60 * 24 * 7
+        maxAge: 60 * 60 * 24 * 7,
+        path: "/"
       })
     );
   },
 
   logout(res) {
-    res.setHeader("Set-Cookie", cookie.serialize("jwt", "", { maxAge: 0 }));
+    res.setHeader(
+      "Set-Cookie",
+      cookie.serialize("jwt", "", { maxAge: 0, path: "/" })
+    );
   }
 };

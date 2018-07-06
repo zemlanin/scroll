@@ -48,7 +48,7 @@ module.exports = {
       draft: true,
       private: false,
       public: false,
-      created: new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, ''),
+      created: new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, ""),
       import_url: null
     };
 
@@ -72,7 +72,9 @@ module.exports = {
       );
 
       if (dbPost) {
-        dbPost.created = new Date(parseInt(dbPost.created)).toISOString().replace(/:\d{2}\.\d{3}Z$/, '');
+        dbPost.created = new Date(parseInt(dbPost.created))
+          .toISOString()
+          .replace(/:\d{2}\.\d{3}Z$/, "");
         post = dbPost;
       }
     }
@@ -103,7 +105,7 @@ module.exports = {
       draft: true,
       private: false,
       public: false,
-      created: new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, ''),
+      created: new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, ""),
       import_url: null
     };
 
@@ -130,7 +132,9 @@ module.exports = {
       );
 
       if (dbPost) {
-        dbPost.created = new Date(parseInt(dbPost.created)).toISOString().replace(/:\d{2}\.\d{3}Z$/, '');
+        dbPost.created = new Date(parseInt(dbPost.created))
+          .toISOString()
+          .replace(/:\d{2}\.\d{3}Z$/, "");
         post = dbPost;
         postExists = true;
       }
@@ -161,7 +165,9 @@ module.exports = {
     }
 
     if (req.post.created) {
-      post.created = new Date(req.post.created + ':00Z').toISOString().replace(/\.\d{3}Z$/, 'Z');
+      post.created = new Date(req.post.created + ":00Z")
+        .toISOString()
+        .replace(/\.\d{3}Z$/, "Z");
     }
 
     if (postExists) {
@@ -183,7 +189,7 @@ module.exports = {
           5: post.text,
           6: post.import_url,
           7: post.created,
-          8: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')
+          8: new Date().toISOString().replace(/\.\d{3}Z$/, "Z")
         }
       );
     } else {
@@ -211,7 +217,7 @@ module.exports = {
       return;
     }
 
-    post.created = post.created.replace(/:\d{2}Z$/, '');
+    post.created = post.created.replace(/:\d{2}Z$/, "");
 
     return render("edit.mustache", {
       user: user,

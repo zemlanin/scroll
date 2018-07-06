@@ -173,7 +173,7 @@ async function generate(stdout, stderr) {
       title,
       text: post.text,
       created: created.toISOString(),
-      createdDate: created.toISOString().split('T')[0],
+      createdDate: created.toISOString().split("T")[0],
       createdUTC: created.toUTCString(),
       newer: newerPost && { id: newerPost.id, url: getPostUrl(newerPost) },
       older: olderPost && { id: olderPost.id, url: getPostUrl(olderPost) },

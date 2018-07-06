@@ -48,7 +48,7 @@ module.exports = {
       draft: true,
       private: false,
       public: false,
-      created: +new Date(),
+      created: new Date().toISOString(),
       import_url: null
     };
 
@@ -72,6 +72,7 @@ module.exports = {
       );
 
       if (dbPost) {
+        dbPost.created = new Date(parseInt(dbPost.created)).toISOString();
         post = dbPost;
       }
     }
@@ -102,7 +103,7 @@ module.exports = {
       draft: true,
       private: false,
       public: false,
-      created: +new Date(),
+      created: new Date().toISOString(),
       import_url: null
     };
 
@@ -129,6 +130,7 @@ module.exports = {
       );
 
       if (dbPost) {
+        dbPost.created = new Date(parseInt(dbPost.created)).toISOString();
         post = dbPost;
         postExists = true;
       }
@@ -158,15 +160,20 @@ module.exports = {
       post.import_url = null;
     }
 
+    if (req.post.created) {
+      post.created = new Date(req.post.created).toISOString();
+    }
+
     if (postExists) {
       await db.run(
         `UPDATE posts SET
           slug = ?2,
           draft = ?3,
           private = ?4,
-          text = ?5, 
-          import_url = ?6, 
-          modified = ?7
+          text = ?5,
+          import_url = ?6,
+          created = ?7,
+          modified = ?8
           WHERE id = ?1`,
         {
           1: post.id,
@@ -175,7 +182,8 @@ module.exports = {
           4: post.private,
           5: post.text,
           6: post.import_url,
-          7: new Date().toISOString()
+          7: post.created,
+          8: new Date().toISOString()
         }
       );
     } else {
@@ -190,7 +198,7 @@ module.exports = {
           4: post.private,
           5: post.text,
           6: post.import_url,
-          7: new Date().toISOString()
+          7: post.created
         }
       );
     }

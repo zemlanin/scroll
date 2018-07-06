@@ -84,6 +84,8 @@ function prepare(post, options) {
     }
   }
 
+  const created = new Date(post.created);
+
   return {
     id: post.id,
     url: options.url,
@@ -95,8 +97,9 @@ function prepare(post, options) {
     html: marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"), {
       baseUrl: options.baseUrl
     }),
-    created: new Date(parseInt(post.created)).toISOString(),
-    createdUTC: new Date(parseInt(post.created)).toUTCString(),
+    created: created.toISOString(),
+    createdDate: created.toISOString().split("T")[0],
+    createdUTC: created.toUTCString(),
     imported
   };
 }
@@ -118,7 +121,7 @@ module.exports = async (req, res) => {
     draft: true,
     private: false,
     public: false,
-    created: +new Date(),
+    created: new Date().toISOString(),
     import_url: null
   };
 
@@ -143,12 +146,17 @@ module.exports = async (req, res) => {
     );
 
     if (dbPost) {
+      dbPost.created = new Date(parseInt(dbPost.created)).toISOString();
       post = dbPost;
     }
   }
 
   if (req.method === "POST") {
     post.text = req.post.text;
+  }
+
+  if (req.method === "POST") {
+    post.created = req.post.created;
   }
 
   const preparedPost = prepare(post, {

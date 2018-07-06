@@ -161,7 +161,7 @@ module.exports = {
     }
 
     if (req.post.created) {
-      post.created = new Date(req.post.created + ':00Z').toISOString();
+      post.created = new Date(req.post.created + ':00Z').toISOString().replace(/\.\d{3}Z$/, 'Z');
     }
 
     if (postExists) {
@@ -210,6 +210,8 @@ module.exports = {
 
       return;
     }
+
+    post.created = post.created.replace(/:\d{2}Z$/, '');
 
     return render("edit.mustache", {
       user: user,

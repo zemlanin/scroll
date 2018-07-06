@@ -161,6 +161,8 @@ async function generate(stdout, stderr) {
       }
     }
 
+    const created = new Date(parseInt(post.created));
+
     return {
       id: post.id,
       slug: post.slug,
@@ -170,8 +172,9 @@ async function generate(stdout, stderr) {
       url,
       title,
       text: post.text,
-      created: new Date(parseInt(post.created)).toISOString(),
-      createdUTC: new Date(parseInt(post.created)).toUTCString(),
+      created: created.toISOString(),
+      createdDate: created.toISOString().split('T')[0],
+      createdUTC: created.toUTCString(),
       newer: newerPost && { id: newerPost.id, url: getPostUrl(newerPost) },
       older: olderPost && { id: olderPost.id, url: getPostUrl(olderPost) },
       imported

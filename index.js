@@ -172,7 +172,7 @@ async function generate(stdout, stderr) {
       url,
       title,
       text: post.text,
-      created: created.toISOString(),
+      created: created.toISOString().replace(/\.\d{3}Z$/, 'Z'),
       createdDate: created.toISOString().split("T")[0],
       createdUTC: created.toUTCString(),
       newer: newerPost && { id: newerPost.id, url: getPostUrl(newerPost) },

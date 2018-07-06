@@ -97,7 +97,7 @@ function prepare(post, options) {
     html: marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"), {
       baseUrl: options.baseUrl
     }),
-    created: created.toISOString(),
+    created: created.toISOString().replace(/\.\d{3}Z$/, 'Z'),
     createdDate: created.toISOString().split("T")[0],
     createdUTC: created.toUTCString(),
     imported
@@ -121,7 +121,7 @@ module.exports = async (req, res) => {
     draft: true,
     private: false,
     public: false,
-    created: new Date().toISOString(),
+    created: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
     import_url: null
   };
 
@@ -146,7 +146,7 @@ module.exports = async (req, res) => {
     );
 
     if (dbPost) {
-      dbPost.created = new Date(parseInt(dbPost.created)).toISOString();
+      dbPost.created = new Date(parseInt(dbPost.created)).toISOString().replace(/\.\d{3}Z$/, 'Z');
       post = dbPost;
     }
   }

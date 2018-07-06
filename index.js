@@ -96,7 +96,9 @@ async function generate(stdout, stderr) {
 
     const header1Token = tokens.find(t => t.type === "heading" && t.text);
 
-    let title = post.slug || post.id;
+    const created = new Date(parseInt(post.created));
+
+    let title = post.slug || created.toISOString().split("T")[0];
     const url = getPostUrl(post);
 
     if (header1Token) {
@@ -160,8 +162,6 @@ async function generate(stdout, stderr) {
         }
       }
     }
-
-    const created = new Date(parseInt(post.created));
 
     return {
       id: post.id,

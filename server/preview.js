@@ -48,7 +48,8 @@ function prepare(post, options) {
 
   const header1Token = tokens.find(t => t.type === "heading" && t.text);
 
-  let title = post.id;
+  const created = new Date(post.created);
+  let title = post.slug || created.toISOString().split("T")[0];
 
   if (header1Token) {
     title = cheerio.load(marked(header1Token.text)).text();
@@ -83,8 +84,6 @@ function prepare(post, options) {
       };
     }
   }
-
-  const created = new Date(post.created);
 
   return {
     id: post.id,

@@ -362,7 +362,10 @@ async function generate(stdout, stderr) {
       },
       feed: {
         pubDate: new Date(
-          Math.max.apply(null, feedPosts.map(p => new Date(p.created)))
+          Math.max.apply(
+            null,
+            feedPosts.map(p => new Date(p.modified || p.created))
+          )
         ).toUTCString(),
         description: `Everything feed - ${BLOG_TITLE}`,
         url: BLOG_BASE_URL + "/rss.xml"

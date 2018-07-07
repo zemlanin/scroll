@@ -28,7 +28,7 @@
     "request": "2.85.0",
     "request-promise-native": "1.0.5",
     "rsync": "0.6.1",
-    "sqlite": "2.9.1"
+    "sqlite": "^2.9.2"
   },
   "devDependencies": {
     "cheerio": "1.0.0-rc.2",

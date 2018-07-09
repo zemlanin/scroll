@@ -20,17 +20,9 @@ const chunk = require("lodash.chunk");
 const cheerio = require("cheerio");
 const Rsync = require("rsync");
 
-const { IMPORT_ICONS, renderer } = require("./common.js");
-
-marked.setOptions({
-  gfm: true,
-  smartypants: false,
-  renderer: renderer,
-  baseUrl: process.env.BLOG_BASE_URL || null
-});
+const { IMPORT_ICONS, BLOG_BASE_URL, renderer, prepare } = require("./common.js");
 
 const BLOG_TITLE = "zemlan.in";
-const BLOG_BASE_URL = process.env.BLOG_BASE_URL || ".";
 
 const rmrf = require("./rmrf.js");
 
@@ -55,10 +47,6 @@ async function render(tmpl, data) {
       )
     }
   );
-}
-
-function getPostUrl(post) {
-  return `${BLOG_BASE_URL}/${post.slug || post.id}.html`;
 }
 
 async function generate(stdout, stderr) {
@@ -88,73 +76,8 @@ async function generate(stdout, stderr) {
 
   stdout.write(`loaded posts from db\n`);
 
-  const postTitles = {};
   const postsCount = posts.length;
-
-  let preparedPosts = posts.map(post => {
-    const tokens = marked.lexer(post.text);
-
-    const header1Token = tokens.find(t => t.type === "heading" && t.text);
-
-    const created = new Date(parseInt(post.created));
-
-    let title = post.slug || created.toISOString().split("T")[0];
-    const url = getPostUrl(post);
-
-    if (header1Token) {
-      title = cheerio.load(marked(header1Token.text)).text();
-      post.text = post.text.replace(
-        header1Token.text,
-        `[${header1Token.text}](${url})`
-      );
-    }
-
-    postTitles[post.id] = title;
-
-    let imported;
-
-    if (post.import_url) {
-      if (post.id.startsWith("twitter-")) {
-        imported = {
-          icon: IMPORT_ICONS.twitter,
-          url: post.import_url
-        };
-      } else if (post.id.startsWith("tumblr-")) {
-        imported = {
-          icon: post.id.startsWith("tumblr-zem")
-            ? IMPORT_ICONS.tumblr.zem
-            : IMPORT_ICONS.tumblr.doremarkable,
-          url: post.import_url
-        };
-      } else if (post.id.startsWith("wordpress-")) {
-        imported = {
-          icon: IMPORT_ICONS.wordpress
-        };
-      } else if (post.id.startsWith("instagram-")) {
-        imported = {
-          icon: IMPORT_ICONS.instagram
-        };
-      }
-    }
-
-    return {
-      id: post.id,
-      slug: post.slug,
-      draft: post.draft,
-      private: post.private,
-      public: post.public,
-      url,
-      title,
-      text: post.text,
-      created: created.toISOString().replace(/\.\d{3}Z$/, "Z"),
-      createdDate: created.toISOString().split("T")[0],
-      createdUTC: created.toUTCString(),
-      modified: post.modified
-        ? new Date(parseInt(post.modified)).toISOString()
-        : null,
-      imported
-    };
-  });
+  let preparedPosts = posts.map(prepare);
 
   posts = null;
 

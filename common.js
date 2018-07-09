@@ -1,10 +1,5 @@
 const marked = require("marked");
-marked.setOptions({
-  gfm: true,
-  smartypants: false,
-  renderer: renderer,
-  baseUrl: process.env.BLOG_BASE_URL || null
-});
+const cheerio = require("cheerio");
 
 const BLOG_BASE_URL = process.env.BLOG_BASE_URL || ".";
 
@@ -137,6 +132,13 @@ renderer.paragraph = function(text) {
   return ogParagraph(text);
 };
 
+marked.setOptions({
+  gfm: true,
+  smartypants: false,
+  renderer: renderer,
+  baseUrl: process.env.BLOG_BASE_URL || null
+});
+
 function getPostUrl(post) {
   return `${BLOG_BASE_URL}/${post.slug || post.id}.html`;
 }
@@ -205,8 +207,6 @@ function prepare(post) {
 }
 
 module.exports = {
-  IMPORT_ICONS,
   BLOG_BASE_URL,
-  renderer,
   prepare
 };

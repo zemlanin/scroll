@@ -91,7 +91,7 @@ async function generate(stdout, stderr) {
   const postTitles = {};
   const postsCount = posts.length;
 
-  let preparedPosts = posts.map((post, i) => {
+  let preparedPosts = posts.map(post => {
     const tokens = marked.lexer(post.text);
 
     const header1Token = tokens.find(t => t.type === "heading" && t.text);
@@ -137,32 +137,6 @@ async function generate(stdout, stderr) {
       }
     }
 
-    let newerPost, olderPost;
-
-    if (post.public && i) {
-      for (
-        let newerIndex = i - 1;
-        newerIndex >= 0 && posts[newerIndex] && !newerPost;
-        newerIndex--
-      ) {
-        if (posts[newerIndex].public) {
-          newerPost = posts[newerIndex];
-        }
-      }
-    }
-
-    if (post.public) {
-      for (
-        let olderIndex = i + 1;
-        olderIndex < postsCount && posts[olderIndex] && !olderPost;
-        olderIndex++
-      ) {
-        if (posts[olderIndex].public) {
-          olderPost = posts[olderIndex];
-        }
-      }
-    }
-
     return {
       id: post.id,
       slug: post.slug,
@@ -178,8 +152,6 @@ async function generate(stdout, stderr) {
       modified: post.modified
         ? new Date(parseInt(post.modified)).toISOString()
         : null,
-      newer: newerPost && { id: newerPost.id, url: getPostUrl(newerPost) },
-      older: olderPost && { id: olderPost.id, url: getPostUrl(olderPost) },
       imported
     };
   });
@@ -232,18 +204,8 @@ async function generate(stdout, stderr) {
           title: post.title,
           post,
           url: post.url,
-          older: post.older
-            ? {
-                text: postTitles[post.older.id] || post.older.id,
-                url: post.older.url
-              }
-            : null,
-          newer: post.newer
-            ? {
-                text: postTitles[post.newer.id] || post.newer.id,
-                url: post.newer.url
-              }
-            : null
+          older: null,
+          newer: null
         });
 
         if (post.slug && post.id !== post.slug) {

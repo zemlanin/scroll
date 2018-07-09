@@ -20,7 +20,12 @@ const chunk = require("lodash.chunk");
 const cheerio = require("cheerio");
 const Rsync = require("rsync");
 
-const { IMPORT_ICONS, BLOG_BASE_URL, renderer, prepare } = require("./common.js");
+const {
+  IMPORT_ICONS,
+  BLOG_BASE_URL,
+  renderer,
+  prepare
+} = require("./common.js");
 
 const BLOG_TITLE = "zemlan.in";
 

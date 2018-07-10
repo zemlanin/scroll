@@ -10,7 +10,7 @@ const fsPromises = {
 
 const marked = require("marked");
 const chunk = require("lodash.chunk");
-const groupBy = require("lodash.groupBy");
+const groupBy = require("lodash.groupby");
 
 const DESTINATION = process.env.DIST || "dist";
 const {

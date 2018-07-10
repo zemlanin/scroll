@@ -57,7 +57,8 @@ function prepare(post, options) {
   }
   shortTokens.links = tokens.links;
 
-  return Object.assign(post, {
+  return {
+    ...post,
     title: title,
     short: marked.parser(shortTokens, {
       baseUrl: options.baseUrl,
@@ -66,7 +67,7 @@ function prepare(post, options) {
       renderer: renderer
     }),
     urls: urls
-  });
+  };
 }
 
 module.exports = async (req, res) => {

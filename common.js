@@ -79,9 +79,10 @@ renderer.image = function(href, title, text) {
   }
 
   if (href.indexOf("//embed.music.apple.com/") > -1) {
-    const height = href.indexOf('/album/') > -1 && href.match(/[?&]i=\d+/)
-      ? 150 // track
-      : 360; // album/playlist
+    const height =
+      href.indexOf("/album/") > -1 && href.match(/[?&]i=\d+/)
+        ? 150 // track
+        : 360; // album/playlist
     return `<iframe width="640" height="${height}" allow="autoplay *; encrypted-media *;" frameborder="0" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation" src="${href}"></iframe>`;
   }
 

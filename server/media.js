@@ -43,16 +43,15 @@ module.exports = {
 
     return render("media.mustache", {
       user: user,
-      media: media.slice(0, PAGE_SIZE).map(m =>
-        Object.assign(m, {
-          type: {
-            image: m.ext.match("^(gif|jpe?g|png)$"),
-            video: m.ext.match("^(mp4)$"),
-            audio: m.ext.match("^(mp3)$"),
-            text: m.ext.match("^(md|txt|markdown|html|js|css)$")
-          }
-        })
-      ),
+      media: media.slice(0, PAGE_SIZE).map(m => ({
+        ...m,
+        type: {
+          image: m.ext.match("^(gif|jpe?g|png)$"),
+          video: m.ext.match("^(mp4)$"),
+          audio: m.ext.match("^(mp3)$"),
+          text: m.ext.match("^(md|txt|markdown|html|js|css)$")
+        }
+      })),
       urls: {
         moreMedia: moreMedia && `/backstage/media/?offset=${offset + PAGE_SIZE}`
       }

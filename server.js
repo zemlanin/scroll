@@ -49,13 +49,11 @@ const server = http.createServer((req, res) => {
     const host = req.headers["x-forwarded-host"] || req.headers["host"];
     const port = (host.match(/:(\d+)$/) && host.match(/:(\d+)$/)[1]) || null;
 
-    req.absolute = url.format(
-      Object.assign({
-        protocol,
-        host,
-        port
-      })
-    );
+    req.absolute = url.format({
+      protocol,
+      host,
+      port
+    });
 
     if (
       req.method === "POST" &&

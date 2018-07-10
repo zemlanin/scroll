@@ -61,9 +61,10 @@ function getPostsQuery(where, limit) {
 function extendPost(rawPost) {
   const post = prepare(rawPost);
 
-  post.html = marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"));
-
-  return post;
+  return {
+    ...post,
+    html: marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"))
+  };
 }
 
 async function getPosts(db, params, where, limit) {
@@ -299,19 +300,19 @@ async function generateRSSPage(db) {
 async function getAffectedPages(db, postCreated) {
   const totalPostCount = (await db.get(
     `
-        SELECT count(*) as c
-        FROM posts
-        WHERE draft = 0 AND private = 0
-      `
+      SELECT count(*) as c
+      FROM posts
+      WHERE draft = 0 AND private = 0
+    `
   )).c;
 
   const postsAfterCurrentCount =
     (await db.get(
       `
-      SELECT count(*) as c
-      FROM posts
-      WHERE draft = 0 AND private = 0 AND created >= ?1
-    `,
+        SELECT count(*) as c
+        FROM posts
+        WHERE draft = 0 AND private = 0 AND created >= ?1
+      `,
       { 1: postCreated }
     )).c || 1;
 

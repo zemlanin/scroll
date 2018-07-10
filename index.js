@@ -14,39 +14,20 @@ const fs = {
 
 const sqlite = require("sqlite");
 const marked = require("marked");
-const mustache = require("mustache");
 const groupBy = require("lodash.groupby");
 const chunk = require("lodash.chunk");
 const Rsync = require("rsync");
 
-const { BLOG_BASE_URL, prepare } = require("./common.js");
-
-const BLOG_TITLE = "zemlan.in";
+const {
+  BLOG_TITLE,
+  BLOG_BASE_URL,
+  PAGE_SIZE,
+  MINIMUM_INDEX_PAGE_SIZE,
+  prepare,
+  render
+} = require("./common.js");
 
 const rmrf = require("./rmrf.js");
-
-async function loadTemplate(tmpl) {
-  return (
-    loadTemplate.cache[tmpl] ||
-    (loadTemplate.cache[tmpl] = (await fs.readFile(tmpl)).toString())
-  );
-}
-loadTemplate.cache = {};
-
-async function render(tmpl, data) {
-  return mustache.render(
-    await loadTemplate(path.resolve(__dirname, tmpl)),
-    data,
-    {
-      header: await loadTemplate(
-        path.resolve(__dirname, "templates", "header.mustache")
-      ),
-      footer: await loadTemplate(
-        path.resolve(__dirname, "templates", "footer.mustache")
-      )
-    }
-  );
-}
 
 async function generate(stdout, stderr) {
   const tmpFolder = await fs.mkdtemp(path.join(os.tmpdir(), "scroll-"));
@@ -146,8 +127,6 @@ async function generate(stdout, stderr) {
   stdout.write("\n");
   stdout.write("posts done\n");
 
-  const PAGE_SIZE = 20;
-
   const publicPosts = preparedPosts.filter(p => p.public);
 
   if (publicPosts.length % PAGE_SIZE) {
@@ -205,7 +184,7 @@ async function generate(stdout, stderr) {
   let indexPage;
   let olderPage;
 
-  if (pagination[0].length < 10) {
+  if (pagination[0].length < MINIMUM_INDEX_PAGE_SIZE) {
     indexPage = pagination[0].concat(pagination[1]);
     olderPage = {
       text: `page-${pagination.length - 2}`,
@@ -248,12 +227,7 @@ async function generate(stdout, stderr) {
         url: BLOG_BASE_URL + "/index.html"
       },
       feed: {
-        pubDate: new Date(
-          Math.max.apply(
-            null,
-            feedPosts.map(p => new Date(p.modified || p.created))
-          )
-        ).toUTCString(),
+        pubDate: new Date().toUTCString(),
         description: `Everything feed - ${BLOG_TITLE}`,
         url: BLOG_BASE_URL + "/rss.xml"
       },

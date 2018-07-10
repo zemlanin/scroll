@@ -10,6 +10,7 @@ const getPostId = () =>
   )}`;
 
 const { authed } = require("./auth.js");
+const { generateAfterEdit } = require("../generate-post.js");
 const { render } = require("./templates/index.js");
 const sqlite = require("sqlite");
 
@@ -112,6 +113,7 @@ module.exports = {
     const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
 
     let postExists = false;
+    let oldStatus = null;
     if (existingPostId) {
       const dbPost = await db.get(
         `
@@ -137,6 +139,14 @@ module.exports = {
           .replace(/:\d{2}\.\d{3}Z$/, "");
         post = dbPost;
         postExists = true;
+
+        if (post.draft) {
+          oldStatus = "draft";
+        } else if (post.private) {
+          oldStatus = "private";
+        } else if (post.public) {
+          oldStatus = "public";
+        }
       }
     }
 
@@ -208,6 +218,8 @@ module.exports = {
         }
       );
     }
+
+    await generateAfterEdit(db, post.id, oldStatus);
 
     if (!existingPostId) {
       res.writeHead(303, {

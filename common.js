@@ -1,6 +1,17 @@
+const path = require("path");
 const marked = require("marked");
 const cheerio = require("cheerio");
+const mustache = require("mustache");
+const { promisify } = require("util");
 
+const fs = require("fs");
+const fsPromises = {
+  readFile: promisify(fs.readFile)
+};
+
+const PAGE_SIZE = 20;
+const MINIMUM_INDEX_PAGE_SIZE = 10;
+const BLOG_TITLE = "zemlan.in";
 const BLOG_BASE_URL = process.env.BLOG_BASE_URL || ".";
 
 const IMPORT_ICONS = {
@@ -187,12 +198,22 @@ function prepare(post) {
     }
   }
 
+  let status;
+  if (post.draft) {
+    status = "draft";
+  } else if (post.private) {
+    status = "private";
+  } else if (post.public) {
+    status = "public";
+  }
+
   return {
     id: post.id,
     slug: post.slug,
     draft: post.draft,
     private: post.private,
     public: post.public,
+    status: status,
     url,
     title,
     text: post.text,
@@ -206,7 +227,36 @@ function prepare(post) {
   };
 }
 
+async function loadTemplate(tmpl) {
+  return (
+    loadTemplate.cache[tmpl] ||
+    (loadTemplate.cache[tmpl] = (await fsPromises.readFile(tmpl)).toString())
+  );
+}
+loadTemplate.cache = {};
+
+async function render(tmpl, data) {
+  return mustache.render(
+    await loadTemplate(path.resolve(__dirname, tmpl)),
+    data,
+    {
+      header: await loadTemplate(
+        path.resolve(__dirname, "templates", "header.mustache")
+      ),
+      footer: await loadTemplate(
+        path.resolve(__dirname, "templates", "footer.mustache")
+      )
+    }
+  );
+}
+
 module.exports = {
+  BLOG_TITLE,
   BLOG_BASE_URL,
-  prepare
+  PAGE_SIZE,
+  MINIMUM_INDEX_PAGE_SIZE,
+  IMPORT_ICONS,
+  prepare,
+  render,
+  renderer
 };

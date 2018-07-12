@@ -71,12 +71,12 @@ function prepare(post, options) {
 }
 
 async function getSuggestion(req) {
-  const referer = req.getHeader("referer");
+  const referer = req.headers.referer;
   if (!referer) {
     return;
   }
   
-  const host = req.getHeader("host");
+  const host = req.headers.host;
   const idOrSlugMatch = referer.match(
     `^https?://${host.replace(".", "\\.")}/([a-z0-9_-]+)(\.html)?$`
   );

@@ -70,6 +70,34 @@ function prepare(post, options) {
   };
 }
 
+async function getSuggestion(req) {
+  const referer = req.getHeader("referer");
+  if (!referer) {
+    return;
+  }
+  
+  const host = req.getHeader("host");
+  const idOrSlugMatch = referer.match(
+    `^https?://${host.replace(".", "\\.")}/([a-z0-9_-]+)(\.html)?$`
+  );
+  if (idOrSlugMatch) {
+    const idOrSlug = idOrSlugMatch[1];
+    const suggestionPost = await db.get(
+      `SELECT id, slug FROM posts WHERE id = ?1 OR slug = ?1 LIMIT 1`,
+      { 1: idOrSlug }
+    );
+
+    if (!suggestionPost) {
+      return;
+    }
+    
+    return {
+      text: `edit ${idOrSlug}`,
+      url: `/backstage/edit/?id=${suggestionPost.id}`
+    }
+  }
+}
+
 module.exports = async (req, res) => {
   const indieAuthUrl = url.format({
     protocol: "https",
@@ -120,13 +148,7 @@ module.exports = async (req, res) => {
   );
 
   const morePosts = posts.length > PAGE_SIZE;
-  const suggestion =
-    query.src && query.src.toString().match(/^[a-z0-9_-]+$/i)
-      ? {
-          text: `edit ${query.src}`,
-          url: `/backstage/edit/?id=${query.src}`
-        }
-      : null;
+  const suggestion = await getSuggestion(req);
 
   return render("list.mustache", {
     user: user,

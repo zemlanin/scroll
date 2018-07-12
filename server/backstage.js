@@ -70,15 +70,15 @@ function prepare(post, options) {
   };
 }
 
-async function getSuggestion(req) {
+async function getSuggestion(db, req) {
   const referer = req.headers.referer;
   if (!referer) {
     return;
   }
-  
+
   const host = req.headers.host;
   const idOrSlugMatch = referer.match(
-    `^https?://${host.replace(".", "\\.")}/([a-z0-9_-]+)(\.html)?$`
+    `^https?://${host.replace(".", "\\.")}/([a-zA-Z0-9_-]+)(\.html)?$`
   );
   if (idOrSlugMatch) {
     const idOrSlug = idOrSlugMatch[1];
@@ -90,11 +90,11 @@ async function getSuggestion(req) {
     if (!suggestionPost) {
       return;
     }
-    
+
     return {
       text: `edit ${idOrSlug}`,
       url: `/backstage/edit/?id=${suggestionPost.id}`
-    }
+    };
   }
 }
 
@@ -148,7 +148,7 @@ module.exports = async (req, res) => {
   );
 
   const morePosts = posts.length > PAGE_SIZE;
-  const suggestion = await getSuggestion(req);
+  const suggestion = await getSuggestion(db, req);
 
   return render("list.mustache", {
     user: user,

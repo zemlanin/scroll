@@ -7,7 +7,7 @@
 
   tasks:
     - name: install certbot prereq
-      apt: pkg=software-properties-common state=installed
+      apt: pkg=software-properties-common state=present
 
     - name: install certbot repo
       apt_repository:
@@ -15,7 +15,7 @@
         state: present
 
     - name: install certbot
-      apt: pkg=python-certbot-nginx state=installed
+      apt: pkg=python-certbot-nginx state=present
 
     - name: stop nginx to allow for certbot's server to bind to port 80
       service: name=nginx state=stopped

@@ -20,7 +20,7 @@
         update_cache: yes
 
     - name: install goaccess
-      apt: pkg=goaccess state=installed update_cache=true
+      apt: pkg=goaccess state=present update_cache=true
 
     - cron:
         name: "generate goaccess report"

@@ -9,8 +9,8 @@ const fsPromises = {
   readFile: promisify(fs.readFile)
 };
 
-const PAGE_SIZE = 20;
-const MINIMUM_INDEX_PAGE_SIZE = 10;
+const PAGE_SIZE = 10;
+const MINIMUM_INDEX_PAGE_SIZE = 5;
 const BLOG_TITLE = "zemlan.in";
 const BLOG_BASE_URL = process.env.BLOG_BASE_URL || ".";
 

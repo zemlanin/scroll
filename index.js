@@ -217,7 +217,7 @@ async function generate(stdout, stderr) {
     { flag: "wx" }
   );
 
-  const feedPosts = indexPage.slice(0, PAGE_SIZE);
+  const feedPosts = pagination[0].concat(pagination[1]).slice(0, PAGE_SIZE);
 
   await fs.writeFile(
     `${tmpFolder}/rss.xml`,

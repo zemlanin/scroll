@@ -8,7 +8,7 @@ const marked = require("marked");
 const sqlite = require("sqlite");
 const cheerio = require("cheerio");
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 marked.setOptions({
   gfm: true,

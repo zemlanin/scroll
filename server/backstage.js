@@ -22,7 +22,7 @@ const MARKED_END_TOKENS_MAP = {
   list_item_start: "list_item_start",
   loose_item_start: "list_item_end",
   blockquote_start: "blockquote_end"
-}
+};
 
 function prepare(post, options) {
   let tokens = marked.lexer(post.text);
@@ -58,13 +58,13 @@ function prepare(post, options) {
     if (token.type === "paragraph") {
       paragraphsCounter = paragraphsCounter + 1;
     }
-    
+
     if (MARKED_END_TOKENS_MAP[token.type]) {
-      closingTokensStack.unshift(MARKED_END_TOKENS_MAP[token.type])
+      closingTokensStack.unshift(MARKED_END_TOKENS_MAP[token.type]);
     }
-    
+
     if (closingTokensStack.length && closingTokensStack[0] === token.type) {
-      closingTokensStack.shift()
+      closingTokensStack.shift();
     }
 
     if (paragraphsCounter >= 3 && !closingTokensStack.length) {

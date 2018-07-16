@@ -2,12 +2,12 @@
   <nav>
     {{#newer}}<a href="{{{newer.url}}}">&larr; {{newer.text}}</a>{{/newer}}
     {{^newer}}<span></span>{{/newer}}
-    <span>
+    <div style="text-align: center;">
       <a href="./archive.html">archive</a>
       {{#feed}}
       <br/><a href="{{{feed.url}}}">rss</a>
       {{/feed}}
-    </span>
+    </div>
     {{#older}}<a href="{{older.url}}">{{older.text}} &rarr;</a>{{/older}}
     {{^older}}<span></span>{{/older}}
   </nav>

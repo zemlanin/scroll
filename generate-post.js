@@ -109,7 +109,7 @@ async function generatePostPage(post) {
   const renderedPage = await render("./templates/post.mustache", {
     blog: {
       title: BLOG_TITLE,
-      url: BLOG_BASE_URL + "/index.html"
+      url: BLOG_BASE_URL + "/"
     },
     feed: {
       description: `Everything feed - ${BLOG_TITLE}`,
@@ -163,7 +163,7 @@ async function generatePaginationPage(db, pageNumber, postIds, isNewest) {
     await render("./templates/list.mustache", {
       blog: {
         title: BLOG_TITLE,
-        url: BLOG_BASE_URL + "/index.html"
+        url: BLOG_BASE_URL + "/"
       },
       feed: {
         description: `Everything feed - ${BLOG_TITLE}`,
@@ -173,7 +173,7 @@ async function generatePaginationPage(db, pageNumber, postIds, isNewest) {
       url: url,
       posts: posts,
       newer: isNewest
-        ? { text: `index`, url: `${BLOG_BASE_URL}/index.html` }
+        ? { text: `index`, url: `${BLOG_BASE_URL}/` }
         : {
             text: `page-${pageNumber + 1}`,
             url: `${BLOG_BASE_URL}/page-${pageNumber + 1}.html`
@@ -210,7 +210,7 @@ async function generateIndexPage(db, newestPage) {
     await render("./templates/list.mustache", {
       blog: {
         title: BLOG_TITLE,
-        url: BLOG_BASE_URL + "/index.html"
+        url: BLOG_BASE_URL + "/"
       },
       feed: {
         description: `Everything feed - ${BLOG_TITLE}`,
@@ -261,7 +261,7 @@ async function generateArchivePage(db) {
     await render("./templates/archive.mustache", {
       blog: {
         title: BLOG_TITLE,
-        url: BLOG_BASE_URL + "/index.html"
+        url: BLOG_BASE_URL + "/"
       },
       feed: {
         description: `Everything feed - ${BLOG_TITLE}`,
@@ -285,7 +285,7 @@ async function generateRSSPage(db) {
     await render("./templates/rss.mustache", {
       blog: {
         title: BLOG_TITLE,
-        url: BLOG_BASE_URL + "/index.html"
+        url: BLOG_BASE_URL + "/"
       },
       feed: {
         pubDate: new Date().toUTCString(),

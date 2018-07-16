@@ -352,10 +352,17 @@
       </h2>
     {{/post}}
     {{^post}}
-      <h1>
-        <a href="{{{blog.url}}}">{{blog.title}}</a>
-        {{#title}}&nbsp;<span>/ <a href="{{{url}}}">{{title}}</a></span>{{/title}}
-      </h1>
+      {{#index}}
+        <h1>
+          <a href="{{{blog.url}}}">{{blog.title}}</a>
+        </h1>
+      {{/index}}
+      {{^index}}
+        <h2>
+          <a href="{{{blog.url}}}">{{blog.title}}</a>
+          {{#title}}&nbsp;<span>/ <a href="{{{url}}}">{{title}}</a></span>{{/title}}
+        </h2>
+      {{/index}}
     {{/post}}
 
     <input type="checkbox" id="night-mode" />

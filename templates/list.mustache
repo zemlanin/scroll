@@ -2,17 +2,17 @@
 
 {{#posts}}
 <article id="{{id}}">
-    {{{html}}}
+  {{{html}}}
 
-    <time datetime="{{created}}">
-        {{#imported}}
-            {{#imported.url}}<a href="{{{url}}}">{{{icon}}}</a>{{/imported.url}}
-            {{^imported.url}}{{{icon}}}{{/imported.url}}
-        {{/imported}}
-        <a href="{{{url}}}" title="{{created}}">
-            {{createdDate}}
-        </a>
-    </time>
+  <time datetime="{{created}}">
+    {{#imported}}
+      {{#imported.url}}<a href="{{{url}}}">{{{icon}}}</a>{{/imported.url}}
+      {{^imported.url}}{{{icon}}}{{/imported.url}}
+    {{/imported}}
+    <a href="{{{url}}}" title="{{created}}">
+      {{createdDate}}
+    </a>
+  </time>
 </article>
 {{/posts}}
 

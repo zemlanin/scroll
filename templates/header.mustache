@@ -23,6 +23,15 @@
       font-size: 20px;
       line-height: 1.58;
     }
+    
+    h1, h2, h3 {
+      margin: 0.5em 0;
+      line-height: 1.3;
+    }
+    
+    p {
+      margin: 0.8em 0;
+    }
 
     body.dark {
       background-color: black;
@@ -337,7 +346,7 @@
     {{#post}}
       <h2>
         <a href="{{{blog.url}}}">{{blog.title}}</a>
-        <span>&nbsp;/&nbsp;<span><a href="{{{url}}}"><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" width="1em" height="0.8em" viewBox="0 0 512 512"><path fill="currentColor" d="{{fas.link}}"/></svg></a>
+        <span>&nbsp;/&nbsp;<span><a href="{{{url}}}"><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 512 512"><path fill="currentColor" d="{{fas.link}}"/></svg></a>
       </h2>
     {{/post}}
     {{^post}}

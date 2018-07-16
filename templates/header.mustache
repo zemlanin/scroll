@@ -18,7 +18,7 @@
           margin: auto;
           display: flex;
           flex-direction: column;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          font: 17px/30px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
             Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
           line-height: 1.5em;
         }
@@ -78,11 +78,15 @@
           }
         }
 
+        article iframe[src*="music.apple.com/"] {
+          max-width: calc(100% - 0.1em);
+        }
+
         article a.future-frame {
           position: relative;
         }
 
-        article a[href*="youtube.com"].future-frame:after {
+        article a[href*="youtube.com/"].future-frame:after {
           position: absolute;
           width: 64px;
           height: 64px;
@@ -99,7 +103,7 @@
           background-position: center;
         }
 
-        article a[href*="youtube.com"].future-frame.loading:after {
+        article a[href*="youtube.com/"].future-frame.loading:after {
           display: none;
         }
 
@@ -174,7 +178,8 @@
 
         article pre code {
           border: none;
-          padding: none;
+          padding: 0;
+          word-wrap: normal;
         }
 
         article pre {

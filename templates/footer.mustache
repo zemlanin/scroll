@@ -1,14 +1,18 @@
+  </main>
   <nav>
     {{#newer}}<a href="{{{newer.url}}}">&larr; {{newer.text}}</a>{{/newer}}
     {{^newer}}<span></span>{{/newer}}
-    {{#older}}<a href="{{{older.url}}}">{{older.text}} &rarr;</a>{{/older}}
+    <span>
+      <a href="./archive.html">archive</a>
+      {{#feed}}
+      <br/><a href="{{{feed.url}}}">rss</a>
+      {{/feed}}
+    </span>
+    {{#older}}<a href="{{older.url}}">{{older.text}} &rarr;</a>{{/older}}
+    {{^older}}<span></span>{{/older}}
   </nav>
   <footer>
     <a href="https://anton.codes" rel="me">Anton Verinov</a>
-    <a href="./archive.html">archive</a>
-    {{#feed}}
-    <a href="{{{feed.url}}}">rss</a>
-    {{/feed}}
     <a href="/backstage">
       <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" style="vertical-align:middle" viewBox="0 0 640 512"><path fill="rgba(192,192,192,0.5)" d="{{fas.door-open}}"></path></svg>
     </a>

@@ -165,7 +165,7 @@ module.exports = {
     }
 
     if (req.post.created) {
-      post.created = new Date(req.post.created + ":00Z")
+      post.created = new Date(req.post.created)
         .toISOString()
         .replace(/\.\d{3}Z$/, "Z");
     }

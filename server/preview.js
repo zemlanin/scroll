@@ -70,7 +70,7 @@ module.exports = async (req, res) => {
     draft: true,
     private: false,
     public: false,
-    created: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+    created: +new Date,
   };
 
   if (existingPostId) {
@@ -93,19 +93,13 @@ module.exports = async (req, res) => {
     );
 
     if (dbPost) {
-      dbPost.created = new Date(parseInt(dbPost.created))
-        .toISOString()
-        .replace(/\.\d{3}Z$/, "Z");
       post = dbPost;
     }
   }
 
   if (req.method === "POST") {
     post.text = req.post.text;
-  }
-
-  if (req.method === "POST") {
-    post.created = req.post.created;
+    post.created = +new Date(req.post.created);
   }
 
   const preparedPost = prepare(post, {

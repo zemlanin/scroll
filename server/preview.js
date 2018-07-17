@@ -11,7 +11,7 @@ const fs = {
   exists: promisify(_fs.exists)
 };
 const { authed } = require("./auth.js");
-const { IMPORT_ICONS, renderer } = require("../common.js");
+const { renderer, prepare: commonPrepare } = require("../common.js");
 const sqlite = require("sqlite");
 const mustache = require("mustache");
 const marked = require("marked");
@@ -44,62 +44,12 @@ async function render(tmpl, data) {
 }
 
 function prepare(post, options) {
-  const tokens = marked.lexer(post.text);
-
-  const header1Token = tokens.find(t => t.type === "heading" && t.text);
-
-  const created = new Date(post.created);
-  let title = post.slug || created.toISOString().split("T")[0];
-
-  if (header1Token) {
-    title = cheerio.load(marked(header1Token.text)).text();
-    post.text = post.text.replace(
-      header1Token.text,
-      `[${header1Token.text}](${options.url})`
-    );
-  }
-
-  let imported;
-
-  if (post.import_url) {
-    if (post.id.startsWith("twitter-")) {
-      imported = {
-        icon: IMPORT_ICONS.twitter,
-        url: post.import_url
-      };
-    } else if (post.id.startsWith("tumblr-")) {
-      imported = {
-        icon: post.id.startsWith("tumblr-zem")
-          ? IMPORT_ICONS.tumblr.zem
-          : IMPORT_ICONS.tumblr.doremarkable,
-        url: post.import_url
-      };
-    } else if (post.id.startsWith("wordpress-")) {
-      imported = {
-        icon: IMPORT_ICONS.wordpress
-      };
-    } else if (post.id.startsWith("instagram-")) {
-      imported = {
-        icon: IMPORT_ICONS.instagram
-      };
-    }
-  }
-
   return {
-    id: post.id,
+    ...commonPrepare(post),
     url: options.url,
-    draft: post.draft,
-    private: post.private,
-    public: post.public,
-    title,
-    text: post.text,
     html: marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"), {
       baseUrl: options.baseUrl
     }),
-    created: created.toISOString().replace(/\.\d{3}Z$/, "Z"),
-    createdDate: created.toISOString().split("T")[0],
-    createdUTC: created.toUTCString(),
-    imported
   };
 }
 
@@ -121,7 +71,6 @@ module.exports = async (req, res) => {
     private: false,
     public: false,
     created: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
-    import_url: null
   };
 
   if (existingPostId) {
@@ -136,8 +85,7 @@ module.exports = async (req, res) => {
           (NOT draft AND NOT private) public,
           text,
           strftime('%s000', created) created,
-          strftime('%s000', modified) modified,
-          import_url
+          strftime('%s000', modified) modified
         FROM posts
         WHERE id = ?1
       `,

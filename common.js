@@ -24,26 +24,6 @@ const MINIMUM_INDEX_PAGE_SIZE = 5;
 const BLOG_TITLE = "zemlan.in";
 const BLOG_BASE_URL = process.env.BLOG_BASE_URL || ".";
 
-const IMPORT_ICONS = {
-  wordpress: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="${
-    fab["wordpress-simple"]
-  }"></path></svg>`,
-  tumblr: {
-    zem: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="#36465d" d="${
-      fab["tumblr-square"]
-    }"></path></svg>`,
-    doremarkable: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="#ff6961" d="${
-      fab["tumblr-square"]
-    }"></path></svg>`
-  },
-  twitter: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="#1da1f2" d="${
-    fab.twitter
-  }"></path></svg>`,
-  instagram: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path fill="currentColor" d="${
-    fab.instagram
-  }"></path></svg>`
-};
-
 const renderer = new marked.Renderer();
 const ogImage = renderer.image.bind(renderer);
 const ogLink = renderer.link.bind(renderer);
@@ -196,32 +176,6 @@ function prepare(post) {
     );
   }
 
-  let imported;
-
-  if (post.import_url) {
-    if (post.id.startsWith("twitter-")) {
-      imported = {
-        icon: IMPORT_ICONS.twitter,
-        url: post.import_url
-      };
-    } else if (post.id.startsWith("tumblr-")) {
-      imported = {
-        icon: post.id.startsWith("tumblr-zem")
-          ? IMPORT_ICONS.tumblr.zem
-          : IMPORT_ICONS.tumblr.doremarkable,
-        url: post.import_url
-      };
-    } else if (post.id.startsWith("wordpress-")) {
-      imported = {
-        icon: IMPORT_ICONS.wordpress
-      };
-    } else if (post.id.startsWith("instagram-")) {
-      imported = {
-        icon: IMPORT_ICONS.instagram
-      };
-    }
-  }
-
   let status;
   if (post.draft) {
     status = "draft";
@@ -246,8 +200,7 @@ function prepare(post) {
     createdUTC: created.toUTCString(),
     modified: post.modified
       ? new Date(parseInt(post.modified)).toISOString()
-      : null,
-    imported
+      : null
   };
 }
 
@@ -283,7 +236,6 @@ module.exports = {
   BLOG_BASE_URL,
   PAGE_SIZE,
   MINIMUM_INDEX_PAGE_SIZE,
-  IMPORT_ICONS,
   prepare,
   render,
   renderer

@@ -46,8 +46,7 @@ async function generate(stdout, stderr) {
       (NOT draft AND NOT private) public,
       text,
       strftime('%s000', created) created,
-      strftime('%s000', modified) modified,
-      import_url
+      strftime('%s000', modified) modified
     FROM posts
     WHERE draft = 0
     ORDER BY created DESC

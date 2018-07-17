@@ -12,7 +12,7 @@
             margin-bottom: 1em;
         }
 
-        textarea, input[name="slug"], input[name="import_url"], form, form button {
+        textarea, input[name="slug"], form, form button {
             font-size: 1em;
             font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
             "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
@@ -46,26 +46,6 @@
             class="field textarea"
             rows="8"
         >{{{post.text}}}</textarea>
-        <div class="field has-addons">
-            <div class="control is-expanded">
-                <input
-                    name="import_url"
-                    type="url"
-                    value="{{post.import_url}}"
-                    placeholder="import url"
-                    class="input"
-                >
-            </div>
-            <div class="control">
-                <button type="submit"
-                    name="import"
-                    value="1"
-                    class="button"
-                >
-                    import
-                </button>
-            </div>
-        </div>
         <div class="field is-horizontal" style="justify-content: space-between;">
             <div class="field has-addons">
                 <div class="control">

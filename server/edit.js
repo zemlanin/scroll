@@ -49,8 +49,7 @@ module.exports = {
       draft: true,
       private: false,
       public: false,
-      created: new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, ""),
-      import_url: null
+      created: new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, "")
     };
 
     if (query.id) {
@@ -64,8 +63,7 @@ module.exports = {
             (NOT draft AND NOT private) public,
             text,
             strftime('%s000', created) created,
-            strftime('%s000', modified) modified,
-            import_url
+            strftime('%s000', modified) modified
           FROM posts
           WHERE id = ?1
         `,
@@ -106,8 +104,7 @@ module.exports = {
       draft: true,
       private: false,
       public: false,
-      created: new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, ""),
-      import_url: null
+      created: new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, "")
     };
 
     const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
@@ -125,8 +122,7 @@ module.exports = {
             (NOT draft AND NOT private) public,
             text,
             strftime('%s000', created) created,
-            strftime('%s000', modified) modified,
-            import_url
+            strftime('%s000', modified) modified
           FROM posts
           WHERE id = ?1
         `,
@@ -168,12 +164,6 @@ module.exports = {
       post.slug = null;
     }
 
-    if (req.post.import_url) {
-      post.import_url = req.post.import_url;
-    } else if (post.import_url) {
-      post.import_url = null;
-    }
-
     if (req.post.created) {
       post.created = new Date(req.post.created + ":00Z")
         .toISOString()
@@ -187,7 +177,6 @@ module.exports = {
           draft = ?3,
           private = ?4,
           text = ?5,
-          import_url = ?6,
           created = ?7,
           modified = ?8
           WHERE id = ?1`,
@@ -197,7 +186,6 @@ module.exports = {
           3: post.draft,
           4: post.private,
           5: post.text,
-          6: post.import_url,
           7: post.created,
           8: new Date().toISOString().replace(/\.\d{3}Z$/, "Z")
         }
@@ -205,7 +193,7 @@ module.exports = {
     } else {
       await db.run(
         `INSERT INTO posts
-          (id, slug, draft, private, text, import_url, created)
+          (id, slug, draft, private, text, created)
           VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)`,
         {
           1: post.id,
@@ -213,7 +201,6 @@ module.exports = {
           3: post.draft,
           4: post.private,
           5: post.text,
-          6: post.import_url,
           7: post.created
         }
       );

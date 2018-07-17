@@ -22,15 +22,15 @@
         Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
       font-size: 20px;
       line-height: 1.58;
+      padding-left: 0.75em;
+      padding-right: 0.75em;
     }
-    
-    h1, h2, h3 {
-      margin: 0.5em 0;
-      line-height: 1.3;
-    }
-    
-    p {
-      margin: 0.8em 0;
+
+    @supports (padding: max(0px)) {
+      body {
+        padding-left: max(0.75em, env(safe-area-inset-left));
+        padding-right: max(0.75em, env(safe-area-inset-right));
+      }
     }
 
     body.dark {
@@ -41,18 +41,23 @@
     @media (max-width: 40em) {
       body {
         padding-bottom: 1em;
-        padding-left: 0.75em;
-        padding-right: 0.75em;
         font-size: 17px;
       }
-    }
 
-    @supports (padding: max(0px)) {
-      body {
-        padding-bottom: max(1em, env(safe-area-inset-bottom));
-        padding-left: max(0.75em, env(safe-area-inset-left));
-        padding-right: max(0.75em, env(safe-area-inset-right));
+      @supports (padding: max(0px)) {
+        body {
+          padding-bottom: max(1em, env(safe-area-inset-bottom));
+        }
       }
+    }
+    
+    h1, h2, h3 {
+      margin: 0.5em 0;
+      line-height: 1.3;
+    }
+    
+    p {
+      margin: 0.8em 0;
     }
 
     * {
@@ -141,19 +146,13 @@
       border-left: 2px solid rgba(0, 165, 0, 0.7);
     }
 
+    nav, footer {
+      margin-bottom: 1em;
+    }
+
     nav {
       display: flex;
       flex-flow: row;
-    }
-
-    nav,
-    footer {
-      margin-bottom: 1em;
-      margin-left: -1em;
-      margin-right: -1em;
-    }
-
-    nav {
       justify-content: space-between;
       word-break: break-word;
     }
@@ -166,20 +165,7 @@
       flex-grow: 1;
     }
 
-    @media (max-width: 40em) {
-      nav,
-      footer {
-        margin-right: 0;
-      }
-
-      nav > *,
-      footer > * {
-        margin-right: 0;
-      }
-    }
-
     article code {
-      background: white;
       border: solid 1px #dedede;
       padding: 0.1em 0.2em;
       font-size: 0.9em;
@@ -197,27 +183,25 @@
     }
 
     article pre {
-      background: white;
       border: solid 1px #dedede;
       padding: 0.2em 0.4em;
       overflow-x: scroll;
       line-height: 1.5;
     }
 
-    article h1 a,
-    article h2 a,
-    article h3 a {
-      text-decoration: none;
-    }
-
     body.dark article code,
     body.dark article pre {
-      background: black;
       border-color: #414141;
     }
 
     body.dark article pre code {
       border: none;
+    }
+
+    article h1 a,
+    article h2 a,
+    article h3 a {
+      text-decoration: none;
     }
 
     a,
@@ -247,7 +231,7 @@
     header {
       display: flex;
       flex-direction: row;
-      align-items: first baseline;
+      align-items: center;
       justify-content: flex-start;
     }
 
@@ -260,31 +244,12 @@
       word-break: break-all;
     }
 
-    #night-mode {
-      border: none;
-      width: 1.5em;
-      height: 1.5em;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      -ms-appearance: none;
-      -o-appearance: none;
-      appearance: none;
-      cursor: pointer;
+    header h1 {
+      font-size: 1.5em;
     }
 
-    #night-mode:after {
-      position: relative;
-      display: block;
-      width: 1.5em;
-      height: 1.5em;
-      vertical-align: middle;
-      content: "";
-      color: black;
-      background: white
-        url("data:image/svg+xml;utf8,<svg role='img' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='#888' d='{{fas.lightbulb}}'></path></svg>");
-    }
-    #night-mode:checked:after {
-      background-color: black;
+    header h2 {
+      font-size: 1.3em;
     }
   </style>
   <script type="text/javascript">
@@ -365,6 +330,9 @@
       {{/index}}
     {{/post}}
 
-    <input type="checkbox" id="night-mode" />
+    <label>
+      <input type="checkbox" id="night-mode" />
+      <svg role='img' xmlns='http://www.w3.org/2000/svg' style="vertical-align: middle;" width="1em" height="1em" viewBox='0 0 512 512'><path fill='#888' d='{{fas.lightbulb}}'></path></svg>
+    </label>
   </header>
   <main>

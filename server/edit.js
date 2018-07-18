@@ -194,7 +194,7 @@ module.exports = {
       await db.run(
         `INSERT INTO posts
           (id, slug, draft, private, text, created)
-          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)`,
+          VALUES (?1, ?2, ?3, ?4, ?5, ?7)`,
         {
           1: post.id,
           2: post.slug,

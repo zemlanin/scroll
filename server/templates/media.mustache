@@ -103,7 +103,7 @@
           {{#type.audio}}data-type="audio"{{/type.audio}}
           {{#type.text}}data-type="text"{{/type.text}}
           {{#type.image}}
-            style="background-image: url('/media/{{id}}.{{ext}}'); background-size: cover;"
+            style="background-image: url('/media/{{id}}.{{ext}}?w=128&h=128'); background-size: cover;"
           {{/type.image}}
           onclick="window.expandMedia(event, this)"
         >

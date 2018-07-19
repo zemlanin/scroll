@@ -7,8 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "npm run prettier -- -l",
     "fmt": "npm run prettier -- --write",
-    "prettier": "prettier \"*.js\" \"import/*.js\" \"server/*.js\"",
-    "eslint": "eslint"
+    "prettier": "prettier \"{.,import,server,templates}/*.js\"",
+    "eslint": "eslint \"{.,import,server,templates}/*.js\""
   },
   "keywords": [],
   "author": "",

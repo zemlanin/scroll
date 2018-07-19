@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.body.classList.add("dark");
   }
 
-  nightModeCheckbox.addEventListener("change", function () {
+  nightModeCheckbox.addEventListener("change", function() {
     if (nightModeCheckbox.checked) {
       document.body.classList.add("dark");
       document.cookie = "night-mode=1; path=/";

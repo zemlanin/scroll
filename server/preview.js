@@ -11,11 +11,10 @@ const fs = {
   exists: promisify(_fs.exists)
 };
 const { authed } = require("./auth.js");
-const { renderer, prepare: commonPrepare } = require("../common.js");
+const { renderer, prepare: commonPrepare, render } = require("../common.js");
 const sqlite = require("sqlite");
 const mustache = require("mustache");
 const marked = require("marked");
-const cheerio = require("cheerio");
 
 marked.setOptions({
   gfm: true,
@@ -24,32 +23,13 @@ marked.setOptions({
   baseUrl: null
 });
 
-async function loadTemplate(tmpl) {
-  return (
-    loadTemplate.cache[tmpl] ||
-    (loadTemplate.cache[tmpl] = (await fs.readFile(tmpl)).toString())
-  );
-}
-loadTemplate.cache = {};
-
-async function render(tmpl, data) {
-  return mustache.render(await loadTemplate(tmpl), data, {
-    header: await loadTemplate(
-      path.resolve(__dirname, "..", "templates", "header.mustache")
-    ),
-    footer: await loadTemplate(
-      path.resolve(__dirname, "..", "templates", "footer.mustache")
-    )
-  });
-}
-
 function prepare(post, options) {
   return {
     ...commonPrepare(post),
     url: options.url,
     html: marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"), {
       baseUrl: options.baseUrl
-    }),
+    })
   };
 }
 
@@ -70,7 +50,7 @@ module.exports = async (req, res) => {
     draft: true,
     private: false,
     public: false,
-    created: +new Date,
+    created: +new Date()
   };
 
   if (existingPostId) {

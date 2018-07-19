@@ -1,20 +1,21 @@
 /* eslint-env browser */
 document.addEventListener("DOMContentLoaded", function() {
   var nightModeCheckbox = document.getElementById("night-mode");
+  var classList = document.body.classList;
 
   nightModeCheckbox.checked =
     document.cookie && document.cookie.match(/(^|; )night-mode=1(;|$)/);
 
   if (nightModeCheckbox.checked) {
-    document.body.classList.add("dark");
+    classList.add("dark");
   }
 
   nightModeCheckbox.addEventListener("change", function() {
     if (nightModeCheckbox.checked) {
-      document.body.classList.add("dark");
+      classList.add("dark");
       document.cookie = "night-mode=1; path=/";
     } else {
-      document.body.classList.remove("dark");
+      classList.remove("dark");
       document.cookie = "night-mode=0; path=/";
     }
   });
@@ -35,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function() {
     i.setAttribute("width", 640);
     i.setAttribute("height", 0);
     i.setAttribute("allow", "autoplay; encrypted-media");
-    i.setAttribute("allowfullscreen", "1");
+    i.setAttribute("allowfullscreen", 1);
     target.parentNode.insertBefore(i, target);
     i.addEventListener("load", function() {
       i.setAttribute("height", 360);

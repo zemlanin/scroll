@@ -2,6 +2,8 @@ const path = require("path");
 const marked = require("marked");
 const cheerio = require("cheerio");
 const mustache = require("mustache");
+const UglifyJS = require("uglify-js");
+const CleanCSS = require("clean-css");
 const { promisify } = require("util");
 
 const fs = require("fs");
@@ -204,13 +206,22 @@ function prepare(post) {
   };
 }
 
-async function loadTemplate(tmpl) {
-  return (
-    loadTemplate.cache[tmpl] ||
-    (loadTemplate.cache[tmpl] = (await fsPromises.readFile(tmpl)).toString())
-  );
+async function loadTemplate(tmpl, processCallback) {
+  if (loadTemplate.cache[tmpl]) {
+    return loadTemplate.cache[tmpl]
+  }
+
+  if (processCallback) {
+    return loadTemplate.cache[tmpl] = processCallback((await fsPromises.readFile(tmpl)).toString())
+  }
+
+  return loadTemplate.cache[tmpl] = (await fsPromises.readFile(tmpl)).toString()
 }
 loadTemplate.cache = {};
+
+const cleanCSS = new CleanCSS({
+  level: 2
+})
 
 async function render(tmpl, data) {
   return mustache.render(
@@ -226,7 +237,15 @@ async function render(tmpl, data) {
       ),
       footer: await loadTemplate(
         path.resolve(__dirname, "templates", "footer.mustache")
-      )
+      ),
+      'header.js': await loadTemplate(
+        path.resolve(__dirname, "templates", "header.js"),
+        code => UglifyJS.minify(code).code
+      ),
+      'header.css': await loadTemplate(
+        path.resolve(__dirname, "templates", "header.css"),
+        code => cleanCSS.minify(code).styles
+      ),
     }
   );
 }

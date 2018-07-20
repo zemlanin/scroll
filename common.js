@@ -228,8 +228,9 @@ function prepare(post) {
         longread.teaser = isTeaserToken(tokens[1])
           ? marked(
             tokens
-            .slice(1, 3)
+            .slice(1, 4)
             .filter(isTeaserToken)
+            .slice(0, 2)
             .map(t => t.text)
             .join("\n\n")
           )

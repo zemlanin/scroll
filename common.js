@@ -188,7 +188,7 @@ function prepare(post) {
     if (tokens.length > 5) {
       const wordCount = cheerio(html).text().match(WORD_REGEX).length;
 
-      if (wordCount > 300) {
+      if (wordCount > 200) {
         longread = {
           title: htmlTitle,
           wordCount,

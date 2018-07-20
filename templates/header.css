@@ -185,7 +185,8 @@ body.dark article pre code {
 
 article h1 a,
 article h2 a,
-article h3 a {
+article h3 a,
+article a.word-count {
   text-decoration: none;
 }
 

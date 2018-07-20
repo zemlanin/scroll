@@ -17,9 +17,6 @@ function prepare(post, options) {
   return {
     ...commonPrepare(post),
     url: options.url,
-    html: marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"), {
-      baseUrl: options.baseUrl
-    })
   };
 }
 

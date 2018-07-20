@@ -2,7 +2,17 @@
 
 {{#posts}}
 <article id="{{id}}">
-  {{{html}}}
+  {{#longread}}
+    {{{title}}}
+    {{{teaser}}}
+    <a href="{{{url}}}" class="word-count">
+      {{wordCount}} слов &rarr;
+    </a>
+  {{/longread}}
+
+  {{^longread}}
+    {{{html}}}
+  {{/longread}}
 
   <time datetime="{{created}}">
     <a href="{{{url}}}" title="{{created}}">

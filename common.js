@@ -160,6 +160,8 @@ function getPostUrl(post) {
   return `${BLOG_BASE_URL}/${post.slug || post.id}.html`;
 }
 
+const WORD_REGEX = /[a-zA-Z0-9_\u0392-\u03c9\u0400-\u04FF]+|[\u4E00-\u9FFF\u3400-\u4dbf\uf900-\ufaff\u3040-\u309f\uac00-\ud7af\u0400-\u04FF]+|[\u00E4\u00C4\u00E5\u00C5\u00F6\u00D6]+|\w+/g;
+
 function prepare(post) {
   const tokens = marked.lexer(post.text);
 
@@ -169,12 +171,38 @@ function prepare(post) {
 
   let title = post.slug || created.toISOString().split("T")[0];
   const url = getPostUrl(post);
+  let longread = null;
+  let html = null;
 
   if (header1Token) {
-    title = cheerio.load(marked(header1Token.text)).text();
+    const htmlTitle = marked('#'.repeat(header1Token.depth) + ' ' + `[${header1Token.text}](${url})`);
+    title = cheerio.load(htmlTitle).text();
     post.text = post.text.replace(
       header1Token.text,
       `[${header1Token.text}](${url})`
+    );
+    html = marked(
+      post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯")
+    );
+
+    if (tokens.length > 5) {
+      longread = {
+        title: htmlTitle,
+        wordCount: cheerio(html).text().match(WORD_REGEX).length
+      }
+
+      const tokenAfterHeader = tokens[tokens.indexOf(header1Token) + 1]
+      if (tokenAfterHeader && tokenAfterHeader.type === "paragraph" && tokenAfterHeader.text) {
+        const teaserTokens = marked.lexer(tokenAfterHeader.text);
+
+        if (teaserTokens.length === 1 && (teaserTokens[0].text.match(/^_.+_$/) || teaserTokens[0].text.match(/^!\[.*\]\(.+\)$/))) {
+          longread.teaser = '<p>' + marked(teaserTokens[0].text) + '</p>'
+        }
+      }
+    }
+  } else {
+    html = marked(
+      post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯")
     );
   }
 
@@ -196,6 +224,8 @@ function prepare(post) {
     status: status,
     url,
     title,
+    html,
+    longread,
     text: post.text,
     created: created.toISOString().replace(/\.\d{3}Z$/, "Z"),
     createdDate: created.toISOString().split("T")[0],

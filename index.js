@@ -90,9 +90,6 @@ async function generate(stdout, stderr) {
 
     await Promise.all(
       postsChunk.map(async post => {
-        post.html = marked(
-          post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯")
-        );
 
         const renderedPage = await render("./templates/post.mustache", {
           blog: {

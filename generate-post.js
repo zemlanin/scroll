@@ -57,21 +57,12 @@ function getPostsQuery(where, limit) {
   return query;
 }
 
-function extendPost(rawPost) {
-  const post = prepare(rawPost);
-
-  return {
-    ...post,
-    html: marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"))
-  };
-}
-
 async function getPosts(db, params, where, limit) {
-  return (await db.all(getPostsQuery(where, limit), params)).map(extendPost);
+  return (await db.all(getPostsQuery(where, limit), params)).map(prepare);
 }
 
 async function getPost(db, postId) {
-  return extendPost(await db.get(getPostsQuery(`id = ?1`), { 1: postId }));
+  return prepare(await db.get(getPostsQuery(`id = ?1`), { 1: postId }));
 }
 
 async function removePostPage(post) {

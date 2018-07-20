@@ -186,17 +186,21 @@ function prepare(post) {
     );
 
     if (tokens.length > 5) {
-      longread = {
-        title: htmlTitle,
-        wordCount: cheerio(html).text().match(WORD_REGEX).length
-      }
+      const wordCount = cheerio(html).text().match(WORD_REGEX).length;
 
-      const tokenAfterHeader = tokens[tokens.indexOf(header1Token) + 1]
-      if (tokenAfterHeader && tokenAfterHeader.type === "paragraph" && tokenAfterHeader.text) {
-        const teaserTokens = marked.lexer(tokenAfterHeader.text);
+      if (wordCount > 300) {
+        longread = {
+          title: htmlTitle,
+          wordCount,
+        }
 
-        if (teaserTokens.length === 1 && (teaserTokens[0].text.match(/^_.+_$/) || teaserTokens[0].text.match(/^!\[.*\]\(.+\)$/))) {
-          longread.teaser = '<p>' + marked(teaserTokens[0].text) + '</p>'
+        const tokenAfterHeader = tokens[tokens.indexOf(header1Token) + 1]
+        if (tokenAfterHeader && tokenAfterHeader.type === "paragraph" && tokenAfterHeader.text) {
+          const teaserTokens = marked.lexer(tokenAfterHeader.text);
+
+          if (teaserTokens.length === 1 && (teaserTokens[0].text.match(/^_.+_$/) || teaserTokens[0].text.match(/^!\[.*\]\(.+\)$/))) {
+            longread.teaser = '<p>' + marked(teaserTokens[0].text) + '</p>'
+          }
         }
       }
     }

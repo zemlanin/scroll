@@ -225,7 +225,7 @@ function prepare(post) {
           )
         };
 
-        londread.teaser = isTeaserToken(tokens[1])
+        longread.teaser = isTeaserToken(tokens[1])
           ? marked(
             tokens
             .slice(1, 3)

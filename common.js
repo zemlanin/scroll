@@ -225,7 +225,7 @@ function prepare(post) {
           )
         };
 
-        const londread.teaser = isTeaserToken(tokens[1])
+        londread.teaser = isTeaserToken(tokens[1])
           ? marked(
             tokens
             .slice(1, 3)

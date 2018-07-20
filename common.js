@@ -249,6 +249,9 @@ async function render(tmpl, data) {
       "header.css": await loadTemplate(
         path.resolve(__dirname, "templates", "header.css"),
         code => cleanCSS.minify(code).styles
+      ),
+      gauges: await loadTemplate(
+        path.resolve(__dirname, "templates", "gauges.mustache")
       )
     }
   );

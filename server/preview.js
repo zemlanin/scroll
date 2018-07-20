@@ -1,19 +1,9 @@
 const url = require("url");
-const _fs = require("fs");
 const path = require("path");
-const { promisify } = require("util");
 
-const fs = {
-  mkdir: promisify(_fs.mkdir),
-  access: promisify(_fs.access),
-  readFile: promisify(_fs.readFile),
-  writeFile: promisify(_fs.writeFile),
-  exists: promisify(_fs.exists)
-};
 const { authed } = require("./auth.js");
 const { renderer, prepare: commonPrepare, render } = require("../common.js");
 const sqlite = require("sqlite");
-const mustache = require("mustache");
 const marked = require("marked");
 
 marked.setOptions({

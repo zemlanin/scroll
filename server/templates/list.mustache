@@ -85,7 +85,11 @@
         <a href="/backstage/edit" class="button">new post</a>
         <a href="/backstage/media" class="button">media</a>
         <a href="/backstage/generate" class="button">generate</a>
-        <a href="/backstage/analytics" class="button">analytics</a>
+        {{#gauges.id}}
+          <a href="https://secure.gaug.es/dashboard#/gauges/{{gauges.id}}/overview"
+            class="button"
+          ><img src="/backstage/gauges.svg" style="height:1em; width: 3em"></a>
+        {{^gauges.id}}
     </nav>
 
     {{#suggestion}}

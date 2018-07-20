@@ -162,6 +162,22 @@ function getPostUrl(post) {
 
 const WORD_REGEX = /[a-zA-Z0-9_\u0392-\u03c9\u0400-\u04FF]+|[\u4E00-\u9FFF\u3400-\u4dbf\uf900-\ufaff\u3040-\u309f\uac00-\ud7af\u0400-\u04FF]+|[\u00E4\u00C4\u00E5\u00C5\u00F6\u00D6]+|\w+/g;
 
+function pluralize(n, ...forms) {
+  const singular = n % 10 === 1 && n % 100 != 11;
+  if (singular) {
+    return forms[0];
+  } else if (forms.length === 2) {
+    return forms[1];
+  } else {
+    const few = n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20);
+    if (few) {
+      return forms[1];
+    } else {
+      return forms[2];
+    }
+  }
+}
+
 function prepare(post) {
   const tokens = marked.lexer(post.text);
 
@@ -175,39 +191,52 @@ function prepare(post) {
   let html = null;
 
   if (header1Token) {
-    const htmlTitle = marked('#'.repeat(header1Token.depth) + ' ' + `[${header1Token.text}](${url})`);
+    const htmlTitle = marked(
+      "#".repeat(header1Token.depth) + " " + `[${header1Token.text}](${url})`
+    );
     title = cheerio.load(htmlTitle).text();
     post.text = post.text.replace(
       header1Token.text,
       `[${header1Token.text}](${url})`
     );
-    html = marked(
-      post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯")
-    );
+    html = marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"));
 
     if (tokens.length > 5) {
-      const wordCount = cheerio(html).text().match(WORD_REGEX).length;
+      const wordCount = cheerio(html)
+        .text()
+        .match(WORD_REGEX).length;
 
       if (wordCount > 200) {
         longread = {
           title: htmlTitle,
-          wordCount,
-        }
+          more: pluralize(
+            wordCount,
+            `${wordCount} слово`,
+            `${wordCount} слова`,
+            `${wordCount} слов`
+          )
+        };
 
-        const tokenAfterHeader = tokens[tokens.indexOf(header1Token) + 1]
-        if (tokenAfterHeader && tokenAfterHeader.type === "paragraph" && tokenAfterHeader.text) {
+        const tokenAfterHeader = tokens[tokens.indexOf(header1Token) + 1];
+        if (
+          tokenAfterHeader &&
+          tokenAfterHeader.type === "paragraph" &&
+          tokenAfterHeader.text
+        ) {
           const teaserTokens = marked.lexer(tokenAfterHeader.text);
 
-          if (teaserTokens.length === 1 && (teaserTokens[0].text.match(/^_.+_$/) || teaserTokens[0].text.match(/^!\[.*\]\(.+\)$/))) {
-            longread.teaser = '<p>' + marked(teaserTokens[0].text) + '</p>'
+          if (
+            teaserTokens.length === 1 &&
+            (teaserTokens[0].text.match(/^_.+_$/) ||
+              teaserTokens[0].text.match(/^!\[.*\]\(.+\)$/))
+          ) {
+            longread.teaser = "<p>" + marked(teaserTokens[0].text) + "</p>";
           }
         }
       }
     }
   } else {
-    html = marked(
-      post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯")
-    );
+    html = marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"));
   }
 
   let status;

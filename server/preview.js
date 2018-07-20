@@ -16,7 +16,7 @@ marked.setOptions({
 function prepare(post, options) {
   return {
     ...commonPrepare(post),
-    url: options.url,
+    url: options.url
   };
 }
 

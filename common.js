@@ -178,10 +178,18 @@ function pluralize(n, ...forms) {
   }
 }
 
+function isTeaserToken(token) {
+  return token
+    && token.type === "paragraph"
+    && token.text.match(/^(_.+_|!\[.*\]\(.+\))$/)
+}
+
 function prepare(post) {
   const tokens = marked.lexer(post.text);
 
-  const header1Token = tokens.find(t => t.type === "heading" && t.text);
+  const header1Token = tokens && tokens[0] && tokens[0].type === "heading" && tokens[0].text
+    ? tokens[0]
+    : null;
 
   const created = new Date(parseInt(post.created));
 
@@ -217,22 +225,15 @@ function prepare(post) {
           )
         };
 
-        const tokenAfterHeader = tokens[tokens.indexOf(header1Token) + 1];
-        if (
-          tokenAfterHeader &&
-          tokenAfterHeader.type === "paragraph" &&
-          tokenAfterHeader.text
-        ) {
-          const teaserTokens = marked.lexer(tokenAfterHeader.text);
-
-          if (
-            teaserTokens.length === 1 &&
-            (teaserTokens[0].text.match(/^_.+_$/) ||
-              teaserTokens[0].text.match(/^!\[.*\]\(.+\)$/))
-          ) {
-            longread.teaser = "<p>" + marked(teaserTokens[0].text) + "</p>";
-          }
-        }
+        const londread.teaser = isTeaserToken(tokens[1])
+          ? marked(
+            tokens
+            .slice(1, 3)
+            .filter(isTeaserToken)
+            .map(t => t.text)
+            .join("\n\n")
+          )
+          : '';
       }
     }
   } else {

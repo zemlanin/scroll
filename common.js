@@ -179,17 +179,20 @@ function pluralize(n, ...forms) {
 }
 
 function isTeaserToken(token) {
-  return token
-    && token.type === "paragraph"
-    && token.text.match(/^(_.+_|!\[.*\]\(.+\))$/)
+  return (
+    token &&
+    token.type === "paragraph" &&
+    token.text.match(/^(_.+_|!\[.*\]\(.+\))$/)
+  );
 }
 
 function prepare(post) {
   const tokens = marked.lexer(post.text);
 
-  const header1Token = tokens && tokens[0] && tokens[0].type === "heading" && tokens[0].text
-    ? tokens[0]
-    : null;
+  const header1Token =
+    tokens && tokens[0] && tokens[0].type === "heading" && tokens[0].text
+      ? tokens[0]
+      : null;
 
   const created = new Date(parseInt(post.created));
 
@@ -227,14 +230,14 @@ function prepare(post) {
 
         longread.teaser = isTeaserToken(tokens[1])
           ? marked(
-            tokens
-            .slice(1, 4)
-            .filter(isTeaserToken)
-            .slice(0, 2)
-            .map(t => t.text)
-            .join("\n\n")
-          )
-          : '';
+              tokens
+                .slice(1, 4)
+                .filter(isTeaserToken)
+                .slice(0, 2)
+                .map(t => t.text)
+                .join("\n\n")
+            )
+          : "";
       }
     }
   } else {

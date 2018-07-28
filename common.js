@@ -324,7 +324,7 @@ async function render(tmpl, data) {
         code => cleanCSS.minify(code).styles
       ),
       "highlight.css": await loadTemplate(
-        path.resolve(__dirname, "node_modules", "highlight.js/styles/default.css"),
+        path.resolve(__dirname, "templates", "highlight.css"),
         code => cleanCSS.minify(code).styles
       ),
       gauges: await loadTemplate(

@@ -323,6 +323,10 @@ async function render(tmpl, data) {
         path.resolve(__dirname, "templates", "header.css"),
         code => cleanCSS.minify(code).styles
       ),
+      "highlight.css": await loadTemplate(
+        path.resolve(__dirname, "node_modules", "highlight.js/styles/default.css"),
+        code => cleanCSS.minify(code).styles
+      ),
       gauges: await loadTemplate(
         path.resolve(__dirname, "templates", "gauges.mustache")
       )

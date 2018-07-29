@@ -28,9 +28,10 @@ marked.setOptions({
   smartypants: false,
   renderer: renderer,
   highlight: function(code, lang) {
-    return require('highlight.js')
-      .highlightAuto(code, lang ? [lang] : undefined)
-      .value;
+    return require("highlight.js").highlightAuto(
+      code,
+      lang ? [lang] : undefined
+    ).value;
   },
   baseUrl: null
 });

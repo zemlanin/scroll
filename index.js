@@ -90,7 +90,6 @@ async function generate(stdout, stderr) {
 
     await Promise.all(
       postsChunk.map(async post => {
-
         const renderedPage = await render("./templates/post.mustache", {
           blog: {
             title: BLOG_TITLE,

@@ -9,7 +9,7 @@ const getPostId = () =>
     10
   )}`;
 
-const { authed } = require("./auth.js");
+const { authed, sendToAuthProvider } = require("./auth.js");
 const { generateAfterEdit } = require("../generate-post.js");
 const { render } = require("./templates/index.js");
 const sqlite = require("sqlite");
@@ -19,8 +19,7 @@ module.exports = {
     const user = authed(req, res);
 
     if (!user) {
-      res.statusCode = 401;
-      return `<a href="/backstage">auth</a>`;
+      return sendToAuthProvider(req, res);
     }
 
     const query = url.parse(req.url, true).query;
@@ -90,8 +89,7 @@ module.exports = {
     const user = authed(req, res);
 
     if (!user) {
-      res.statusCode = 401;
-      return `<a href="/backstage">auth</a>`;
+      return sendToAuthProvider(req, res);
     }
 
     const query = url.parse(req.url, true).query;

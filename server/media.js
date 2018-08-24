@@ -7,7 +7,7 @@ const multiparty = require("multiparty");
 const fs = {
   unlink: promisify(_fs.unlink)
 };
-const { authed } = require("./auth.js");
+const { authed, sendToAuthProvider } = require("./auth.js");
 const { openFileMedia } = require("../import/media.js");
 const { render } = require("./templates/index.js");
 const sqlite = require("sqlite");
@@ -21,8 +21,7 @@ module.exports = {
     const user = authed(req, res);
 
     if (!user) {
-      res.statusCode = 401;
-      return `<a href="/backstage/">auth</a>`;
+      return sendToAuthProvider(req, res);
     }
 
     const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
@@ -61,8 +60,7 @@ module.exports = {
     const user = authed(req, res);
 
     if (!user) {
-      res.statusCode = 401;
-      return `<a href="/backstage/">auth</a>`;
+      return sendToAuthProvider(req, res);
     }
 
     const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));

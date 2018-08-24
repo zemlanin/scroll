@@ -1,4 +1,4 @@
-const { authed } = require("./auth.js");
+const { authed, sendToAuthProvider } = require("./auth.js");
 
 const generate = require("../index.js");
 const { render } = require("./templates/index.js");
@@ -8,8 +8,7 @@ module.exports = {
     const user = authed(req, res);
 
     if (!user) {
-      res.statusCode = 401;
-      return `<a href="/backstage">auth</a>`;
+      return sendToAuthProvider(req, res);
     }
 
     return render("generate.mustache");
@@ -18,8 +17,7 @@ module.exports = {
     const user = authed(req, res);
 
     if (!user) {
-      res.statusCode = 401;
-      return `<a href="/backstage">auth</a>`;
+      return sendToAuthProvider(req, res);
     }
 
     res.writeHead(200, { "Content-Type": "text/plain" });

@@ -1,14 +1,15 @@
 const cookie = require("cookie");
+const url = require("url");
 const jwt = require("jsonwebtoken");
+const secrets = require("./secrets.json");
 
 const SECRET = (() => {
-  try {
-    return require("./secrets.json").jwt;
-  } catch (e) {
-    return require("crypto")
+  return (
+    secrets.jwt ||
+    require("crypto")
       .randomBytes(256)
-      .toString("hex");
-  }
+      .toString("hex")
+  );
 })();
 
 module.exports = {
@@ -39,10 +40,26 @@ module.exports = {
     }
   },
 
+  sendToAuthProvider(req, res) {
+    const githubAuthUrl = url.format({
+      protocol: "https",
+      hostname: "github.com",
+      pathname: "/login/oauth/authorize",
+      query: {
+        scope: "user:email",
+        client_id: secrets.githubId
+      }
+    });
+
+    res.statusCode = 303;
+    res.setHeader("Location", githubAuthUrl);
+  },
+
   generateToken(payload, expiresIn = 60 * 60 * 24 * 7) {
     return jwt.sign(
       {
-        me: payload.me
+        me: payload.me,
+        github: payload.github
       },
       SECRET,
       { expiresIn }

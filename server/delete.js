@@ -1,15 +1,14 @@
 const url = require("url");
 const path = require("path");
 
-const { authed } = require("./auth.js");
+const { authed, sendToAuthProvider } = require("./auth.js");
 const sqlite = require("sqlite");
 
 module.exports = async (req, res) => {
   const user = authed(req, res);
 
   if (!user) {
-    res.statusCode = 401;
-    return `<a href="/backstage">auth</a>`;
+    return sendToAuthProvider(req, res);
   }
 
   const query = url.parse(req.url, true).query;

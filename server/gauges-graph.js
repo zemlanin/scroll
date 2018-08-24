@@ -1,7 +1,7 @@
 const url = require("url");
 const https = require("https");
 
-const { authed } = require("./auth.js");
+const { authed, sendToAuthProvider } = require("./auth.js");
 const { gaugesId, gaugesToken } = require("./secrets.json");
 
 async function getTraffic() {
@@ -44,8 +44,7 @@ module.exports = async (req, res) => {
   const user = authed(req, res);
 
   if (!user) {
-    res.statusCode = 401;
-    return;
+    return sendToAuthProvider(req, res);
   }
 
   const traffic = await getTraffic();

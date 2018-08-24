@@ -1,7 +1,7 @@
 const url = require("url");
 const path = require("path");
 
-const { authed, logout } = require("./auth.js");
+const { authed, logout, sendToAuthProvider } = require("./auth.js");
 const { render } = require("./templates/index.js");
 const { renderer } = require("../common.js");
 const marked = require("marked");
@@ -117,31 +117,19 @@ async function getSuggestion(db, req) {
 }
 
 module.exports = async (req, res) => {
-  const indieAuthUrl = url.format({
-    protocol: "https",
-    hostname: "indieauth.com",
-    pathname: "/auth",
-    query: {
-      me: "zemlan.in",
-      client_id: url.resolve(req.absolute, "/backstage"),
-      redirect_uri: url.resolve(req.absolute, "/backstage/callback")
-    }
-  });
-
   const query = url.parse(req.url, true).query;
 
   if (query.logout) {
     logout(res);
-    res.statusCode = 401;
-
-    return `<a href="${indieAuthUrl}">auth</a>`;
+    res.statusCode = 303;
+    res.setHeader("Location", "/");
+    return;
   }
 
   const user = authed(req, res);
 
   if (!user) {
-    res.statusCode = 401;
-    return `<a href="${indieAuthUrl}">auth</a>`;
+    return sendToAuthProvider(req, res);
   }
 
   const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));

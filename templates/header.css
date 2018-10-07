@@ -244,6 +244,10 @@ header h2 {
     max-width: 100%;
     padding: 0;
   }
+  
+  article p {
+    page-break-inside: avoid;
+  }
 
   header label,
   nav,

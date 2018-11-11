@@ -41,13 +41,17 @@ module.exports = {
   },
 
   sendToAuthProvider(req, res) {
+    const redirectURL = url.parse(req.url, true);
+    redirectURL.pathname = "/backstage/callback?next=" + encodeURIComponent(redirectURL.pathname + redirectURL.search);
+
     const githubAuthUrl = url.format({
       protocol: "https",
       hostname: "github.com",
       pathname: "/login/oauth/authorize",
       query: {
         scope: "user:email",
-        client_id: secrets.githubId
+        client_id: secrets.githubId,
+        redirect_uri: redirectURL
       }
     });
 

@@ -98,14 +98,17 @@ module.exports = async (req, res) => {
       auth({ me: authed_user.login, github: verification.access_token }, res);
 
       res.statusCode = 303;
-      res.setHeader("Location", "/backstage");
+      res.setHeader(
+        "Location",
+        query.next && query.next.startsWith("/backstage")
+          ? decodeURIComponent(query.next)
+          : "/backstage"
+      );
       return;
     }
 
     return "fail";
   } else {
-    console.log(verification);
-
     return "fail";
   }
 

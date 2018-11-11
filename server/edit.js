@@ -14,6 +14,8 @@ const { generateAfterEdit } = require("../generate-post.js");
 const { render } = require("./templates/index.js");
 const sqlite = require("sqlite");
 
+const SLUG_REGEX = /^[a-zA-Z0-9_-]+$/
+
 module.exports = {
   get: async (req, res) => {
     const user = authed(req, res);
@@ -48,7 +50,8 @@ module.exports = {
       draft: true,
       private: false,
       public: false,
-      created: new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, "")
+      created: new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, ""),
+      text: "",
     };
 
     if (query.id) {
@@ -74,6 +77,28 @@ module.exports = {
           .toISOString()
           .replace(/:\d{2}\.\d{3}Z$/, "");
         post = dbPost;
+      }
+    } else {
+      if (query.text) {
+        try {
+          post.text = decodeURIComponent(query.text);
+        } catch (e) {
+          //
+        }
+      }
+      
+      if (query.slug && query.slug.text(SLUG_REGEX)) {
+        post.slug = query.slug;
+      }
+      
+      if (query.created) {
+        try {
+          const parsedDate = new Date(query.created)
+            .toISOString()
+            .replace(/:\d{2}\.\d{3}Z$/, "");
+        } catch (e) {
+          //
+        }
       }
     }
 

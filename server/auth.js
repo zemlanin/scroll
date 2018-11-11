@@ -41,8 +41,14 @@ module.exports = {
   },
 
   sendToAuthProvider(req, res) {
-    const redirectURL = url.parse(req.url, true);
-    redirectURL.pathname = "/backstage/callback?next=" + encodeURIComponent(redirectURL.pathname + redirectURL.search);
+    const redirectURL = url.format({
+      protocol: url.parse(process.env.BLOG_BASE_URL).protocol,
+      hostname: url.parse(process.env.BLOG_BASE_URL).hostname,
+      pathname: "/backstage/callback",
+      query: {
+        next: req.url
+      }
+    })
 
     const githubAuthUrl = url.format({
       protocol: "https",

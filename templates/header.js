@@ -3,22 +3,39 @@ document.addEventListener("DOMContentLoaded", function() {
   var nightModeCheckbox = document.getElementById("night-mode");
   var classList = document.body.classList;
 
-  nightModeCheckbox.checked =
+  var enabledNightModeCookie =
     document.cookie && document.cookie.match(/(^|; )night-mode=1(;|$)/);
+  var disabledNightModeCookie =
+    document.cookie && document.cookie.match(/(^|; )night-mode=0(;|$)/);
 
-  if (nightModeCheckbox.checked) {
+  nightModeCheckbox.checked =
+    enabledNightModeCookie ||
+    (window.matchMedia("(prefers-color-scheme: dark)").matches &&
+      !disabledNightModeCookie);
+
+  if (enabledNightModeCookie) {
     classList.add("dark");
+  } else if (disabledNightModeCookie) {
+    classList.add("light");
   }
 
   nightModeCheckbox.addEventListener("change", function() {
     if (nightModeCheckbox.checked) {
       classList.add("dark");
+      classList.remove("light");
       document.cookie = "night-mode=1; path=/";
     } else {
       classList.remove("dark");
+      classList.add("light");
       document.cookie = "night-mode=0; path=/";
     }
   });
+
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addListener(function(colorSchemeMedia) {
+      nightModeCheckbox.checked = colorSchemeMedia.matches;
+    });
 });
 
 document.addEventListener("DOMContentLoaded", function() {

@@ -139,7 +139,7 @@ renderer.image = function(href, title, text) {
         );
 
     const imgSrc = attrs.match(/poster=['"]?([^'" ]+)['"]?/)[1];
-    return `<a class="future-pdf" href="${href}" data-src="${href}">
+    return `<a class="future-frame" href="${href}" data-src="${href}">
       <img src="${imgSrc}">
     </a>`;
   }

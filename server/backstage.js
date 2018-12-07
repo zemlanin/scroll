@@ -96,7 +96,7 @@ async function getSuggestion(db, req) {
 
   const host = req.headers.host;
   const idOrSlugMatch = referer.match(
-    `^https?://${host.replace(".", "\\.")}/([a-zA-Z0-9_-]+)(\.html)?$`
+    `^https?://${host.replace(".", "\\.")}/([a-zA-Z0-9_-]+)(.html)?$`
   );
   if (idOrSlugMatch) {
     const idOrSlug = idOrSlugMatch[1];

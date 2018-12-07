@@ -26,6 +26,12 @@ const MINIMUM_INDEX_PAGE_SIZE = 5;
 const BLOG_TITLE = "zemlan.in";
 const BLOG_BASE_URL = process.env.BLOG_BASE_URL || ".";
 
+function isOwnMedia(href) {
+  return process.env.BLOG_BASE_URL
+    ? href.startsWith(process.env.BLOG_BASE_URL + "/media/")
+    : href.startsWith("media/") || href.startsWith("/media/");
+}
+
 const renderer = new marked.Renderer();
 const ogImage = renderer.image.bind(renderer);
 const ogLink = renderer.link.bind(renderer);
@@ -95,8 +101,8 @@ renderer.image = function(href, title, text) {
   }
 
   if (
-    (href.startsWith("media/") && href.endsWith(".mp4")) ||
-    (text && text.indexOf("poster=") > -1)
+    (isOwnMedia(href) && href.endsWith(".mp4")) ||
+    (!href.endsWith(".pdf") && text && text.indexOf("poster=") > -1)
   ) {
     const attrs =
       text &&
@@ -112,6 +118,30 @@ renderer.image = function(href, title, text) {
 
     return `<video playsinline controls preload="none" src="${href}" ${attrs ||
       ""}></video>`;
+  }
+
+  if (
+    isOwnMedia(href) &&
+    href.endsWith(".pdf") &&
+    text &&
+    text.indexOf("poster=") > -1
+  ) {
+    const attrs =
+      text &&
+      text
+        .replace(/&apos;/g, `'`)
+        .replace(/&quot;/g, `"`)
+        .replace(
+          /((src|href|poster)=['"]?)\/media\//g,
+          `$1${
+            process.env.BLOG_BASE_URL ? process.env.BLOG_BASE_URL + "/" : ""
+          }media/`
+        );
+
+    const imgSrc = attrs.match(/poster=['"]?([^'" ]+)['"]?/)[1];
+    return `<a class="future-pdf" href="${href}" data-src="${href}">
+      <img src="${imgSrc}">
+    </a>`;
   }
 
   return ogImage(href, title, text);
@@ -318,7 +348,13 @@ async function render(tmpl, data) {
       ),
       "header.js": await loadTemplate(
         path.resolve(__dirname, "templates", "header.js"),
-        code => UglifyJS.minify(code).code
+        code => {
+          let c = UglifyJS.minify(code).code;
+          if (!c) {
+            throw new Error("Empty header.js");
+          }
+          return c;
+        }
       ),
       "header.css": await loadTemplate(
         path.resolve(__dirname, "templates", "header.css"),

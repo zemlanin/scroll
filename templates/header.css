@@ -78,6 +78,7 @@ article video {
 }
 
 article iframe,
+article a.future-pdf,
 article a.future-frame {
   display: block;
   margin: auto;
@@ -95,6 +96,7 @@ article iframe[src*="music.apple.com/"] {
   max-width: calc(100% - 0.1em);
 }
 
+article a.future-pdf,
 article a.future-frame {
   position: relative;
 }
@@ -117,6 +119,10 @@ article a[href*="youtube.com/"].future-frame:after {
 }
 
 article a[href*="youtube.com/"].future-frame.loading:after {
+  display: none;
+}
+
+article a.future-pdf.loading:after {
   display: none;
 }
 

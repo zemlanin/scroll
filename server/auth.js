@@ -48,7 +48,7 @@ module.exports = {
       query: {
         next: req.url
       }
-    })
+    });
 
     const githubAuthUrl = url.format({
       protocol: "https",

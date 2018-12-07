@@ -69,3 +69,48 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   );
 });
+
+document.addEventListener("DOMContentLoaded", function() {
+  function handleFuturePDF(e) {
+    if (e.ctrlKey || e.metaKey) {
+      return true;
+    }
+
+    var target = e.currentTarget;
+    target.removeEventListener("click", handleFuturePDF);
+    target.classList.add("loading");
+    var href = target.getAttribute("data-src");
+
+    var objEl = document.createElement("object");
+    var embedEl = document.createElement("embed");
+    var pEl = document.createElement("p");
+    pEl.innerHTML =
+      'This browser does not support PDFs. <a href="' +
+      href +
+      '">Download PDF</a>.';
+    embedEl.appendChild(pEl);
+
+    embedEl.setAttribute("src", href);
+    embedEl.setAttribute("type", "application/pdf");
+    objEl.appendChild(embedEl);
+
+    objEl.setAttribute("data", href);
+    objEl.setAttribute("type", "application/pdf");
+    objEl.setAttribute("width", "800px");
+    objEl.setAttribute(
+      "height",
+      "" + (20 + 800 * target.clientHeight / target.clientWidth) + "px"
+    );
+    objEl.setAttribute("allowfullscreen", 1);
+    target.parentNode.insertBefore(objEl, target);
+    target.style.display = "none";
+    e.preventDefault();
+  }
+
+  Array.prototype.forEach.call(
+    document.querySelectorAll("a.future-pdf[data-src]"),
+    function(fpdf) {
+      fpdf.addEventListener("click", handleFuturePDF);
+    }
+  );
+});

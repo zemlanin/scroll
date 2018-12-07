@@ -13,7 +13,6 @@ const fs = {
 };
 
 const sqlite = require("sqlite");
-const marked = require("marked");
 const groupBy = require("lodash.groupby");
 const chunk = require("lodash.chunk");
 const Rsync = require("rsync");

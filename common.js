@@ -139,7 +139,10 @@ renderer.image = function(href, title, text) {
         );
 
     const imgSrc = attrs.match(/poster=['"]?([^'" ]+)['"]?/)[1];
-    return `<a class="future-frame" href="${href}" data-src="${href}">
+    const dataSrc = `https://drive.google.com/viewerng/viewer?url=${encodeURIComponent(
+      href
+    )}&pid=explorer&efh=false&a=v&chrome=false&embedded=true`;
+    return `<a class="future-frame" href="${href}" data-src="${dataSrc}">
       <img src="${imgSrc}">
     </a>`;
   }

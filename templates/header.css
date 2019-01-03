@@ -175,6 +175,10 @@ nav, footer {
   margin-bottom: 1em;
 }
 
+footer {
+  text-align: center;
+}
+
 nav {
   display: flex;
   flex-flow: row;
@@ -182,10 +186,7 @@ nav {
   word-break: break-word;
 }
 
-nav > *,
-footer > * {
-  margin-left: 1em;
-  margin-right: 1em;
+nav span {
   flex-basis: 0;
   flex-grow: 1;
 }

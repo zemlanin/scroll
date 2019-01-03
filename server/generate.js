@@ -20,7 +20,23 @@ module.exports = {
       return sendToAuthProvider(req, res);
     }
 
-    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.writeHead(200, {
+      "Content-Type": "text/html",
+      "Cache-Control": "no-cache"
+    });
+
+    res.write(
+      `
+        <body style="position: absolute; bottom: 0">
+          <script>
+            document.addEventListener("DOMContentLoaded", function() {
+              document.body.style.position = "";
+              document.body.scrollTop = document.body.scrollHeight;
+            })
+          </script>
+          <pre style="word-wrap: break-word; white-space: pre-wrap;">
+      `
+    );
 
     return generate(res, res)
       .then(() => {

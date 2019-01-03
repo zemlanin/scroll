@@ -3,5 +3,4 @@ node_modules/
 posts.db
 .DS_Store
 ansible/*.retry
-server/secrets.json
 .env

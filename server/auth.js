@@ -1,11 +1,10 @@
 const cookie = require("cookie");
 const url = require("url");
 const jwt = require("jsonwebtoken");
-const secrets = require("./secrets.json");
 
 const SECRET = (() => {
   return (
-    secrets.jwt ||
+    process.env.JWT_SECRET ||
     require("crypto")
       .randomBytes(256)
       .toString("hex")
@@ -56,7 +55,7 @@ module.exports = {
       pathname: "/login/oauth/authorize",
       query: {
         scope: "user:email",
-        client_id: secrets.githubId,
+        client_id: process.env.GITHUB_APP_ID,
         redirect_uri: redirectURL
       }
     });

@@ -2,6 +2,8 @@ const http = require("http");
 const url = require("url");
 const querystring = require("querystring");
 
+require("dotenv").config();
+
 const handlers = {
   "GET /backstage": require("./server/backstage.js"),
   "GET /backstage/callback": require("./server/callback.js"),

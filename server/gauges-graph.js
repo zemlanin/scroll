@@ -2,17 +2,16 @@ const url = require("url");
 const https = require("https");
 
 const { authed, sendToAuthProvider } = require("./auth.js");
-const { gaugesId, gaugesToken } = require("./secrets.json");
 
 async function getTraffic() {
   return new Promise(resolve => {
     const req = https.request(
       {
         host: "secure.gaug.es",
-        path: `/gauges/${gaugesId}/traffic`,
+        path: `/gauges/${process.env.GAUGES_ID}/traffic`,
         method: "get",
         headers: {
-          "X-Gauges-Token": gaugesToken
+          "X-Gauges-Token": process.env.GAUGES_TOKEN
         }
       },
       resp => {

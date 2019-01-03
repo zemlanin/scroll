@@ -2,7 +2,6 @@ const url = require("url");
 const https = require("https");
 const querystring = require("querystring");
 const { auth } = require("./auth.js");
-const secrets = require("./secrets.json");
 
 module.exports = async (req, res) => {
   const query = url.parse(req.url, true).query;
@@ -15,8 +14,8 @@ module.exports = async (req, res) => {
 
   const postData = querystring.stringify({
     code: query.code,
-    client_id: secrets.githubId,
-    client_secret: secrets.githubSecret
+    client_id: process.env.GITHUB_APP_ID,
+    client_secret: process.env.GITHUB_APP_SECRET
   });
 
   const verification = await new Promise(resolve => {
@@ -94,7 +93,11 @@ module.exports = async (req, res) => {
       req.end();
     });
 
-    if (authed_user && authed_user.id === secrets.githubUserId) {
+    if (
+      authed_user &&
+      authed_user.id &&
+      authed_user.id.toString() === process.env.GITHUB_USER_ID
+    ) {
       auth({ me: authed_user.login, github: verification.access_token }, res);
 
       res.statusCode = 303;

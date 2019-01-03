@@ -8,8 +8,6 @@ const marked = require("marked");
 const sqlite = require("sqlite");
 const cheerio = require("cheerio");
 
-const { gaugesId } = require("./secrets.json");
-
 const PAGE_SIZE = 10;
 
 marked.setOptions({
@@ -164,7 +162,7 @@ module.exports = async (req, res) => {
     ),
     suggestion: suggestion,
     gauges: {
-      id: gaugesId
+      id: process.env.GAUGES_ID
     },
     urls: {
       logout: url.resolve(req.absolute, "/backstage/?logout=1"),

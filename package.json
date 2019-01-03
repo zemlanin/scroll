@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "npm run prettier -- -l",
     "fmt": "npm run prettier -- --write",
-    "prettier": "prettier \"{.,import,server,templates}/*.js\"",
+    "prettier": "prettier \"{.,import,server,templates}/*.{js,css}\"",
     "eslint": "eslint \"{.,import,server,templates}/*.js\""
   },
   "keywords": [],
@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "eslint": "4.19.1",
-    "prettier": "1.12.0"
+    "prettier": "1.15.3"
   },
   "eslintConfig": {
     "extends": "eslint:recommended",

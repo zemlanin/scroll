@@ -299,7 +299,7 @@ async function getAffectedPages(db, postCreated) {
 
   const postsCountOnAffectedPages =
     postsAfterCurrentCount +
-    (totalPostCount - postsAfterCurrentCount) % PAGE_SIZE;
+    ((totalPostCount - postsAfterCurrentCount) % PAGE_SIZE);
 
   const inaffectedPages =
     (totalPostCount - postsCountOnAffectedPages) / PAGE_SIZE;

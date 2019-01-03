@@ -48,7 +48,9 @@ body.light {
   }
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   margin: 0.5em 0;
   line-height: 1.3;
 }
@@ -140,7 +142,7 @@ article a[href$=".pdf"][data-src*="https://drive.google.com/viewerng/viewer"].fu
   }
 
   to {
-    opacity: 1.0;
+    opacity: 1;
   }
 }
 
@@ -171,7 +173,8 @@ article blockquote {
   border-left: 2px solid rgba(0, 165, 0, 0.7);
 }
 
-nav, footer {
+nav,
+footer {
   margin-bottom: 1em;
 }
 
@@ -306,7 +309,7 @@ header h2 {
     max-width: 100%;
     padding: 0;
   }
-  
+
   article p {
     page-break-inside: avoid;
   }

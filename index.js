@@ -94,8 +94,8 @@ async function generate(stdout, stderr) {
         `${postsChunk[0].created.slice(0, 4)} ${i
           .toString()
           .padStart(progressPadding)}/${postsCount} ${"#".repeat(
-          parseInt(i * 50 / postsCount)
-        )}${".".repeat(parseInt((postsCount - i) * 50 / postsCount))}`
+          parseInt((i * 50) / postsCount)
+        )}${".".repeat(parseInt(((postsCount - i) * 50) / postsCount))}`
       );
     } else {
       stdout.write(postsChunk[0].created.slice(3, 4));

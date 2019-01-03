@@ -10,13 +10,6 @@ const cheerio = require("cheerio");
 
 const PAGE_SIZE = 10;
 
-marked.setOptions({
-  gfm: true,
-  smartypants: false,
-  renderer: renderer,
-  baseUrl: null
-});
-
 const MARKED_END_TOKENS_MAP = {
   list_start: "list_end",
   list_item_start: "list_item_start",

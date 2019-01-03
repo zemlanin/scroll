@@ -8,7 +8,6 @@ const fsPromises = {
   writeFile: promisify(fs.writeFile)
 };
 
-const marked = require("marked");
 const chunk = require("lodash.chunk");
 const groupBy = require("lodash.groupby");
 
@@ -19,22 +18,8 @@ const {
   PAGE_SIZE,
   MINIMUM_INDEX_PAGE_SIZE,
   render,
-  renderer,
   prepare
 } = require("./common.js");
-
-marked.setOptions({
-  gfm: true,
-  smartypants: false,
-  renderer: renderer,
-  highlight: function(code, lang) {
-    return require("highlight.js").highlightAuto(
-      code,
-      lang ? [lang] : undefined
-    ).value;
-  },
-  baseUrl: null
-});
 
 function getPostsQuery(where, limit) {
   let query = `

@@ -2,22 +2,8 @@ const url = require("url");
 const path = require("path");
 
 const { authed } = require("./auth.js");
-const { renderer, prepare: commonPrepare, render } = require("../common.js");
+const { prepare: commonPrepare, render } = require("../common.js");
 const sqlite = require("sqlite");
-const marked = require("marked");
-
-marked.setOptions({
-  gfm: true,
-  smartypants: false,
-  renderer: renderer,
-  highlight: function(code, lang) {
-    return require("highlight.js").highlightAuto(
-      code,
-      lang ? [lang] : undefined
-    ).value;
-  },
-  baseUrl: null
-});
 
 function prepare(post, options) {
   return {

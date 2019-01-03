@@ -1,18 +1,67 @@
 const url = require("url");
-const _fs = require("fs");
+const fs = require("fs");
 const path = require("path");
 const { promisify } = require("util");
 const multiparty = require("multiparty");
 
-const fs = {
-  unlink: promisify(_fs.unlink)
+const fsPromises = {
+  unlink: promisify(fs.unlink),
+  readFile: promisify(fs.readFile),
+  copyFile: promisify(fs.copyFile)
 };
 const { authed, sendToAuthProvider } = require("./auth.js");
-const { openFileMedia } = require("../import/media.js");
 const { render } = require("./templates/index.js");
 const sqlite = require("sqlite");
 
 const PAGE_SIZE = 20;
+
+const _id = require("nanoid/generate");
+const getMediaId = () =>
+  _id("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 26);
+
+async function openFileMedia(src, filePath, db) {
+  const alreadyLoaded = await db.get("SELECT * from media WHERE src = ?1", [
+    src
+  ]);
+
+  if (alreadyLoaded) {
+    return {
+      id: alreadyLoaded.id,
+      ext: alreadyLoaded.ext,
+      src: alreadyLoaded.src
+    };
+  }
+
+  const resp = await fsPromises.readFile(filePath);
+
+  const result = {
+    id: getMediaId(),
+    ext: src.match(/\.([a-z0-9]+)$/i)[1].toLowerCase(),
+    src: src
+  };
+
+  await db.run(
+    "INSERT INTO media (id, ext, data, created) VALUES (?1, ?2, ?3, ?4)",
+    {
+      1: result.id,
+      2: result.ext,
+      3: resp,
+      4: new Date().toISOString()
+    }
+  );
+
+  await fsPromises.copyFile(
+    filePath,
+    path.resolve(
+      __dirname,
+      process.env.DIST || "../dist",
+      "media",
+      `${result.id}.${result.ext}`
+    )
+  );
+
+  return result;
+}
 
 module.exports = {
   get: async (req, res) => {
@@ -70,7 +119,7 @@ module.exports = {
         1: parsedMatch[1],
         2: parsedMatch[2]
       });
-      await fs.unlink(
+      await fsPromises.unlink(
         path.resolve(
           __dirname,
           process.env.DIST || "../dist",
@@ -97,7 +146,7 @@ module.exports = {
     for (const f of files.files) {
       const src = `:upload/size-${f.headers.size}/${f.originalFilename}`;
       await openFileMedia(src, f.path, db);
-      await fs.unlink(f.path);
+      await fsPromises.unlink(f.path);
     }
 
     res.writeHead(303, { Location: `/backstage/media/` });

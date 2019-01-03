@@ -2,8 +2,5 @@ dist/
 node_modules/
 posts.db
 .DS_Store
-import/upload/
-import/instagram/photos/
-import/instagram/videos/
 ansible/*.retry
 server/secrets.json

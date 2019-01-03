@@ -1,15 +1,15 @@
-const _fs = require("fs");
+const fs = require("fs");
 const { promisify } = require("util");
 const os = require("os");
 const path = require("path");
 
-const fs = {
-  mkdir: promisify(_fs.mkdir),
-  access: promisify(_fs.access),
-  readFile: promisify(_fs.readFile),
-  writeFile: promisify(_fs.writeFile),
-  exists: promisify(_fs.exists),
-  mkdtemp: promisify(_fs.mkdtemp)
+const fsPromises = {
+  mkdir: promisify(fs.mkdir),
+  access: promisify(fs.access),
+  readFile: promisify(fs.readFile),
+  writeFile: promisify(fs.writeFile),
+  exists: promisify(fs.exists),
+  mkdtemp: promisify(fs.mkdtemp)
 };
 
 const sqlite = require("sqlite");
@@ -26,11 +26,23 @@ const {
   render
 } = require("./common.js");
 
-const rmrf = require("./rmrf.js");
+function rmrf(path) {
+  if (fs.existsSync(path)) {
+    fs.readdirSync(path).forEach(function(file) {
+      var curPath = path + "/" + file;
+      if (fs.lstatSync(curPath).isDirectory()) {
+        rmrf(curPath);
+      } else {
+        fs.unlinkSync(curPath);
+      }
+    });
+    fs.rmdirSync(path);
+  }
+}
 
 async function generate(stdout, stderr) {
-  const tmpFolder = await fs.mkdtemp(path.join(os.tmpdir(), "scroll-"));
-  await fs.mkdir(path.join(tmpFolder, "/media"));
+  const tmpFolder = await fsPromises.mkdtemp(path.join(os.tmpdir(), "scroll-"));
+  await fsPromises.mkdir(path.join(tmpFolder, "/media"));
 
   stdout.write(`made tmp dir: ${tmpFolder}\n`);
 
@@ -106,14 +118,22 @@ async function generate(stdout, stderr) {
         });
 
         if (post.slug && post.id !== post.slug) {
-          await fs.writeFile(`${tmpFolder}/${post.slug}.html`, renderedPage, {
-            flag: "wx"
-          });
+          await fsPromises.writeFile(
+            `${tmpFolder}/${post.slug}.html`,
+            renderedPage,
+            {
+              flag: "wx"
+            }
+          );
         }
 
-        return fs.writeFile(`${tmpFolder}/${post.id}.html`, renderedPage, {
-          flag: "wx"
-        });
+        return fsPromises.writeFile(
+          `${tmpFolder}/${post.id}.html`,
+          renderedPage,
+          {
+            flag: "wx"
+          }
+        );
       })
     );
   }
@@ -138,7 +158,7 @@ async function generate(stdout, stderr) {
     const url = `page-${pageNumber}.html`;
     const title = `page-${pageNumber}`;
 
-    await fs.writeFile(
+    await fsPromises.writeFile(
       `${tmpFolder}/${url}`,
       await render("./templates/list.mustache", {
         blog: {
@@ -192,7 +212,7 @@ async function generate(stdout, stderr) {
     };
   }
 
-  await fs.writeFile(
+  await fsPromises.writeFile(
     `${tmpFolder}/index.html`,
     await render("./templates/list.mustache", {
       blog: {
@@ -213,7 +233,7 @@ async function generate(stdout, stderr) {
 
   const feedPosts = pagination[0].concat(pagination[1]).slice(0, PAGE_SIZE);
 
-  await fs.writeFile(
+  await fsPromises.writeFile(
     `${tmpFolder}/rss.xml`,
     await render("./templates/rss.mustache", {
       blog: {
@@ -242,7 +262,7 @@ async function generate(stdout, stderr) {
     return a > b ? -1 : 1;
   });
 
-  await fs.writeFile(
+  await fsPromises.writeFile(
     `${tmpFolder}/archive.html`,
     await render("./templates/archive.mustache", {
       blog: {
@@ -280,7 +300,7 @@ async function generate(stdout, stderr) {
       .then(loaded =>
         Promise.all(
           loaded.map(async m =>
-            fs.writeFile(
+            fsPromises.writeFile(
               path.join(tmpFolder, "media", `${m.id}.${m.ext}`),
               m.data
             )

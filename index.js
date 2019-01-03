@@ -17,7 +17,7 @@ const groupBy = require("lodash.groupby");
 const chunk = require("lodash.chunk");
 const Rsync = require("rsync");
 
-require("dotenv").config();
+require("dotenv").config({ path: require("path").resolve(__dirname, ".env") });
 
 const {
   BLOG_TITLE,

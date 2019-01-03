@@ -2,7 +2,7 @@ const http = require("http");
 const url = require("url");
 const querystring = require("querystring");
 
-require("dotenv").config();
+require("dotenv").config({ path: require("path").resolve(__dirname, ".env") });
 
 const handlers = {
   "GET /backstage": require("./server/backstage.js"),

@@ -3,7 +3,7 @@
   remote_user: root
   gather_facts: yes
   vars:
-    NODEJS_VERSION: "8"
+    NODEJS_VERSION: "10"
 
   tasks:
     - name: Install the gpg key for nodejs LTS

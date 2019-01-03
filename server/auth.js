@@ -40,9 +40,12 @@ module.exports = {
   },
 
   sendToAuthProvider(req, res) {
+    const parsedUrl = url.parse(req.absolute);
+
     const redirectURL = url.format({
-      protocol: url.parse(process.env.BLOG_BASE_URL).protocol,
-      hostname: url.parse(process.env.BLOG_BASE_URL).hostname,
+      protocol: parsedUrl.protocol,
+      hostname: parsedUrl.hostname,
+      port: parsedUrl.port,
       pathname: "/backstage/callback",
       query: {
         next: req.url

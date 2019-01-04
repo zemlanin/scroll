@@ -169,7 +169,7 @@ renderer.image = function(href, title, text) {
       return `<iframe src="${frameSrc}"
         frameborder="0"
         width="640"
-        width="360"
+        height="360"
         allow="autoplay; encrypted-media"
         allowfullscreen="1"
       ></iframe>`;

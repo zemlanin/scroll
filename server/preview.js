@@ -2,7 +2,12 @@ const url = require("url");
 const path = require("path");
 
 const { authed } = require("./auth.js");
-const { BLOG_TITLE, POSTS_DB, prepare: commonPrepare, render } = require("../common.js");
+const {
+  BLOG_TITLE,
+  POSTS_DB,
+  prepare: commonPrepare,
+  render
+} = require("../common.js");
 const sqlite = require("sqlite");
 
 function prepare(post, options) {

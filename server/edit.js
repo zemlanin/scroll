@@ -1,5 +1,4 @@
 const url = require("url");
-const path = require("path");
 const _id = require("nanoid/generate");
 const getPostId = () =>
   `post-${new Date().getFullYear()}-${(new Date().getMonth() + 1)

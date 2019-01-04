@@ -1,5 +1,4 @@
 const url = require("url");
-const path = require("path");
 
 const { authed, logout, sendToAuthProvider } = require("./auth.js");
 const { render } = require("./templates/index.js");

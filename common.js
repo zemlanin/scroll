@@ -29,7 +29,12 @@ const DIST = path.resolve(__dirname, process.env.DIST || "dist");
 const POSTS_DB = path.resolve(__dirname, process.env.POSTS_DB || "posts.db");
 
 function isOwnMedia(href) {
-  return process.env.BLOG_BASE_URL && href.startsWith(process.env.BLOG_BASE_URL + "/media/") || href.startsWith("media/") || href.startsWith("/media/");
+  return (
+    (process.env.BLOG_BASE_URL &&
+      href.startsWith(process.env.BLOG_BASE_URL + "/media/")) ||
+    href.startsWith("media/") ||
+    href.startsWith("/media/")
+  );
 }
 
 const renderer = new marked.Renderer();
@@ -99,10 +104,13 @@ renderer.image = function(href, title, text) {
   } else if (process.env.BLOG_BASE_URL && href.startsWith("media/")) {
     href = process.env.BLOG_BASE_URL + "/" + href;
   } else if (href.startsWith("media/")) {
-    href = "/" + href
+    href = "/" + href;
   }
 
-  if ((isOwnMedia(href) || text && text.indexOf("poster=") > -1) && href.endsWith(".mp4")) {
+  if (
+    (isOwnMedia(href) || (text && text.indexOf("poster=") > -1)) &&
+    href.endsWith(".mp4")
+  ) {
     const attrs =
       text &&
       text

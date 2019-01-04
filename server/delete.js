@@ -1,5 +1,4 @@
 const url = require("url");
-const path = require("path");
 
 const { authed, sendToAuthProvider } = require("./auth.js");
 const { POSTS_DB } = require("../common.js");

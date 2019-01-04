@@ -27,6 +27,7 @@
     "lodash.chunk": "4.2.0",
     "lodash.groupby": "4.6.0",
     "marked": "0.3.19",
+    "mime": "2.4.0",
     "multiparty": "4.1.4",
     "mustache": "2.3.0",
     "nanoid": "1.0.2",

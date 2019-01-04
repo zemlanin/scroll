@@ -10,6 +10,7 @@ const fsPromises = {
   copyFile: promisify(fs.copyFile)
 };
 const { authed, sendToAuthProvider } = require("./auth.js");
+const { DIST } = require("../common.js");
 const { render } = require("./templates/index.js");
 const sqlite = require("sqlite");
 
@@ -52,12 +53,7 @@ async function openFileMedia(src, filePath, db) {
 
   await fsPromises.copyFile(
     filePath,
-    path.resolve(
-      __dirname,
-      process.env.DIST || "../dist",
-      "media",
-      `${result.id}.${result.ext}`
-    )
+    path.resolve(DIST, "media", `${result.id}.${result.ext}`)
   );
 
   return result;
@@ -119,14 +115,7 @@ module.exports = {
         1: parsedMatch[1],
         2: parsedMatch[2]
       });
-      await fsPromises.unlink(
-        path.resolve(
-          __dirname,
-          process.env.DIST || "../dist",
-          "media",
-          req.post.delete
-        )
-      );
+      await fsPromises.unlink(path.resolve(DIST, "media", req.post.delete));
       res.writeHead(303, { Location: `/backstage/media/` });
       res.end();
       return;

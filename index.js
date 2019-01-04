@@ -20,6 +20,7 @@ const Rsync = require("rsync");
 require("dotenv").config({ path: require("path").resolve(__dirname, ".env") });
 
 const {
+  DIST,
   BLOG_TITLE,
   BLOG_BASE_URL,
   PAGE_SIZE,
@@ -319,7 +320,7 @@ async function generate(stdout, stderr) {
       .set("delete")
       .flags("Icru")
       .source(tmpFolder + path.sep)
-      .destination(process.env.DIST || "dist");
+      .destination(DIST);
 
     rsync.execute(
       function(error) {

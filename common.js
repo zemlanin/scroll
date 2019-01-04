@@ -25,6 +25,7 @@ const PAGE_SIZE = 10;
 const MINIMUM_INDEX_PAGE_SIZE = 5;
 const BLOG_TITLE = "zemlan.in";
 const BLOG_BASE_URL = process.env.BLOG_BASE_URL || ".";
+const DIST = path.resolve(__dirname, process.env.DIST || "dist");
 
 function isOwnMedia(href) {
   return process.env.BLOG_BASE_URL
@@ -377,6 +378,7 @@ async function render(tmpl, data) {
 module.exports = {
   BLOG_TITLE,
   BLOG_BASE_URL,
+  DIST,
   PAGE_SIZE,
   MINIMUM_INDEX_PAGE_SIZE,
   prepare,

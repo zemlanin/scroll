@@ -11,8 +11,8 @@ const fsPromises = {
 const chunk = require("lodash.chunk");
 const groupBy = require("lodash.groupby");
 
-const DESTINATION = process.env.DIST || "dist";
 const {
+  DIST,
   BLOG_BASE_URL,
   BLOG_TITLE,
   PAGE_SIZE,
@@ -57,11 +57,7 @@ async function getPost(db, postId) {
 }
 
 async function removePostPage(post) {
-  const postIdPagePath = path.resolve(
-    __dirname,
-    DESTINATION,
-    `${post.id}.html`
-  );
+  const postIdPagePath = path.resolve(DIST, `${post.id}.html`);
 
   try {
     await fsPromises.access(postIdPagePath);
@@ -71,11 +67,7 @@ async function removePostPage(post) {
   }
 
   if (post.slug) {
-    const postSlugPagePath = path.resolve(
-      __dirname,
-      DESTINATION,
-      `${post.slug}.html`
-    );
+    const postSlugPagePath = path.resolve(DIST, `${post.slug}.html`);
 
     try {
       await fsPromises.access(postSlugPagePath);
@@ -105,20 +97,19 @@ async function generatePostPage(post) {
 
   if (post.slug && post.id !== post.slug) {
     await fsPromises.writeFile(
-      `${DESTINATION}/${post.slug}.html`,
+      path.resolve(DIST, `${post.slug}.html`),
       renderedPage
     );
   }
 
-  return fsPromises.writeFile(`${DESTINATION}/${post.id}.html`, renderedPage);
+  return fsPromises.writeFile(
+    path.resolve(DIST, `${post.id}.html`),
+    renderedPage
+  );
 }
 
 async function removePotentialPagination(newestPage) {
-  const pagePath = path.resolve(
-    __dirname,
-    DESTINATION,
-    `page-${newestPage.index + 1}.html`
-  );
+  const pagePath = path.resolve(DIST, `page-${newestPage.index + 1}.html`);
 
   try {
     await fsPromises.access(pagePath);
@@ -140,7 +131,7 @@ async function generatePaginationPage(db, pageNumber, postIds, isNewest) {
   const title = `page-${pageNumber}`;
 
   await fsPromises.writeFile(
-    `${DESTINATION}/${url}`,
+    path.resolve(DIST, url),
     await render("./templates/list.mustache", {
       blog: {
         title: BLOG_TITLE,
@@ -187,7 +178,7 @@ async function generateIndexPage(db, newestPage) {
   );
 
   await fsPromises.writeFile(
-    `${DESTINATION}/index.html`,
+    path.resolve(DIST, "index.html"),
     await render("./templates/list.mustache", {
       blog: {
         title: BLOG_TITLE,
@@ -238,7 +229,7 @@ async function generateArchivePage(db) {
   });
 
   await fsPromises.writeFile(
-    `${DESTINATION}/archive.html`,
+    path.resolve(DIST, "archive.html"),
     await render("./templates/archive.mustache", {
       blog: {
         title: BLOG_TITLE,
@@ -262,7 +253,7 @@ async function generateRSSPage(db) {
   const posts = await getPosts(db, {}, "draft = 0 AND private = 0", PAGE_SIZE);
 
   await fsPromises.writeFile(
-    `${DESTINATION}/rss.xml`,
+    path.resolve(DIST, "rss.xml"),
     await render("./templates/rss.mustache", {
       blog: {
         title: BLOG_TITLE,

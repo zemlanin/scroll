@@ -21,6 +21,7 @@ require("dotenv").config({ path: require("path").resolve(__dirname, ".env") });
 
 const {
   DIST,
+  POSTS_DB,
   BLOG_TITLE,
   BLOG_BASE_URL,
   PAGE_SIZE,
@@ -49,7 +50,7 @@ async function generate(stdout, stderr) {
 
   stdout.write(`made tmp dir: ${tmpFolder}\n`);
 
-  const db = await sqlite.open(path.resolve(__dirname, "posts.db"));
+  const db = await sqlite.open(POSTS_DB);
 
   let posts = await db.all(`
     SELECT

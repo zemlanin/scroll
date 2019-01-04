@@ -10,7 +10,7 @@ const fsPromises = {
   copyFile: promisify(fs.copyFile)
 };
 const { authed, sendToAuthProvider } = require("./auth.js");
-const { DIST } = require("../common.js");
+const { DIST, POSTS_DB, renderer } = require("../common.js");
 const { render } = require("./templates/index.js");
 const sqlite = require("sqlite");
 
@@ -68,7 +68,7 @@ const mediaId = {
     }
 
     const query = url.parse(req.url, true).query;
-    const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
+    const db = await sqlite.open(POSTS_DB);
     const m = await db.get(
       `
         SELECT id, ext
@@ -124,7 +124,7 @@ const mediaId = {
     }
 
     const query = url.parse(req.url, true).query;
-    const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
+    const db = await sqlite.open(POSTS_DB);
     const m = await db.get(
       `
         SELECT id, ext
@@ -166,7 +166,7 @@ module.exports = {
       return sendToAuthProvider(req, res);
     }
 
-    const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
+    const db = await sqlite.open(POSTS_DB);
     const offset = +query.offset || 0;
     const media = await db.all(
       `
@@ -219,7 +219,7 @@ module.exports = {
       });
     });
 
-    const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
+    const db = await sqlite.open(POSTS_DB);
     let lastMedia = null;
     for (const f of files.files) {
       const src = `:upload/size-${f.headers.size}/${f.originalFilename}`;

@@ -3,7 +3,7 @@ const path = require("path");
 
 const { authed, logout, sendToAuthProvider } = require("./auth.js");
 const { render } = require("./templates/index.js");
-const { renderer } = require("../common.js");
+const { POSTS_DB, renderer } = require("../common.js");
 const marked = require("marked");
 const sqlite = require("sqlite");
 const cheerio = require("cheerio");
@@ -123,7 +123,7 @@ module.exports = async (req, res) => {
     return sendToAuthProvider(req, res);
   }
 
-  const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
+  const db = await sqlite.open(POSTS_DB);
   const offset = +query.offset || 0;
   const posts = await db.all(
     `

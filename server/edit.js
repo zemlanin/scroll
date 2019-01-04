@@ -11,6 +11,7 @@ const getPostId = () =>
 
 const { authed, sendToAuthProvider } = require("./auth.js");
 const { generateAfterEdit } = require("../generate-post.js");
+const { POSTS_DB } = require("../common.js");
 const { render } = require("./templates/index.js");
 const sqlite = require("sqlite");
 
@@ -27,7 +28,7 @@ module.exports = {
     const query = url.parse(req.url, true).query;
     const existingPostId = query.id || (req.post && req.post.id);
 
-    const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
+    const db = await sqlite.open(POSTS_DB);
 
     if (query.latest != null) {
       const latestPost = await db.get(
@@ -132,7 +133,7 @@ module.exports = {
       created: new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, "")
     };
 
-    const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
+    const db = await sqlite.open(POSTS_DB);
 
     let postExists = false;
     let oldStatus = null;

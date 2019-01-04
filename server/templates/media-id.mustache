@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        {{> bulma.css}}
+    </style>
+    <style>
+      nav {
+        margin-top: 1em;
+        margin-bottom: 1em;
+      }
+
+      textarea,
+      input[name="slug"]{
+        width: 100%;
+        font-size: 1em;
+        font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
+          "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
+          "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
+          "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+      }
+
+      textarea {
+        min-height: 40vh;
+      }
+
+      section .media-expanded img,
+      section .media-expanded video,
+      section .media-expanded audio {
+        max-width: 100%;
+        width: auto;
+        max-height: 22.5em;
+        height: auto;
+        display: block;
+        margin: auto;
+      }
+    </style>
+</head>
+<body class="container is-fluid" style="margin-top: 1em; margin-bottom: 80px">
+    <nav class="level">
+      <div class="level-left">
+        <a class="button" href="/backstage">&larr; backstage</a>
+        <a class="button" href="/backstage/media">media</a>
+      </div>
+      <form enctype="multipart/form-data"
+        action="/backstage/media/"
+        method="POST"
+        class="field has-addons level-right"
+      >
+        <div class="control is-expanded">
+          <input name="files" type="file" multiple class="input" />
+        </div>
+        <div class="control">
+          <button class="button">+</button>
+        </div>
+      </form>
+    </nav>
+
+    <section class="columns">
+      <div class="column media-expanded">
+        {{#media}}
+          {{#type.image}}
+            <img src="/media/{{id}}.{{ext}}" />
+          {{/type.image}}
+          {{#type.video}}
+            <video src="/media/{{id}}.{{ext}}" controls playsinline></video>
+          {{/type.video}}
+          {{#type.audio}}
+            <audio src="/media/{{id}}.{{ext}}" controls></audio>
+          {{/type.audio}}
+        {{/media}}
+      </div>
+
+      <div class="column">
+        <div class="section">
+          <span class="title is-4">conversions:</span>
+          <div class="tags has-addons">
+            <a href="/media/{{media.id}}.{{media.ext}}" class="tag">original</a>
+            {{^posts}}
+            <form method="POST" class="tag is-danger">
+              <button class="delete is-small" name="delete" value="1" onclick="return confirm('are you sure?')">delete</button>
+            </form>
+            {{/posts}}
+          </div>
+        </div>
+
+        <div class="section">
+          <span class="title is-4">posts:</span>
+          <ul>
+            {{#posts}}
+              <li class="level" style="display: flex">
+                {{#draft}}
+                <span class="level-right">
+                  <a href="/backstage/edit/?id={{id}}">/{{slugOrId}}</a>
+                  &nbsp;<sup>[d]</sup>
+                </span>
+                {{/draft}}
+                {{^draft}}
+                <a class="level-right" href="/{{slugOrId}}.html">/{{slugOrId}}.html</a>
+                {{/draft}}
+                <a class="level-right" href="/backstage/edit/?id={{id}}">edit</a>
+              </li>
+            {{/posts}}
+            {{^posts}}
+              <div class="level" style="display: flex">
+                <span>nothing yet</span>
+                <a href="/backstage/edit/?text=![](/media/{{media.id}}.{{media.ext}})">create post with that</a>
+              </div>
+            {{/posts}}
+          </ul>
+        </div>
+      </div>
+    </section>
+</body>
+</html>

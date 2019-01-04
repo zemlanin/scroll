@@ -59,9 +59,106 @@ async function openFileMedia(src, filePath, db) {
   return result;
 }
 
+const mediaId = {
+  get: async (req, res) => {
+    const user = authed(req, res);
+
+    if (!user) {
+      return sendToAuthProvider(req, res);
+    }
+
+    const query = url.parse(req.url, true).query;
+    const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
+    const m = await db.get(
+      `
+        SELECT id, ext
+        FROM media
+        WHERE id = ?1
+        LIMIT 1
+      `,
+      { 1: query.id }
+    );
+
+    if (!m) {
+      res.writeHead(404);
+      res.end();
+      return;
+    }
+
+    const posts = await db.all(
+      `
+        SELECT
+          id,
+          slug,
+          case when slug is not null
+            then slug
+            else id
+          end as slugOrId,
+          draft
+        FROM posts
+        WHERE instr(text, ?1) > 0
+        ORDER BY created DESC
+      `,
+      { 1: `media/${query.id}` }
+    );
+
+    return render("media-id.mustache", {
+      user: user,
+      posts: posts,
+      media: {
+        ...m,
+        type: {
+          image: !!m.ext.match("^(gif|jpe?g|png)$"),
+          video: !!m.ext.match("^(mp4)$"),
+          audio: !!m.ext.match("^(mp3)$"),
+          text: !!m.ext.match("^(md|txt|markdown|html|js|css)$")
+        }
+      }
+    });
+  },
+  post: async (req, res) => {
+    const user = authed(req, res);
+
+    if (!user) {
+      return sendToAuthProvider(req, res);
+    }
+
+    const query = url.parse(req.url, true).query;
+    const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
+    const m = await db.get(
+      `
+        SELECT id, ext
+        FROM media
+        WHERE id = ?1
+        LIMIT 1
+      `,
+      { 1: query.id }
+    );
+
+    if (!m) {
+      res.writeHead(404);
+      res.end();
+      return;
+    }
+
+    if (req.post && req.post.delete) {
+      await db.run(`DELETE FROM media WHERE id = ?1`, {
+        1: m.id
+      });
+      await fsPromises.unlink(path.resolve(DIST, "media", `${m.id}.${m.ext}`));
+      res.writeHead(303, { Location: `/backstage/media/` });
+      res.end();
+      return;
+    }
+  }
+};
+
 module.exports = {
   get: async (req, res) => {
     const query = url.parse(req.url, true).query;
+    if (query.id) {
+      return await mediaId.get(req, res);
+    }
 
     const user = authed(req, res);
 
@@ -73,13 +170,11 @@ module.exports = {
     const offset = +query.offset || 0;
     const media = await db.all(
       `
-      SELECT
-        id,
-        ext
-      FROM media
-      ORDER BY created DESC
-      LIMIT ?2 OFFSET ?1
-    `,
+        SELECT id, ext
+        FROM media
+        ORDER BY created DESC
+        LIMIT ?2 OFFSET ?1
+      `,
       { 1: offset, 2: PAGE_SIZE + 1 }
     );
 
@@ -90,10 +185,10 @@ module.exports = {
       media: media.slice(0, PAGE_SIZE).map(m => ({
         ...m,
         type: {
-          image: m.ext.match("^(gif|jpe?g|png)$"),
-          video: m.ext.match("^(mp4)$"),
-          audio: m.ext.match("^(mp3)$"),
-          text: m.ext.match("^(md|txt|markdown|html|js|css)$")
+          image: !!m.ext.match("^(gif|jpe?g|png)$"),
+          video: !!m.ext.match("^(mp4)$"),
+          audio: !!m.ext.match("^(mp3)$"),
+          text: !!m.ext.match("^(md|txt|markdown|html|js|css)$")
         }
       })),
       urls: {
@@ -102,23 +197,15 @@ module.exports = {
     });
   },
   post: async (req, res) => {
+    const query = url.parse(req.url, true).query;
+    if (query.id) {
+      return await mediaId.post(req, res);
+    }
+
     const user = authed(req, res);
 
     if (!user) {
       return sendToAuthProvider(req, res);
-    }
-
-    const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
-    if (req.post && req.post.delete) {
-      const parsedMatch = req.post.delete.match(/^([a-z0-9_-]+).([a-z0-9]+)$/i);
-      await db.run(`DELETE FROM media WHERE id = ?1 AND ext = ?2`, {
-        1: parsedMatch[1],
-        2: parsedMatch[2]
-      });
-      await fsPromises.unlink(path.resolve(DIST, "media", req.post.delete));
-      res.writeHead(303, { Location: `/backstage/media/` });
-      res.end();
-      return;
     }
 
     const { files } = await new Promise((resolve, reject) => {
@@ -132,13 +219,20 @@ module.exports = {
       });
     });
 
+    const db = await sqlite.open(path.resolve(__dirname, "..", "posts.db"));
+    let lastMedia = null;
     for (const f of files.files) {
       const src = `:upload/size-${f.headers.size}/${f.originalFilename}`;
-      await openFileMedia(src, f.path, db);
+      lastMedia = await openFileMedia(src, f.path, db);
       await fsPromises.unlink(f.path);
     }
 
-    res.writeHead(303, { Location: `/backstage/media/` });
+    res.writeHead(303, {
+      Location:
+        files.files.length === 1
+          ? `/backstage/media/?id=${lastMedia.id}`
+          : `/backstage/media/`
+    });
     res.end();
     return;
   }

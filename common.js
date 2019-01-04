@@ -1,4 +1,5 @@
 const path = require("path");
+const mime = require("mime");
 const marked = require("marked");
 const cheerio = require("cheerio");
 const mustache = require("mustache");
@@ -35,6 +36,19 @@ function isOwnMedia(href) {
     href.startsWith("media/") ||
     href.startsWith("/media/")
   );
+}
+
+function getMimeObj(href) {
+  const fullMimeType = mime.getType(href) || "";
+  const type = fullMimeType && fullMimeType.split("/")[0] || "";
+
+  return {
+    image: type === "image",
+    video: type === "video",
+    audio: type === "audio",
+    text: type === "text" || fullMimeType.match(/^application\/(js|json)$/i),
+    pdf: fullMimeType === "application/pdf"
+  };
 }
 
 const renderer = new marked.Renderer();
@@ -106,10 +120,12 @@ renderer.image = function(href, title, text) {
   } else if (href.startsWith("media/")) {
     href = "/" + href;
   }
+  
+  const mimeObj = getMimeObj(href);
 
   if (
     (isOwnMedia(href) || (text && text.indexOf("poster=") > -1)) &&
-    href.endsWith(".mp4")
+    mimeObj.video
   ) {
     const attrs =
       text &&
@@ -127,7 +143,7 @@ renderer.image = function(href, title, text) {
       ""}></video>`;
   }
 
-  if (isOwnMedia(href) && href.endsWith(".pdf")) {
+  if (isOwnMedia(href) && mimeObj.pdf) {
     const frameSrc = `https://drive.google.com/viewerng/viewer?pid=explorer&efh=false&a=v&chrome=false&embedded=true&url=${encodeURIComponent(
       href
     )}`;
@@ -394,6 +410,7 @@ module.exports = {
   POSTS_DB,
   PAGE_SIZE,
   MINIMUM_INDEX_PAGE_SIZE,
+  getMimeObj,
   prepare,
   render,
   renderer

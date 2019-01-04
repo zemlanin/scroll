@@ -2,6 +2,7 @@ const url = require("url");
 const fs = require("fs");
 const path = require("path");
 const { promisify } = require("util");
+const mime = require("mime");
 const multiparty = require("multiparty");
 
 const fsPromises = {
@@ -10,7 +11,7 @@ const fsPromises = {
   copyFile: promisify(fs.copyFile)
 };
 const { authed, sendToAuthProvider } = require("./auth.js");
-const { DIST, POSTS_DB, renderer } = require("../common.js");
+const { DIST, POSTS_DB, getMimeObj, renderer } = require("../common.js");
 const { render } = require("./templates/index.js");
 const sqlite = require("sqlite");
 
@@ -101,6 +102,8 @@ const mediaId = {
       `,
       { 1: `media/${m.id}` }
     );
+    
+    const mediaMimeType = mime.getType(m.ext) || "";
 
     return render("media-id.mustache", {
       user: user,
@@ -108,12 +111,7 @@ const mediaId = {
       media: {
         ...m,
         displayHtml: renderer.image(`media/${m.id}.${m.ext}`),
-        type: {
-          image: !!m.ext.match("^(gif|jpe?g|png)$"),
-          video: !!m.ext.match("^(mp4)$"),
-          audio: !!m.ext.match("^(mp3)$"),
-          text: !!m.ext.match("^(md|txt|markdown|html|js|css)$")
-        }
+        type: getMimeObj(m.ext)
       }
     });
   },
@@ -185,12 +183,7 @@ module.exports = {
       user: user,
       media: media.slice(0, PAGE_SIZE).map(m => ({
         ...m,
-        type: {
-          image: !!m.ext.match("^(gif|jpe?g|png)$"),
-          video: !!m.ext.match("^(mp4)$"),
-          audio: !!m.ext.match("^(mp3)$"),
-          text: !!m.ext.match("^(md|txt|markdown|html|js|css)$")
-        }
+        type: getMimeObj(m.ext)
       })),
       urls: {
         moreMedia: moreMedia && `/backstage/media/?offset=${offset + PAGE_SIZE}`

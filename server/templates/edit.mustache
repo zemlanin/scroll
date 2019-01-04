@@ -118,7 +118,10 @@
                 />
                 </div>
                 <div class="control">
-                <button type="button" class="button control" onclick='document.querySelector("form#main-form").created.value = new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, "")'>now</button>
+                    <button type="button"
+                        class="button"
+                        onclick='document.querySelector("form#main-form").created.value = new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, "")'
+                    >now</button>
                 </div>
             </div>
             <div class="tabs">

@@ -40,7 +40,7 @@ function isOwnMedia(href) {
 
 function getMimeObj(href) {
   const fullMimeType = mime.getType(href) || "";
-  const type = fullMimeType && fullMimeType.split("/")[0] || "";
+  const type = (fullMimeType && fullMimeType.split("/")[0]) || "";
 
   return {
     image: type === "image",
@@ -120,7 +120,7 @@ renderer.image = function(href, title, text) {
   } else if (href.startsWith("media/")) {
     href = "/" + href;
   }
-  
+
   const mimeObj = getMimeObj(href);
 
   if (

@@ -102,7 +102,7 @@ const mediaId = {
       `,
       { 1: `media/${m.id}` }
     );
-    
+
     const mediaMimeType = mime.getType(m.ext) || "";
 
     return render("media-id.mustache", {

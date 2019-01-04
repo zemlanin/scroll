@@ -29,9 +29,7 @@ const DIST = path.resolve(__dirname, process.env.DIST || "dist");
 const POSTS_DB = path.resolve(__dirname, process.env.POSTS_DB || "posts.db");
 
 function isOwnMedia(href) {
-  return process.env.BLOG_BASE_URL
-    ? href.startsWith(process.env.BLOG_BASE_URL + "/media/")
-    : href.startsWith("media/") || href.startsWith("/media/");
+  return process.env.BLOG_BASE_URL && href.startsWith(process.env.BLOG_BASE_URL + "/media/") || href.startsWith("media/") || href.startsWith("/media/");
 }
 
 const renderer = new marked.Renderer();
@@ -96,16 +94,15 @@ renderer.image = function(href, title, text) {
     return `<iframe width="640" height="${height}" allow="autoplay *; encrypted-media *;" frameborder="0" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation" src="${href}"></iframe>`;
   }
 
-  if (href.startsWith("/media/")) {
-    href = process.env.BLOG_BASE_URL
-      ? process.env.BLOG_BASE_URL + href
-      : href.slice(1);
+  if (process.env.BLOG_BASE_URL && href.startsWith("/media/")) {
+    href = process.env.BLOG_BASE_URL + href;
+  } else if (process.env.BLOG_BASE_URL && href.startsWith("media/")) {
+    href = process.env.BLOG_BASE_URL + "/" + href;
+  } else if (href.startsWith("media/")) {
+    href = "/" + href
   }
 
-  if (
-    (isOwnMedia(href) && href.endsWith(".mp4")) ||
-    (!href.endsWith(".pdf") && text && text.indexOf("poster=") > -1)
-  ) {
+  if ((isOwnMedia(href) || text && text.indexOf("poster=") > -1) && href.endsWith(".mp4")) {
     const attrs =
       text &&
       text
@@ -122,31 +119,37 @@ renderer.image = function(href, title, text) {
       ""}></video>`;
   }
 
-  if (
-    isOwnMedia(href) &&
-    href.endsWith(".pdf") &&
-    text &&
-    text.indexOf("poster=") > -1
-  ) {
-    const attrs =
-      text &&
-      text
-        .replace(/&apos;/g, `'`)
-        .replace(/&quot;/g, `"`)
-        .replace(
-          /((src|href|poster)=['"]?)\/media\//g,
-          `$1${
-            process.env.BLOG_BASE_URL ? process.env.BLOG_BASE_URL + "/" : ""
-          }media/`
-        );
-
-    const imgSrc = attrs.match(/poster=['"]?([^'" ]+)['"]?/)[1];
-    const dataSrc = `https://drive.google.com/viewerng/viewer?pid=explorer&efh=false&a=v&chrome=false&embedded=true&url=${encodeURIComponent(
+  if (isOwnMedia(href) && href.endsWith(".pdf")) {
+    const frameSrc = `https://drive.google.com/viewerng/viewer?pid=explorer&efh=false&a=v&chrome=false&embedded=true&url=${encodeURIComponent(
       href
     )}`;
-    return `<a class="future-frame" href="${href}" data-src="${dataSrc}">
-      <img src="${imgSrc}">
-    </a>`;
+
+    if (text && text.indexOf("poster=") > -1) {
+      const attrs =
+        text &&
+        text
+          .replace(/&apos;/g, `'`)
+          .replace(/&quot;/g, `"`)
+          .replace(
+            /((src|href|poster)=['"]?)\/media\//g,
+            `$1${
+              process.env.BLOG_BASE_URL ? process.env.BLOG_BASE_URL + "/" : ""
+            }media/`
+          );
+
+      const imgSrc = attrs.match(/poster=['"]?([^'" ]+)['"]?/)[1];
+      return `<a class="future-frame" href="${href}" data-src="${frameSrc}">
+        <img src="${imgSrc}">
+      </a>`;
+    } else {
+      return `<iframe src="${frameSrc}"
+        frameborder="0"
+        width="640"
+        width="360"
+        allow="autoplay; encrypted-media"
+        allowfullscreen="1"
+      ></iframe>`;
+    }
   }
 
   return ogImage(href, title, text);

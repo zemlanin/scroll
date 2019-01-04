@@ -60,17 +60,7 @@
 
     <section class="columns">
       <div class="column media-expanded">
-        {{#media}}
-          {{#type.image}}
-            <img src="/media/{{id}}.{{ext}}" />
-          {{/type.image}}
-          {{#type.video}}
-            <video src="/media/{{id}}.{{ext}}" controls playsinline></video>
-          {{/type.video}}
-          {{#type.audio}}
-            <audio src="/media/{{id}}.{{ext}}" controls></audio>
-          {{/type.audio}}
-        {{/media}}
+        {{{media.displayHtml}}}
       </div>
 
       <div class="column">

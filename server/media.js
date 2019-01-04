@@ -99,7 +99,7 @@ const mediaId = {
         WHERE instr(text, ?1) > 0
         ORDER BY created DESC
       `,
-      { 1: `media/${query.id}` }
+      { 1: `media/${m.id}` }
     );
 
     return render("media-id.mustache", {
@@ -107,6 +107,7 @@ const mediaId = {
       posts: posts,
       media: {
         ...m,
+        displayHtml: renderer.image(`media/${m.id}.${m.ext}`),
         type: {
           image: !!m.ext.match("^(gif|jpe?g|png)$"),
           video: !!m.ext.match("^(mp4)$"),

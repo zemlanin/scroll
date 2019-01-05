@@ -44,13 +44,11 @@ function rmrf(path) {
   }
 }
 
-async function generate(stdout, stderr) {
+async function generate(db, stdout, stderr) {
   const tmpFolder = await fsPromises.mkdtemp(path.join(os.tmpdir(), "scroll-"));
   await fsPromises.mkdir(path.join(tmpFolder, "/media"));
 
   stdout.write(`made tmp dir: ${tmpFolder}\n`);
-
-  const db = await sqlite.open(POSTS_DB);
 
   let posts = await db.all(`
     SELECT
@@ -340,15 +338,22 @@ async function generate(stdout, stderr) {
 }
 
 if (require.main === module) {
-  generate(process.stdout, process.stderr)
-    .then(() => {
-      console.log("done");
-      process.exit(0);
-    })
-    .catch(err => {
-      console.error(err);
-      process.exit(1);
-    });
+  sqlite.open(POSTS_DB)
+    .then(db =>
+	    generate(db, process.stdout, process.stderr)
+		    .then(() => {
+		      console.log("done");
+		      return db.close().then(() => {
+		        process.exit(0);
+		      })
+		    })
+		    .catch(err => {
+		      console.error(err);
+		      return db.close().then(() => {
+		        process.exit(1);
+		      })
+		    })
+    );
 } else {
   module.exports = generate;
 }

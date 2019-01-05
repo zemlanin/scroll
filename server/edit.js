@@ -27,7 +27,7 @@ module.exports = {
     const query = url.parse(req.url, true).query;
     const existingPostId = query.id || (req.post && req.post.id);
 
-    const db = await sqlite.open(POSTS_DB);
+    const db = await req.db();
 
     if (query.latest != null) {
       const latestPost = await db.get(
@@ -132,7 +132,7 @@ module.exports = {
       created: new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, "")
     };
 
-    const db = await sqlite.open(POSTS_DB);
+    const db = await req.db();
 
     let postExists = false;
     let oldStatus = null;

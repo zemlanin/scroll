@@ -38,7 +38,7 @@ module.exports = {
       `
     );
 
-    return generate(res, res)
+    return generate(await req.db(), res, res)
       .then(() => {
         res.end("done");
       })

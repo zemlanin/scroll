@@ -1,6 +1,7 @@
 const http = require("http");
 const url = require("url");
 const querystring = require("querystring");
+const sqlite = require("sqlite");
 
 require("dotenv").config({ path: require("path").resolve(__dirname, ".env") });
 
@@ -68,8 +69,13 @@ const server = http.createServer((req, res) => {
         return ogHandler(req, res);
       };
     }
+    
+    let db;
+    req.db = async () => {
+    	return db || (db = await sqlite.open(POSTS_DB));
+    };
 
-    handler(req, res)
+    return handler(req, res)
       .then(body => {
         const contentType = res.getHeader("content-type");
         if (
@@ -91,6 +97,7 @@ const server = http.createServer((req, res) => {
           res.end();
         }
       })
+      .then(() => db && db.driver.open && db.close())
       .catch(err => {
         if (!res.finished) {
           console.error(err);
@@ -98,6 +105,8 @@ const server = http.createServer((req, res) => {
           res.writeHead(500, { "Content-Type": "text/plain" });
           res.end("500");
         }
+        
+        return db && db.driver.open && db.close();
       });
   }
 });

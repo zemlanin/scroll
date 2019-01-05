@@ -69,7 +69,7 @@ const mediaId = {
     }
 
     const query = url.parse(req.url, true).query;
-    const db = await sqlite.open(POSTS_DB);
+    const db = await req.db();
     const m = await db.get(
       `
         SELECT id, ext
@@ -123,7 +123,7 @@ const mediaId = {
     }
 
     const query = url.parse(req.url, true).query;
-    const db = await sqlite.open(POSTS_DB);
+    const db = await req.db();
     const m = await db.get(
       `
         SELECT id, ext
@@ -165,7 +165,7 @@ module.exports = {
       return sendToAuthProvider(req, res);
     }
 
-    const db = await sqlite.open(POSTS_DB);
+    const db = await req.db();
     const offset = +query.offset || 0;
     const media = await db.all(
       `
@@ -213,7 +213,7 @@ module.exports = {
       });
     });
 
-    const db = await sqlite.open(POSTS_DB);
+    const db = await req.db();
     let lastMedia = null;
     for (const f of files.files) {
       const src = `:upload/size-${f.headers.size}/${f.originalFilename}`;

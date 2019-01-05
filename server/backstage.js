@@ -122,7 +122,7 @@ module.exports = async (req, res) => {
     return sendToAuthProvider(req, res);
   }
 
-  const db = await sqlite.open(POSTS_DB);
+  const db = await req.db();
   const offset = +query.offset || 0;
   const posts = await db.all(
     `

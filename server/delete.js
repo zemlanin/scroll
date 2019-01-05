@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
   const query = url.parse(req.url, true).query;
   const existingPostId = query.id || (req.post && req.post.id);
 
-  const db = await sqlite.open(POSTS_DB);
+  const db = await req.db();
 
   const dbPost = await db.get(
     `SELECT id, draft FROM posts WHERE id = ?1 AND draft = 1 LIMIT 1`,

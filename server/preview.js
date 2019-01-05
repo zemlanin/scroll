@@ -38,7 +38,7 @@ module.exports = async (req, res) => {
   };
 
   if (existingPostId) {
-    const db = await sqlite.open(POSTS_DB);
+    const db = await req.db();
     const dbPost = await db.get(
       `
         SELECT

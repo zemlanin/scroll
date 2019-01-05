@@ -71,10 +71,10 @@ const server = http.createServer((req, res) => {
         return ogHandler(req, res);
       };
     }
-    
+
     let db;
     req.db = async () => {
-    	return db || (db = await sqlite.open(POSTS_DB));
+      return db || (db = await sqlite.open(POSTS_DB));
     };
 
     return handler(req, res)
@@ -107,7 +107,7 @@ const server = http.createServer((req, res) => {
           res.writeHead(500, { "Content-Type": "text/plain" });
           res.end("500");
         }
-        
+
         return db && db.driver.open && db.close();
       });
   }

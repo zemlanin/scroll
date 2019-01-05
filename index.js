@@ -338,22 +338,21 @@ async function generate(db, stdout, stderr) {
 }
 
 if (require.main === module) {
-  sqlite.open(POSTS_DB)
-    .then(db =>
-	    generate(db, process.stdout, process.stderr)
-		    .then(() => {
-		      console.log("done");
-		      return db.close().then(() => {
-		        process.exit(0);
-		      })
-		    })
-		    .catch(err => {
-		      console.error(err);
-		      return db.close().then(() => {
-		        process.exit(1);
-		      })
-		    })
-    );
+  sqlite.open(POSTS_DB).then(db =>
+    generate(db, process.stdout, process.stderr)
+      .then(() => {
+        console.log("done");
+        return db.close().then(() => {
+          process.exit(0);
+        });
+      })
+      .catch(err => {
+        console.error(err);
+        return db.close().then(() => {
+          process.exit(1);
+        });
+      })
+  );
 } else {
   module.exports = generate;
 }

@@ -10,9 +10,7 @@ const getPostId = () =>
 
 const { authed, sendToAuthProvider } = require("./auth.js");
 const { generateAfterEdit } = require("../generate-post.js");
-const { POSTS_DB } = require("../common.js");
 const { render } = require("./templates/index.js");
-const sqlite = require("sqlite");
 
 const SLUG_REGEX = /^[a-zA-Z0-9_-]+$/;
 

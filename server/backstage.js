@@ -2,9 +2,8 @@ const url = require("url");
 
 const { authed, logout, sendToAuthProvider } = require("./auth.js");
 const { render } = require("./templates/index.js");
-const { POSTS_DB, renderer } = require("../common.js");
+const { renderer } = require("../common.js");
 const marked = require("marked");
-const sqlite = require("sqlite");
 const cheerio = require("cheerio");
 
 const PAGE_SIZE = 10;

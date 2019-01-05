@@ -11,9 +11,8 @@ const fsPromises = {
   copyFile: promisify(fs.copyFile)
 };
 const { authed, sendToAuthProvider } = require("./auth.js");
-const { DIST, POSTS_DB, getMimeObj, renderer } = require("../common.js");
+const { DIST, getMimeObj, renderer } = require("../common.js");
 const { render } = require("./templates/index.js");
-const sqlite = require("sqlite");
 
 const PAGE_SIZE = 20;
 
@@ -102,8 +101,6 @@ const mediaId = {
       `,
       { 1: `media/${m.id}` }
     );
-
-    const mediaMimeType = mime.getType(m.ext) || "";
 
     return render("media-id.mustache", {
       user: user,

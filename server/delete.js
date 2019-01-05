@@ -1,8 +1,6 @@
 const url = require("url");
 
 const { authed, sendToAuthProvider } = require("./auth.js");
-const { POSTS_DB } = require("../common.js");
-const sqlite = require("sqlite");
 
 module.exports = async (req, res) => {
   const user = authed(req, res);

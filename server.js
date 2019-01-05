@@ -5,6 +5,8 @@ const sqlite = require("sqlite");
 
 require("dotenv").config({ path: require("path").resolve(__dirname, ".env") });
 
+const { POSTS_DB } = require("./common.js");
+
 const handlers = {
   "GET /backstage": require("./server/backstage.js"),
   "GET /backstage/callback": require("./server/callback.js"),

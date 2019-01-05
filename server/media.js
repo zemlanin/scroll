@@ -2,6 +2,7 @@ const url = require("url");
 const fs = require("fs");
 const path = require("path");
 const { promisify } = require("util");
+const mime = require("mime");
 const multiparty = require("multiparty");
 
 const fsPromises = {

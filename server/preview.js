@@ -2,11 +2,7 @@ const url = require("url");
 const path = require("path");
 
 const { authed } = require("./auth.js");
-const {
-  BLOG_TITLE,
-  prepare: commonPrepare,
-  render
-} = require("../common.js");
+const { BLOG_TITLE, prepare: commonPrepare, render } = require("../common.js");
 
 function prepare(post, options) {
   return {

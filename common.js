@@ -38,8 +38,8 @@ function isOwnMedia(href) {
   );
 }
 
-function getMimeObj(href) {
-  const fullMimeType = mime.getType(href) || "";
+function getMimeObj(href, fullMimeType) {
+  fullMimeType = fullMimeType || mime.getType(href) || "";
   const type = (fullMimeType && fullMimeType.split("/")[0]) || "";
 
   return {

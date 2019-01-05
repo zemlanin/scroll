@@ -14,10 +14,70 @@ const { DIST, getMimeObj, renderer } = require("../common.js");
 const { render } = require("./templates/index.js");
 
 const PAGE_SIZE = 20;
+const CONVERSION_TAGS = {
+  image: {
+    _default: ["icon128"],
+    icon128(input) {},
+    fit200(input) {},
+    fit1000(input) {},
+    fit1600(input) {},
+    gifv(input, mimeType) {}
+  },
+  video: {
+    _default: ["icon128", "firstframe"],
+    icon128(input) {},
+    firstframe(input) {}
+  },
+  pdf: {
+    _default: ["icon128"],
+    icon128(input) {},
+    firstpage1600(input) {}
+  }
+};
 
 const _id = require("nanoid/generate");
 const getMediaId = () =>
   _id("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 26);
+  
+async function convertMedia(db, tag, blob, id, mimeType, destination) {
+  const alreadyConverted = await db.get(
+    "SELECT * from converted_media WHERE media_id = ?1 AND tag = ?2",
+    [id, tag]
+  );
+
+  if (alreadyConverted) {
+    return {
+      id: alreadyConverted.id,
+      ext: alreadyConverted.ext,
+      tag: alreadyConverted.tag,
+      media_id: alreadyConverted.media_id
+    };
+  }
+
+  const mimeObj = getMimeObj(null, mimeType);
+  const mimeKey = Object.keys(mimeObj).find(k => mimeObj[k]);
+  
+  if (!mimeKey || !CONVERSION_TAGS[mimeKey]) {
+    return
+  }
+  
+  const convertFunc = CONVERSION_TAGS[m][tag];
+  const converted = convertFunc && convertFunc(blob, mimeType);
+  if (!converted) {
+    return;
+  }
+  
+  // { data, ext } = converted
+  
+  const result = {
+    id: getMediaId(),
+    media_id: id,
+    tag: tag,
+    ext: converted.ext
+    // data: converted.data,
+    // created: new Date().toISOString()
+  }
+}
 
 async function openFileMedia(src, filePath, db) {
   const alreadyLoaded = await db.get("SELECT * from media WHERE src = ?1", [
@@ -34,9 +94,12 @@ async function openFileMedia(src, filePath, db) {
 
   const resp = await fsPromises.readFile(filePath);
 
+  const mimeType = mime.getType(src);
   const result = {
     id: getMediaId(),
-    ext: src.match(/\.([a-z0-9]+)$/i)[1].toLowerCase(),
+    ext: mimeType
+      ? mime.getExtension(mimeType)
+      : src.match(/\.([a-z0-9]+)$/i)[1].toLowerCase(),
     src: src
   };
 
@@ -53,6 +116,14 @@ async function openFileMedia(src, filePath, db) {
   await fsPromises.copyFile(
     filePath,
     path.resolve(DIST, "media", `${result.id}.${result.ext}`)
+  );
+  
+  await convertMedia(
+    conversions,
+    resp,
+    result.id,
+    mimeType,
+    path.resolve(DIST, "media")
   );
 
   return result;

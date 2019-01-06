@@ -96,7 +96,7 @@ const mediaId = {
           draft
         FROM posts
         WHERE instr(text, ?1) > 0
-        ORDER BY created DESC
+        ORDER BY created DESC, modified DESC, id DESC
       `,
       { 1: `media/${m.id}` }
     );
@@ -167,7 +167,7 @@ module.exports = {
       `
         SELECT id, ext
         FROM media
-        ORDER BY created DESC
+        ORDER BY created DESC, id DESC
         LIMIT ?2 OFFSET ?1
       `,
       { 1: offset, 2: PAGE_SIZE + 1 }

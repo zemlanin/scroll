@@ -29,7 +29,7 @@ module.exports = {
 
     if (query.latest != null) {
       const latestPost = await db.get(
-        `SELECT id FROM posts ORDER BY created desc LIMIT 1`
+        `SELECT id FROM posts ORDER BY created DESC, modified DESC, id DESC LIMIT 1`
       );
 
       res.writeHead(302, {

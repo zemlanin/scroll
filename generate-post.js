@@ -39,7 +39,7 @@ function getPostsQuery(where, limit) {
     query = query + `WHERE ${where} `;
   }
 
-  query = query + `ORDER BY created DESC `;
+  query = query + `ORDER BY created DESC, modified DESC, id DESC `;
 
   if (limit) {
     query = query + `LIMIT ${limit} `;
@@ -204,7 +204,7 @@ async function generateArchivePage(db) {
     SELECT strftime('%Y-%m', created) month
     FROM posts
     WHERE draft = 0 AND private = 0
-    ORDER BY created DESC
+    ORDER BY created DESC, modified DESC, id DESC
   `);
 
   if (postMonths.length % PAGE_SIZE) {
@@ -300,7 +300,7 @@ async function getAffectedPages(db, postCreated) {
       SELECT id
       FROM posts
       WHERE draft = 0 AND private = 0
-      ORDER BY created DESC
+      ORDER BY created DESC, modified DESC, id DESC
       LIMIT ?2
     `,
     {

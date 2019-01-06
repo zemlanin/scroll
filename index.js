@@ -62,9 +62,8 @@ async function generate(db, stdout, stderr) {
       strftime('%s000', modified) modified
     FROM posts
     WHERE draft = 0
-    ORDER BY created DESC
+    ORDER BY created DESC, modified DESC, id DESC
   `);
-  // const posts = await db.all(`SELECT * from posts WHERE id LIKE "tumblr%" ORDER BY created DESC`);
 
   stdout.write(`loaded posts from db\n`);
 

@@ -11,74 +11,15 @@ const fsPromises = {
   copyFile: promisify(fs.copyFile)
 };
 const { authed, sendToAuthProvider } = require("./auth.js");
+const { convertMedia, CONVERSION_TAGS } = require("./convert.js");
 const { DIST, getMimeObj, renderer } = require("../common.js");
 const { render } = require("./templates/index.js");
 
 const PAGE_SIZE = 20;
-const CONVERSION_TAGS = {
-  image: {
-    _default: ["icon128"],
-    icon128(input) {},
-    fit200(input) {},
-    fit1000(input) {},
-    fit1600(input) {},
-    gifv(input, mimeType) {}
-  },
-  video: {
-    _default: ["icon128", "firstframe"],
-    icon128(input) {},
-    firstframe(input) {}
-  },
-  pdf: {
-    _default: ["icon128"],
-    icon128(input) {},
-    firstpage1600(input) {}
-  }
-};
 
 const _id = require("nanoid/generate");
 const getMediaId = () =>
   _id("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 26);
-  
-async function convertMedia(db, tag, blob, id, mimeType, destination) {
-  const alreadyConverted = await db.get(
-    "SELECT * from converted_media WHERE media_id = ?1 AND tag = ?2",
-    [id, tag]
-  );
-
-  if (alreadyConverted) {
-    return {
-      id: alreadyConverted.id,
-      ext: alreadyConverted.ext,
-      tag: alreadyConverted.tag,
-      media_id: alreadyConverted.media_id
-    };
-  }
-
-  const mimeObj = getMimeObj(null, mimeType);
-  const mimeKey = Object.keys(mimeObj).find(k => mimeObj[k]);
-  
-  if (!mimeKey || !CONVERSION_TAGS[mimeKey]) {
-    return
-  }
-  
-  const convertFunc = CONVERSION_TAGS[m][tag];
-  const converted = convertFunc && convertFunc(blob, mimeType);
-  if (!converted) {
-    return;
-  }
-  
-  // { data, ext } = converted
-  
-  const result = {
-    id: getMediaId(),
-    media_id: id,
-    tag: tag,
-    ext: converted.ext
-    // data: converted.data,
-    // created: new Date().toISOString()
-  }
-}
 
 async function openFileMedia(src, filePath, db) {
   const alreadyLoaded = await db.get("SELECT * from media WHERE src = ?1", [
@@ -118,14 +59,25 @@ async function openFileMedia(src, filePath, db) {
     filePath,
     path.resolve(DIST, "media", `${result.id}.${result.ext}`)
   );
-  
-  await convertMedia(
-    conversions,
-    resp,
-    result.id,
-    mimeType,
-    path.resolve(DIST, "media")
-  );
+
+  const mimeObj = getMimeObj(null, mimeType);
+  const mimeKey = Object.keys(mimeObj).find(k => mimeObj[k]);
+
+  const defaultConversionTags =
+    CONVERSION_TAGS[mimeKey] && CONVERSION_TAGS[mimeKey]._default;
+
+  if (defaultConversionTags) {
+    for (const tag of defaultConversionTags) {
+      await convertMedia(
+        db,
+        tag,
+        resp,
+        result.id,
+        mimeType,
+        path.resolve(DIST, "media")
+      );
+    }
+  }
 
   return result;
 }
@@ -140,9 +92,17 @@ const mediaId = {
 
     const query = url.parse(req.url, true).query;
     const db = await req.db();
+    // TODO check the performance hit of multiple `length(data)` in a query
     const m = await db.get(
       `
-        SELECT id, ext
+        SELECT
+          id,
+          ext,
+          CASE 
+            WHEN length(data) < 1024 THEN length(data) || 'B'
+            WHEN length(data) >=  1024 AND length(data) < (1024 * 1024) THEN (length(data) / 1024) || 'KB'
+            WHEN length(data) >= (1024 * 1024) THEN (length(data) / (1024 * 1024)) || 'MB'
+          END AS size
         FROM media
         WHERE id = ?1
         LIMIT 1
@@ -155,6 +115,38 @@ const mediaId = {
       res.end();
       return;
     }
+
+    const existingConversions = await db.all(
+      `
+        SELECT
+          id,
+          media_id,
+          tag,
+          ext,
+          CASE 
+            WHEN length(data) < 1024 THEN length(data) || 'B'
+            WHEN length(data) >=  1024 AND length(data) < (1024 * 1024) THEN (length(data) / 1024) || 'KB'
+            WHEN length(data) >= (1024 * 1024) THEN (length(data) / (1024 * 1024)) || 'MB'
+          END AS size
+        FROM converted_media
+        WHERE media_id = ?1
+        ORDER BY created DESC, tag ASC
+      `,
+      { 1: m.id }
+    );
+
+    const existingConversionsTags = existingConversions.map(r => r.tag);
+
+    const mimeObj = getMimeObj(m.ext);
+    const mimeKey = Object.keys(mimeObj).find(k => mimeObj[k]);
+
+    const possibleConversions = CONVERSION_TAGS[mimeKey]
+      ? Object.keys(CONVERSION_TAGS[mimeKey])
+          .filter(
+            tag => tag != "_default" && !existingConversionsTags.includes(tag)
+          )
+          .map(tag => ({ tag, media_id: m.id }))
+      : [];
 
     const posts = await db.all(
       `
@@ -176,6 +168,8 @@ const mediaId = {
     return render("media-id.mustache", {
       user: user,
       posts: posts,
+      existingConversions: existingConversions,
+      possibleConversions: possibleConversions,
       media: {
         ...m,
         displayHtml: renderer.image(`media/${m.id}.${m.ext}`),
@@ -209,10 +203,16 @@ const mediaId = {
     }
 
     if (req.post && req.post.delete) {
+      await db.run(`DELETE FROM converted_media WHERE media_id = ?1`, {
+        1: m.id
+      });
+      await fsPromises.unlink(path.resolve(DIST, "media", m.id));
+
       await db.run(`DELETE FROM media WHERE id = ?1`, {
         1: m.id
       });
       await fsPromises.unlink(path.resolve(DIST, "media", `${m.id}.${m.ext}`));
+
       res.writeHead(303, { Location: `/backstage/media/` });
       res.end();
       return;
@@ -245,14 +245,39 @@ module.exports = {
       { 1: offset, 2: PAGE_SIZE + 1 }
     );
 
+    const conversions = await db.all(
+      `
+        SELECT media_id, tag, ext
+        FROM converted_media
+        WHERE tag = ?1 AND media_id IN (${media
+          .map(m => `"${m.id}"`)
+          .join(",")})
+      `,
+      { 1: "icon128" }
+    );
+
+    const iconsMap = conversions.reduce(
+      (acc, c) => ({
+        ...acc,
+        [c.media_id]: `/media/${c.media_id}/${c.tag}.${c.ext}`
+      }),
+      {}
+    );
+
     const moreMedia = media.length > PAGE_SIZE;
 
     return render("media.mustache", {
       user: user,
-      media: media.slice(0, PAGE_SIZE).map(m => ({
-        ...m,
-        type: getMimeObj(m.ext)
-      })),
+      media: media.slice(0, PAGE_SIZE).map(m => {
+        const mimeObj = getMimeObj(m.ext);
+        return {
+          ...m,
+          icon:
+            iconsMap[m.id] ||
+            (mimeObj.image && `/media/${m.id}.${m.ext}?w=128&h=128`),
+          type: mimeObj
+        };
+      }),
       urls: {
         moreMedia: moreMedia && `/backstage/media/?offset=${offset + PAGE_SIZE}`
       }

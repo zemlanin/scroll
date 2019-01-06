@@ -71,13 +71,50 @@
         <div class="section">
           <span class="title is-4">conversions:</span>
           <div class="tags has-addons">
-            <a href="/media/{{media.id}}.{{media.ext}}" class="tag">original</a>
+            <a href="/media/{{media.id}}.{{media.ext}}" class="tag">
+              original.{{media.ext}} / {{media.size}}
+            </a>
             {{^posts}}
             <form method="POST" class="tag is-danger">
               <button class="delete is-small" name="delete" value="1" onclick="return confirm('are you sure?')">delete</button>
             </form>
             {{/posts}}
           </div>
+          {{#existingConversions}}
+            <div class="tags has-addons">
+              <a href="/media/{{media_id}}/{{tag}}.{{ext}}" class="tag">
+                {{tag}}.{{ext}} / {{size}}
+              </a>
+              <form method="POST"
+                action="/backstage/convert/?id={{media_id}}&tag={{tag}}"
+                class="tag is-danger"
+              >
+                <input type="hidden" name="id" value="{{media_id}}">
+                <input type="hidden" name="tag" value="{{tag}}">
+                <button class="delete is-small"
+                  name="delete"
+                  value="1"
+                  onclick="return confirm('are you sure?')"
+                >delete</button>
+              </form>
+            </div>
+          {{/existingConversions}}
+          {{#possibleConversions}}
+              <form method="POST"
+                action="/backstage/convert/?id={{media_id}}&tag={{tag}}"
+                style="display: inline-block;"
+              >
+                <input type="hidden" name="id" value="{{media_id}}">
+                <input type="hidden" name="tag" value="{{tag}}">
+                <button type="submit" class="button tag">
+                  <span>
+                    {{tag}}
+                  </span>
+                  &nbsp;
+                  <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" style="vertical-align:middle" viewBox="0 0 640 512"><path fill="currentColor" d="{{fas.plus}}"></path></svg>
+                </button>
+              </form>
+          {{/possibleConversions}}
         </div>
 
         <div class="section">

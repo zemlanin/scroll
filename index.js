@@ -44,6 +44,16 @@ function rmrf(path) {
   }
 }
 
+function uniq(arr) {
+  return [...new Set(arr)];
+}
+
+async function mkdirP(p) {
+  if (!(await fsPromises.exists(p))) {
+    return fsPromises.mkdir(p);
+  }
+}
+
 async function generate(db, stdout, stderr) {
   const tmpFolder = await fsPromises.mkdtemp(path.join(os.tmpdir(), "scroll-"));
   await fsPromises.mkdir(path.join(tmpFolder, "/media"));
@@ -317,6 +327,36 @@ async function generate(db, stdout, stderr) {
   }
 
   stdout.write("media done\n");
+
+  const convertedMedia = await db.all("SELECT id from converted_media");
+
+  for (const convertedMediaChunk of chunk(convertedMedia, 16)) {
+    await db
+      .all(
+        `SELECT * from converted_media WHERE id IN (${convertedMediaChunk
+          .map(c => `"${c.id}"`)
+          .join(",")})`
+      )
+      .then(loaded =>
+        Promise.all(
+          uniq(loaded.map(c => path.join(tmpFolder, "media", c.media_id))).map(
+            mkdirP
+          )
+        ).then(() => loaded)
+      )
+      .then(loaded =>
+        Promise.all(
+          loaded.map(async c =>
+            fsPromises.writeFile(
+              path.join(tmpFolder, "media", c.media_id, `${c.tag}.${c.ext}`),
+              c.data
+            )
+          )
+        )
+      );
+  }
+
+  stdout.write("converted_media done\n");
 
   await new Promise((resolve, reject) => {
     const rsync = new Rsync()

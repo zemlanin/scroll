@@ -20,6 +20,7 @@ const handlers = {
   "POST /backstage/jwt": require("./server/jwt.js"),
   "GET /backstage/media": require("./server/media.js").get,
   "POST /backstage/media": require("./server/media.js").post,
+  "POST /backstage/convert": require("./server/convert.js").post,
   "GET /backstage/gauges.svg": require("./server/gauges-graph.js")
 };
 

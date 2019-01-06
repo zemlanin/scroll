@@ -72,7 +72,7 @@ async function generate(db, stdout, stderr) {
       strftime('%s000', modified) modified
     FROM posts
     WHERE draft = 0
-    ORDER BY created DESC, modified DESC, id DESC
+    ORDER BY datetime(created) DESC, id DESC
   `);
 
   stdout.write(`loaded posts from db\n`);

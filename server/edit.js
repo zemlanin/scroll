@@ -14,6 +14,15 @@ const { render } = require("./templates/index.js");
 
 const SLUG_REGEX = /^[a-zA-Z0-9_-]+$/;
 
+function parseUTCTimestampWithoutZulu(str) {
+  // used in tandem with `<datetime-local>` with UTC values
+  const dt = new Date(str);
+
+  dt.setTime(dt.getTime() - dt.getTimezoneOffset() * 60 * 1000);
+
+  return dt;
+}
+
 module.exports = {
   get: async (req, res) => {
     const user = authed(req, res);
@@ -29,7 +38,7 @@ module.exports = {
 
     if (query.latest != null) {
       const latestPost = await db.get(
-        `SELECT id FROM posts ORDER BY created DESC, modified DESC, id DESC LIMIT 1`
+        `SELECT id FROM posts ORDER BY datetime(created) DESC, id DESC LIMIT 1`
       );
 
       res.writeHead(302, {
@@ -127,7 +136,7 @@ module.exports = {
       draft: true,
       private: false,
       public: false,
-      created: new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, "")
+      created: new Date()
     };
 
     const db = await req.db();
@@ -153,9 +162,7 @@ module.exports = {
       );
 
       if (dbPost) {
-        dbPost.created = new Date(parseInt(dbPost.created))
-          .toISOString()
-          .replace(/:\d{2}\.\d{3}Z$/, "");
+        dbPost.created = new Date(parseInt(dbPost.created));
         post = dbPost;
         postExists = true;
 
@@ -187,10 +194,10 @@ module.exports = {
       post.slug = null;
     }
 
+    let oldCreated = null;
     if (req.post.created) {
-      post.created = new Date(req.post.created)
-        .toISOString()
-        .replace(/\.\d{3}Z$/, "Z");
+      oldCreated = post.created;
+      post.created = parseUTCTimestampWithoutZulu(req.post.created);
     }
 
     if (postExists) {
@@ -209,7 +216,7 @@ module.exports = {
           3: post.draft,
           4: post.private,
           5: post.text,
-          7: post.created,
+          7: post.created.toISOString().replace(/\.\d{3}Z$/, "Z"),
           8: new Date().toISOString().replace(/\.\d{3}Z$/, "Z")
         }
       );
@@ -224,12 +231,12 @@ module.exports = {
           3: post.draft,
           4: post.private,
           5: post.text,
-          7: post.created
+          7: post.created.toISOString().replace(/\.\d{3}Z$/, "Z")
         }
       );
     }
 
-    await generateAfterEdit(db, post.id, oldStatus);
+    await generateAfterEdit(db, post.id, oldStatus, oldCreated);
 
     if (!existingPostId) {
       res.writeHead(303, {
@@ -239,7 +246,7 @@ module.exports = {
       return;
     }
 
-    post.created = post.created.replace(/:\d{2}Z$/, "");
+    post.created = post.created.toISOString().replace(/:\d{2}\.\d{3}Z$/, "");
 
     return render("edit.mustache", {
       user: user,

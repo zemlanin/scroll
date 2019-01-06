@@ -130,7 +130,7 @@ const mediaId = {
           END AS size
         FROM converted_media
         WHERE media_id = ?1
-        ORDER BY created DESC, tag ASC
+        ORDER BY tag ASC
       `,
       { 1: m.id }
     );
@@ -160,7 +160,7 @@ const mediaId = {
           draft
         FROM posts
         WHERE instr(text, ?1) > 0
-        ORDER BY created DESC, modified DESC, id DESC
+        ORDER BY datetime(created) DESC, id DESC
       `,
       { 1: `media/${m.id}` }
     );

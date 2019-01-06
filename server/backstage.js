@@ -135,7 +135,7 @@ module.exports = async (req, res) => {
         strftime('%s000', created) created,
         strftime('%s000', modified) modified
       FROM posts
-      ORDER BY created DESC
+      ORDER BY datetime(created) DESC, id DESC
       LIMIT ?2 OFFSET ?1
     `,
     { 1: offset, 2: PAGE_SIZE + 1 }

@@ -39,7 +39,7 @@ function getPostsQuery(where, limit) {
     query = query + `WHERE ${where} `;
   }
 
-  query = query + `ORDER BY created DESC, modified DESC, id DESC `;
+  query = query + `ORDER BY datetime(created) DESC, id DESC `;
 
   if (limit) {
     query = query + `LIMIT ${limit} `;
@@ -206,7 +206,7 @@ async function generateArchivePage(db) {
     SELECT strftime('%Y-%m', created) month
     FROM posts
     WHERE draft = 0 AND private = 0
-    ORDER BY created DESC, modified DESC, id DESC
+    ORDER BY datetime(created) DESC, id DESC
   `);
 
   if (postMonths.length % PAGE_SIZE) {
@@ -287,7 +287,7 @@ async function getAffectedPages(db, postCreated) {
       `
         SELECT count(*) as c
         FROM posts
-        WHERE draft = 0 AND private = 0 AND created >= ?1
+        WHERE draft = 0 AND private = 0 AND datetime(created) >= datetime(?1)
       `,
       { 1: postCreated }
     )).c || 1;
@@ -304,7 +304,7 @@ async function getAffectedPages(db, postCreated) {
       SELECT id
       FROM posts
       WHERE draft = 0 AND private = 0
-      ORDER BY created DESC, modified DESC, id DESC
+      ORDER BY datetime(created) DESC, id DESC
       LIMIT ?2
     `,
     {
@@ -328,7 +328,7 @@ async function getAffectedPages(db, postCreated) {
   return pagination;
 }
 
-async function generateAfterEdit(db, postId, oldStatus) {
+async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
   const post = await getPost(db, postId);
   const newStatus = post.status;
 
@@ -339,7 +339,14 @@ async function generateAfterEdit(db, postId, oldStatus) {
   }
 
   if (oldStatus === "public" || newStatus === "public") {
-    const pages = await getAffectedPages(db, post.created);
+    const pages = await getAffectedPages(
+      db,
+      oldCreated
+        ? new Date(Math.min(oldCreated, new Date(post.created)))
+            .toISOString()
+            .replace(/\.\d{3}Z$/, "Z")
+        : post.created
+    );
 
     const newestPage = pages[0] || { index: 0, posts: [] };
 

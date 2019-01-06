@@ -167,7 +167,7 @@ async function gifvConvert(input) {
   };
 }
 
-function getFirstFrameBuffer(input) {
+function getFirstFrameBuffer(input, crop = null) {
   return new Promise((resolve, reject) => {
     Promise.resolve()
       .then(async () => {
@@ -189,6 +189,11 @@ function getFirstFrameBuffer(input) {
           .inputFormat("mp4")
           .outputOptions(["-vframes 1"])
           .toFormat("image2")
+          .videoFilter(
+            crop
+              ? ["crop=min(iw\\, ih):min(iw\\, ih)", `scale=${crop}:${crop}`]
+              : null
+          )
           .on("end", function() {
             resolve(Buffer.concat(chunks));
             cleanup().catch(() => {});
@@ -222,6 +227,17 @@ async function firstFrameConvert(input) {
   };
 }
 
+async function firstFrameIconConvert(input) {
+  if (!(await isFfmpegInstalled)) {
+    return;
+  }
+
+  return {
+    ext: "jpeg",
+    data: await getFirstFrameBuffer(input, 128)
+  };
+}
+
 async function getConversionTags(mimeType) {
   if (mimeType === "image/gif" && (await isFfmpegInstalled)) {
     return {
@@ -237,7 +253,8 @@ async function getConversionTags(mimeType) {
 
   if (mimeType === "video/mp4") {
     return {
-      _default: ["firstframe"],
+      _default: ["icon128", "firstframe"],
+      icon128: firstFrameIconConvert,
       firstframe: firstFrameConvert
     };
   }

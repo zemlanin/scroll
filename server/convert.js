@@ -185,15 +185,19 @@ function getFirstFrameBuffer(input, crop = null) {
 
         let chunks = [];
 
-        ffmpeg(inputFile)
+        let ffmpegArgs = ffmpeg(inputFile)
           .inputFormat("mp4")
           .outputOptions(["-vframes 1"])
-          .toFormat("image2")
-          .videoFilter(
-            crop
-              ? ["crop=min(iw\\, ih):min(iw\\, ih)", `scale=${crop}:${crop}`]
-              : null
-          )
+          .toFormat("image2");
+
+        if (crop) {
+          ffmpegArgs = ffmpegArgs.videoFilter([
+            "crop=min(iw\\, ih):min(iw\\, ih)",
+            `scale=${crop}:${crop}`
+          ]);
+        }
+
+        ffmpegArgs
           .on("end", function() {
             resolve(Buffer.concat(chunks));
             cleanup().catch(() => {});

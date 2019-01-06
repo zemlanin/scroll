@@ -113,10 +113,25 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.on("clientError", (err, socket) => {
-  socket.end("HTTP/1.1 400 Bad Request\r\n\r\n");
-});
+if (require.main === module) {
+  sqlite
+    .open(POSTS_DB)
+    .then(db => db.migrate().then(() => db.close()))
+    .then(() => {
+      server.on("clientError", (err, socket) => {
+        socket.end("HTTP/1.1 400 Bad Request\r\n\r\n");
+      });
 
-server.listen(process.env.PORT);
+      server.listen(process.env.PORT);
 
-console.log(`running on ${process.env.PORT}`);
+      console.log(`running on ${process.env.PORT}`);
+    })
+    .catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
+} else {
+  module.exports = {
+    server
+  };
+}

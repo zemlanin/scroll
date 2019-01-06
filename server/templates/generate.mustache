@@ -24,7 +24,12 @@
     <nav style="display: flex; justify-content: space-between;">
         <a href="/backstage" class="button">&larr; backstage</a>
         <form method="POST" target="stdout">
-            <button class="button">generate</button>
+            <button class="button" name="generator" value="default-media">
+                generate default conversions
+            </button>
+        </form>
+        <form method="POST" target="stdout">
+            <button class="button">generate pages</button>
         </form>
     </nav>
     <iframe name="stdout"

@@ -163,11 +163,11 @@ async function generatePaginationPage(db, pageNumber, postIds, isNewest) {
 
 async function generateIndexPage(db, newestPage) {
   let indexPostsLimit = newestPage.posts.length;
-  let olderPageIndex = newestPage.index - 1;
+  let olderPageIndex = Math.max(0, newestPage.index - 1);
 
   if (newestPage.posts.length < MINIMUM_INDEX_PAGE_SIZE) {
     indexPostsLimit = newestPage.posts.length + PAGE_SIZE;
-    olderPageIndex = newestPage.index - 2;
+    olderPageIndex = Math.max(0, newestPage.index - 2);
   }
 
   const posts = await getPosts(
@@ -190,10 +190,12 @@ async function generateIndexPage(db, newestPage) {
       },
       posts: posts,
       newer: null,
-      older: {
-        text: `page-${olderPageIndex}`,
-        url: `${BLOG_BASE_URL}/page-${olderPageIndex}.html`
-      },
+      older: olderPageIndex
+        ? {
+            text: `page-${olderPageIndex}`,
+            url: `${BLOG_BASE_URL}/page-${olderPageIndex}.html`
+          }
+        : null,
       index: true
     })
   );
@@ -214,7 +216,9 @@ async function generateArchivePage(db) {
   }
 
   const pages = chunk(postMonths, PAGE_SIZE);
-  pages[0] = pages[0].filter(Boolean);
+  if (pages.length) {
+    pages[0] = pages[0].filter(Boolean);
+  }
 
   const groupByMonth = groupBy(
     pages.map((v, i) => ({
@@ -337,7 +341,7 @@ async function generateAfterEdit(db, postId, oldStatus) {
   if (oldStatus === "public" || newStatus === "public") {
     const pages = await getAffectedPages(db, post.created);
 
-    const newestPage = pages[0];
+    const newestPage = pages[0] || { index: 0, posts: [] };
 
     await removePotentialPagination(newestPage);
 

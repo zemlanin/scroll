@@ -152,7 +152,9 @@ async function generate(db, stdout, stderr) {
 
   let pagination = chunk(publicPosts, PAGE_SIZE);
 
-  pagination[0] = pagination[0].filter(Boolean);
+  if (pagination.length) {
+    pagination[0] = pagination[0].filter(Boolean);
+  }
 
   let pageNumber = pagination.length;
   for (const page of pagination) {
@@ -199,7 +201,7 @@ async function generate(db, stdout, stderr) {
   let indexPage;
   let olderPage;
 
-  if (pagination[0].length < MINIMUM_INDEX_PAGE_SIZE) {
+  if (pagination.length > 1 && pagination[0].length < MINIMUM_INDEX_PAGE_SIZE) {
     indexPage = pagination[0].concat(pagination[1]);
     olderPage = {
       text: `page-${pagination.length - 2}`,
@@ -207,10 +209,12 @@ async function generate(db, stdout, stderr) {
     };
   } else {
     indexPage = pagination[0];
-    olderPage = {
-      text: `page-${pagination.length - 1}`,
-      url: `${BLOG_BASE_URL}/page-${pagination.length - 1}.html`
-    };
+    if (pagination.length > 1) {
+      olderPage = {
+        text: `page-${pagination.length - 1}`,
+        url: `${BLOG_BASE_URL}/page-${pagination.length - 1}.html`
+      };
+    }
   }
 
   await fsPromises.writeFile(
@@ -232,7 +236,9 @@ async function generate(db, stdout, stderr) {
     { flag: "wx" }
   );
 
-  const feedPosts = pagination[0].concat(pagination[1]).slice(0, PAGE_SIZE);
+  const feedPosts = pagination.length
+    ? pagination[0].concat(pagination[1] || []).slice(0, PAGE_SIZE)
+    : [];
 
   await fsPromises.writeFile(
     `${tmpFolder}/rss.xml`,

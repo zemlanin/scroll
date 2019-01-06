@@ -46,7 +46,7 @@ const CONVERSION_TAGS = {
           .resize({
             width: 200,
             height: 200,
-            fit: "contain",
+            fit: "inside",
             withoutEnlargement: true
           })
           .toFormat(ext)
@@ -61,7 +61,7 @@ const CONVERSION_TAGS = {
           .resize({
             width: 1000,
             height: 1000,
-            fit: "contain",
+            fit: "inside",
             withoutEnlargement: true
           })
           .toFormat(ext)
@@ -76,7 +76,7 @@ const CONVERSION_TAGS = {
           .resize({
             width: 1600,
             height: 1600,
-            fit: "contain",
+            fit: "inside",
             withoutEnlargement: true
           })
           .toFormat(ext)

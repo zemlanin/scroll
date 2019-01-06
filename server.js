@@ -1,9 +1,10 @@
-const http = require("http");
 const url = require("url");
+const http = require("http");
+const path = require("path");
 const querystring = require("querystring");
 const sqlite = require("sqlite");
 
-require("dotenv").config({ path: require("path").resolve(__dirname, ".env") });
+require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
 const { POSTS_DB } = require("./common.js");
 
@@ -117,7 +118,11 @@ const server = http.createServer((req, res) => {
 if (require.main === module) {
   sqlite
     .open(POSTS_DB)
-    .then(db => db.migrate().then(() => db.close()))
+    .then(db =>
+      db
+        .migrate({ migrationsPath: path.resolve(__dirname, "migrations") })
+        .then(() => db.close())
+    )
     .then(() => {
       server.on("clientError", (err, socket) => {
         socket.end("HTTP/1.1 400 Bad Request\r\n\r\n");

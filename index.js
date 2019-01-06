@@ -385,7 +385,7 @@ async function generate(db, stdout, stderr) {
 if (require.main === module) {
   sqlite.open(POSTS_DB).then(db =>
     db
-      .migrate()
+      .migrate({ migrationsPath: path.resolve(__dirname, "migrations") })
       .then(() => generate(db, process.stdout, process.stderr))
       .then(() => {
         console.log("done");

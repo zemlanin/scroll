@@ -5,8 +5,8 @@ const chunk = require("lodash.chunk");
 const { authed, sendToAuthProvider } = require("./auth.js");
 
 const generate = require("../index.js");
-const { DIST, getMimeObj } = require("../common.js");
-const { convertMedia, CONVERSION_TAGS } = require("./convert.js");
+const { DIST } = require("../common.js");
+const { convertMedia, getConversionTags } = require("./convert.js");
 const { render } = require("./templates/index.js");
 
 async function generateDefaultMedia(db, stdout, stderr) {
@@ -25,11 +25,9 @@ async function generateDefaultMedia(db, stdout, stderr) {
         Promise.all(
           loaded.map(async m => {
             const mimeType = mime.getType(m.ext);
-            const mimeObj = getMimeObj(null, mimeType);
-            const mimeKey = Object.keys(mimeObj).find(k => mimeObj[k]);
+            const ctags = getConversionTags(mimeType);
 
-            const defaultConversionTags =
-              CONVERSION_TAGS[mimeKey] && CONVERSION_TAGS[mimeKey]._default;
+            const defaultConversionTags = ctags && ctags._default;
 
             try {
               if (defaultConversionTags) {

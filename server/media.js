@@ -11,7 +11,7 @@ const fsPromises = {
   copyFile: promisify(fs.copyFile)
 };
 const { authed, sendToAuthProvider } = require("./auth.js");
-const { convertMedia, CONVERSION_TAGS } = require("./convert.js");
+const { convertMedia, getConversionTags } = require("./convert.js");
 const { DIST, getMimeObj, renderer } = require("../common.js");
 const { render } = require("./templates/index.js");
 
@@ -60,14 +60,10 @@ async function openFileMedia(src, filePath, db) {
     path.resolve(DIST, "media", `${result.id}.${result.ext}`)
   );
 
-  const mimeObj = getMimeObj(null, mimeType);
-  const mimeKey = Object.keys(mimeObj).find(k => mimeObj[k]);
+  const ctags = getConversionTags(mimeType);
 
-  const defaultConversionTags =
-    CONVERSION_TAGS[mimeKey] && CONVERSION_TAGS[mimeKey]._default;
-
-  if (defaultConversionTags) {
-    for (const tag of defaultConversionTags) {
+  if (ctags && ctags._default) {
+    for (const tag of ctags._default) {
       await convertMedia(
         db,
         tag,
@@ -137,16 +133,13 @@ const mediaId = {
 
     const existingConversionsTags = existingConversions.map(r => r.tag);
 
-    const mimeObj = getMimeObj(m.ext);
-    const mimeKey = Object.keys(mimeObj).find(k => mimeObj[k]);
+    const ctags = getConversionTags(mime.getType(m.ext));
 
-    const possibleConversions = CONVERSION_TAGS[mimeKey]
-      ? Object.keys(CONVERSION_TAGS[mimeKey])
-          .filter(
-            tag => tag != "_default" && !existingConversionsTags.includes(tag)
-          )
-          .map(tag => ({ tag, media_id: m.id }))
-      : [];
+    const possibleConversions = Object.keys(ctags || {})
+      .filter(
+        tag => tag != "_default" && !existingConversionsTags.includes(tag)
+      )
+      .map(tag => ({ tag, media_id: m.id }));
 
     const posts = await db.all(
       `

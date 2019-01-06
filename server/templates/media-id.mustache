@@ -69,7 +69,6 @@
 
       <div class="column">
         <div class="section">
-          <span class="title is-4">conversions:</span>
           <div class="tags has-addons">
             <a href="/media/{{media.id}}.{{media.ext}}" class="tag">
               original.{{media.ext}} / {{media.size}}
@@ -80,6 +79,12 @@
             </form>
             {{/posts}}
           </div>
+          <span class="title is-4">conversions:</span>
+          {{^existingConversions}}
+            {{^possibleConversions}}
+              <div>none</div>
+            {{/possibleConversions}}
+          {{/existingConversions}}
           {{#existingConversions}}
             <div class="tags has-addons">
               <a href="/media/{{media_id}}/{{tag}}.{{ext}}" class="tag">

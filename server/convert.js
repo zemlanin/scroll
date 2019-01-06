@@ -14,88 +14,90 @@ const sharp = require("sharp");
 const _id = require("nanoid/generate");
 
 const { authed, sendToAuthProvider } = require("./auth.js");
-const { getMimeObj, DIST } = require("../common.js");
+const { DIST } = require("../common.js");
 
 const getMediaId = () =>
   _id("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 26);
 
-const CONVERSION_TAGS = {
-  image: {
-    _default: ["icon128"],
-    async icon128(input) {
-      const ext = "png";
-      return {
-        ext,
-        data: await sharp(input)
-          .resize({
-            width: 128,
-            height: 128,
-            fit: "cover",
-            strategy: "attention",
-            withoutEnlargement: true
-          })
-          .toFormat(ext)
-          .toBuffer()
-      };
-    },
-    async fit200(input, mimeType) {
-      const ext = mimeType != "image/gif" ? mime.getExtension(mimeType) : "png";
-      return {
-        ext,
-        data: await sharp(input)
-          .resize({
-            width: 200,
-            height: 200,
-            fit: "inside",
-            withoutEnlargement: true
-          })
-          .toFormat(ext)
-          .toBuffer()
-      };
-    },
-    async fit1000(input, mimeType) {
-      const ext = mimeType != "image/gif" ? mime.getExtension(mimeType) : "png";
-      return {
-        ext,
-        data: await sharp(input)
-          .resize({
-            width: 1000,
-            height: 1000,
-            fit: "inside",
-            withoutEnlargement: true
-          })
-          .toFormat(ext)
-          .toBuffer()
-      };
-    },
-    async fit1600(input, mimeType) {
-      const ext = mimeType != "image/gif" ? mime.getExtension(mimeType) : "png";
-      return {
-        ext,
-        data: await sharp(input)
-          .resize({
-            width: 1600,
-            height: 1600,
-            fit: "inside",
-            withoutEnlargement: true
-          })
-          .toFormat(ext)
-          .toBuffer()
-      };
-    }
-    //   async gifv(input, mimeType) {}
+const SHARP_SUPPORTED_INPUT_MIMETYPES = new Set([
+  "image/gif",
+  "image/png",
+  "image/jpeg",
+  "image/webp"
+]);
+
+const SHARP_CONVERSION_TAGS = {
+  _default: ["icon128"],
+  async icon128(input) {
+    const ext = "png";
+    return {
+      ext,
+      data: await sharp(input)
+        .resize({
+          width: 128,
+          height: 128,
+          fit: "cover",
+          strategy: "attention",
+          withoutEnlargement: true
+        })
+        .toFormat(ext)
+        .toBuffer()
+    };
+  },
+  async fit200(input, mimeType) {
+    const ext = mimeType != "image/gif" ? mime.getExtension(mimeType) : "png";
+    return {
+      ext,
+      data: await sharp(input)
+        .resize({
+          width: 200,
+          height: 200,
+          fit: "inside",
+          withoutEnlargement: true
+        })
+        .toFormat(ext)
+        .toBuffer()
+    };
+  },
+  async fit1000(input, mimeType) {
+    const ext = mimeType != "image/gif" ? mime.getExtension(mimeType) : "png";
+    return {
+      ext,
+      data: await sharp(input)
+        .resize({
+          width: 1000,
+          height: 1000,
+          fit: "inside",
+          withoutEnlargement: true
+        })
+        .toFormat(ext)
+        .toBuffer()
+    };
+  },
+  async fit1600(input, mimeType) {
+    const ext = mimeType != "image/gif" ? mime.getExtension(mimeType) : "png";
+    return {
+      ext,
+      data: await sharp(input)
+        .resize({
+          width: 1600,
+          height: 1600,
+          fit: "inside",
+          withoutEnlargement: true
+        })
+        .toFormat(ext)
+        .toBuffer()
+    };
   }
-  // video: {
-  //   _default: ["icon128", "firstframe"],
-  //   async icon128(input) {},
-  //   async firstframe(input) {}
-  // },
-  // pdf: {
-  //   _default: ["icon128"],
-  //   async icon128(input) {},
-  //   async firstpage1600(input) {}
-  // }
 };
+
+function getConversionTags(mimeType) {
+  // if (mimeType === "gifv") { gifv(input, mimeType) }
+
+  if (SHARP_SUPPORTED_INPUT_MIMETYPES.has(mimeType)) {
+    return SHARP_CONVERSION_TAGS;
+  }
+}
 
 async function convertMedia(db, tag, blob, mediaId, mimeType, destination) {
   const alreadyConverted = await db.get(
@@ -112,14 +114,13 @@ async function convertMedia(db, tag, blob, mediaId, mimeType, destination) {
     };
   }
 
-  const mimeObj = getMimeObj(null, mimeType);
-  const mimeKey = Object.keys(mimeObj).find(k => mimeObj[k]);
+  const ctags = getConversionTags(mimeType);
 
-  if (!mimeKey || !CONVERSION_TAGS[mimeKey]) {
+  if (!ctags) {
     return;
   }
 
-  const convertFunc = CONVERSION_TAGS[mimeKey][tag];
+  const convertFunc = ctags[tag];
   const converted = convertFunc && (await convertFunc(blob, mimeType));
   if (!converted) {
     return;
@@ -164,7 +165,7 @@ async function convertMedia(db, tag, blob, mediaId, mimeType, destination) {
 }
 
 module.exports = {
-  CONVERSION_TAGS,
+  getConversionTags,
   convertMedia,
   post: async (req, res) => {
     const user = authed(req, res);

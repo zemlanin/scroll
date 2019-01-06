@@ -131,8 +131,6 @@ function getGifToMP4Buffer(input) {
           .videoBitrate(1000)
           .toFormat("mp4")
           .save(outputFile)
-          .on("start", cmd => console.log(cmd))
-          .on("stderr", cmd => console.log(cmd))
           .on("end", function() {
             fsPromises.readFile(outputFile).then(blob =>
               cleanup().then(() => {
@@ -169,6 +167,61 @@ async function gifvConvert(input) {
   };
 }
 
+function getFirstFrameBuffer(input) {
+  return new Promise((resolve, reject) => {
+    Promise.resolve()
+      .then(async () => {
+        const tmpFolder = await fsPromises.mkdtemp(
+          path.join(os.tmpdir(), "scrollconvert-")
+        );
+        const inputFile = path.join(tmpFolder, "input.mp4");
+
+        await fsPromises.writeFile(inputFile, input);
+
+        const cleanup = async () => {
+          await fsPromises.unlink(inputFile);
+          chunks = null;
+        };
+
+        let chunks = [];
+
+        ffmpeg(inputFile)
+          .inputFormat("mp4")
+          .outputOptions(["-vframes 1"])
+          .toFormat("image2")
+          .on("end", function() {
+            resolve(Buffer.concat(chunks));
+            cleanup().catch(() => {});
+          })
+          .on("error", function(err) {
+            cleanup()
+              .catch(() => {})
+              .then(() => {
+                reject(err);
+              });
+          })
+          .pipe()
+          .on("data", function(chunk) {
+            chunks.push(chunk);
+          });
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
+}
+
+async function firstFrameConvert(input) {
+  if (!(await isFfmpegInstalled)) {
+    return;
+  }
+
+  return {
+    ext: "jpeg",
+    data: await getFirstFrameBuffer(input)
+  };
+}
+
 async function getConversionTags(mimeType) {
   if (mimeType === "image/gif" && (await isFfmpegInstalled)) {
     return {
@@ -180,6 +233,13 @@ async function getConversionTags(mimeType) {
 
   if (SHARP_SUPPORTED_INPUT_MIMETYPES.has(mimeType)) {
     return SHARP_CONVERSION_TAGS;
+  }
+
+  if (mimeType === "video/mp4") {
+    return {
+      _default: ["firstframe"],
+      firstframe: firstFrameConvert
+    };
   }
 }
 

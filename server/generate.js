@@ -9,7 +9,7 @@ const { DIST, getMimeObj } = require("../common.js");
 const { convertMedia, CONVERSION_TAGS } = require("./convert.js");
 const { render } = require("./templates/index.js");
 
-async function generateDefaultMedia(db, stdout /* , stderr */) {
+async function generateDefaultMedia(db, stdout, stderr) {
   const media = await db.all("SELECT id from media");
 
   stdout.write(`total media: ${media.length}\n`);
@@ -31,20 +31,29 @@ async function generateDefaultMedia(db, stdout /* , stderr */) {
             const defaultConversionTags =
               CONVERSION_TAGS[mimeKey] && CONVERSION_TAGS[mimeKey]._default;
 
-            if (defaultConversionTags) {
-              for (const tag of defaultConversionTags) {
-                await convertMedia(
-                  db,
-                  tag,
-                  m.data,
-                  m.id,
-                  mimeType,
-                  path.resolve(DIST, "media")
-                );
+            try {
+              if (defaultConversionTags) {
+                for (const tag of defaultConversionTags) {
+                  await convertMedia(
+                    db,
+                    tag,
+                    m.data,
+                    m.id,
+                    mimeType,
+                    path.resolve(DIST, "media")
+                  );
+                }
+                stdout.write(`+`);
+              } else {
+                stdout.write(`.`);
               }
-              stdout.write(`+`);
-            } else {
-              stdout.write(`.`);
+            } catch (e) {
+              stderr.write(
+                `\nfailed converting ${m.id}.${
+                  m.ext
+                } [${defaultConversionTags && defaultConversionTags.join(",")}]`
+              );
+              throw e;
             }
           })
         )

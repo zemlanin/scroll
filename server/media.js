@@ -60,7 +60,7 @@ async function openFileMedia(src, filePath, db) {
     path.resolve(DIST, "media", `${result.id}.${result.ext}`)
   );
 
-  const ctags = getConversionTags(mimeType);
+  const ctags = await getConversionTags(mimeType);
 
   if (ctags && ctags._default) {
     for (const tag of ctags._default) {
@@ -133,7 +133,7 @@ const mediaId = {
 
     const existingConversionsTags = existingConversions.map(r => r.tag);
 
-    const ctags = getConversionTags(mime.getType(m.ext));
+    const ctags = await getConversionTags(mime.getType(m.ext));
 
     const possibleConversions = Object.keys(ctags || {})
       .filter(

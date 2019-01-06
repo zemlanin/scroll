@@ -1,16 +1,21 @@
 const fs = require("fs");
+const os = require("os");
 const path = require("path");
 const { promisify } = require("util");
 
 const fsPromises = {
+  readFile: promisify(fs.readFile),
   writeFile: promisify(fs.writeFile),
   unlink: promisify(fs.unlink),
   mkdir: promisify(fs.mkdir),
+  mkdtemp: promisify(fs.mkdtemp),
   exists: promisify(fs.exists)
 };
 
 const mime = require("mime");
 const sharp = require("sharp");
+const ffmpeg = require("fluent-ffmpeg");
+const isAnimatedGif = require("animated-gif-detector");
 const _id = require("nanoid/generate");
 
 const { authed, sendToAuthProvider } = require("./auth.js");
@@ -91,8 +96,87 @@ const SHARP_CONVERSION_TAGS = {
   }
 };
 
-function getConversionTags(mimeType) {
-  // if (mimeType === "gifv") { gifv(input, mimeType) }
+const isFfmpegInstalled = new Promise(resolve => {
+  ffmpeg.getAvailableFormats(function(err, formats) {
+    return resolve(Boolean(!err && formats));
+  });
+});
+
+function getGifToMP4Buffer(input) {
+  return new Promise((resolve, reject) => {
+    Promise.resolve()
+      .then(async () => {
+        const tmpFolder = await fsPromises.mkdtemp(
+          path.join(os.tmpdir(), "scrollconvert-")
+        );
+        const inputFile = path.join(tmpFolder, "input.gif");
+        const outputFile = path.join(tmpFolder, "output.mp4");
+
+        await fsPromises.writeFile(inputFile, input);
+
+        const cleanup = async () => {
+          await fsPromises.unlink(inputFile);
+          await fsPromises.unlink(outputFile);
+        };
+
+        ffmpeg(inputFile)
+          .outputOptions([
+            "-movflags +faststart+frag_keyframe+empty_moov",
+            "-pix_fmt yuv420p",
+            "-vf",
+            "scale=trunc(iw/2)*2:trunc(ih/2)*2"
+          ])
+          .videoCodec("libx264")
+          .noAudio()
+          .videoBitrate(1000)
+          .toFormat("mp4")
+          .save(outputFile)
+          .on("start", cmd => console.log(cmd))
+          .on("stderr", cmd => console.log(cmd))
+          .on("end", function() {
+            fsPromises.readFile(outputFile).then(blob =>
+              cleanup().then(() => {
+                resolve(blob);
+              })
+            );
+          })
+          .on("error", function(err) {
+            cleanup()
+              .catch(() => {})
+              .then(() => {
+                reject(err);
+              });
+          });
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
+}
+
+async function gifvConvert(input) {
+  if (!(await isFfmpegInstalled)) {
+    return;
+  }
+
+  if (!isAnimatedGif(input)) {
+    return;
+  }
+
+  return {
+    ext: "mp4",
+    data: await getGifToMP4Buffer(input)
+  };
+}
+
+async function getConversionTags(mimeType) {
+  if (mimeType === "image/gif" && (await isFfmpegInstalled)) {
+    return {
+      ...SHARP_CONVERSION_TAGS,
+      _default: SHARP_CONVERSION_TAGS._default.concat("gifv"),
+      gifv: gifvConvert
+    };
+  }
 
   if (SHARP_SUPPORTED_INPUT_MIMETYPES.has(mimeType)) {
     return SHARP_CONVERSION_TAGS;
@@ -114,7 +198,7 @@ async function convertMedia(db, tag, blob, mediaId, mimeType, destination) {
     };
   }
 
-  const ctags = getConversionTags(mimeType);
+  const ctags = await getConversionTags(mimeType);
 
   if (!ctags) {
     return;

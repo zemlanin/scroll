@@ -25,7 +25,7 @@ async function generateDefaultMedia(db, stdout, stderr) {
         Promise.all(
           loaded.map(async m => {
             const mimeType = mime.getType(m.ext);
-            const ctags = getConversionTags(mimeType);
+            const ctags = await getConversionTags(mimeType);
 
             const defaultConversionTags = ctags && ctags._default;
 

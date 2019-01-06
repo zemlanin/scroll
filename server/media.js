@@ -272,9 +272,7 @@ module.exports = {
         const mimeObj = getMimeObj(m.ext);
         return {
           ...m,
-          icon:
-            iconsMap[m.id] ||
-            (mimeObj.image && `/media/${m.id}.${m.ext}?w=128&h=128`),
+          icon: iconsMap[m.id] || (mimeObj.image && `/media/${m.id}.${m.ext}`),
           type: mimeObj
         };
       }),

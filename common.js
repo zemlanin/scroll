@@ -133,9 +133,9 @@ renderer.image = function(href, title, text) {
         .replace(/&apos;/g, `'`)
         .replace(/&quot;/g, `"`)
         .replace(
-          /((src|href|poster)=['"]?)\/media\//g,
+          /((src|href|poster)=['"]?)\/?media\//g,
           `$1${
-            process.env.BLOG_BASE_URL ? process.env.BLOG_BASE_URL + "/" : ""
+            process.env.BLOG_BASE_URL ? process.env.BLOG_BASE_URL + "/" : "/"
           }media/`
         );
 

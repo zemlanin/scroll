@@ -158,6 +158,11 @@ const mediaId = {
       { 1: `media/${m.id}` }
     );
 
+    let poster, ffc;
+    if ((ffc = existingConversions.find(c => c.tag === "firstframe"))) {
+      poster = `/media/${m.id}/${ffc.tag}.${ffc.ext}`;
+    }
+
     return render("media-id.mustache", {
       user: user,
       posts: posts,
@@ -165,7 +170,11 @@ const mediaId = {
       possibleConversions: possibleConversions,
       media: {
         ...m,
-        displayHtml: renderer.image(`media/${m.id}.${m.ext}`),
+        displayHtml: renderer.image(
+          `/media/${m.id}.${m.ext}`,
+          "",
+          poster ? `poster="${poster}"` : ""
+        ),
         type: getMimeObj(m.ext)
       }
     });

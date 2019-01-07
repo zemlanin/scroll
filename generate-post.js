@@ -177,28 +177,25 @@ async function generateIndexPage(db, newestPage) {
     indexPostsLimit
   );
 
-  await fsPromises.writeFile(
-    path.resolve(DIST, "index.html"),
-    await render("./templates/list.mustache", {
-      blog: {
-        title: BLOG_TITLE,
-        url: BLOG_BASE_URL + "/"
-      },
-      feed: {
-        description: `Everything feed - ${BLOG_TITLE}`,
-        url: BLOG_BASE_URL + "/rss.xml"
-      },
-      posts: posts,
-      newer: null,
-      older: olderPageIndex
-        ? {
-            text: `page-${olderPageIndex}`,
-            url: `${BLOG_BASE_URL}/page-${olderPageIndex}.html`
-          }
-        : null,
-      index: true
-    })
-  );
+  return await render("./templates/list.mustache", {
+    blog: {
+      title: BLOG_TITLE,
+      url: BLOG_BASE_URL + "/"
+    },
+    feed: {
+      description: `Everything feed - ${BLOG_TITLE}`,
+      url: BLOG_BASE_URL + "/rss.xml"
+    },
+    posts: posts,
+    newer: null,
+    older: olderPageIndex
+      ? {
+          text: `page-${olderPageIndex}`,
+          url: `${BLOG_BASE_URL}/page-${olderPageIndex}.html`
+        }
+      : null,
+    index: true
+  });
 }
 
 async function generateArchivePage(db) {
@@ -267,7 +264,7 @@ async function generateRSSPage(db) {
       url: BLOG_BASE_URL + "/rss.xml"
     },
     posts: posts
-  })
+  });
 }
 
 async function getAffectedPages(db, postCreated) {
@@ -349,7 +346,10 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
 
     await removePotentialPagination(newestPage);
 
-    await generateIndexPage(db, newestPage);
+    await fsPromises.writeFile(
+      path.resolve(DIST, "index.html"),
+      await generateIndexPage(db, newestPage)
+    );
 
     if (pages.length <= 2) {
       await fsPromises.writeFile(

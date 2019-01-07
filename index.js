@@ -17,9 +17,7 @@ const groupBy = require("lodash.groupby");
 const chunk = require("lodash.chunk");
 const Rsync = require("rsync");
 
-const {
-  generateRSSPage
-} = require("./generate-post.js");
+const { generateRSSPage, generateIndexPage } = require("./generate-post.js");
 
 require("dotenv").config({ path: require("path").resolve(__dirname, ".env") });
 
@@ -212,40 +210,11 @@ async function generate(db, stdout, stderr) {
 
   stdout.write("pagination done\n");
 
-  let indexPage;
-  let olderPage;
-
-  if (pagination.length > 1 && pagination[0].length < MINIMUM_INDEX_PAGE_SIZE) {
-    indexPage = pagination[0].concat(pagination[1]);
-    olderPage = {
-      text: `page-${pagination.length - 2}`,
-      url: `${BLOG_BASE_URL}/page-${pagination.length - 2}.html`
-    };
-  } else {
-    indexPage = pagination[0];
-    if (pagination.length > 1) {
-      olderPage = {
-        text: `page-${pagination.length - 1}`,
-        url: `${BLOG_BASE_URL}/page-${pagination.length - 1}.html`
-      };
-    }
-  }
-
   await fsPromises.writeFile(
     `${tmpFolder}/index.html`,
-    await render("./templates/list.mustache", {
-      blog: {
-        title: BLOG_TITLE,
-        url: BLOG_BASE_URL + "/"
-      },
-      feed: {
-        description: `Everything feed - ${BLOG_TITLE}`,
-        url: BLOG_BASE_URL + "/rss.xml"
-      },
-      posts: indexPage,
-      newer: null,
-      older: olderPage,
-      index: true
+    await generateIndexPage(db, {
+      posts: pagination[0],
+      index: pagination.length
     }),
     { flag: "wx" }
   );

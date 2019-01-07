@@ -3,12 +3,12 @@ const https = require("https");
 
 const { authed, sendToAuthProvider } = require("./auth.js");
 
-async function getTraffic() {
+async function getTraffic(date) {
   return new Promise(resolve => {
     const req = https.request(
       {
         host: "secure.gaug.es",
-        path: `/gauges/${process.env.GAUGES_ID}/traffic`,
+        path: `/gauges/${process.env.GAUGES_ID}/traffic${date ? "?date=" + date : ""}`,
         method: "get",
         headers: {
           "X-Gauges-Token": process.env.GAUGES_TOKEN
@@ -46,7 +46,17 @@ module.exports = async (req, res) => {
     return sendToAuthProvider(req, res);
   }
 
-  const traffic = await getTraffic();
+  const thisMonthResp = await getTraffic();
+  const lastMonthDate = new url.URL(thisMonthResp.urls.older)
+    .searchParams.get("date")
+  const lastMonthResp = await getTraffic(lastMonthDate);
+  
+  const traffic = {
+    traffic: lastMonthResp.traffic.concat(thisMonthResp.traffic).slice(-30),
+  }
+  
+  traffic.views = traffic.traffic.reduce((acc, d) => acc + d.views, 0);
+  traffic.people = traffic.traffic.reduce((acc, d) => acc + d.people, 0);
 
   const width = traffic.traffic.length * 3 + 4;
   const aspectRatio =

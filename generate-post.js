@@ -313,6 +313,7 @@ async function getPagination(db, postsCreatedAfter) {
 async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
   const post = await getPost(db, postId);
   const newStatus = post.status;
+  const newCreated = post.created;
 
   if (newStatus === "draft") {
     await removePostPage(post);
@@ -346,7 +347,7 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
       );
     }
 
-    if (oldStatus === newStatus) {
+    if (oldStatus === newStatus && +oldCreated === +new Date(newCreated)) {
       const postPaginationPage = pages.slice(-1)[0];
       const pageNumber = postPaginationPage.index;
 

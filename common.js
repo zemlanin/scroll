@@ -127,17 +127,23 @@ renderer.image = function(href, title, text) {
     (isOwnMedia(href) || (text && text.indexOf("poster=") > -1)) &&
     mimeObj.video
   ) {
-    const attrs =
+    let attrs =
       text &&
       text
         .replace(/&apos;/g, `'`)
         .replace(/&quot;/g, `"`)
         .replace(
           /((src|href|poster)=['"]?)\/?media\//g,
-          `$1${
-            process.env.BLOG_BASE_URL ? process.env.BLOG_BASE_URL + "/" : "/"
-          }media/`
+          `$1${process.env.BLOG_BASE_URL || ""}/media/`
         );
+
+    const isGIFVattr = attrs.match(/(^|\s+)gifv($|\s+)/g);
+    const isOwnGIFV = isOwnMedia(href) && href.indexOf("/gifv.mp4") > -1;
+
+    if (isGIFVattr || isOwnGIFV) {
+      attrs = isGIFVattr ? attrs.replace(isGIFVattr[0], ``) : attrs;
+      return `<video playsinline autoplay muted loop src="${href}" ${attrs}></video>`;
+    }
 
     return `<video playsinline controls preload="none" src="${href}" ${attrs ||
       ""}></video>`;
@@ -156,9 +162,7 @@ renderer.image = function(href, title, text) {
           .replace(/&quot;/g, `"`)
           .replace(
             /((src|href|poster)=['"]?)\/media\//g,
-            `$1${
-              process.env.BLOG_BASE_URL ? process.env.BLOG_BASE_URL + "/" : ""
-            }media/`
+            `$1${process.env.BLOG_BASE_URL || ""}/media/`
           );
 
       const imgSrc = attrs.match(/poster=['"]?([^'" ]+)['"]?/)[1];
@@ -181,9 +185,7 @@ renderer.image = function(href, title, text) {
 
 renderer.link = function(href, title, text) {
   if (href.startsWith("/media/")) {
-    href = process.env.BLOG_BASE_URL
-      ? process.env.BLOG_BASE_URL + href
-      : href.slice(1);
+    href = process.env.BLOG_BASE_URL ? process.env.BLOG_BASE_URL + href : href;
   }
 
   return ogLink(href, title, text);
@@ -191,10 +193,8 @@ renderer.link = function(href, title, text) {
 
 renderer.html = function(html) {
   html = html.replace(
-    /((src|href|poster)=['"]?)\/media\//g,
-    `$1${
-      process.env.BLOG_BASE_URL ? process.env.BLOG_BASE_URL + "/" : ""
-    }media/`
+    /((src|href|poster)=['"]?)\/?media\//g,
+    `$1${process.env.BLOG_BASE_URL || ""}/media/`
   );
 
   return ogHTML(html);
@@ -202,10 +202,8 @@ renderer.html = function(html) {
 
 renderer.paragraph = function(text) {
   text = text.replace(
-    /((src|href|poster)=['"]?)\/media\//g,
-    `$1${
-      process.env.BLOG_BASE_URL ? process.env.BLOG_BASE_URL + "/" : ""
-    }media/`
+    /((src|href|poster)=['"]?)\/?media\//g,
+    `$1${process.env.BLOG_BASE_URL || ""}/media/`
   );
 
   return ogParagraph(text);

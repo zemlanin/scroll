@@ -48,7 +48,7 @@ module.exports = async (req, res) => {
 
   const traffic = await getTraffic();
 
-  const width = traffic.traffic.length * 3;
+  const width = traffic.traffic.length * 3 + 4;
   const aspectRatio =
     query.h && query.w ? parseInt(query.w) / parseInt(query.h) : 3;
 
@@ -63,7 +63,7 @@ module.exports = async (req, res) => {
 
   return `<?xml version="1.0" standalone="no"?>
     <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-    <svg viewBox="0 1 ${width} ${height +
+    <svg viewBox="0 0 ${width} ${height +
     2}" preserveAspectRatio="xMinYMin meet" version="1.1" xmlns="http://www.w3.org/2000/svg">
       <text
         x="${width}"
@@ -104,3 +104,4 @@ module.exports = async (req, res) => {
     </svg>
   `;
 };
+module.exports.getTraffic = getTraffic;

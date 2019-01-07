@@ -5,8 +5,6 @@ const path = require("path");
 
 const fsPromises = {
   mkdir: promisify(fs.mkdir),
-  access: promisify(fs.access),
-  readFile: promisify(fs.readFile),
   writeFile: promisify(fs.writeFile),
   exists: promisify(fs.exists),
   mkdtemp: promisify(fs.mkdtemp)
@@ -15,6 +13,8 @@ const fsPromises = {
 const sqlite = require("sqlite");
 const chunk = require("lodash.chunk");
 const Rsync = require("rsync");
+
+require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
 const {
   getPosts,
@@ -26,21 +26,19 @@ const {
   generateArchivePage
 } = require("./generate-post.js");
 
-require("dotenv").config({ path: require("path").resolve(__dirname, ".env") });
-
 const { DIST, POSTS_DB } = require("./common.js");
 
-function rmrf(path) {
-  if (fs.existsSync(path)) {
-    fs.readdirSync(path).forEach(function(file) {
-      var curPath = path + "/" + file;
+function rmrf(filepath) {
+  if (fs.existsSync(filepath)) {
+    fs.readdirSync(filepath).forEach(function(file) {
+      var curPath = filepath + "/" + file;
       if (fs.lstatSync(curPath).isDirectory()) {
         rmrf(curPath);
       } else {
         fs.unlinkSync(curPath);
       }
     });
-    fs.rmdirSync(path);
+    fs.rmdirSync(filepath);
   }
 }
 

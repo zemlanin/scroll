@@ -58,7 +58,7 @@ module.exports = async (req, res) => {
   traffic.views = traffic.traffic.reduce((acc, d) => acc + d.views, 0);
   traffic.people = traffic.traffic.reduce((acc, d) => acc + d.people, 0);
 
-  const width = traffic.traffic.length * 3 + 4;
+  const width = traffic.traffic.length * 3 + 10;
   const aspectRatio =
     query.h && query.w ? parseInt(query.w) / parseInt(query.h) : 3;
 

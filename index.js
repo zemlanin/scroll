@@ -17,6 +17,10 @@ const groupBy = require("lodash.groupby");
 const chunk = require("lodash.chunk");
 const Rsync = require("rsync");
 
+const {
+  generateRSSPage
+} = require("./generate-post.js");
+
 require("dotenv").config({ path: require("path").resolve(__dirname, ".env") });
 
 const {
@@ -246,24 +250,9 @@ async function generate(db, stdout, stderr) {
     { flag: "wx" }
   );
 
-  const feedPosts = pagination.length
-    ? pagination[0].concat(pagination[1] || []).slice(0, PAGE_SIZE)
-    : [];
-
   await fsPromises.writeFile(
     `${tmpFolder}/rss.xml`,
-    await render("./templates/rss.mustache", {
-      blog: {
-        title: BLOG_TITLE,
-        url: BLOG_BASE_URL + "/"
-      },
-      feed: {
-        pubDate: new Date().toUTCString(),
-        description: `Everything feed - ${BLOG_TITLE}`,
-        url: BLOG_BASE_URL + "/rss.xml"
-      },
-      posts: feedPosts
-    }),
+    await generateRSSPage(db),
     { flag: "wx" }
   );
 

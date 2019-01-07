@@ -256,21 +256,18 @@ async function generateArchivePage(db) {
 async function generateRSSPage(db) {
   const posts = await getPosts(db, {}, "draft = 0 AND private = 0", PAGE_SIZE);
 
-  await fsPromises.writeFile(
-    path.resolve(DIST, "rss.xml"),
-    await render("./templates/rss.mustache", {
-      blog: {
-        title: BLOG_TITLE,
-        url: BLOG_BASE_URL + "/"
-      },
-      feed: {
-        pubDate: new Date().toUTCString(),
-        description: `Everything feed - ${BLOG_TITLE}`,
-        url: BLOG_BASE_URL + "/rss.xml"
-      },
-      posts: posts
-    })
-  );
+  return await render("./templates/rss.mustache", {
+    blog: {
+      title: BLOG_TITLE,
+      url: BLOG_BASE_URL + "/"
+    },
+    feed: {
+      pubDate: new Date().toUTCString(),
+      description: `Everything feed - ${BLOG_TITLE}`,
+      url: BLOG_BASE_URL + "/rss.xml"
+    },
+    posts: posts
+  })
 }
 
 async function getAffectedPages(db, postCreated) {
@@ -355,7 +352,10 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
     await generateIndexPage(db, newestPage);
 
     if (pages.length <= 2) {
-      await generateRSSPage(db);
+      await fsPromises.writeFile(
+        path.resolve(DIST, "rss.xml"),
+        await generateRSSPage(db)
+      );
     }
 
     if (oldStatus === newStatus) {
@@ -383,5 +383,10 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
 }
 
 module.exports = {
-  generateAfterEdit
+  generateAfterEdit,
+  generatePostPage,
+  generatePaginationPage,
+  generateArchivePage,
+  generateIndexPage,
+  generateRSSPage
 };

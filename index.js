@@ -13,11 +13,14 @@ const fsPromises = {
 };
 
 const sqlite = require("sqlite");
-const groupBy = require("lodash.groupby");
 const chunk = require("lodash.chunk");
 const Rsync = require("rsync");
 
-const { generateRSSPage, generateIndexPage } = require("./generate-post.js");
+const {
+  generateRSSPage,
+  generateIndexPage,
+  generateArchivePage
+} = require("./generate-post.js");
 
 require("dotenv").config({ path: require("path").resolve(__dirname, ".env") });
 
@@ -27,7 +30,6 @@ const {
   BLOG_TITLE,
   BLOG_BASE_URL,
   PAGE_SIZE,
-  MINIMUM_INDEX_PAGE_SIZE,
   prepare,
   render
 } = require("./common.js");
@@ -211,7 +213,7 @@ async function generate(db, stdout, stderr) {
   stdout.write("pagination done\n");
 
   await fsPromises.writeFile(
-    `${tmpFolder}/index.html`,
+    path.resolve(tmpFolder, "index.html"),
     await generateIndexPage(db, {
       posts: pagination[0],
       index: pagination.length
@@ -220,41 +222,14 @@ async function generate(db, stdout, stderr) {
   );
 
   await fsPromises.writeFile(
-    `${tmpFolder}/rss.xml`,
+    path.resolve(tmpFolder, "rss.xml"),
     await generateRSSPage(db),
     { flag: "wx" }
   );
 
-  const groupByMonth = groupBy(
-    pagination.map((v, i) => ({
-      month: v[0].created.match(/^\d{4}-\d{2}/)[0],
-      text: pagination.length - i,
-      url: `./page-${pagination.length - i}.html`
-    })),
-    v => v.month
-  );
-  const monthGroups = Object.keys(groupByMonth).sort((a, b) => {
-    return a > b ? -1 : 1;
-  });
-
   await fsPromises.writeFile(
-    `${tmpFolder}/archive.html`,
-    await render("./templates/archive.mustache", {
-      blog: {
-        title: BLOG_TITLE,
-        url: BLOG_BASE_URL + "/"
-      },
-      feed: {
-        description: `Everything feed - ${BLOG_TITLE}`,
-        url: BLOG_BASE_URL + "/rss.xml"
-      },
-      title: "archive",
-      url: "./archive.html",
-      months: monthGroups.map(month => ({
-        month,
-        pages: groupByMonth[month]
-      }))
-    }),
+    path.resolve(tmpFolder, "archive.html"),
+    await generateArchivePage(db),
     { flag: "wx" }
   );
 

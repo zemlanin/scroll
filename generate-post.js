@@ -229,25 +229,22 @@ async function generateArchivePage(db) {
     return a > b ? -1 : 1;
   });
 
-  await fsPromises.writeFile(
-    path.resolve(DIST, "archive.html"),
-    await render("./templates/archive.mustache", {
-      blog: {
-        title: BLOG_TITLE,
-        url: BLOG_BASE_URL + "/"
-      },
-      feed: {
-        description: `Everything feed - ${BLOG_TITLE}`,
-        url: BLOG_BASE_URL + "/rss.xml"
-      },
-      title: "archive",
-      url: "./archive.html",
-      months: monthGroups.map(month => ({
-        month,
-        pages: groupByMonth[month]
-      }))
-    })
-  );
+  return await render("./templates/archive.mustache", {
+    blog: {
+      title: BLOG_TITLE,
+      url: BLOG_BASE_URL + "/"
+    },
+    feed: {
+      description: `Everything feed - ${BLOG_TITLE}`,
+      url: BLOG_BASE_URL + "/rss.xml"
+    },
+    title: "archive",
+    url: "./archive.html",
+    months: monthGroups.map(month => ({
+      month,
+      pages: groupByMonth[month]
+    }))
+  });
 }
 
 async function generateRSSPage(db) {
@@ -377,7 +374,10 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
         );
       }
 
-      await generateArchivePage(db);
+      await fsPromises.writeFile(
+        path.resolve(DIST, "archive.html"),
+        await generateArchivePage(db)
+      );
     }
   }
 }

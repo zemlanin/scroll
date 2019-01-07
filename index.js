@@ -17,6 +17,8 @@ const chunk = require("lodash.chunk");
 const Rsync = require("rsync");
 
 const {
+  getPosts,
+  generatePostPage,
   getPagination,
   generatePaginationPage,
   generateRSSPage,
@@ -26,14 +28,7 @@ const {
 
 require("dotenv").config({ path: require("path").resolve(__dirname, ".env") });
 
-const {
-  DIST,
-  POSTS_DB,
-  BLOG_TITLE,
-  BLOG_BASE_URL,
-  prepare,
-  render
-} = require("./common.js");
+const { DIST, POSTS_DB } = require("./common.js");
 
 function rmrf(path) {
   if (fs.existsSync(path)) {
@@ -65,29 +60,11 @@ async function generate(db, stdout, stderr) {
 
   stdout.write(`made tmp dir: ${tmpFolder}\n`);
 
-  let posts = await db.all(`
-    SELECT
-      id,
-      slug,
-      draft,
-      private,
-      (NOT draft AND NOT private) public,
-      text,
-      strftime('%s000', created) created,
-      strftime('%s000', modified) modified
-    FROM posts
-    WHERE draft = 0
-    ORDER BY datetime(created) DESC, id DESC
-  `);
+  let preparedPosts = await getPosts(db, {}, `draft = 0`, null);
 
   stdout.write(`loaded posts from db\n`);
 
-  const postsCount = posts.length;
-  let preparedPosts = posts.map(prepare);
-
-  posts = null;
-
-  stdout.write("post preparation done\n");
+  const postsCount = preparedPosts.length;
 
   const progressPadding = Math.log10(postsCount) + 1;
   let i = 0;
@@ -117,25 +94,11 @@ async function generate(db, stdout, stderr) {
 
     await Promise.all(
       postsChunk.map(async post => {
-        const renderedPage = await render("./templates/post.mustache", {
-          blog: {
-            title: BLOG_TITLE,
-            url: BLOG_BASE_URL + "/"
-          },
-          feed: {
-            description: `Everything feed - ${BLOG_TITLE}`,
-            url: BLOG_BASE_URL + "/rss.xml"
-          },
-          title: post.title,
-          post,
-          url: post.url,
-          older: null,
-          newer: null
-        });
+        const renderedPage = await generatePostPage(post);
 
         if (post.slug && post.id !== post.slug) {
           await fsPromises.writeFile(
-            `${tmpFolder}/${post.slug}.html`,
+            path.resolve(tmpFolder, `${post.slug}.html`),
             renderedPage,
             {
               flag: "wx"
@@ -143,8 +106,8 @@ async function generate(db, stdout, stderr) {
           );
         }
 
-        return fsPromises.writeFile(
-          `${tmpFolder}/${post.id}.html`,
+        await fsPromises.writeFile(
+          path.resolve(tmpFolder, `${post.id}.html`),
           renderedPage,
           {
             flag: "wx"

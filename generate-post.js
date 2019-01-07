@@ -79,7 +79,7 @@ async function removePostPage(post) {
 }
 
 async function generatePostPage(post) {
-  const renderedPage = await render("./templates/post.mustache", {
+  return await render("./templates/post.mustache", {
     blog: {
       title: BLOG_TITLE,
       url: BLOG_BASE_URL + "/"
@@ -94,18 +94,6 @@ async function generatePostPage(post) {
     older: null,
     newer: null
   });
-
-  if (post.slug && post.id !== post.slug) {
-    await fsPromises.writeFile(
-      path.resolve(DIST, `${post.slug}.html`),
-      renderedPage
-    );
-  }
-
-  return fsPromises.writeFile(
-    path.resolve(DIST, `${post.id}.html`),
-    renderedPage
-  );
 }
 
 async function removePotentialPagination(newestPage) {
@@ -318,7 +306,19 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
   if (newStatus === "draft") {
     await removePostPage(post);
   } else {
-    await generatePostPage(post);
+    const renderedPage = await generatePostPage(post);
+
+    if (post.slug && post.id !== post.slug) {
+      await fsPromises.writeFile(
+        path.resolve(DIST, `${post.slug}.html`),
+        renderedPage
+      );
+    }
+
+    await fsPromises.writeFile(
+      path.resolve(DIST, `${post.id}.html`),
+      renderedPage
+    );
   }
 
   if (oldStatus === "public" || newStatus === "public") {
@@ -384,6 +384,7 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
 }
 
 module.exports = {
+  getPosts,
   generateAfterEdit,
   generatePostPage,
   getPagination,

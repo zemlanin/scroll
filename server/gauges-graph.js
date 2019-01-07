@@ -8,7 +8,9 @@ async function getTraffic(date) {
     const req = https.request(
       {
         host: "secure.gaug.es",
-        path: `/gauges/${process.env.GAUGES_ID}/traffic${date ? "?date=" + date : ""}`,
+        path: `/gauges/${process.env.GAUGES_ID}/traffic${
+          date ? "?date=" + date : ""
+        }`,
         method: "get",
         headers: {
           "X-Gauges-Token": process.env.GAUGES_TOKEN
@@ -38,8 +40,6 @@ async function getTraffic(date) {
 }
 
 module.exports = async (req, res) => {
-  const query = url.parse(req.url, true).query;
-
   const user = authed(req, res);
 
   if (!user) {
@@ -47,13 +47,13 @@ module.exports = async (req, res) => {
   }
 
   const thisMonthResp = await getTraffic();
-  const lastMonthDate = url.parse(thisMonthResp.urls.older, true).query.date
+  const lastMonthDate = url.parse(thisMonthResp.urls.older, true).query.date;
   const lastMonthResp = await getTraffic(lastMonthDate);
-  
+
   const traffic = lastMonthResp.traffic
     .concat(thisMonthResp.traffic)
     .slice(-30);
-  
+
   const totalViews = traffic.reduce((acc, d) => acc + d.views, 0);
   const totalPeople = traffic.reduce((acc, d) => acc + d.people, 0);
 

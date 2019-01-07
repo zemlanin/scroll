@@ -17,6 +17,8 @@ const chunk = require("lodash.chunk");
 const Rsync = require("rsync");
 
 const {
+  getPagination,
+  generatePaginationPage,
   generateRSSPage,
   generateIndexPage,
   generateArchivePage
@@ -29,7 +31,6 @@ const {
   POSTS_DB,
   BLOG_TITLE,
   BLOG_BASE_URL,
-  PAGE_SIZE,
   prepare,
   render
 } = require("./common.js");
@@ -156,68 +157,28 @@ async function generate(db, stdout, stderr) {
   stdout.write("\n");
   stdout.write("posts done\n");
 
-  const publicPosts = preparedPosts.filter(p => p.public);
+  let pagination = await getPagination(db, null);
 
-  if (publicPosts.length % PAGE_SIZE) {
-    for (let i = 0; i < publicPosts.length % PAGE_SIZE; i++) {
-      publicPosts.unshift(null);
-    }
-  }
-
-  let pagination = chunk(publicPosts, PAGE_SIZE);
-
-  if (pagination.length) {
-    pagination[0] = pagination[0].filter(Boolean);
-  }
-
-  let pageNumber = pagination.length;
   for (const page of pagination) {
-    const url = `page-${pageNumber}.html`;
-    const title = `page-${pageNumber}`;
+    const pageNumber = page.index;
 
     await fsPromises.writeFile(
-      `${tmpFolder}/${url}`,
-      await render("./templates/list.mustache", {
-        blog: {
-          title: BLOG_TITLE,
-          url: BLOG_BASE_URL + "/"
-        },
-        feed: {
-          description: `Everything feed - ${BLOG_TITLE}`,
-          url: BLOG_BASE_URL + "/rss.xml"
-        },
-        title: title,
-        url: url,
-        posts: page,
-        newer:
-          pageNumber < pagination.length - 1
-            ? {
-                text: `page-${pageNumber + 1}`,
-                url: `${BLOG_BASE_URL}/page-${pageNumber + 1}.html`
-              }
-            : { text: `index`, url: `${BLOG_BASE_URL}/` },
-        older:
-          pageNumber > 1
-            ? {
-                text: `page-${pageNumber - 1}`,
-                url: `${BLOG_BASE_URL}/page-${pageNumber - 1}.html`
-              }
-            : null
-      }),
+      path.resolve(tmpFolder, `page-${pageNumber}.html`),
+      await generatePaginationPage(
+        db,
+        pageNumber,
+        page.posts,
+        pagination.length === pageNumber
+      ),
       { flag: "wx" }
     );
-
-    pageNumber = pageNumber - 1;
   }
 
   stdout.write("pagination done\n");
 
   await fsPromises.writeFile(
     path.resolve(tmpFolder, "index.html"),
-    await generateIndexPage(db, {
-      posts: pagination[0],
-      index: pagination.length
-    }),
+    await generateIndexPage(db, pagination[0]),
     { flag: "wx" }
   );
 

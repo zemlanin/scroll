@@ -130,35 +130,32 @@ async function generatePaginationPage(db, pageNumber, postIds, isNewest) {
   const url = `page-${pageNumber}.html`;
   const title = `page-${pageNumber}`;
 
-  await fsPromises.writeFile(
-    path.resolve(DIST, url),
-    await render("./templates/list.mustache", {
-      blog: {
-        title: BLOG_TITLE,
-        url: BLOG_BASE_URL + "/"
-      },
-      feed: {
-        description: `Everything feed - ${BLOG_TITLE}`,
-        url: BLOG_BASE_URL + "/rss.xml"
-      },
-      title: title,
-      url: url,
-      posts: posts,
-      newer: isNewest
-        ? { text: `index`, url: `${BLOG_BASE_URL}/` }
-        : {
-            text: `page-${pageNumber + 1}`,
-            url: `${BLOG_BASE_URL}/page-${pageNumber + 1}.html`
-          },
-      older:
-        pageNumber > 1
-          ? {
-              text: `page-${pageNumber - 1}`,
-              url: `${BLOG_BASE_URL}/page-${pageNumber - 1}.html`
-            }
-          : null
-    })
-  );
+  return await render("./templates/list.mustache", {
+    blog: {
+      title: BLOG_TITLE,
+      url: BLOG_BASE_URL + "/"
+    },
+    feed: {
+      description: `Everything feed - ${BLOG_TITLE}`,
+      url: BLOG_BASE_URL + "/rss.xml"
+    },
+    title: title,
+    url: url,
+    posts: posts,
+    newer: isNewest
+      ? { text: `index`, url: `${BLOG_BASE_URL}/` }
+      : {
+          text: `page-${pageNumber + 1}`,
+          url: `${BLOG_BASE_URL}/page-${pageNumber + 1}.html`
+        },
+    older:
+      pageNumber > 1
+        ? {
+            text: `page-${pageNumber - 1}`,
+            url: `${BLOG_BASE_URL}/page-${pageNumber - 1}.html`
+          }
+        : null
+  });
 }
 
 async function generateIndexPage(db, newestPage) {
@@ -264,57 +261,51 @@ async function generateRSSPage(db) {
   });
 }
 
-async function getAffectedPages(db, postCreated) {
-  const totalPostCount = (await db.get(
-    `
-      SELECT count(*) as c
-      FROM posts
-      WHERE draft = 0 AND private = 0
-    `
-  )).c;
+async function getPagination(db, postsCreatedAfter) {
+  let query = `
+    SELECT id
+    FROM posts
+    WHERE draft = 0 AND private = 0
+    ORDER BY datetime(created) DESC, id DESC
+  `;
+  let params = [];
+  let paginationOffset = 0;
 
-  const postsAfterCurrentCount =
-    (await db.get(
-      `
-        SELECT count(*) as c
-        FROM posts
-        WHERE draft = 0 AND private = 0 AND datetime(created) >= datetime(?1)
-      `,
-      { 1: postCreated }
-    )).c || 1;
+  if (postsCreatedAfter) {
+    const totalPostCount = (await db.get(
+      `SELECT count(*) as c FROM posts WHERE draft = 0 AND private = 0`
+    )).c;
 
-  const postsCountOnAffectedPages =
-    postsAfterCurrentCount +
-    ((totalPostCount - postsAfterCurrentCount) % PAGE_SIZE);
+    const postsAfterCurrentCount =
+      (await db.get(
+        `
+          SELECT count(*) as c FROM posts
+          WHERE draft = 0 AND private = 0 AND datetime(created) >= datetime(?1)
+        `,
+        { 1: postsCreatedAfter }
+      )).c || 1;
 
-  const inaffectedPages =
-    (totalPostCount - postsCountOnAffectedPages) / PAGE_SIZE;
+    const postsCountOnAffectedPages =
+      postsAfterCurrentCount +
+      ((totalPostCount - postsAfterCurrentCount) % PAGE_SIZE);
 
-  const postsOnAffectedPages = await db.all(
-    `
-      SELECT id
-      FROM posts
-      WHERE draft = 0 AND private = 0
-      ORDER BY datetime(created) DESC, id DESC
-      LIMIT ?2
-    `,
-    {
-      2: postsCountOnAffectedPages
-    }
-  );
+    query = query + ` LIMIT ?1 `;
+    params = { 1: postsCountOnAffectedPages };
+    paginationOffset = (totalPostCount - postsCountOnAffectedPages) / PAGE_SIZE;
+  }
 
-  if (postsOnAffectedPages.length % PAGE_SIZE) {
-    for (let i = 0; i < postsOnAffectedPages.length % PAGE_SIZE; i++) {
-      postsOnAffectedPages.unshift(null);
+  const posts = await db.all(query, params);
+
+  if (posts.length % PAGE_SIZE) {
+    for (let i = 0; i < posts.length % PAGE_SIZE; i++) {
+      posts.unshift(null);
     }
   }
 
-  const pagination = chunk(postsOnAffectedPages, PAGE_SIZE).map(
-    (page, i, arr) => ({
-      posts: page.filter(Boolean).map(p => p.id),
-      index: arr.length - i + inaffectedPages
-    })
-  );
+  const pagination = chunk(posts, PAGE_SIZE).map((page, i, arr) => ({
+    posts: page.filter(Boolean).map(p => p.id),
+    index: arr.length - i + paginationOffset
+  }));
 
   return pagination;
 }
@@ -330,7 +321,7 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
   }
 
   if (oldStatus === "public" || newStatus === "public") {
-    const pages = await getAffectedPages(
+    const pages = await getPagination(
       db,
       oldCreated
         ? new Date(Math.min(oldCreated, new Date(post.created)))
@@ -357,20 +348,29 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
 
     if (oldStatus === newStatus) {
       const postPaginationPage = pages.slice(-1)[0];
+      const pageNumber = postPaginationPage.index;
 
-      await generatePaginationPage(
-        db,
-        postPaginationPage.index,
-        postPaginationPage.posts,
-        newestPage.index === postPaginationPage.index
+      await fsPromises.writeFile(
+        path.resolve(DIST, `page-${pageNumber}.html`),
+        await generatePaginationPage(
+          db,
+          postPaginationPage.index,
+          postPaginationPage.posts,
+          newestPage.index === postPaginationPage.index
+        )
       );
     } else {
       for (const page of pages) {
-        await generatePaginationPage(
-          db,
-          page.index,
-          page.posts,
-          newestPage.index === page.index
+        const pageNumber = page.index;
+
+        await fsPromises.writeFile(
+          path.resolve(DIST, `page-${pageNumber}.html`),
+          await generatePaginationPage(
+            db,
+            pageNumber,
+            page.posts,
+            newestPage.index === pageNumber
+          )
         );
       }
 
@@ -385,6 +385,7 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
 module.exports = {
   generateAfterEdit,
   generatePostPage,
+  getPagination,
   generatePaginationPage,
   generateArchivePage,
   generateIndexPage,

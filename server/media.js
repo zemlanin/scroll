@@ -6,7 +6,11 @@ const mime = require("mime");
 const multiparty = require("multiparty");
 
 const fsPromises = {
+  exists: promisify(fs.exists),
   unlink: promisify(fs.unlink),
+  lstat: promisify(fs.lstat),
+  rmdir: promisify(fs.rmdir),
+  readdir: promisify(fs.readdir),
   readFile: promisify(fs.readFile),
   copyFile: promisify(fs.copyFile)
 };
@@ -20,6 +24,21 @@ const PAGE_SIZE = 20;
 const _id = require("nanoid/generate");
 const getMediaId = () =>
   _id("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 26);
+
+async function rmrf(filepath) {
+  if (await fsPromises.exists(filepath)) {
+    for (const file of await fsPromises.readdir(filepath)) {
+      const curPath = path.resolve(filepath, file);
+
+      if ((await fsPromises.lstat(curPath)).isDirectory()) {
+        await rmrf(curPath);
+      } else {
+        await fsPromises.unlink(curPath);
+      }
+    }
+    await fsPromises.rmdir(filepath);
+  }
+}
 
 async function openFileMedia(src, filePath, db) {
   const alreadyLoaded = await db.get("SELECT * from media WHERE src = ?1", [
@@ -208,7 +227,7 @@ const mediaId = {
       await db.run(`DELETE FROM converted_media WHERE media_id = ?1`, {
         1: m.id
       });
-      await fsPromises.unlink(path.resolve(DIST, "media", m.id));
+      await rmrf(path.resolve(DIST, "media", m.id));
 
       await db.run(`DELETE FROM media WHERE id = ?1`, {
         1: m.id

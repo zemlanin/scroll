@@ -53,7 +53,16 @@ function serveMedia(req, res) {
   });
 }
 
+function write403(req, res) {
+  if (!res.finished) {
+    res.writeHead(403, { "Content-Type": "text/plain" });
+    res.end("403");
+  }
+}
+
 const handlers = [
+  ["GET", "/*.php", write403],
+  ["GET", /^\/(cgi|cgi-bin|phpmyadmin|myadmin|pma|sql|mysql)/i, write403],
   ["GET", "/", serveHtml],
   [
     "GET",
@@ -62,7 +71,7 @@ const handlers = [
   ],
   [
     "GET",
-    /^\/post\/(\d+)\/?/,
+    /^\/post\/(\d+)/,
     async (req, res) =>
       res.writeHead(302, { Location: `/tumblr-zem-${req.params[0]}.html` })
   ],

@@ -1,30 +1,99 @@
+const fs = require("fs");
 const url = require("url");
 const http = require("http");
 const path = require("path");
 const querystring = require("querystring");
+const { promisify } = require("util");
+const fsPromises = {
+  readFile: promisify(fs.readFile)
+};
+
 const sqlite = require("sqlite");
 const static = require("node-static");
+const UrlPattern = require("url-pattern");
 
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
 const { DIST, POSTS_DB } = require("./common.js");
 
-const handlers = {
-  "GET /backstage": require("./server/backstage.js"),
-  "GET /backstage/callback": require("./server/callback.js"),
-  "GET /backstage/edit": require("./server/edit.js").get,
-  "POST /backstage/edit": require("./server/edit.js").post,
-  "POST /backstage/delete": require("./server/delete.js"),
-  "GET /backstage/preview": require("./server/preview.js"),
-  "POST /backstage/preview": require("./server/preview.js"),
-  "GET /backstage/generate": require("./server/generate.js").get,
-  "POST /backstage/generate": require("./server/generate.js").post,
-  "POST /backstage/jwt": require("./server/jwt.js"),
-  "GET /backstage/media": require("./server/media.js").get,
-  "POST /backstage/media": require("./server/media.js").post,
-  "POST /backstage/convert": require("./server/convert.js").post,
-  "GET /backstage/gauges.svg": require("./server/gauges-graph.js")
-};
+const fileServer = new static.Server(DIST, {
+  cache: false,
+  serverInfo: "scroll",
+  gzip: /^text\//
+});
+
+function write404(res) {
+  if (!res.finished) {
+    res.writeHead(404, { "Content-Type": "text/plain" });
+    res.end("404");
+  }
+}
+
+function serveHtml(req, res) {
+  return new Promise((resolve, reject) => {
+    fileServer
+      .serveFile((req.params.name || "index") + ".html", 200, {}, req, res)
+      .on("success", resolve)
+      .on("error", () => {
+        write404(res);
+        reject();
+      });
+  });
+}
+
+function serveMedia(req, res) {
+  return new Promise((resolve, reject) => {
+    fileServer
+      .serve(req, res)
+      .on("success", resolve)
+      .on("error", () => {
+        write404(res);
+        reject();
+      });
+  });
+}
+
+const handlers = [
+  ["GET", "/", serveHtml],
+  [
+    "GET",
+    "/rss",
+    async (req, res) => res.writeHead(302, { Location: "/rss.xml" })
+  ],
+  [
+    "GET",
+    /^\/post\/(\d+)\/?/,
+    async (req, res) =>
+      res.writeHead(302, { Location: `/tumblr-zem-${req.params[0]}.html` })
+  ],
+  [
+    "GET",
+    "/robots.txt",
+    async (req, res) => {
+      res.setHeader("content-type", "text/plain");
+
+      return await fsPromises.readFile(
+        path.resolve(__dirname, "static", "robots.txt")
+      );
+    }
+  ],
+  ["GET", "/media/*", serveMedia],
+  ["GET", "/:name(.html)", serveHtml],
+  ["GET", "/backstage", require("./server/backstage.js")],
+  ["GET", "/backstage/callback", require("./server/callback.js")],
+  ["GET", "/backstage/edit", require("./server/edit.js").get],
+  ["POST", "/backstage/edit", require("./server/edit.js").post],
+  ["POST", "/backstage/delete", require("./server/delete.js")],
+  ["GET", "/backstage/preview", require("./server/preview.js")],
+  ["POST", "/backstage/preview", require("./server/preview.js")],
+  ["GET", "/backstage/generate", require("./server/generate.js").get],
+  ["POST", "/backstage/generate", require("./server/generate.js").post],
+  ["POST", "/backstage/jwt", require("./server/jwt.js")],
+  ["GET", "/backstage/media", require("./server/media.js").get],
+  ["POST", "/backstage/media", require("./server/media.js").post],
+  ["POST", "/backstage/convert", require("./server/convert.js").post],
+  ["GET", "/backstage/gauges.svg", require("./server/gauges-graph.js")]
+].map(([m, p, h]) => [m, new UrlPattern(p), h]);
 
 async function processPost(request, response) {
   var queryData = "";
@@ -46,35 +115,19 @@ async function processPost(request, response) {
   });
 }
 
-const fileServer = new static.Server(DIST, {
-  cache: false,
-  serverInfo: "scroll",
-  gzip: /^text\//
-});
-
 const server = http.createServer((req, res) => {
-  const pathname = url.parse(req.url).pathname.replace(/\/$/, "");
-  let handler = handlers[`${req.method} ${pathname}`];
+  const pathname = url.parse(req.url).pathname.replace(/(.)\/$/, "$1");
+  let [, , handler] =
+    handlers.find(([method, pattern]) => {
+      if (req.method == method || (method == "GET" && req.method == "HEAD")) {
+        req.params = pattern.match(pathname);
+      }
+
+      return !!req.params;
+    }) || [];
 
   if (!handler) {
-    // TODO: redirects
-
-    req
-      .addListener("end", function() {
-        fileServer.serve(req, res, function(err /* , result */) {
-          if (err) {
-            res.writeHead(404, { "Content-Type": "text/plain" });
-            res.end("404");
-          }
-        });
-      })
-      .resume();
-    return;
-  }
-
-  if (!handler) {
-    res.writeHead(404, { "Content-Type": "text/plain" });
-    res.end("404");
+    write404(res);
   } else {
     const protocol = req.headers["x-forwarded-proto"] || req.protocol || "http";
     const host = req.headers["x-forwarded-host"] || req.headers["host"];
@@ -104,6 +157,10 @@ const server = http.createServer((req, res) => {
 
     return handler(req, res)
       .then(body => {
+        if (res.finished) {
+          return;
+        }
+
         const contentType = res.getHeader("content-type");
         if (
           typeof body === "string" ||

@@ -7,7 +7,7 @@ const static = require("node-static");
 
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
-const { POSTS_DB } = require("./common.js");
+const { DIST, POSTS_DB } = require("./common.js");
 
 const handlers = {
   "GET /backstage": require("./server/backstage.js"),
@@ -46,7 +46,7 @@ async function processPost(request, response) {
   });
 }
 
-const fileServer = new static.Server("./dist", {
+const fileServer = new static.Server(DIST, {
   cache: false,
   serverInfo: "scroll",
   gzip: /^text\//

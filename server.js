@@ -22,7 +22,7 @@ const fileServer = new static.Server(DIST, {
   gzip: /^text\//
 });
 
-function write404(res) {
+function write404(req, res) {
   if (!res.finished) {
     res.writeHead(404, { "Content-Type": "text/plain" });
     res.end("404");
@@ -35,7 +35,7 @@ function serveHtml(req, res) {
       .serveFile((req.params.name || "index") + ".html", 200, {}, req, res)
       .on("success", resolve)
       .on("error", () => {
-        write404(res);
+        write404(req, res);
         reject();
       });
   });
@@ -47,7 +47,7 @@ function serveMedia(req, res) {
       .serve(req, res)
       .on("success", resolve)
       .on("error", () => {
-        write404(res);
+        write404(req, res);
         reject();
       });
   });
@@ -127,7 +127,7 @@ const server = http.createServer((req, res) => {
     }) || [];
 
   if (!handler) {
-    write404(res);
+    return write404(req, res);
   } else {
     const protocol = req.headers["x-forwarded-proto"] || req.protocol || "http";
     const host = req.headers["x-forwarded-host"] || req.headers["host"];
@@ -155,7 +155,9 @@ const server = http.createServer((req, res) => {
       return db || (db = await sqlite.open(POSTS_DB));
     };
 
-    return handler(req, res)
+    const result = handler(req, res);
+
+    return (result instanceof Promise ? result : Promise.resolve(result))
       .then(body => {
         if (res.finished) {
           return;

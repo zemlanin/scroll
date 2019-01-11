@@ -1,15 +1,24 @@
+const fs = require("fs");
 const path = require("path");
+const zlib = require("zlib");
+const { promisify } = require("util");
+
 const mime = require("mime");
 const marked = require("marked");
 const cheerio = require("cheerio");
 const mustache = require("mustache");
 const UglifyJS = require("uglify-js");
 const CleanCSS = require("clean-css");
-const { promisify } = require("util");
 
-const fs = require("fs");
 const fsPromises = {
-  readFile: promisify(fs.readFile)
+  readFile: promisify(fs.readFile),
+  writeFile: promisify(fs.writeFile),
+  unlink: promisify(fs.unlink),
+  exists: promisify(fs.exists)
+};
+
+const zlibPromises = {
+  gzip: promisify(zlib.gzip)
 };
 
 const fontAwesomeSVGReducer = (acc, icon) =>
@@ -401,6 +410,26 @@ async function render(tmpl, data) {
   );
 }
 
+async function writeFileWithGzip(path, content, flags) {
+  await fsPromises.writeFile(path, content, flags);
+
+  await fsPromises.writeFile(
+    path + ".gz",
+    await zlibPromises.gzip(content),
+    flags
+  );
+}
+
+async function unlinkFileWithGzip(path) {
+  if (await fsPromises.exists(path)) {
+    await fsPromises.unlink(path);
+  }
+
+  if (await fsPromises.exists(path + ".gz")) {
+    await fsPromises.unlink(path + ".gz");
+  }
+}
+
 module.exports = {
   BLOG_TITLE,
   BLOG_BASE_URL,
@@ -411,5 +440,7 @@ module.exports = {
   getMimeObj,
   prepare,
   render,
-  renderer
+  renderer,
+  writeFileWithGzip,
+  unlinkFileWithGzip
 };

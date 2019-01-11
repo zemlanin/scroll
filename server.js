@@ -3,6 +3,7 @@ const http = require("http");
 const path = require("path");
 const querystring = require("querystring");
 const sqlite = require("sqlite");
+const static = require("node-static");
 
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
@@ -45,9 +46,31 @@ async function processPost(request, response) {
   });
 }
 
+const fileServer = new static.Server("./dist", {
+  cache: false,
+  serverInfo: "scroll",
+  gzip: /^text\//
+});
+
 const server = http.createServer((req, res) => {
-  let handler =
-    handlers[`${req.method} ${url.parse(req.url).pathname.replace(/\/$/, "")}`];
+  const pathname = url.parse(req.url).pathname.replace(/\/$/, "");
+  let handler = handlers[`${req.method} ${pathname}`];
+
+  if (!handler) {
+    // TODO: redirects
+
+    req
+      .addListener("end", function() {
+        fileServer.serve(req, res, function(err /* , result */) {
+          if (err) {
+            res.writeHead(404, { "Content-Type": "text/plain" });
+            res.end("404");
+          }
+        });
+      })
+      .resume();
+    return;
+  }
 
   if (!handler) {
     res.writeHead(404, { "Content-Type": "text/plain" });

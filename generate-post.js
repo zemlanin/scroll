@@ -1,12 +1,4 @@
 const path = require("path");
-const { promisify } = require("util");
-
-const fs = require("fs");
-const fsPromises = {
-  access: promisify(fs.access),
-  unlink: promisify(fs.unlink),
-  writeFile: promisify(fs.writeFile)
-};
 
 const chunk = require("lodash.chunk");
 const groupBy = require("lodash.groupby");
@@ -18,7 +10,9 @@ const {
   PAGE_SIZE,
   MINIMUM_INDEX_PAGE_SIZE,
   render,
-  prepare
+  prepare,
+  writeFileWithGzip,
+  unlinkFileWithGzip
 } = require("./common.js");
 
 function getPostsQuery(where, limit) {
@@ -59,22 +53,12 @@ async function getPost(db, postId) {
 async function removePostPage(post) {
   const postIdPagePath = path.resolve(DIST, `${post.id}.html`);
 
-  try {
-    await fsPromises.access(postIdPagePath);
-    await fsPromises.unlink(postIdPagePath);
-  } catch (e) {
-    //
-  }
+  await unlinkFileWithGzip(postIdPagePath);
 
   if (post.slug) {
     const postSlugPagePath = path.resolve(DIST, `${post.slug}.html`);
 
-    try {
-      await fsPromises.access(postSlugPagePath);
-      await fsPromises.unlink(postSlugPagePath);
-    } catch (e) {
-      //
-    }
+    await unlinkFileWithGzip(postSlugPagePath);
   }
 }
 
@@ -99,12 +83,7 @@ async function generatePostPage(post) {
 async function removePotentialPagination(newestPage) {
   const pagePath = path.resolve(DIST, `page-${newestPage.index + 1}.html`);
 
-  try {
-    await fsPromises.access(pagePath);
-    await fsPromises.unlink(pagePath);
-  } catch (e) {
-    //
-  }
+  await unlinkFileWithGzip(pagePath);
 }
 
 async function generatePaginationPage(db, pageNumber, postIds, isNewest) {
@@ -309,13 +288,13 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
     const renderedPage = await generatePostPage(post);
 
     if (post.slug && post.id !== post.slug) {
-      await fsPromises.writeFile(
+      await writeFileWithGzip(
         path.resolve(DIST, `${post.slug}.html`),
         renderedPage
       );
     }
 
-    await fsPromises.writeFile(
+    await writeFileWithGzip(
       path.resolve(DIST, `${post.id}.html`),
       renderedPage
     );
@@ -335,13 +314,13 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
 
     await removePotentialPagination(newestPage);
 
-    await fsPromises.writeFile(
+    await writeFileWithGzip(
       path.resolve(DIST, "index.html"),
       await generateIndexPage(db, newestPage)
     );
 
     if (pages.length <= 2) {
-      await fsPromises.writeFile(
+      await writeFileWithGzip(
         path.resolve(DIST, "rss.xml"),
         await generateRSSPage(db)
       );
@@ -351,7 +330,7 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
       const postPaginationPage = pages.slice(-1)[0];
       const pageNumber = postPaginationPage.index;
 
-      await fsPromises.writeFile(
+      await writeFileWithGzip(
         path.resolve(DIST, `page-${pageNumber}.html`),
         await generatePaginationPage(
           db,
@@ -364,7 +343,7 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
       for (const page of pages) {
         const pageNumber = page.index;
 
-        await fsPromises.writeFile(
+        await writeFileWithGzip(
           path.resolve(DIST, `page-${pageNumber}.html`),
           await generatePaginationPage(
             db,
@@ -375,7 +354,7 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
         );
       }
 
-      await fsPromises.writeFile(
+      await writeFileWithGzip(
         path.resolve(DIST, "archive.html"),
         await generateArchivePage(db)
       );

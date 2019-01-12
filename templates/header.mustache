@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html prefix="og: http://ogp.me/ns#" xmlns:og="http://opengraphprotocol.org/schema/">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,6 +8,21 @@
   {{/feed}}
   <link href="https://twitter.com/zemlanin" rel="me">
   <link href="https://github.com/zemlanin" rel="me">
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:creator" content="@zemlanin" />
+  <meta property="og:site_name" content="{{blog.title}}">
+  {{#post}}
+    {{#opengraph}}
+      <meta property="og:url" content="{{{url}}}" />
+      <meta property="og:title" content="{{title}}" />
+      {{#description}}
+        <meta property="og:description" content="{{description}}" />
+      {{/description}}
+      {{#image}}
+        <meta property="og:image" content="{{{image}}}" />
+      {{/image}}
+    {{/opengraph}}
+  {{/post}}
   <title>
     {{#title}}{{title}} - {{/title}}
     {{blog.title}}

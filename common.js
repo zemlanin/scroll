@@ -332,6 +332,23 @@ function prepare(post) {
     status = "public";
   }
 
+  const opengraph = {
+    url: url,
+    title: title.trim(),
+    description: null,
+    image: null
+  };
+
+  if (longread) {
+    const parsedTeaser = longread.teaser ? cheerio.load(longread.teaser) : null;
+    opengraph.description =
+      (parsedTeaser && parsedTeaser.text().trim()) || longread.more;
+    opengraph.image = parsedTeaser
+      ? parsedTeaser("img").attr("src") ||
+        parsedTeaser("[poster]").attr("poster")
+      : null;
+  }
+
   return {
     id: post.id,
     slug: post.slug,
@@ -343,6 +360,7 @@ function prepare(post) {
     title,
     html,
     longread,
+    opengraph,
     text: post.text,
     created: created.toISOString().replace(/\.\d{3}Z$/, "Z"),
     createdDate: created.toISOString().split("T")[0],

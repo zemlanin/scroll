@@ -14,7 +14,7 @@ const UrlPattern = require("url-pattern");
 
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
-const { DIST, POSTS_DB } = require("./common.js");
+const { DIST, POSTS_DB, PORT } = require("./common.js");
 
 const fileServer = new static.Server(DIST, {
   cache: false,
@@ -219,9 +219,9 @@ if (require.main === module) {
         socket.end("HTTP/1.1 400 Bad Request\r\n\r\n");
       });
 
-      server.listen(process.env.PORT);
+      server.listen(PORT);
 
-      console.log(`running on ${process.env.PORT}`);
+      console.log(`running on ${PORT}`);
     })
     .catch(err => {
       console.error(err);

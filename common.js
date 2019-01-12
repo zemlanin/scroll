@@ -34,6 +34,7 @@ const fab = Object.values(
 const PAGE_SIZE = 10;
 const MINIMUM_INDEX_PAGE_SIZE = 5;
 const BLOG_TITLE = "zemlan.in";
+const PORT = process.env.PORT || 8000;
 const BLOG_BASE_URL = process.env.BLOG_BASE_URL || ".";
 const DIST = path.resolve(__dirname, process.env.DIST || "dist");
 const POSTS_DB = path.resolve(__dirname, process.env.POSTS_DB || "posts.db");
@@ -437,6 +438,7 @@ module.exports = {
   BLOG_TITLE,
   BLOG_BASE_URL,
   DIST,
+  PORT,
   POSTS_DB,
   PAGE_SIZE,
   MINIMUM_INDEX_PAGE_SIZE,

@@ -280,6 +280,13 @@ function prepare(post) {
   let longread = null;
   let html = null;
 
+  const opengraph = {
+    url: url,
+    title: title,
+    description: null,
+    image: null
+  };
+
   if (header1Token) {
     const htmlTitle = marked(
       "#".repeat(header1Token.depth) + " " + `[${header1Token.text}](${url})`
@@ -290,6 +297,22 @@ function prepare(post) {
       `[${header1Token.text}](${url})`
     );
     html = marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"));
+    const teaser = isTeaserToken(tokens[1])
+      ? marked(
+          tokens
+            .slice(1, 4)
+            .filter(isTeaserToken)
+            .slice(0, 2)
+            .map(t => t.text)
+            .join("\n\n")
+        )
+      : "";
+    const parsedTeaser = teaser && cheerio.load(teaser);
+    opengraph.image =
+      parsedTeaser &&
+      (parsedTeaser("img").attr("src") ||
+        parsedTeaser("[poster]").attr("poster"));
+    opengraph.title = title.trim();
 
     if (tokens.length > 5) {
       const wordCount = cheerio(html)
@@ -307,17 +330,13 @@ function prepare(post) {
           )
         };
 
-        longread.teaser = isTeaserToken(tokens[1])
-          ? marked(
-              tokens
-                .slice(1, 4)
-                .filter(isTeaserToken)
-                .slice(0, 2)
-                .map(t => t.text)
-                .join("\n\n")
-            )
-          : "";
+        longread.teaser = teaser;
       }
+
+      opengraph.description =
+        (teaser && parsedTeaser.text().trim()) ||
+        (longread && longread.more) ||
+        null;
     }
   } else {
     html = marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"));
@@ -330,23 +349,6 @@ function prepare(post) {
     status = "private";
   } else if (post.public) {
     status = "public";
-  }
-
-  const opengraph = {
-    url: url,
-    title: title.trim(),
-    description: null,
-    image: null
-  };
-
-  if (longread) {
-    const parsedTeaser = longread.teaser ? cheerio.load(longread.teaser) : null;
-    opengraph.description =
-      (parsedTeaser && parsedTeaser.text().trim()) || longread.more;
-    opengraph.image = parsedTeaser
-      ? parsedTeaser("img").attr("src") ||
-        parsedTeaser("[poster]").attr("poster")
-      : null;
   }
 
   return {

@@ -65,6 +65,21 @@ module.exports = async (req, res) => {
     baseUrl: url.resolve(req.absolute, "/")
   });
 
+  const showTeaser = (req.post && req.post.teaser) || query.teaser;
+
+  if (showTeaser) {
+    return render(path.resolve(__dirname, "..", "templates", "list.mustache"), {
+      blog: {
+        title: BLOG_TITLE,
+        url: url.resolve(req.absolute, "/backstage")
+      },
+      posts: [preparedPost],
+      url: preparedPost.url,
+      older: null,
+      newer: null
+    });
+  }
+
   return render(path.resolve(__dirname, "..", "templates", "post.mustache"), {
     blog: {
       title: BLOG_TITLE,

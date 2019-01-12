@@ -55,7 +55,10 @@ function getMimeObj(href, fullMimeType) {
     image: type === "image",
     video: type === "video",
     audio: type === "audio",
-    text: type === "text" || fullMimeType.match(/^application\/(js|json)$/i),
+    text:
+      type === "text" ||
+      fullMimeType === "application/javascript" ||
+      fullMimeType === "application/json",
     pdf: fullMimeType === "application/pdf"
   };
 }

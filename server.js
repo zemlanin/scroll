@@ -88,7 +88,7 @@ const handlers = [
   ],
   ["GET", "/media/*", serveMedia],
   ["GET", "/:name(.html)", serveHtml],
-  ["GET", "/backstage", require("./backstage/backstage.js")],
+  ["GET", "/backstage", require("./backstage/index.js")],
   ["GET", "/backstage/callback", require("./backstage/callback.js")],
   ["GET", "/backstage/edit", require("./backstage/edit.js").get],
   ["POST", "/backstage/edit", require("./backstage/edit.js").post],

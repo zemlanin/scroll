@@ -87,7 +87,6 @@ const handlers = [
     }
   ],
   ["GET", "/media/*", serveMedia],
-  ["GET", "/:name(.html)", serveHtml],
   ["GET", "/backstage", require("./backstage/index.js")],
   ["GET", "/backstage/callback", require("./backstage/callback.js")],
   ["GET", "/backstage/edit", require("./backstage/edit.js").get],
@@ -101,7 +100,8 @@ const handlers = [
   ["GET", "/backstage/media", require("./backstage/media.js").get],
   ["POST", "/backstage/media", require("./backstage/media.js").post],
   ["POST", "/backstage/convert", require("./backstage/convert.js").post],
-  ["GET", "/backstage/gauges.svg", require("./backstage/gauges-graph.js")]
+  ["GET", "/backstage/gauges.svg", require("./backstage/gauges-graph.js")],
+  ["GET", "/:name(.html)", serveHtml]
 ].map(([m, p, h]) => [m, new UrlPattern(p), h]);
 
 async function processPost(request, response) {

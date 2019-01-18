@@ -41,6 +41,18 @@ function serveHtml(req, res) {
   });
 }
 
+function serveRSS(req, res) {
+  return new Promise((resolve, reject) => {
+    fileServer
+      .serveFile("rss.xml", 200, {}, req, res)
+      .on("success", resolve)
+      .on("error", () => {
+        write404(req, res);
+        reject();
+      });
+  });
+}
+
 function serveMedia(req, res) {
   return new Promise((resolve, reject) => {
     fileServer
@@ -69,6 +81,7 @@ const handlers = [
     "/rss",
     async (req, res) => res.writeHead(302, { Location: "/rss.xml" })
   ],
+  ["GET", "/rss.xml", serveRSS],
   [
     "GET",
     /^\/post\/(\d+)/,

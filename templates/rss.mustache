@@ -10,7 +10,7 @@
 
  {{#posts}}
  <item>
-  <title>{{title}}</title>
+  {{#rss.title}}<title>{{rss.title}}</title>{{/rss.title}}
   <description>{{html}}</description>
   <link>{{{url}}}</link>
   <guid isPermaLink="false">{{{id}}}</guid>

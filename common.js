@@ -265,8 +265,19 @@ function isTeaserToken(token) {
   );
 }
 
+function escapeKaomoji(str) {
+  return str.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯");
+}
+
 function prepare(post) {
+  post.text = escapeKaomoji(post.text);
   const tokens = marked.lexer(post.text);
+  const assignLinks = ts => {
+    if (ts) {
+      ts.links = tokens.links;
+    }
+    return ts;
+  };
 
   const header1Token =
     tokens && tokens[0] && tokens[0].type === "heading" && tokens[0].text
@@ -276,9 +287,14 @@ function prepare(post) {
   const created = new Date(parseInt(post.created));
 
   let title = post.slug || created.toISOString().split("T")[0];
+  let htmlTitle = null;
   const url = getPostUrl(post);
   let longread = null;
   let html = null;
+
+  const rss = {
+    title: null
+  };
 
   const opengraph = {
     url: url,
@@ -288,23 +304,24 @@ function prepare(post) {
   };
 
   if (header1Token) {
-    const htmlTitle = marked(
-      "#".repeat(header1Token.depth) + " " + `[${header1Token.text}](${url})`
-    );
-    title = cheerio.load(htmlTitle).text();
-    post.text = post.text.replace(
-      header1Token.text,
-      `[${header1Token.text}](${url})`
-    );
-    html = marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"));
-    const teaser = isTeaserToken(tokens[1])
-      ? marked(
-          tokens
-            .slice(1, 4)
-            .filter(isTeaserToken)
-            .slice(0, 2)
-            .map(t => t.text)
-            .join("\n\n")
+    const headerPrefix = "#".repeat(header1Token.depth);
+    htmlTitle = marked(`${headerPrefix} [${header1Token.text}](${url})`);
+    rss.title = title = cheerio
+      .load(htmlTitle)
+      .text()
+      .trim();
+
+    const tokensWithoutTitle = tokens.slice(1);
+    html = marked.parser(assignLinks([...tokensWithoutTitle]));
+
+    const teaser = isTeaserToken(tokensWithoutTitle[0])
+      ? marked.parser(
+          assignLinks([
+            ...tokensWithoutTitle
+              .slice(0, 3)
+              .filter(isTeaserToken)
+              .slice(0, 2)
+          ])
         )
       : "";
     const parsedTeaser = teaser && cheerio.load(teaser);
@@ -339,7 +356,7 @@ function prepare(post) {
         null;
     }
   } else {
-    html = marked(post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯"));
+    rss.html = html = marked(post.text);
   }
 
   let status;
@@ -360,8 +377,10 @@ function prepare(post) {
     status: status,
     url,
     title,
+    htmlTitle,
     html,
     longread,
+    rss,
     opengraph,
     text: post.text,
     created: created.toISOString().replace(/\.\d{3}Z$/, "Z"),

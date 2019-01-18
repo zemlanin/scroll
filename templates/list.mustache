@@ -3,7 +3,7 @@
 {{#posts}}
 <article id="{{id}}">
   {{#longread}}
-    {{{title}}}
+    {{{htmlTitle}}}
     {{{teaser}}}
     <a href="{{{url}}}" class="more">
       {{more}} &rarr;
@@ -11,6 +11,7 @@
   {{/longread}}
 
   {{^longread}}
+    {{{htmlTitle}}}
     {{{html}}}
   {{/longread}}
 

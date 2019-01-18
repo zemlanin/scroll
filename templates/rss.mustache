@@ -11,7 +11,10 @@
  {{#posts}}
  <item>
   {{#rss.title}}<title>{{rss.title}}</title>{{/rss.title}}
-  <description>{{html}}</description>
+  <description>
+  	{{html}}
+    {{^rss.title}}&lt;p&gt;&lt;a href&#x3D;&quot;{{url}}&quot;&gt;&amp;infin;&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;{{/rss.title}}
+  </description>
   <link>{{{url}}}</link>
   <guid isPermaLink="false">{{{id}}}</guid>
   <pubDate>{{createdUTC}}</pubDate>

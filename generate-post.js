@@ -65,10 +65,6 @@ async function removePostPage(post) {
 async function generatePostPage(post, blog) {
   return await render("./templates/post.mustache", {
     blog: blog,
-    feed: {
-      description: `Everything feed - ${blog.title}`,
-      url: url.resolve(blog.url, "rss.xml")
-    },
     title: post.title,
     post,
     url: post.url,
@@ -96,10 +92,6 @@ async function generatePaginationPage(db, blog, pageNumber, postIds, isNewest) {
 
   return await render("./templates/list.mustache", {
     blog,
-    feed: {
-      description: `Everything feed - ${blog.title}`,
-      url: url.resolve(blog.url, "rss.xml")
-    },
     title: title,
     url: pageUrl,
     posts: posts,
@@ -137,10 +129,6 @@ async function generateIndexPage(db, blog, newestPage) {
 
   return await render("./templates/list.mustache", {
     blog,
-    feed: {
-      description: `Everything feed - ${blog.title}`,
-      url: url.resolve(blog.url, "rss.xml")
-    },
     posts: posts,
     newer: null,
     older: olderPageIndex
@@ -186,10 +174,6 @@ async function generateArchivePage(db, blog) {
 
   return await render("./templates/archive.mustache", {
     blog,
-    feed: {
-      description: `Everything feed - ${blog.title}`,
-      url: url.resolve(blog.url, "rss.xml")
-    },
     title: "archive",
     url: "./archive.html",
     months: monthGroups.map(month => ({
@@ -204,11 +188,7 @@ async function generateRSSPage(db, blog) {
 
   return await render("./templates/rss.mustache", {
     blog,
-    feed: {
-      pubDate: new Date().toUTCString(),
-      description: `Everything feed - ${blog.title}`,
-      url: url.resolve(blog.url, "rss.xml")
-    },
+    pubDate: new Date().toUTCString(),
     posts: posts
   });
 }

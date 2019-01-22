@@ -417,7 +417,11 @@ const cleanCSS = new CleanCSS({
 async function getBlogObject(/* db */) {
   return {
     title: BLOG_TITLE,
-    url: url.resolve(BLOG_BASE_URL, "/")
+    url: url.resolve(BLOG_BASE_URL, "/"),
+    feed: {
+      description: `Everything feed - ${BLOG_TITLE}`,
+      url: url.resolve(BLOG_BASE_URL, "/rss.xml")
+    }
   };
 }
 

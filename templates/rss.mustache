@@ -2,11 +2,11 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
  <title>{{ blog.title }}</title>
- <description>{{ feed.description }}</description>
+ <description>{{ blog.feed.description }}</description>
  <link>{{{ blog.url }}}</link>
- <pubDate>{{ feed.pubDate }}</pubDate>
+ <pubDate>{{ pubDate }}</pubDate>
  <ttl>1800</ttl>
- <atom:link href="{{{ feed.url }}}" rel="self" type="application/rss+xml" />
+ <atom:link href="{{{ blog.feed.url }}}" rel="self" type="application/rss+xml" />
 
  {{#posts}}
  <item>

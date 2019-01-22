@@ -3,7 +3,6 @@ const path = require("path");
 
 const { authed } = require("./auth.js");
 const {
-  BLOG_TITLE,
   prepare: commonPrepare,
   render,
   getBlogObject
@@ -36,8 +35,8 @@ module.exports = async (req, res) => {
     created: +new Date()
   };
 
+  const db = await req.db();
   if (existingPostId) {
-    const db = await req.db();
     const dbPost = await db.get(
       `
         SELECT

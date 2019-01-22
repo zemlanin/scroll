@@ -1,4 +1,5 @@
 const fs = require("fs");
+const url = require("url");
 const path = require("path");
 const zlib = require("zlib");
 const { promisify } = require("util");
@@ -288,16 +289,16 @@ function prepare(post) {
 
   let title = post.slug || created.toISOString().split("T")[0];
   let htmlTitle = null;
-  const url = getPostUrl(post);
   let longread = null;
   let html = null;
 
+  post.url = getPostUrl(post);
   const rss = {
     title: null
   };
 
   const opengraph = {
-    url: url,
+    url: post.url,
     title: title,
     description: null,
     image: null
@@ -305,7 +306,7 @@ function prepare(post) {
 
   if (header1Token) {
     const headerPrefix = "#".repeat(header1Token.depth);
-    htmlTitle = marked(`${headerPrefix} [${header1Token.text}](${url})`);
+    htmlTitle = marked(`${headerPrefix} [${header1Token.text}](${post.url})`);
     rss.title = title = cheerio
       .load(htmlTitle)
       .text()
@@ -374,8 +375,8 @@ function prepare(post) {
     draft: post.draft,
     private: post.private,
     public: post.public,
-    status: status,
-    url,
+    url: post.url,
+    status,
     title,
     htmlTitle,
     html,
@@ -412,6 +413,13 @@ loadTemplate.cache = {};
 const cleanCSS = new CleanCSS({
   level: 2
 });
+
+async function getBlogObject(/* db */) {
+  return {
+    title: BLOG_TITLE,
+    url: url.resolve(BLOG_BASE_URL, "/")
+  };
+}
 
 async function render(tmpl, data) {
   return mustache.render(
@@ -482,6 +490,7 @@ module.exports = {
   PAGE_SIZE,
   MINIMUM_INDEX_PAGE_SIZE,
   getMimeObj,
+  getBlogObject,
   prepare,
   render,
   renderer,

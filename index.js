@@ -26,7 +26,12 @@ const {
   generateArchivePage
 } = require("./generate-post.js");
 
-const { DIST, POSTS_DB, writeFileWithGzip } = require("./common.js");
+const {
+  DIST,
+  POSTS_DB,
+  writeFileWithGzip,
+  getBlogObject
+} = require("./common.js");
 
 function rmrf(filepath) {
   if (fs.existsSync(filepath)) {
@@ -57,6 +62,8 @@ async function generate(db, stdout, stderr) {
   await fsPromises.mkdir(path.join(tmpFolder, "/media"));
 
   stdout.write(`made tmp dir: ${tmpFolder}\n`);
+
+  const blog = await getBlogObject(db);
 
   let preparedPosts = await getPosts(db, {}, `draft = 0`, null);
 
@@ -92,7 +99,7 @@ async function generate(db, stdout, stderr) {
 
     await Promise.all(
       postsChunk.map(async post => {
-        const renderedPage = await generatePostPage(post);
+        const renderedPage = await generatePostPage(post, blog);
 
         if (post.slug && post.id !== post.slug) {
           await writeFileWithGzip(
@@ -123,6 +130,7 @@ async function generate(db, stdout, stderr) {
       path.resolve(tmpFolder, `page-${pageNumber}.html`),
       await generatePaginationPage(
         db,
+        blog,
         pageNumber,
         page.posts,
         pagination.length === pageNumber
@@ -135,19 +143,19 @@ async function generate(db, stdout, stderr) {
 
   await writeFileWithGzip(
     path.resolve(tmpFolder, "index.html"),
-    await generateIndexPage(db, pagination[0]),
+    await generateIndexPage(db, blog, pagination[0]),
     { flag: "wx" }
   );
 
   await writeFileWithGzip(
     path.resolve(tmpFolder, "rss.xml"),
-    await generateRSSPage(db),
+    await generateRSSPage(db, blog),
     { flag: "wx" }
   );
 
   await writeFileWithGzip(
     path.resolve(tmpFolder, "archive.html"),
-    await generateArchivePage(db),
+    await generateArchivePage(db, blog),
     { flag: "wx" }
   );
 

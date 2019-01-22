@@ -1,3 +1,4 @@
+const url = require("url");
 const path = require("path");
 
 const chunk = require("lodash.chunk");
@@ -5,12 +6,11 @@ const groupBy = require("lodash.groupby");
 
 const {
   DIST,
-  BLOG_BASE_URL,
-  BLOG_TITLE,
   PAGE_SIZE,
   MINIMUM_INDEX_PAGE_SIZE,
   render,
   prepare,
+  getBlogObject,
   writeFileWithGzip,
   unlinkFileWithGzip
 } = require("./common.js");
@@ -62,15 +62,12 @@ async function removePostPage(post) {
   }
 }
 
-async function generatePostPage(post) {
+async function generatePostPage(post, blog) {
   return await render("./templates/post.mustache", {
-    blog: {
-      title: BLOG_TITLE,
-      url: BLOG_BASE_URL + "/"
-    },
+    blog: blog,
     feed: {
-      description: `Everything feed - ${BLOG_TITLE}`,
-      url: BLOG_BASE_URL + "/rss.xml"
+      description: `Everything feed - ${blog.title}`,
+      url: url.resolve(blog.url, "rss.xml")
     },
     title: post.title,
     post,
@@ -86,7 +83,7 @@ async function removePotentialPagination(newestPage) {
   await unlinkFileWithGzip(pagePath);
 }
 
-async function generatePaginationPage(db, pageNumber, postIds, isNewest) {
+async function generatePaginationPage(db, blog, pageNumber, postIds, isNewest) {
   const posts = await getPosts(
     db,
     postIds,
@@ -94,38 +91,35 @@ async function generatePaginationPage(db, pageNumber, postIds, isNewest) {
     postIds.length
   );
 
-  const url = `page-${pageNumber}.html`;
+  const pageUrl = `page-${pageNumber}.html`;
   const title = `page-${pageNumber}`;
 
   return await render("./templates/list.mustache", {
-    blog: {
-      title: BLOG_TITLE,
-      url: BLOG_BASE_URL + "/"
-    },
+    blog,
     feed: {
-      description: `Everything feed - ${BLOG_TITLE}`,
-      url: BLOG_BASE_URL + "/rss.xml"
+      description: `Everything feed - ${blog.title}`,
+      url: url.resolve(blog.url, "rss.xml")
     },
     title: title,
-    url: url,
+    url: pageUrl,
     posts: posts,
     newer: isNewest
-      ? { text: `index`, url: `${BLOG_BASE_URL}/` }
+      ? { text: `index`, url: blog.url }
       : {
           text: `page-${pageNumber + 1}`,
-          url: `${BLOG_BASE_URL}/page-${pageNumber + 1}.html`
+          url: url.resolve(blog.url, `page-${pageNumber + 1}.html`)
         },
     older:
       pageNumber > 1
         ? {
             text: `page-${pageNumber - 1}`,
-            url: `${BLOG_BASE_URL}/page-${pageNumber - 1}.html`
+            url: url.resolve(blog.url, `page-${pageNumber - 1}.html`)
           }
         : null
   });
 }
 
-async function generateIndexPage(db, newestPage) {
+async function generateIndexPage(db, blog, newestPage) {
   let indexPostsLimit = newestPage.posts.length;
   let olderPageIndex = Math.max(0, newestPage.index - 1);
 
@@ -142,27 +136,24 @@ async function generateIndexPage(db, newestPage) {
   );
 
   return await render("./templates/list.mustache", {
-    blog: {
-      title: BLOG_TITLE,
-      url: BLOG_BASE_URL + "/"
-    },
+    blog,
     feed: {
-      description: `Everything feed - ${BLOG_TITLE}`,
-      url: BLOG_BASE_URL + "/rss.xml"
+      description: `Everything feed - ${blog.title}`,
+      url: url.resolve(blog.url, "rss.xml")
     },
     posts: posts,
     newer: null,
     older: olderPageIndex
       ? {
           text: `page-${olderPageIndex}`,
-          url: `${BLOG_BASE_URL}/page-${olderPageIndex}.html`
+          url: url.resolve(blog.url, `page-${olderPageIndex}.html`)
         }
       : null,
     index: true
   });
 }
 
-async function generateArchivePage(db) {
+async function generateArchivePage(db, blog) {
   let postMonths = await db.all(`
     SELECT strftime('%Y-%m', created) month
     FROM posts
@@ -194,13 +185,10 @@ async function generateArchivePage(db) {
   });
 
   return await render("./templates/archive.mustache", {
-    blog: {
-      title: BLOG_TITLE,
-      url: BLOG_BASE_URL + "/"
-    },
+    blog,
     feed: {
-      description: `Everything feed - ${BLOG_TITLE}`,
-      url: BLOG_BASE_URL + "/rss.xml"
+      description: `Everything feed - ${blog.title}`,
+      url: url.resolve(blog.url, "rss.xml")
     },
     title: "archive",
     url: "./archive.html",
@@ -211,18 +199,15 @@ async function generateArchivePage(db) {
   });
 }
 
-async function generateRSSPage(db) {
+async function generateRSSPage(db, blog) {
   const posts = await getPosts(db, {}, "draft = 0 AND private = 0", PAGE_SIZE);
 
   return await render("./templates/rss.mustache", {
-    blog: {
-      title: BLOG_TITLE,
-      url: BLOG_BASE_URL + "/"
-    },
+    blog,
     feed: {
       pubDate: new Date().toUTCString(),
-      description: `Everything feed - ${BLOG_TITLE}`,
-      url: BLOG_BASE_URL + "/rss.xml"
+      description: `Everything feed - ${blog.title}`,
+      url: url.resolve(blog.url, "rss.xml")
     },
     posts: posts
   });
@@ -278,6 +263,7 @@ async function getPagination(db, postsCreatedAfter) {
 }
 
 async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
+  const blog = await getBlogObject(db);
   const post = await getPost(db, postId);
   const newStatus = post.status;
   const newCreated = post.created;
@@ -285,7 +271,7 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
   if (newStatus === "draft") {
     await removePostPage(post);
   } else {
-    const renderedPage = await generatePostPage(post);
+    const renderedPage = await generatePostPage(post, blog);
 
     if (post.slug && post.id !== post.slug) {
       await writeFileWithGzip(
@@ -316,13 +302,13 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
 
     await writeFileWithGzip(
       path.resolve(DIST, "index.html"),
-      await generateIndexPage(db, newestPage)
+      await generateIndexPage(db, blog, newestPage)
     );
 
     if (pages.length <= 2) {
       await writeFileWithGzip(
         path.resolve(DIST, "rss.xml"),
-        await generateRSSPage(db)
+        await generateRSSPage(db, blog)
       );
     }
 
@@ -334,6 +320,7 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
         path.resolve(DIST, `page-${pageNumber}.html`),
         await generatePaginationPage(
           db,
+          blog,
           postPaginationPage.index,
           postPaginationPage.posts,
           newestPage.index === postPaginationPage.index
@@ -347,6 +334,7 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
           path.resolve(DIST, `page-${pageNumber}.html`),
           await generatePaginationPage(
             db,
+            blog,
             pageNumber,
             page.posts,
             newestPage.index === pageNumber
@@ -356,7 +344,7 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
 
       await writeFileWithGzip(
         path.resolve(DIST, "archive.html"),
-        await generateArchivePage(db)
+        await generateArchivePage(db, blog)
       );
     }
   }

@@ -2,7 +2,12 @@ const url = require("url");
 const path = require("path");
 
 const { authed } = require("./auth.js");
-const { BLOG_TITLE, prepare: commonPrepare, render } = require("../common.js");
+const {
+  BLOG_TITLE,
+  prepare: commonPrepare,
+  render,
+  getBlogObject
+} = require("../common.js");
 
 function prepare(post, options) {
   return {
@@ -67,12 +72,12 @@ module.exports = async (req, res) => {
 
   const showTeaser = (req.post && req.post.teaser) || query.teaser;
 
+  const blog = await getBlogObject(db);
+  blog.url = url.resolve(req.absolute, "/backstage");
+
   if (showTeaser) {
     return render(path.resolve(__dirname, "..", "templates", "list.mustache"), {
-      blog: {
-        title: BLOG_TITLE,
-        url: url.resolve(req.absolute, "/backstage")
-      },
+      blog: blog,
       posts: [preparedPost],
       url: preparedPost.url,
       older: null,
@@ -81,10 +86,7 @@ module.exports = async (req, res) => {
   }
 
   return render(path.resolve(__dirname, "..", "templates", "post.mustache"), {
-    blog: {
-      title: BLOG_TITLE,
-      url: url.resolve(req.absolute, "/backstage")
-    },
+    blog: blog,
     title: preparedPost.title,
     post: preparedPost,
     url: preparedPost.url,

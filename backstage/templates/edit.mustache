@@ -27,22 +27,35 @@
 
       .media-thumbnail,
       .more-media {
-        width: 64px;
-        height: 64px;
+        width: 3em;
+        height: 3em;
         background: lightgray;
         word-break: all;
         display: inline-block;
+        border: 1px solid transparent;
+      }
+
+      .media-thumbnail:hover {
+        border-color: #00a500;
+      }
+
+      .media-thumbnail.with-extra {
+        border-radius: 0.3em 0 0 0.3em;
+        border-color: #00a500;
       }
 
       .media-extra {
         display: inline-flex;
         align-items: center;
-        background-color: lightgray;
-        border-radius: 0 1em 1em 0;
+        border-radius: 0 0.3em 0.3em 0;
+        padding-right: 0.35em;
+        border: 1px solid #00a500;
+        border-left-width: 0;
       }
 
       .media-extra .buttons {
         flex-wrap: nowrap;
+        padding-left: 0.35em;
       }
 
       .media-extra .buttons, .media-extra .buttons .button {
@@ -158,19 +171,24 @@
             class="field textarea"
             rows="8"
         >{{{post.text}}}</textarea>
-        <div style="overflow-x: scroll; height: 68px; width: 100%; white-space: nowrap; -webkit-overflow-scrolling: touch;">
-          <ul>
+        <div style="overflow-x: scroll; height: 3em; margin-bottom: 1em; width: 100%; white-space: nowrap; -webkit-overflow-scrolling: touch;">
+          <ul style="font-size: 0.5em;">
             {{#media}}
-              <li style="display: inline-flex;">
+              <li style="display: inline-flex; font-size: 1rem;">
                 <a
                   class="media-thumbnail"
                   data-id="{{id}}"
                   {{#icon}}
-                    style="background-image: url('{{{icon}}}'); background-size: cover;"
+                    style="background-image: url('{{{icon}}}'); background-size: cover; background-repeat: no-repeat;"
                   {{/icon}}
-                  onclick='document.querySelector(`.media-extra[data-id="{{id}}"]`).classList.toggle("is-hidden")'
+                  onclick='document.querySelector(`.media-extra[data-id="{{id}}"]`).classList.toggle("is-hidden"); event.currentTarget.classList.toggle("with-extra")'
                 >
-                  <span class="tag" style="opacity: 0.7">{{ext}}</span>
+                  {{#icon}}
+                    <span class="tag" style="opacity: 0">{{ext}}</span>
+                  {{/icon}}
+                  {{^icon}}
+                    <span class="tag" style="opacity: 0.7">{{ext}}</span>
+                  {{/icon}}
                 </a>
                 <div class="media-extra is-hidden" data-id="{{id}}">
                   <div class="buttons has-addons">

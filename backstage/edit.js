@@ -9,6 +9,7 @@ const getPostId = () =>
   )}`;
 
 const { authed, sendToAuthProvider } = require("./auth.js");
+const { getJson: getMediaJson } = require("./media.js");
 const { generateAfterEdit } = require("../generate-post.js");
 const { render } = require("./templates/index.js");
 
@@ -116,7 +117,8 @@ module.exports = {
       post: post,
       urls: {
         logout: url.resolve(req.absolute, "/backstage/?logout=1")
-      }
+      },
+      media: (await getMediaJson(db, { offset: 0 })).media
     });
   },
   post: async (req, res) => {

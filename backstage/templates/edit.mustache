@@ -24,6 +24,26 @@
             min-height: 40vh;
             border: 1px solid gray;
         }
+
+      .media-thumbnail,
+      .more-media {
+        width: 64px;
+        height: 64px;
+        background: lightgray;
+        word-break: all;
+        display: inline-block;
+      }
+
+      .media-extra {
+        display: inline-flex;
+        align-items: center;
+        background-color: lightgray;
+        border-radius: 0 1em 1em 0;
+      }
+
+      .media-extra .buttons, .media-extra .buttons .button {
+        margin-bottom: 0;
+      }
     </style>
 </head>
 <body class="container is-fluid" style="margin: 1em 1em 80px 1em">
@@ -134,6 +154,68 @@
             class="field textarea"
             rows="8"
         >{{{post.text}}}</textarea>
+        <div style="overflow-x: scroll; height: 68px; width: 100%; white-space: nowrap;">
+          <ul>
+            {{#media}}
+              <li style="display: inline-flex;">
+                <a
+                  class="media-thumbnail"
+                  data-id="{{id}}"
+                  {{#icon}}
+                    style="background-image: url('{{{icon}}}'); background-size: cover;"
+                  {{/icon}}
+                  onclick="document.querySelector('.media-extra[data-id=' + '{{id}}' + ']').classList.toggle('is-hidden')"
+                >
+                  <span class="tag" style="opacity: 0.7">{{ext}}</span>
+                </a>
+                <div class="media-extra is-hidden" data-id="{{id}}">
+                  <div class="buttons has-addons">
+                    <a href="/media/{{id}}.{{ext}}" target="_blank" class="button">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 576 512">
+                          <path fill="currentColor" d="{{fas.external-link-alt}}"></path>
+                      </svg>
+                    </a>
+                  </div>
+                  <div class="buttons has-addons">
+                    <button type="button"
+                      class="button"
+                      onclick="window.appendText(`/media/{{id}}.{{ext}}`)"
+                    >original</button>
+                  </div>
+                  {{#existingConversions}}
+                    <div class="buttons has-addons">
+                      <button type="button"
+                        class="button"
+                        onclick="window.appendText(`/media/{{media_id}}/{{tag}}.{{ext}}`)"
+                      >{{tag}}</button>
+                      <button type="button"
+                        class="button control is-danger"
+                        data-convert-id="{{media_id}}"
+                        data-convert-tag="{{tag}}"
+                        data-convert-action="delete"
+                      >
+                        -
+                      </button>
+                    </div>
+                  {{/existingConversions}}
+                  {{#possibleConversions}}
+                    <div class="buttons has-addons">
+                      <button type="button" class="button" disabled>{{tag}}</button>
+                      <button type="button"
+                        class="button"
+                        data-convert-id="{{media_id}}"
+                        data-convert-tag="{{tag}}"
+                        data-convert-action="create"
+                      >
+                        +
+                      </button>
+                    </div>
+                  {{/possibleConversions}}
+                </div>
+              </li>
+            {{/media}}
+          </ul>
+        </div>
         <div class="field is-horizontal"
             style="justify-content: space-between; display: flex; flex-flow: row wrap"
         >
@@ -202,12 +284,18 @@
     <script>
         /* eslint-env browser */
         window.appendText = function (text) {
-            const textarea = document.querySelector('textarea[name="text"]')
-            textarea.innerText = (textarea.innerText + ' ' + text.trim()).trim()
+            text = text.trim();
+
+            const textarea = document.querySelector('textarea[name="text"]');
+            const { selectionStart, selectionEnd } = textarea;
+            textarea.value =
+              textarea.value.slice(0, selectionStart)
+              + text
+              + textarea.value.slice(selectionEnd);
 
             textarea.focus()
-            textarea.selectionStart = textarea.innerText.length
-            textarea.selectionEnd = textarea.innerText.length
+            textarea.selectionStart = selectionStart;
+            textarea.selectionEnd = selectionEnd + text.length;
         }
 
         window.tabClick = function (event) {

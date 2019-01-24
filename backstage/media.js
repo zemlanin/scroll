@@ -242,20 +242,7 @@ const mediaId = {
 };
 
 module.exports = {
-  get: async (req, res) => {
-    const query = url.parse(req.url, true).query;
-    if (query.id) {
-      return await mediaId.get(req, res);
-    }
-
-    const user = authed(req, res);
-
-    if (!user) {
-      return sendToAuthProvider(req, res);
-    }
-
-    const db = await req.db();
-    const offset = +query.offset || 0;
+  getJson: async (db, { offset }) => {
     const media = await db.all(
       `
         SELECT id, ext
@@ -270,36 +257,80 @@ module.exports = {
       `
         SELECT media_id, tag, ext
         FROM converted_media
-        WHERE tag = ?1 AND media_id IN (${media
-          .map(m => `"${m.id}"`)
-          .join(",")})
-      `,
-      { 1: "icon128" }
+        WHERE media_id IN (${media.map(m => `"${m.id}"`).join(",")})
+        ORDER BY tag ASC
+      `
     );
 
-    const iconsMap = conversions.reduce(
-      (acc, c) => ({
-        ...acc,
-        [c.media_id]: `/media/${c.media_id}/${c.tag}.${c.ext}`
-      }),
-      {}
-    );
+    const conversionsMap = {};
+    for (const m of media) {
+      conversionsMap[m.id] = {
+        existingConversions: [],
+        possibleConversions: [],
+        possibleCtags: new Set(
+          Object.keys((await getConversionTags(mime.getType(m.ext))) || {})
+        )
+      };
+      conversionsMap[m.id].possibleCtags.delete("_default");
+    }
+
+    for (const c of conversions) {
+      conversionsMap[c.media_id].existingConversions.push(c);
+      conversionsMap[c.media_id].possibleCtags.delete(c.tag);
+    }
+
+    for (const m of media) {
+      for (const tag of [...conversionsMap[m.id].possibleCtags]) {
+        conversionsMap[m.id].possibleConversions.push({ tag, media_id: m.id });
+      }
+
+      delete conversionsMap[m.id].possibleCtags;
+    }
+
+    const iconsMap = conversions
+      .filter(c => c.tag === "icon128")
+      .reduce(
+        (acc, c) => ({
+          ...acc,
+          [c.media_id]: `/media/${c.media_id}/${c.tag}.${c.ext}`
+        }),
+        {}
+      );
 
     const moreMedia = media.length > PAGE_SIZE;
 
-    return render("media.mustache", {
-      user: user,
+    return {
       media: media.slice(0, PAGE_SIZE).map(m => {
-        const mimeObj = getMimeObj(m.ext);
         return {
           ...m,
-          icon: iconsMap[m.id] || (mimeObj.image && `/media/${m.id}.${m.ext}`),
-          type: mimeObj
+          ...conversionsMap[m.id],
+          icon: iconsMap[m.id],
+          type: getMimeObj(m.ext)
         };
       }),
       urls: {
         moreMedia: moreMedia && `/backstage/media/?offset=${offset + PAGE_SIZE}`
       }
+    };
+  },
+  get: async (req, res) => {
+    const query = url.parse(req.url, true).query;
+    if (query.id) {
+      return await mediaId.get(req, res);
+    }
+
+    const user = authed(req, res);
+
+    if (!user) {
+      return sendToAuthProvider(req, res);
+    }
+
+    const db = await req.db();
+    const offset = +query.offset || 0;
+
+    return render("media.mustache", {
+      user: user,
+      ...(await module.exports.getJson(db, { offset }))
     });
   },
   post: async (req, res) => {

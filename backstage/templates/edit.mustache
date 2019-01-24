@@ -168,7 +168,7 @@
                   {{#icon}}
                     style="background-image: url('{{{icon}}}'); background-size: cover;"
                   {{/icon}}
-                  onclick="document.querySelector('.media-extra[data-id=' + '{{id}}' + ']').classList.toggle('is-hidden')"
+                  onclick='document.querySelector(`.media-extra[data-id="{{id}}"]`).classList.toggle("is-hidden")'
                 >
                   <span class="tag" style="opacity: 0.7">{{ext}}</span>
                 </a>

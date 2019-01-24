@@ -201,13 +201,6 @@
                 </a>
                 <div class="media-extra is-hidden" data-id="{{id}}">
                   <div class="buttons has-addons">
-                    <a href="/backstage/media/?id={{id}}" target="_blank" class="button">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 576 512">
-                          <path fill="currentColor" d="{{fas.external-link-alt}}"></path>
-                      </svg>
-                    </a>
-                  </div>
-                  <div class="buttons has-addons">
                     <button type="button"
                       class="button"
                       onclick="window.appendText(`/media/{{id}}.{{ext}}`)"
@@ -234,6 +227,13 @@
                       </button>
                     </div>
                   {{/possibleConversions}}
+                  <div class="buttons has-addons">
+                    <a href="/backstage/media/?id={{id}}" target="_blank" class="button">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 512 512">
+                          <path fill="currentColor" d="{{fas.cog}}"></path>
+                      </svg>
+                    </a>
+                  </div>
                 </div>
               </li>
             {{/media}}

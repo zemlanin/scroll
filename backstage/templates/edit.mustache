@@ -7,23 +7,32 @@
         {{> bulma.css}}
     </style>
     <style>
-        nav {
-            margin-top: 1em;
-            margin-bottom: 1em;
-        }
+      nav {
+          margin-top: 1em;
+          margin-bottom: 1em;
+      }
 
-        textarea, input[name="slug"], form, form button {
-            font-size: 1em;
-            font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
-            "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
-            "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
-            "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
-        }
+      textarea, input[name="slug"], form, form button {
+          font-size: 1em;
+          font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
+          "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
+          "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
+          "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+      }
 
-        iframe {
-            min-height: 40vh;
-            border: 1px solid gray;
-        }
+      iframe {
+          min-height: 40vh;
+          border: 1px solid gray;
+      }
+
+      #media-bar {
+        overflow-x: scroll;
+        height: 3em;
+        margin-bottom: 1em;
+        width: 100%;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+      }
 
       .media-thumbnail,
       .more-media {
@@ -171,7 +180,7 @@
             class="field textarea"
             rows="8"
         >{{{post.text}}}</textarea>
-        <div style="overflow-x: scroll; height: 3em; margin-bottom: 1em; width: 100%; white-space: nowrap; -webkit-overflow-scrolling: touch;">
+        <div id="media-bar">
           <ul style="font-size: 0.5em;">
             {{#media}}
               <li style="display: inline-flex; font-size: 1rem;">
@@ -181,10 +190,10 @@
                   {{#icon}}
                     style="background-image: url('{{{icon}}}'); background-size: cover; background-repeat: no-repeat;"
                   {{/icon}}
-                  onclick='document.querySelector(`.media-extra[data-id="{{id}}"]`).classList.toggle("is-hidden"); event.currentTarget.classList.toggle("with-extra")'
+                  onclick='window.mediaBarClick(event)'
                 >
                   {{#icon}}
-                    <span class="tag" style="opacity: 0">{{ext}}</span>
+                    &nbsp;
                   {{/icon}}
                   {{^icon}}
                     <span class="tag" style="opacity: 0.7">{{ext}}</span>
@@ -326,6 +335,22 @@
             }
 
             return true;
+        }
+
+        window.mediaBarClick = function (event) {
+          const mediaId = event.currentTarget.dataset.id;
+          const mediaBar = document.getElementById("media-bar");
+          const mediaExtra = document.querySelector(`.media-extra[data-id="${mediaId}"]`)
+
+          mediaExtra.classList.toggle("is-hidden");
+          event.currentTarget.classList.toggle("with-extra");
+
+          if (event.currentTarget.classList.contains("with-extra")) {
+            mediaBar.scrollTo({
+              left: event.currentTarget.offsetLeft - 1,
+              behavior: "smooth"
+            });
+          }
         }
     </script>
 </body>

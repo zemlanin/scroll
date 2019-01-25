@@ -194,6 +194,66 @@ renderer.image = function(href, title, text) {
     }
   }
 
+  if (href.startsWith("data:text/html;base64")) {
+    const frameSrc = href;
+    let imgSrc = null;
+
+    if (text && text.indexOf("poster=") > -1) {
+      const attrs =
+        text &&
+        text
+          .replace(/&apos;/g, `'`)
+          .replace(/&quot;/g, `"`)
+          .replace(
+            /((src|href|poster)=['"]?)\/media\//g,
+            `$1${process.env.BLOG_BASE_URL || ""}/media/`
+          );
+
+      imgSrc = attrs.match(/poster=['"]?([^'" ]+)['"]?/)[1];
+    } else {
+      let lines = [`<tspan x="0" dy="12">data:text/html</tspan>`].concat(
+        frameSrc
+          .slice("data:text/html;base64,".length)
+          .split(/(.{25})/)
+          .filter(Boolean)
+          .slice(0, 6)
+          .map(line => `<tspan x="0" dy="12">${line}</tspan>`)
+      );
+
+      if (text) {
+        lines = [
+          ...lines.slice(0, 3),
+          `<tspan x="80" dy="12" fill="#00a500" text-anchor="middle">${text}</tspan>`,
+          ...lines.slice(3, 6)
+        ];
+      }
+
+      imgSrc =
+        "data:image/svg+xml;utf8," +
+        encodeURIComponent(
+          `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90">
+              <defs><style type="text/css">
+                text {
+                  font-size: 11px;
+                  font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
+                    "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
+                    "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
+                    "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+                }
+              </style></defs>
+              <rect x="0" y="0" height="90" width="160" fill="white" />
+              <text x="0" y="0" fill="#888">${lines.join("")}</text>
+            </svg>
+          `.replace(/^\s+/gm, "")
+        );
+    }
+
+    return `<a class="future-frame" href="${href}" data-src="${frameSrc}" data-background="#fff">
+      <img src="${imgSrc}">
+    </a>`;
+  }
+
   return ogImage(href, title, text);
 };
 

@@ -255,7 +255,8 @@ module.exports = {
       post: post,
       urls: {
         logout: url.resolve(req.absolute, "/backstage/?logout=1")
-      }
+      },
+      media: (await getMediaJson(db, { offset: 0 })).media
     });
   }
 };

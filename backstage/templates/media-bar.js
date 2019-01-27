@@ -41,11 +41,57 @@ document.addEventListener("DOMContentLoaded", function() {
     textarea.selectionEnd = selectionEnd + text.length + needsPoster ? 0 : 5;
   }
 
+  function convertButtonClick(event) {
+    const button = event.currentTarget;
+    const id = button.getAttribute("data-convert-id");
+    const tag = button.getAttribute("data-convert-tag");
+
+    button.innerText = "…";
+    button.setAttribute("disabled", true);
+    fetch(`/backstage/convert`, {
+      method: "POST",
+      body: `id=${id}&tag=${tag}`,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      }
+    })
+      .then(resp => {
+        if (200 <= resp.status && resp.status < 300) {
+          for (const insertButton of mediaBar.querySelectorAll(
+            `button[data-media-path*="/${id}/${tag}"]`
+          )) {
+            insertButton.removeAttribute("disabled");
+          }
+
+          button.innerText = "✓";
+          button.classList.add("is-info");
+          button.classList.remove("is-danger");
+        } else {
+          button.innerText = "!";
+          button.removeAttribute("disabled");
+          button.classList.add("is-danger");
+        }
+      })
+      .catch(() => {
+        button.innerText = "!";
+        button.removeAttribute("disabled");
+        button.classList.add("is-danger");
+      });
+  }
+
   for (const thumb of mediaBar.querySelectorAll(".media-thumbnail")) {
     thumb.addEventListener("click", mediaThumbnailClick);
   }
 
-  for (const button of mediaBar.querySelectorAll("button[data-media-path]")) {
-    button.addEventListener("click", mediaPathClick);
+  for (const insertButton of mediaBar.querySelectorAll(
+    "button[data-media-path]"
+  )) {
+    insertButton.addEventListener("click", mediaPathClick);
+  }
+
+  for (const convertButton of mediaBar.querySelectorAll(
+    'button[data-convert-action="create"]'
+  )) {
+    convertButton.addEventListener("click", convertButtonClick);
   }
 });

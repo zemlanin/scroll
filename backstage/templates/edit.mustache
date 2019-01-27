@@ -28,12 +28,15 @@
       #media-bar {
         overflow-x: auto;
         overflow-y: hidden;
-        scrollbar-width: thin;
-        height: 3em;
-        margin-bottom: 1em;
+        height: 3.5em;
+        height: calc(3em + 16px);
+        margin-top: 0.25em;
+        margin-bottom: 0.25em;
         width: 100%;
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
+        display: flex;
+        flex-wrap: nowrap;
       }
 
       .media-thumbnail,
@@ -64,13 +67,22 @@
         border-left-width: 0;
       }
 
-      .media-extra .buttons {
+      #media-bar .buttons {
         flex-wrap: nowrap;
         padding-left: 0.35em;
       }
 
-      .media-extra .buttons, .media-extra .buttons .button {
+      #media-bar .buttons, #media-bar .buttons .button {
         margin-bottom: 0;
+      }
+
+      #media-bar .new-media {
+        padding-left: 0;
+        padding-right: 0.5em;
+        display: inline-flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        height: 3em;
       }
     </style>
 </head>
@@ -183,6 +195,24 @@
             rows="8"
         >{{{post.text}}}</textarea>
         <div id="media-bar">
+          <div class="new-media buttons has-addons">
+            <button type="button"
+              class="button new-media-camera"
+              disabled
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 512 512">
+                <path fill="currentColor" d="{{fas.camera}}"></path>
+              </svg>
+            </button>
+            <button type="button"
+              class="button new-media-upload"
+              disabled
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 512 512">
+                <path fill="currentColor" d="{{fas.upload}}"></path>
+              </svg>
+            </button>
+          </div>
           <ul style="font-size: 0.5em;">
             {{#media}}
               <li style="display: inline-flex; font-size: 1rem;">

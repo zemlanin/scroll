@@ -31,70 +31,71 @@ const SHARP_SUPPORTED_INPUT_MIMETYPES = new Set([
   "image/webp"
 ]);
 
-const SHARP_CONVERSION_TAGS = {
-  _default: ["icon128"],
-  async icon128(input) {
-    const ext = "png";
-    return {
-      ext,
-      data: await sharp(input)
-        .resize({
-          width: 128,
-          height: 128,
-          fit: "cover",
-          strategy: "attention",
-          withoutEnlargement: true
-        })
-        .toFormat(ext)
-        .toBuffer()
-    };
-  },
-  async fit200(input, mimeType) {
-    const ext = mimeType != "image/gif" ? mime.getExtension(mimeType) : "png";
-    return {
-      ext,
-      data: await sharp(input)
-        .resize({
-          width: 200,
-          height: 200,
-          fit: "inside",
-          withoutEnlargement: true
-        })
-        .toFormat(ext)
-        .toBuffer()
-    };
-  },
-  async fit1000(input, mimeType) {
-    const ext = mimeType != "image/gif" ? mime.getExtension(mimeType) : "png";
-    return {
-      ext,
-      data: await sharp(input)
-        .resize({
-          width: 1000,
-          height: 1000,
-          fit: "inside",
-          withoutEnlargement: true
-        })
-        .toFormat(ext)
-        .toBuffer()
-    };
-  },
-  async fit1600(input, mimeType) {
-    const ext = mimeType != "image/gif" ? mime.getExtension(mimeType) : "png";
-    return {
-      ext,
-      data: await sharp(input)
-        .resize({
-          width: 1600,
-          height: 1600,
-          fit: "inside",
-          withoutEnlargement: true
-        })
-        .toFormat(ext)
-        .toBuffer()
-    };
-  }
-};
+function getSharpConversionTags(mimeType) {
+  const iconExt = "png";
+  const fitExt = mimeType === "image/gif" ? "png" : mime.getExtension(mimeType);
+
+  return {
+    _default: ["icon128"],
+    icon128: {
+      ext: iconExt,
+      async convert(input) {
+        return await sharp(input)
+          .resize({
+            width: 128,
+            height: 128,
+            fit: "cover",
+            strategy: "attention",
+            withoutEnlargement: true
+          })
+          .toFormat(iconExt)
+          .toBuffer();
+      }
+    },
+    fit200: {
+      ext: fitExt,
+      async convert(input) {
+        return await sharp(input)
+          .resize({
+            width: 200,
+            height: 200,
+            fit: "inside",
+            withoutEnlargement: true
+          })
+          .toFormat(fitExt)
+          .toBuffer();
+      }
+    },
+    fit1000: {
+      ext: fitExt,
+      async convert(input) {
+        return await sharp(input)
+          .resize({
+            width: 1000,
+            height: 1000,
+            fit: "inside",
+            withoutEnlargement: true
+          })
+          .toFormat(fitExt)
+          .toBuffer();
+      }
+    },
+    fit1600: {
+      ext: fitExt,
+      async convert(input) {
+        return await sharp(input)
+          .resize({
+            width: 1600,
+            height: 1600,
+            fit: "inside",
+            withoutEnlargement: true
+          })
+          .toFormat(fitExt)
+          .toBuffer();
+      }
+    }
+  };
+}
 
 const isFfmpegInstalled = new Promise(resolve => {
   ffmpeg.getAvailableFormats(function(err, formats) {
@@ -106,6 +107,10 @@ function getGifToMP4Buffer(input) {
   return new Promise((resolve, reject) => {
     Promise.resolve()
       .then(async () => {
+        if (!isAnimatedGif(input)) {
+          return resolve();
+        }
+
         const tmpFolder = await fsPromises.mkdtemp(
           path.join(os.tmpdir(), "scrollconvert-")
         );
@@ -150,21 +155,6 @@ function getGifToMP4Buffer(input) {
         reject(err);
       });
   });
-}
-
-async function gifvConvert(input) {
-  if (!(await isFfmpegInstalled)) {
-    return;
-  }
-
-  if (!isAnimatedGif(input)) {
-    return;
-  }
-
-  return {
-    ext: "mp4",
-    data: await getGifToMP4Buffer(input)
-  };
 }
 
 function getFirstFrameBuffer(input, crop = null) {
@@ -220,46 +210,37 @@ function getFirstFrameBuffer(input, crop = null) {
   });
 }
 
-async function firstFrameConvert(input) {
-  if (!(await isFfmpegInstalled)) {
-    return;
-  }
-
-  return {
-    ext: "jpeg",
-    data: await getFirstFrameBuffer(input)
-  };
-}
-
-async function firstFrameIconConvert(input) {
-  if (!(await isFfmpegInstalled)) {
-    return;
-  }
-
-  return {
-    ext: "jpeg",
-    data: await getFirstFrameBuffer(input, 128)
-  };
-}
-
 async function getConversionTags(mimeType) {
   if (mimeType === "image/gif" && (await isFfmpegInstalled)) {
+    const sharpTags = getSharpConversionTags(mimeType);
+
     return {
-      ...SHARP_CONVERSION_TAGS,
-      _default: SHARP_CONVERSION_TAGS._default.concat("gifv"),
-      gifv: gifvConvert
+      ...sharpTags,
+      _default: sharpTags._default.concat("gifv"),
+      gifv: {
+        ext: "mp4",
+        convert: getGifToMP4Buffer
+      }
     };
   }
 
   if (SHARP_SUPPORTED_INPUT_MIMETYPES.has(mimeType)) {
-    return SHARP_CONVERSION_TAGS;
+    return getSharpConversionTags(mimeType);
   }
 
-  if (mimeType === "video/mp4") {
+  if (mimeType === "video/mp4" && (await isFfmpegInstalled)) {
     return {
       _default: ["icon128", "firstframe"],
-      icon128: firstFrameIconConvert,
-      firstframe: firstFrameConvert
+      icon128: {
+        ext: "jpeg",
+        async convert(input) {
+          return await getFirstFrameBuffer(input, 128);
+        }
+      },
+      firstframe: {
+        ext: "jpeg",
+        convert: getFirstFrameBuffer
+      }
     };
   }
 }
@@ -281,23 +262,22 @@ async function convertMedia(db, tag, blob, mediaId, mimeType, destination) {
 
   const ctags = await getConversionTags(mimeType);
 
-  if (!ctags) {
+  if (!ctags || !ctags[tag]) {
     return;
   }
 
-  const convertFunc = ctags[tag];
-  const converted = convertFunc && (await convertFunc(blob, mimeType));
+  const { ext, convert } = ctags[tag];
+
+  const converted = await convert(blob);
   if (!converted) {
     return;
   }
-
-  // { data, ext } = converted
 
   const result = {
     id: getMediaId(),
     media_id: mediaId,
     tag: tag,
-    ext: converted.ext
+    ext: ext
   };
 
   await db.run(
@@ -310,7 +290,7 @@ async function convertMedia(db, tag, blob, mediaId, mimeType, destination) {
       2: result.media_id,
       3: result.tag,
       4: result.ext,
-      5: converted.data,
+      5: converted,
       6: new Date().toISOString()
     }
   );
@@ -321,10 +301,7 @@ async function convertMedia(db, tag, blob, mediaId, mimeType, destination) {
     await fsPromises.mkdir(dpath);
   }
 
-  await fsPromises.writeFile(
-    path.join(dpath, `${tag}.${converted.ext}`),
-    converted.data
-  );
+  await fsPromises.writeFile(path.join(dpath, `${tag}.${ext}`), converted);
 
   return result;
 }
@@ -393,7 +370,7 @@ module.exports = {
     if (!existing) {
       const mimeType = mime.getType(media.ext);
 
-      await convertMedia(
+      const result = await convertMedia(
         db,
         tag,
         media.data,
@@ -401,6 +378,11 @@ module.exports = {
         mimeType,
         path.resolve(DIST, "media")
       );
+
+      if (!result) {
+        res.writeHead(400);
+        res.end(`unable to convert`);
+      }
     }
 
     res.writeHead(303, { Location: `/backstage/media/?id=${media.id}` });

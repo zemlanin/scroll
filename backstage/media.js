@@ -158,7 +158,7 @@ const mediaId = {
       .filter(
         tag => tag != "_default" && !existingConversionsTags.includes(tag)
       )
-      .map(tag => ({ tag, media_id: m.id }));
+      .map(tag => ({ tag, media_id: m.id, ext: ctags[tag].ext }));
 
     const posts = await db.all(
       `
@@ -267,21 +267,29 @@ module.exports = {
       conversionsMap[m.id] = {
         existingConversions: [],
         possibleConversions: [],
-        possibleCtags: new Set(
-          Object.keys((await getConversionTags(mime.getType(m.ext))) || {})
-        )
+        possibleCtags: (await getConversionTags(mime.getType(m.ext))) || {}
       };
-      conversionsMap[m.id].possibleCtags.delete("_default");
+      if (conversionsMap[m.id].possibleCtags._default) {
+        delete conversionsMap[m.id].possibleCtags._default;
+      }
     }
 
     for (const c of conversions) {
       conversionsMap[c.media_id].existingConversions.push(c);
-      conversionsMap[c.media_id].possibleCtags.delete(c.tag);
+      conversionsMap[c.media_id].possibleCtags[c.tag] = null;
     }
 
     for (const m of media) {
-      for (const tag of [...conversionsMap[m.id].possibleCtags]) {
-        conversionsMap[m.id].possibleConversions.push({ tag, media_id: m.id });
+      for (const tag in conversionsMap[m.id].possibleCtags) {
+        const ctag = conversionsMap[m.id].possibleCtags[tag];
+
+        if (ctag) {
+          conversionsMap[m.id].possibleConversions.push({
+            tag,
+            media_id: m.id,
+            ext: ctag.ext
+          });
+        }
       }
 
       delete conversionsMap[m.id].possibleCtags;

@@ -359,15 +359,15 @@ module.exports = {
       return;
     }
 
-    if (req.post.delete) {
-      const existing = await db.get(
-        "SELECT id, ext from converted_media WHERE media_id = ?1 AND tag = ?2",
-        {
-          1: media.id,
-          2: tag
-        }
-      );
+    const existing = await db.get(
+      "SELECT id, ext from converted_media WHERE media_id = ?1 AND tag = ?2",
+      {
+        1: media.id,
+        2: tag
+      }
+    );
 
+    if (req.post.delete) {
       if (existing) {
         await db.run(`DELETE FROM converted_media WHERE id = ?1`, {
           1: existing.id
@@ -390,16 +390,18 @@ module.exports = {
       return;
     }
 
-    const mimeType = mime.getType(media.ext);
+    if (!existing) {
+      const mimeType = mime.getType(media.ext);
 
-    await convertMedia(
-      db,
-      tag,
-      media.data,
-      media.id,
-      mimeType,
-      path.resolve(DIST, "media")
-    );
+      await convertMedia(
+        db,
+        tag,
+        media.data,
+        media.id,
+        mimeType,
+        path.resolve(DIST, "media")
+      );
+    }
 
     res.writeHead(303, { Location: `/backstage/media/?id=${media.id}` });
     res.end();

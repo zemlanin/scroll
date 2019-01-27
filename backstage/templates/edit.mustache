@@ -26,7 +26,9 @@
       }
 
       #media-bar {
-        overflow-x: scroll;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: thin;
         height: 3em;
         margin-bottom: 1em;
         width: 100%;
@@ -190,7 +192,6 @@
                   {{#icon}}
                     style="background-image: url('{{{icon}}}'); background-size: cover; background-repeat: no-repeat;"
                   {{/icon}}
-                  onclick='window.mediaBarClick(event)'
                 >
                   {{#icon}}
                     &nbsp;
@@ -203,14 +204,14 @@
                   <div class="buttons has-addons">
                     <button type="button"
                       class="button"
-                      onclick="window.appendText(`/media/{{id}}.{{ext}}`)"
+                      data-media-path="/media/{{id}}.{{ext}}"
                     >{{ext}}</button>
                   </div>
                   {{#existingConversions}}
                     <div class="buttons has-addons">
                       <button type="button"
                         class="button"
-                        onclick="window.appendText(`/media/{{media_id}}/{{tag}}.{{ext}}`)"
+                        data-media-path="/media/{{media_id}}/{{tag}}.{{ext}}"
                       >{{tag}}</button>
                     </div>
                   {{/existingConversions}}
@@ -306,44 +307,16 @@
     <form id="dummy"></form>
     <script>
         /* eslint-env browser */
-        window.appendText = function (text) {
-            text = text.trim();
-
-            const textarea = document.querySelector('textarea[name="text"]');
-            const { selectionStart, selectionEnd } = textarea;
-            textarea.value =
-              textarea.value.slice(0, selectionStart)
-              + text
-              + textarea.value.slice(selectionEnd);
-
-            textarea.focus()
-            textarea.selectionStart = selectionStart;
-            textarea.selectionEnd = selectionEnd + text.length;
-        }
-
         window.tabClick = function (event) {
-            for (const tab of event.target.closest(".tabs").querySelectorAll("li")) {
-                tab.classList[tab.contains(event.currentTarget) ? "add" : "remove"]("is-active");
-            }
-
-            return true;
-        }
-
-        window.mediaBarClick = function (event) {
-          const mediaId = event.currentTarget.dataset.id;
-          const mediaBar = document.getElementById("media-bar");
-          const mediaExtra = document.querySelector(`.media-extra[data-id="${mediaId}"]`)
-
-          mediaExtra.classList.toggle("is-hidden");
-          event.currentTarget.classList.toggle("with-extra");
-
-          if (event.currentTarget.classList.contains("with-extra")) {
-            mediaBar.scrollTo({
-              left: event.currentTarget.offsetLeft - 1,
-              behavior: "smooth"
-            });
+          for (const tab of event.target.closest(".tabs").querySelectorAll("li")) {
+            tab.classList[tab.contains(event.currentTarget) ? "add" : "remove"]("is-active");
           }
+
+          return true;
         }
+    </script>
+    <script type="text/javascript">
+      {{ > media-bar.js }}
     </script>
 </body>
 </html>

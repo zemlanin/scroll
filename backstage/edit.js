@@ -112,13 +112,15 @@ module.exports = {
       }
     }
 
+    const mediaJson = await getMediaJson(db, { offset: 0 });
+
     return render("edit.mustache", {
       user: user,
       post: post,
       urls: {
         logout: url.resolve(req.absolute, "/backstage/?logout=1")
       },
-      media: (await getMediaJson(db, { offset: 0 })).media
+      mediaJson: mediaJson
     });
   },
   post: async (req, res) => {
@@ -249,6 +251,7 @@ module.exports = {
     }
 
     post.created = post.created.toISOString().replace(/:\d{2}\.\d{3}Z$/, "");
+    const mediaJson = await getMediaJson(db, { offset: 0 });
 
     return render("edit.mustache", {
       user: user,
@@ -256,7 +259,7 @@ module.exports = {
       urls: {
         logout: url.resolve(req.absolute, "/backstage/?logout=1")
       },
-      media: (await getMediaJson(db, { offset: 0 })).media
+      mediaJson: mediaJson
     });
   }
 };

@@ -1,19 +1,85 @@
 /* eslint-env browser */
 document.addEventListener("DOMContentLoaded", function() {
   const mediaBar = document.getElementById("media-bar");
+  mediaBar.scrollLeft = 0;
+  let moreMediaIntersectionObserver = null;
+
+  function loadMore() {
+    const moreMediaButton = mediaBar.querySelector("[data-more-media-url]");
+    if (!moreMediaButton) {
+      return;
+    }
+
+    if (moreMediaButton.classList.contains("loading")) {
+      return;
+    }
+
+    moreMediaButton.classList.add("loading");
+    const moreMediaButtonLi = moreMediaButton.closest("li");
+
+    const parent = moreMediaButton.closest("ul");
+    const url = moreMediaButton.getAttribute("data-more-media-url");
+    fetch(url, { credentials: "include" })
+      .then(async r => {
+        const htmlTag = document.createElement("html");
+        htmlTag.innerHTML = await r.text();
+
+        bindThumbnailHandlers(htmlTag);
+
+        for (const thumb of htmlTag.querySelectorAll(".media-thumbnail")) {
+          parent.insertBefore(thumb.closest("li"), moreMediaButtonLi);
+          parent.insertBefore(document.createTextNode(" "), moreMediaButtonLi);
+        }
+
+        const newMoreButton = htmlTag.querySelector("[data-more-media-url]");
+
+        if (newMoreButton) {
+          moreMediaButton.setAttribute(
+            "data-more-media-url",
+            newMoreButton.getAttribute("data-more-media-url")
+          );
+        } else {
+          parent.removeChild(moreMediaButtonLi);
+          if (
+            moreMediaIntersectionObserver &&
+            moreMediaIntersectionObserver.disconnect
+          ) {
+            moreMediaIntersectionObserver.disconnect();
+          }
+        }
+      })
+      .catch(e => {
+        moreMediaButton.innerText = e.toString();
+      })
+      .then(() => {
+        moreMediaButton.classList.remove("loading");
+      });
+  }
 
   function mediaThumbnailClick(event) {
     const mediaId = event.currentTarget.dataset.id;
-    const mediaExtra = document.querySelector(
+    const mediaExtra = mediaBar.querySelector(
       `.media-extra[data-id="${mediaId}"]`
     );
 
     mediaExtra.classList.toggle("is-hidden");
     event.currentTarget.classList.toggle("with-extra");
 
-    if (event.currentTarget.classList.contains("with-extra")) {
+    if (
+      event.currentTarget.classList.contains("with-extra") &&
+      mediaBar.scrollLeft + mediaBar.clientWidth <
+        mediaExtra.offsetLeft + mediaExtra.clientWidth
+    ) {
       mediaBar.scrollTo({
-        left: event.currentTarget.offsetLeft - 1,
+        left: Math.min(
+          // left border of expanded thumbnail
+          event.currentTarget.offsetLeft - 1,
+          // rigth border of expanded thumbnail
+          mediaExtra.offsetLeft +
+            mediaExtra.clientWidth -
+            mediaBar.clientWidth +
+            1
+        ),
         behavior: "smooth"
       });
     }
@@ -79,19 +145,46 @@ document.addEventListener("DOMContentLoaded", function() {
       });
   }
 
-  for (const thumb of mediaBar.querySelectorAll(".media-thumbnail")) {
-    thumb.addEventListener("click", mediaThumbnailClick);
+  function bindThumbnailHandlers(parentEl) {
+    for (const thumb of parentEl.querySelectorAll(".media-thumbnail")) {
+      thumb.addEventListener("click", mediaThumbnailClick);
+    }
+
+    for (const insertButton of parentEl.querySelectorAll(
+      "button[data-media-path]"
+    )) {
+      insertButton.addEventListener("click", mediaPathClick);
+    }
+
+    for (const convertButton of parentEl.querySelectorAll(
+      'button[data-convert-action="create"]'
+    )) {
+      convertButton.addEventListener("click", convertButtonClick);
+    }
   }
 
-  for (const insertButton of mediaBar.querySelectorAll(
-    "button[data-media-path]"
-  )) {
-    insertButton.addEventListener("click", mediaPathClick);
-  }
+  bindThumbnailHandlers(mediaBar);
 
-  for (const convertButton of mediaBar.querySelectorAll(
-    'button[data-convert-action="create"]'
-  )) {
-    convertButton.addEventListener("click", convertButtonClick);
+  const moreMediaButton = mediaBar.querySelector("[data-more-media-url]");
+  if (moreMediaButton) {
+    moreMediaButton.addEventListener("click", loadMore);
+
+    if (typeof IntersectionObserver != "undefined") {
+      const observerCallback = entries => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.1) {
+            loadMore();
+          }
+        }
+      };
+      moreMediaIntersectionObserver = new IntersectionObserver(
+        observerCallback,
+        {
+          root: mediaBar,
+          threshold: [0, 0.1]
+        }
+      );
+      moreMediaIntersectionObserver.observe(moreMediaButton);
+    }
   }
 });

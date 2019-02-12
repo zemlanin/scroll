@@ -42,6 +42,9 @@ async function render(tmpl, data) {
       "bulma.css": await loadTemplate(require.resolve("bulma/css/bulma.css")),
       "media-bar.js": await loadTemplate(
         path.resolve(__dirname, "media-bar.js")
+      ),
+      "media-bar.mustache": await loadTemplate(
+        path.resolve(__dirname, "media-bar.mustache")
       )
     }
   );

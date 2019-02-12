@@ -317,7 +317,10 @@ module.exports = {
         };
       }),
       urls: {
-        moreMedia: moreMedia && `/backstage/media/?offset=${offset + PAGE_SIZE}`
+        moreMedia:
+          moreMedia && `/backstage/media/?offset=${offset + PAGE_SIZE}`,
+        moreMediaBar:
+          moreMedia && `/backstage/media/?offset=${offset + PAGE_SIZE}&bar=1`
       }
     };
   },
@@ -336,7 +339,9 @@ module.exports = {
     const db = await req.db();
     const offset = +query.offset || 0;
 
-    return render("media.mustache", {
+    const template = query.bar ? "media-bar.mustache" : "media.mustache";
+
+    return render(template, {
       user: user,
       ...(await module.exports.getJson(db, { offset }))
     });

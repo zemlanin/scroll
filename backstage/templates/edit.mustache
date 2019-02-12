@@ -213,66 +213,9 @@
               </svg>
             </button>
           </div>
-          <ul style="font-size: 0.5em;">
-            {{#media}}
-              <li style="display: inline-flex; font-size: 1rem;">
-                <a
-                  class="media-thumbnail"
-                  data-id="{{id}}"
-                  {{#icon}}
-                    style="background-image: url('{{{icon}}}'); background-size: cover; background-repeat: no-repeat;"
-                  {{/icon}}
-                >
-                  {{#icon}}
-                    &nbsp;
-                  {{/icon}}
-                  {{^icon}}
-                    <span class="tag" style="opacity: 0.7">{{ext}}</span>
-                  {{/icon}}
-                </a>
-                <div class="media-extra is-hidden" data-id="{{id}}">
-                  <div class="buttons has-addons">
-                    <button type="button"
-                      class="button"
-                      data-media-path="/media/{{id}}.{{ext}}"
-                    >{{ext}}</button>
-                  </div>
-                  {{#existingConversions}}
-                    <div class="buttons has-addons">
-                      <button type="button"
-                        class="button"
-                        data-media-path="/media/{{media_id}}/{{tag}}.{{ext}}"
-                      >{{tag}}</button>
-                    </div>
-                  {{/existingConversions}}
-                  {{#possibleConversions}}
-                    <div class="buttons has-addons">
-                      <button type="button"
-                        class="button"
-                        data-media-path="/media/{{media_id}}/{{tag}}.{{ext}}"
-                        disabled
-                      >{{tag}}</button>
-                      <button type="button"
-                        class="button"
-                        data-convert-id="{{media_id}}"
-                        data-convert-tag="{{tag}}"
-                        data-convert-action="create"
-                      >
-                        +
-                      </button>
-                    </div>
-                  {{/possibleConversions}}
-                  <div class="buttons has-addons">
-                    <a href="/backstage/media/?id={{id}}" target="_blank" class="button">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 512 512">
-                          <path fill="currentColor" d="{{fas.cog}}"></path>
-                      </svg>
-                    </a>
-                  </div>
-                </div>
-              </li>
-            {{/media}}
-          </ul>
+          {{#mediaJson}}
+            {{> media-bar.mustache }}
+          {{/mediaJson}}
         </div>
         <div class="field is-horizontal"
             style="justify-content: space-between; display: flex; flex-flow: row wrap"

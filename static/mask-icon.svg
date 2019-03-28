@@ -1,13 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <defs>
-    <polygon
-        id="p"
-        points="0,50 25,25 50,25 0,75"
-        fill="black"
-    ></polygon>
-  </defs>
-  <use href="#p" />
-  <use href="#p"
-    transform="scale(-1, -1) translate(-100, -100)"
-  />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="#000">
+  <rect x="5" y="0" height="5" width="90" stroke-width="0"></rect>
+  <polygon
+      points="0,40 15,25 50,25 0,75"
+      transform="translate(5, 0)"
+  ></polygon>
+  <polygon
+      points="0,40 15,25 50,25 0,75"
+      transform="scale(-1, -1) translate(-95, -100)"
+  ></polygon>
+  <rect x="5" y="95" height="5" width="90" stroke-width="0"></rect>
 </svg>

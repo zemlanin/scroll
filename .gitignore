@@ -1,6 +1,6 @@
 dist/
 node_modules/
-posts.db
+*.db
 .DS_Store
 ansible/*.retry
 .env

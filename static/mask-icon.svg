@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <polygon
+        id="p"
+        points="0,50 25,25 50,25 0,75"
+        fill="black"
+    ></polygon>
+  </defs>
+  <use href="#p" />
+  <use href="#p"
+    transform="scale(-1, -1) translate(-100, -100)"
+  />
+</svg>

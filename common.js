@@ -481,6 +481,14 @@ async function getBlogObject(/* db */) {
     feed: {
       description: `Everything feed - ${BLOG_TITLE}`,
       url: url.resolve(BLOG_BASE_URL, "/rss.xml")
+    },
+    static: {
+      favicon: {
+        png: url.resolve(BLOG_BASE_URL, "/favicon.png")
+      },
+      "mask-icon": {
+        svg: url.resolve(BLOG_BASE_URL, "/mask-icon.svg")
+      }
     }
   };
 }

@@ -99,6 +99,28 @@ const handlers = [
       );
     }
   ],
+  [
+    "GET",
+    "/favicon.png",
+    async (req, res) => {
+      res.setHeader("content-type", "image/png");
+
+      return await fsPromises.readFile(
+        path.resolve(__dirname, "static", "favicon.png")
+      );
+    }
+  ],
+  [
+    "GET",
+    "/mask-icon.svg",
+    async (req, res) => {
+      res.setHeader("content-type", "image/svg+xml");
+
+      return await fsPromises.readFile(
+        path.resolve(__dirname, "static", "mask-icon.svg")
+      );
+    }
+  ],
   ["GET", "/media/*", serveMedia],
   ["GET", "/backstage", require("./backstage/index.js")],
   ["GET", "/backstage/callback", require("./backstage/callback.js")],
@@ -189,7 +211,8 @@ const server = http.createServer((req, res) => {
         if (
           typeof body === "string" ||
           contentType === "text/plain" ||
-          contentType === "text/html"
+          contentType === "text/html" ||
+          contentType.startsWith("image/")
         ) {
           res.writeHead(res.statusCode, {
             "Content-Type": contentType || "text/html"

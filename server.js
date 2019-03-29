@@ -223,16 +223,13 @@ const server = http.createServer((req, res) => {
           typeof body === "string" ||
           contentType === "text/plain" ||
           contentType === "text/html" ||
-          contentType.startsWith("image/")
+          (contentType && contentType.startsWith("image/"))
         ) {
           res.writeHead(res.statusCode, {
             "Content-Type": contentType || "text/html"
           });
           res.end(body);
-        } else if (
-          body ||
-          res.getHeader("content-type") === "application/json"
-        ) {
+        } else if (body || contentType === "application/json") {
           res.writeHead(res.statusCode, { "Content-Type": "application/json" });
           res.end(JSON.stringify(body));
         } else {

@@ -112,6 +112,17 @@ const handlers = [
   ],
   [
     "GET",
+    "/favicon.svg",
+    async (req, res) => {
+      res.setHeader("content-type", "image/svg+xml");
+
+      return await fsPromises.readFile(
+        path.resolve(__dirname, "static", "favicon.svg")
+      );
+    }
+  ],
+  [
+    "GET",
     "/mask-icon.svg",
     async (req, res) => {
       res.setHeader("content-type", "image/svg+xml");

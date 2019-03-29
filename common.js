@@ -484,7 +484,8 @@ async function getBlogObject(/* db */) {
     },
     static: {
       favicon: {
-        png: url.resolve(BLOG_BASE_URL, "/favicon.png")
+        png: url.resolve(BLOG_BASE_URL, "/favicon.png"),
+        svg: url.resolve(BLOG_BASE_URL, "/favicon.svg")
       },
       "mask-icon": {
         svg: url.resolve(BLOG_BASE_URL, "/mask-icon.svg")

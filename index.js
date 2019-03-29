@@ -7,12 +7,17 @@ const fsPromises = {
   mkdir: promisify(fs.mkdir),
   writeFile: promisify(fs.writeFile),
   exists: promisify(fs.exists),
-  mkdtemp: promisify(fs.mkdtemp)
+  mkdtemp: promisify(fs.mkdtemp),
+  readdir: promisify(fs.readdir),
+  lstat: promisify(fs.lstat),
+  copyFile: promisify(fs.copyFile),
+  readFile: promisify(fs.readFile)
 };
 
 const sqlite = require("sqlite");
 const chunk = require("lodash.chunk");
 const Rsync = require("rsync");
+const mime = require("mime");
 
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
@@ -57,11 +62,42 @@ async function mkdirP(p) {
   }
 }
 
+async function copyStaticContent(destination) {
+  const staticPath = path.resolve(__dirname, "static");
+
+  for (const filename of await fsPromises.readdir(staticPath)) {
+    if (filename && filename[0] == ".") {
+      continue;
+    }
+
+    const filepath = path.resolve(staticPath, filename);
+
+    if ((await fsPromises.lstat(filepath)).isDirectory()) {
+      throw new Error("copyStaticContent() doesn't support directories");
+    }
+
+    const mimeType = mime.getType(filename);
+    console.log(filename, mimeType);
+
+    if (mimeType.startsWith("text/") || mimeType == "image/svg+xml") {
+      await writeFileWithGzip(
+        path.resolve(destination, filename),
+        await fsPromises.readFile(filepath),
+        { flag: "wx" }
+      );
+    } else {
+      await fsPromises.copyFile(filepath, path.resolve(destination, filename));
+    }
+  }
+}
+
 async function generate(db, stdout, stderr) {
   const tmpFolder = await fsPromises.mkdtemp(path.join(os.tmpdir(), "scroll-"));
   await fsPromises.mkdir(path.join(tmpFolder, "/media"));
 
   stdout.write(`made tmp dir: ${tmpFolder}\n`);
+
+  await copyStaticContent(tmpFolder);
 
   const blog = await getBlogObject(db);
 

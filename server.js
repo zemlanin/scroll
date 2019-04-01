@@ -101,6 +101,17 @@ const handlers = [
   ],
   [
     "GET",
+    "/favicon.ico",
+    async (req, res) => {
+      res.setHeader("content-type", "image/vnd.microsoft.icon");
+
+      return await fsPromises.readFile(
+        path.resolve(__dirname, "static", "favicon.ico")
+      );
+    }
+  ],
+  [
+    "GET",
     "/favicon.png",
     async (req, res) => {
       res.setHeader("content-type", "image/png");

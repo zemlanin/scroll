@@ -112,6 +112,16 @@ module.exports = {
       }
     }
 
+    if (query.append) {
+      try {
+        post.text = post.text
+          ? post.text.trimEnd() + "\n\n" + decodeURIComponent(query.append)
+          : decodeURIComponent(query.append);
+      } catch (e) {
+        //
+      }
+    }
+
     const mediaJson = await getMediaJson(db, { offset: 0 });
 
     return render("edit.mustache", {

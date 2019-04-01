@@ -1,12 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="#000">
-  <rect x="5" y="0" height="5" width="90" stroke-width="0"></rect>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="#000">
+  <rect x="8" y="0" height="8" width="112" stroke-width="0"></rect>
   <polygon
-      points="0,40 15,25 50,25 0,75"
-      transform="translate(5, 0)"
+      points="0,48 16,32 64,32 0,96"
+      transform="translate(8, 0)"
   ></polygon>
   <polygon
-      points="0,40 15,25 50,25 0,75"
-      transform="scale(-1, -1) translate(-95, -100)"
+      points="0,48 16,32 64,32 0,96"
+      transform="scale(-1, -1) translate(-120, -128)"
   ></polygon>
-  <rect x="5" y="95" height="5" width="90" stroke-width="0"></rect>
+  <rect x="8" y="120" height="8" width="112" stroke-width="0"></rect>
 </svg>

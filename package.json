@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "npm run prettier -- -l",
+    "lint": "npm run prettier -- -l && npm run eslint",
     "fmt": "npm run prettier -- --write",
     "prettier": "prettier \"{.,import,server,templates}/**/*.{js,css}\"",
     "eslint": "eslint \"{.,import,server,templates}/**/*.js\""
@@ -19,7 +19,7 @@
     "@fortawesome/fontawesome-free-solid": "5.0.13",
     "animated-gif-detector": "1.2.0",
     "bulma": "0.7.1",
-    "cheerio": "1.0.0-rc.2",
+    "cheerio": "1.0.0-rc.3",
     "clean-css": "4.1.11",
     "cookie": "0.3.1",
     "dotenv": "6.2.0",
@@ -41,7 +41,7 @@
     "url-pattern": "1.0.3"
   },
   "devDependencies": {
-    "eslint": "4.19.1",
+    "eslint": "5.16.0",
     "prettier": "1.15.3"
   },
   "eslintConfig": {

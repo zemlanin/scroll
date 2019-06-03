@@ -90,9 +90,12 @@ renderer.image = function(href, title, text) {
     href = `https://www.funnyordie.com/embed/${funnyOrDieId[1]}`;
   }
 
-  const appleMusicPath = href.match(/https:\/\/itunes\.apple\.com\/(.+)/);
+  const appleMusicPath = href.match(
+    //         ($1          )              ($2)
+    /https:\/\/(itunes|music)\.apple\.com\/(.+)/
+  );
   if (appleMusicPath) {
-    href = `https://embed.music.apple.com/${appleMusicPath[1]}`;
+    href = `https://embed.music.apple.com/${appleMusicPath[2]}`;
   }
 
   if (href.indexOf("//www.youtube.com/embed/") > -1) {

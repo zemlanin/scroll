@@ -41,6 +41,7 @@ function getSharpConversionTags(mimeType) {
       ext: iconExt,
       async convert(input) {
         return await sharp(input)
+          .rotate() // rotate according to EXIF data, which will be stripped later
           .resize({
             width: 128,
             height: 128,
@@ -56,6 +57,7 @@ function getSharpConversionTags(mimeType) {
       ext: fitExt,
       async convert(input) {
         return await sharp(input)
+          .rotate() // rotate according to EXIF data, which will be stripped later
           .resize({
             width: 200,
             height: 200,
@@ -70,6 +72,7 @@ function getSharpConversionTags(mimeType) {
       ext: fitExt,
       async convert(input) {
         return await sharp(input)
+          .rotate() // rotate according to EXIF data, which will be stripped later
           .resize({
             width: 1000,
             height: 1000,
@@ -84,6 +87,7 @@ function getSharpConversionTags(mimeType) {
       ext: fitExt,
       async convert(input) {
         return await sharp(input)
+          .rotate() // rotate according to EXIF data, which will be stripped later
           .resize({
             width: 1600,
             height: 1600,

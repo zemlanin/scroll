@@ -197,7 +197,7 @@ const server = http.createServer((req, res) => {
   } else {
     const protocol = req.headers["x-forwarded-proto"] || req.protocol || "http";
     const host = req.headers["x-forwarded-host"] || req.headers["host"];
-    const port = (host.match(/:(\d+)$/) && host.match(/:(\d+)$/)[1]) || null;
+    const port = (host && host.match(/:(\d+)$/) && host.match(/:(\d+)$/)[1]) || null;
 
     req.absolute = url.format({
       protocol,

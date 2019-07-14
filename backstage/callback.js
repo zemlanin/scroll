@@ -53,8 +53,6 @@ module.exports = async (req, res) => {
     req.end();
   });
 
-  console.log(verification);
-
   if (verification.access_token) {
     const authed_user = await new Promise(resolve => {
       const req = https.request(

@@ -177,11 +177,15 @@ async function generate(db, stdout, stderr) {
 
   stdout.write("pagination done\n");
 
+  let newestPage = pagination[0] || { index: 0, posts: [] };
+
   await writeFileWithGzip(
     path.resolve(tmpFolder, "index.html"),
-    await generateIndexPage(db, blog, pagination[0]),
+    await generateIndexPage(db, blog, newestPage),
     { flag: "wx" }
   );
+
+  newestPage = null;
 
   await writeFileWithGzip(
     path.resolve(tmpFolder, "rss.xml"),

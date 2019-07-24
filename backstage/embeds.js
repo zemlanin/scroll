@@ -4,6 +4,8 @@ const cheerio = require("cheerio");
 const mustache = require("mustache");
 const rp = require("request-promise-native");
 
+const { render } = require("../common.js");
+
 const { authed, sendToAuthProvider } = require("./auth.js");
 
 /*
@@ -188,38 +190,13 @@ module.exports = {
       };
     }
 
-    return mustache.render(
-      `
-        <div>
-          {{# iframe }}
-            <iframe
-              width="{{width}}"
-              height="{{height}}"
-              src="{{src}}"
-            ></iframe><br/>
-          {{/ iframe }}
-          {{# img }}
-            <img
-              {{# alt}}
-                alt="{{alt}}"
-              {{/ alt}}
-              {{# width}}
-                width="{{width}}"
-              {{/ width}}
-              {{# height}}
-                height="{{height}}"
-              {{/ height}}
-              src="{{src}}"
-            ><br/>
-          {{/ img }}
-          <a href="{{ graph.url }}"><b>{{ graph.title }}</b> • {{ graph.site_name }}</a><br/>
-          {{# graph.description }}
-            <i>{{ graph.description }}</i>
-          {{/ graph.description }}
-        </div>
-        <pre><code>{{ graphJSON }}</code></pre>
-      `,
-      { graph, iframe, img, graphJSON: JSON.stringify(graph, null, 2) }
-    );
+    return render(`backstage/templates/embeds.mustache`, {
+      blog: { title: "embed" },
+      title: graph.title,
+      graph,
+      iframe,
+      img,
+      graphJSON: JSON.stringify(graph, null, 2)
+    });
   }
 };

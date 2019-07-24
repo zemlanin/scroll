@@ -1,0 +1,56 @@
+{{> header}}
+
+<article>
+  <figure>
+    {{# iframe }}
+      <a href="{{graph.url}}"
+        class="future-frame"
+        data-src="{{iframe.src}}"
+      >
+        {{# img }}
+          <img
+            {{# alt}}
+              alt="{{alt}}"
+            {{/ alt}}
+            {{# width}}
+              width="{{width}}"
+            {{/ width}}
+            {{# height}}
+              height="{{height}}"
+            {{/ height}}
+            src="{{src}}"
+          >
+        {{/ img }}
+      </a>
+    {{/ iframe }}
+    {{^ iframe }}
+      <a href="{{graph.url}}">
+        {{# img }}
+          <img
+            {{# alt}}
+              alt="{{alt}}"
+            {{/ alt}}
+            {{# width}}
+              width="{{width}}"
+            {{/ width}}
+            {{# height}}
+              height="{{height}}"
+            {{/ height}}
+            src="{{src}}"
+          >
+        {{/ img }}
+      </a>
+    {{/ iframe }}
+
+    <figcaption>
+      <a href="{{ graph.url }}"><b>{{ graph.title }}</b> • {{ graph.site_name }}</a><br/>
+      {{# graph.description }}
+        <i style="display: inline-block; white-space: nowrap; overflow-x: hidden; text-overflow: ellipsis; max-width: 100%;">{{ graph.description }}</i>
+      {{/ graph.description }}
+    </figcaption>
+  </figure>
+
+  <pre><code>{{ graphJSON }}</code></pre>
+</article>
+
+{{> footer}}

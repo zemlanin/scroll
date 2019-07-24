@@ -57,6 +57,55 @@ const isNumericProp = prop =>
   prop === "video:width" ||
   prop === "video:height";
 
+const numericIfNeeded = ([prop, value]) =>
+  !isNumericProp(prop) || value.match(/^[0-9]+$/);
+
+const metaPropertiesReducer = (acc, [prop, value]) => {
+  let patch = {};
+
+  if (isSimpleProp(prop)) {
+    patch = { [prop]: value };
+  } else if (isBasicMediaProp(prop)) {
+    patch = { [prop]: [...(acc[prop] || []), { url: value }] };
+  } else if (isInitialMediaProp(prop)) {
+    const prop0 = prop.split(":")[0]; // "image" or "video"
+
+    if (acc[prop0] && acc[prop0].length > 0) {
+      const prevObj = acc[prop0].pop();
+
+      if (prevObj.url !== value) {
+        patch = {
+          [prop0]: [...acc[prop0], { ...prevObj, url: value }]
+        };
+      } else {
+        patch = { [prop0]: [...acc[prop0], prevObj, { url: value }] };
+      }
+    } else {
+      patch = { [prop0]: [...(acc[prop0] || []), { url: value }] };
+    }
+  } else if (isMediaProp(prop) || isSecureUrlMediaProp(prop)) {
+    let [prop0, prop1] = prop.split(":");
+
+    if (isSecureUrlMediaProp(prop)) {
+      prop1 = "url";
+    }
+
+    if (acc[prop0].length > 0) {
+      const prevObj = acc[prop0].pop();
+
+      patch = {
+        [prop0]: [...acc[prop0], { ...prevObj, [prop1]: value }]
+      };
+    }
+  }
+
+  return {
+    ...acc,
+    ...patch,
+    _raw: [...acc._raw, { [prop]: value }]
+  };
+};
+
 module.exports = {
   loadOpenGraph: async ogPageURL => {
     let $;
@@ -85,61 +134,12 @@ module.exports = {
       .get()
       .filter(hasContent)
       .map(meta => [meta.property.slice(3), meta.content])
-      .filter(
-        ([prop, value]) => !isNumericProp(prop) || value.match(/^[0-9]+$/)
-      )
-      .reduce(
-        (acc, [prop, value]) => {
-          let patch = {};
-
-          if (isSimpleProp(prop)) {
-            patch = { [prop]: value };
-          } else if (isBasicMediaProp(prop)) {
-            patch = { [prop]: [...(acc[prop] || []), { url: value }] };
-          } else if (isInitialMediaProp(prop)) {
-            const prop0 = prop.split(":")[0]; // "image" or "video"
-
-            if (acc[prop0] && acc[prop0].length > 0) {
-              const prevObj = acc[prop0].pop();
-
-              if (prevObj.url !== value) {
-                patch = {
-                  [prop0]: [...acc[prop0], { ...prevObj, url: value }]
-                };
-              } else {
-                patch = { [prop0]: [...acc[prop0], prevObj, { url: value }] };
-              }
-            } else {
-              patch = { [prop0]: [...(acc[prop0] || []), { url: value }] };
-            }
-          } else if (isMediaProp(prop) || isSecureUrlMediaProp(prop)) {
-            let [prop0, prop1] = prop.split(":");
-
-            if (isSecureUrlMediaProp(prop)) {
-              prop1 = "url";
-            }
-
-            if (acc[prop0].length > 0) {
-              const prevObj = acc[prop0].pop();
-
-              patch = {
-                [prop0]: [...acc[prop0], { ...prevObj, [prop1]: value }]
-              };
-            }
-          }
-
-          return {
-            ...acc,
-            ...patch,
-            _raw: [...acc._raw, { [prop]: value }]
-          };
-        },
-        {
-          _raw: [],
-          title: htmlTitle,
-          url: url
-        }
-      );
+      .filter(numericIfNeeded)
+      .reduce(metaPropertiesReducer, {
+        _raw: [],
+        title: htmlTitle,
+        url: url
+      });
 
     if (!(graph.title && graph.url && graph.image)) {
       return null;

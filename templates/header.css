@@ -132,9 +132,6 @@ article a.future-frame {
 
 article a.future-frame {
   position: relative;
-}
-
-article a.future-frame {
   text-decoration: none;
 }
 
@@ -155,7 +152,7 @@ article a.future-frame:hover:after {
   background: #00a500;
 }
 
-article a.future-frame:hover:after {
+body.dark article a.future-frame:hover:after {
   color: white;
   background: #00a500;
 }

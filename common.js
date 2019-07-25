@@ -322,7 +322,7 @@ function pluralize(n, ...forms) {
 }
 
 function isTeaserToken(token) {
-  return (
+  return Boolean(
     token &&
     token.type === "paragraph" &&
     token.text.match(/^(_.+_|!\[.*\]\(.+\))$/)

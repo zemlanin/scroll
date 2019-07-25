@@ -411,7 +411,9 @@ function prepare(post) {
           )
         };
 
-        longread.teaser = teaser;
+        longread.teaser =
+          teaser +
+          `\n<a href="${post.url}" class="more">${longread.more} &rarr;</a>`;
       }
 
       opengraph.description =

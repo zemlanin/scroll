@@ -2,16 +2,12 @@
 
 {{#posts}}
 <article id="{{id}}">
-  {{#longread}}
-    {{{htmlTitle}}}
-    {{{teaser}}}
-    <a href="{{{url}}}" class="more">
-      {{more}} &rarr;
-    </a>
-  {{/longread}}
+  {{{htmlTitle}}}
 
+  {{#longread}}
+    {{{teaser}}}
+  {{/longread}}
   {{^longread}}
-    {{{htmlTitle}}}
     {{{html}}}
   {{/longread}}
 

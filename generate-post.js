@@ -43,11 +43,13 @@ function getPostsQuery(where, limit) {
 }
 
 async function getPosts(db, params, where, limit) {
-  return (await db.all(getPostsQuery(where, limit), params)).map(prepare);
+  return Promise.all(
+    (await db.all(getPostsQuery(where, limit), params)).map(prepare)
+  );
 }
 
 async function getPost(db, postId) {
-  return prepare(await db.get(getPostsQuery(`id = ?1`), { 1: postId }));
+  return await prepare(await db.get(getPostsQuery(`id = ?1`), { 1: postId }));
 }
 
 async function removePostPage(post) {

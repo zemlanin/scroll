@@ -333,7 +333,7 @@ function escapeKaomoji(str) {
   return str.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯");
 }
 
-function prepare(post) {
+async function prepare(post) {
   post.text = escapeKaomoji(post.text);
   const tokens = marked.lexer(post.text);
   const assignLinks = ts => {

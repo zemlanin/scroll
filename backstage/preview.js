@@ -8,9 +8,9 @@ const {
   getBlogObject
 } = require("../common.js");
 
-function prepare(post, options) {
+async function prepare(post, options) {
   return {
-    ...commonPrepare(post),
+    ...(await commonPrepare(post)),
     url: options.url
   };
 }
@@ -64,7 +64,7 @@ module.exports = async (req, res) => {
     post.created = +new Date(req.post.created);
   }
 
-  const preparedPost = prepare(post, {
+  const preparedPost = await prepare(post, {
     url: url.resolve(req.absolute, `/backstage/preview/?id=${post.id}`),
     baseUrl: url.resolve(req.absolute, "/")
   });

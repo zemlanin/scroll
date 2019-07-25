@@ -1,7 +1,6 @@
 const url = require("url");
 
 const cheerio = require("cheerio");
-const mustache = require("mustache");
 const rp = require("request-promise-native");
 
 const { render } = require("../common.js");
@@ -108,6 +107,44 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
   };
 };
 
+const graphHasIFrame = graph =>
+  graph &&
+  graph.video &&
+  graph.video.some(v => v.url && v.type === "text/html");
+
+const getOpengraphVideo = graphUrl => {
+  let iframeUrl = null;
+
+  const funnyOrDieId = graphUrl.match(
+    /\/\/www\.funnyordie\.com\/videos\/([0-9a-f]+)/
+  );
+  if (funnyOrDieId) {
+    iframeUrl = `https://www.funnyordie.com/embed/${funnyOrDieId[1]}`;
+  }
+
+  const vimeoId = graphUrl.match(/(vimeo\.com\/)(\d+)/);
+  if (vimeoId) {
+    iframeUrl = `https://player.vimeo.com/video/${vimeoId[2]}`;
+  }
+
+  const appleMusicPath = graphUrl.match(
+    //         ($1          )              ($2)
+    /https:\/\/(itunes|music)\.apple\.com\/(.+)/
+  );
+  if (appleMusicPath) {
+    iframeUrl = `https://embed.music.apple.com/${appleMusicPath[2]}`;
+  }
+
+  if (iframeUrl) {
+    return {
+      url: iframeUrl,
+      type: "text/html"
+    };
+  }
+
+  return null;
+};
+
 module.exports = {
   loadOpenGraph: async ogPageURL => {
     let $;
@@ -147,6 +184,14 @@ module.exports = {
       return null;
     }
 
+    if (!graphHasIFrame(graph)) {
+      const videoOverride = getOpengraphVideo(graph.url);
+
+      if (videoOverride) {
+        graph.video = [videoOverride, ...(graph.video || [])];
+      }
+    }
+
     return graph;
   },
 
@@ -170,7 +215,7 @@ module.exports = {
     }
 
     let iframe = null;
-    if (graph.video && graph.video.some(v => v.url && v.type === "text/html")) {
+    if (graphHasIFrame(graph)) {
       const video = graph.video.find(v => v.url && v.type === "text/html");
       iframe = {
         src: video.url,

@@ -46,13 +46,21 @@ document.addEventListener("DOMContentLoaded", function() {
 
     var target = e.currentTarget;
     var img = target.querySelector("img");
+    var width = Math.min(
+      +target.getAttribute("data-width") || Infinity,
+      (img && (img.width || img.clientWidth)) || 640
+    );
+    var height = Math.min(
+      +target.getAttribute("data-height") || Infinity,
+      (img && (img.height || img.clientHeight)) || 360
+    );
     var background = target.getAttribute("data-background");
     target.removeEventListener("click", handleFutureFrame);
     target.classList.add("loading");
     var i = document.createElement("iframe");
     i.setAttribute("src", target.getAttribute("data-src"));
     i.setAttribute("frameborder", 0);
-    i.setAttribute("width", (img && (img.width || img.clientWidth)) || 640);
+    i.setAttribute("width", width);
     i.setAttribute("height", 0);
     i.setAttribute("allow", "autoplay; encrypted-media");
     i.setAttribute("allowfullscreen", 1);
@@ -61,10 +69,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
     target.parentNode.insertBefore(i, target);
     i.addEventListener("load", function() {
-      i.setAttribute(
-        "height",
-        (img && (img.height || img.clientHeight)) || 360
-      );
+      i.setAttribute("height", height);
       target.style.display = "none";
     });
     e.preventDefault();

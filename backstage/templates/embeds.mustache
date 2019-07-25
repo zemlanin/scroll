@@ -6,6 +6,12 @@
       <a href="{{graph.url}}"
         class="future-frame"
         data-src="{{iframe.src}}"
+        {{# iframe.width}}
+          data-width="{{iframe.width}}"
+        {{/ iframe.width}}
+        {{# iframe.height}}
+          data-height="{{iframe.height}}"
+        {{/ iframe.height}}
       >
         {{# img }}
           <img

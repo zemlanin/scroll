@@ -2,77 +2,19 @@ const url = require("url");
 
 const { authed, logout, sendToAuthProvider } = require("./auth.js");
 const { render } = require("./templates/index.js");
-const { renderer } = require("../common.js");
-const marked = require("marked");
-const cheerio = require("cheerio");
+const { prepare: commonPrepare } = require("../common.js");
 
 const PAGE_SIZE = 10;
 
-const MARKED_END_TOKENS_MAP = {
-  list_start: "list_end",
-  list_item_start: "list_item_start",
-  loose_item_start: "list_item_end",
-  blockquote_start: "blockquote_end"
-};
-
-function prepare(post, options) {
-  let tokens = marked.lexer(post.text);
-
-  let title = post.slug || post.id;
+async function prepare(post, options) {
   const urls = {
     edit: url.resolve(options.baseUrl, `/backstage/edit/?id=${post.id}`),
     preview: url.resolve(options.baseUrl, `/backstage/preview/?id=${post.id}`),
     permalink: url.resolve(options.baseUrl, `/${post.slug || post.id}.html`)
   };
 
-  const header1Token = tokens.find(t => t.type === "heading" && t.text);
-
-  if (header1Token) {
-    const headerUrl =
-      post.public || post.private ? urls.permalink : urls.preview;
-    title = cheerio.load(marked(header1Token.text)).text();
-    post.text = post.text.replace(
-      header1Token.text,
-      `[${header1Token.text}](${headerUrl})`
-    );
-  }
-
-  post.text = post.text.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯");
-
-  tokens = marked.lexer(post.text);
-  const shortTokens = [];
-  let paragraphsCounter = 0;
-  const closingTokensStack = [];
-  for (const token of tokens) {
-    shortTokens.push(token);
-
-    if (token.type === "paragraph") {
-      paragraphsCounter = paragraphsCounter + 1;
-    }
-
-    if (MARKED_END_TOKENS_MAP[token.type]) {
-      closingTokensStack.unshift(MARKED_END_TOKENS_MAP[token.type]);
-    }
-
-    if (closingTokensStack.length && closingTokensStack[0] === token.type) {
-      closingTokensStack.shift();
-    }
-
-    if (paragraphsCounter >= 3 && !closingTokensStack.length) {
-      break;
-    }
-  }
-  shortTokens.links = tokens.links;
-
   return {
-    ...post,
-    title: title,
-    short: marked.parser(shortTokens, {
-      baseUrl: options.baseUrl,
-      gfm: true,
-      smartypants: false,
-      renderer: renderer
-    }),
+    ...(await commonPrepare(post)),
     urls: urls
   };
 }
@@ -146,10 +88,12 @@ module.exports = async (req, res) => {
 
   return render("list.mustache", {
     user: user,
-    posts: posts.slice(0, PAGE_SIZE).map(p =>
-      prepare(p, {
-        baseUrl: req.absolute
-      })
+    posts: await Promise.all(
+      posts.slice(0, PAGE_SIZE).map(p =>
+        prepare(p, {
+          baseUrl: req.absolute
+        })
+      )
     ),
     suggestion: suggestion,
     gauges: {

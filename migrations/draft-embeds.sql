@@ -1,8 +1,7 @@
 -- up
 CREATE TABLE IF NOT EXISTS "embeds" (
-	`id` TEXT,
+	`original_url` TEXT,
 	`created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	`original_url` TEXT NOT NULL,
 	`mimetype` TEXT NOT NULL,
 
 	`og:url` TEXT NOT NULL,
@@ -14,9 +13,17 @@ CREATE TABLE IF NOT EXISTS "embeds" (
 	`og:video` JSON,
 	`og:audio` JSON,
 	`raw_og` JSON,
+	PRIMARY KEY (`original_url`)
+);
+
+CREATE TABLE IF NOT EXISTS "post_embed_links" (
+	`id` TEXT,
+	`post_id` TEXT,
+	`original_url` TEXT,
 	PRIMARY KEY (`id`),
-	UNIQUE (`original_url`)
+	UNIQUE (`post_id`, `original_url`)
 );
 
 -- down
+DROP TABLE "post_embed_links";
 DROP TABLE "embeds";

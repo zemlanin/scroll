@@ -74,6 +74,12 @@ article figure.card {
   border-radius: 4px;
 }
 
+@media (max-width: 40em) {
+  article figure.card {
+    margin: 0 auto;
+  }
+}
+
 article figure.card figcaption {
   border: #eee 1px solid;
   border-top: none;
@@ -114,6 +120,11 @@ article video {
   height: auto;
   display: block;
   margin: auto;
+}
+
+article figure.card img,
+article figure.card video {
+  max-height: 21.375em;
 }
 
 article iframe,

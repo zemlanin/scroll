@@ -122,9 +122,18 @@ article video {
   margin: auto;
 }
 
+article audio {
+  width: 100%;
+  display: block;
+}
+
 article figure.card img,
 article figure.card video {
   max-height: 21.375em;
+}
+
+article figure.card img.audio-control {
+  cursor: pointer;
 }
 
 article iframe,

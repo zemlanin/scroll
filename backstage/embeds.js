@@ -13,6 +13,10 @@ const { authed, sendToAuthProvider } = require("./auth.js");
     https://anton.click/npm (redirect)
     https://www.youtube.com/watch?v=PA6mzvHeMk4 (iframe)
     https://eidolamusic.bandcamp.com/album/to-speak-to-listen (iframe)
+    https://m.imgur.com/t/cats/vSfGFEH (native video)
+    http://dobyfriday.com/142 (twitter card player)
+    https://overcast.fm/%2BFNoE1mS94 (twitter card player; audio; escaped `+`)
+    https://atp.fm/episodes/300 (no image -> no card)
     https://music.apple.com/ua/album/no-stopping-us-feat-jenny/1215204298?i=1215204497
     https://twitter.com/mikeyface/status/774823160852217856
     https://500ish.com/screwing-your-vocal-minority-dd4deb72448d
@@ -22,7 +26,7 @@ const { authed, sendToAuthProvider } = require("./auth.js");
     https://soundcloud.com/fairtomidland/the-greener-grass
 */
 
-const hasContent = v => v.content;
+const hasContent = ([_, content]) => content;
 
 const isSimpleProp = prop =>
   prop === "url" ||
@@ -50,13 +54,24 @@ const isMediaProp = prop =>
   prop === "video:type" ||
   prop === "video:width" ||
   prop === "video:height" ||
-  prop === "aduio:type";
+  prop === "audio:type";
 
 const isNumericProp = prop =>
   prop === "image:width" ||
   prop === "image:height" ||
   prop === "video:width" ||
-  prop === "video:height";
+  prop === "video:height" ||
+  prop === "player:width" ||
+  prop === "player:height";
+
+// https://developer.twitter.com/en/docs/tweets/optimize-with-cards/overview/markup
+// https://developer.twitter.com/en/docs/tweets/optimize-with-cards/overview/player-card
+const isPlayerProp = prop =>
+  prop === "player" ||
+  prop === "player:width" ||
+  prop === "player:height" ||
+  prop === "player:stream" ||
+  prop === "player:stream:content_type";
 
 const numericIfNeeded = ([prop, value]) =>
   !isNumericProp(prop) || value.match(/^[0-9]+$/);
@@ -112,6 +127,41 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
     } else {
       patch = { [prop0]: [{ [prop1]: value }] };
     }
+  } else if (isPlayerProp(prop)) {
+    // prop0 = "player"
+    // prop1 = "stream"
+    // prop2 = ???
+    let [prop0, prop1, prop2] = prop.split(":");
+
+    if (prop === "player") {
+      patch = {
+        player: {
+          url: value,
+          ...(acc.player || {})
+        }
+      };
+    } else if (prop1 !== "stream") {
+      patch = {
+        player: {
+          [prop1]: value,
+          ...(acc.player || {})
+        }
+      };
+    } else {
+      if (prop1 === "stream" && prop2 === undefined) {
+        prop2 = "url";
+      }
+
+      patch = {
+        player: {
+          ...(acc.player || {}),
+          stream: {
+            [prop2]: value,
+            ...((acc.player && acc.player.stream) || {})
+          }
+        }
+      };
+    }
   }
 
   return {
@@ -123,13 +173,34 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
 
 const getVideoIframe = graph =>
   graph &&
-  graph.video &&
-  graph.video.find(v => v.url && v.type === "text/html");
+  ((graph.video && graph.video.find(v => v.url && v.type === "text/html")) ||
+    (graph.player && {
+      url: graph.player.url,
+      width: graph.player.width,
+      height: graph.player.height
+    }));
 
 const getVideoNative = graph =>
   graph &&
-  graph.video &&
-  graph.video.find(v => v.url && v.type === "video/mp4");
+  ((graph.video && graph.video.find(v => v.url && v.type === "video/mp4")) ||
+    (graph.player &&
+      graph.player.stream &&
+      graph.player.stream.url &&
+      graph.player.stream.content_type === "video/mp4" && {
+        url: graph.player.stream.url,
+        width: graph.player.width,
+        height: graph.player.height,
+        type: graph.player.stream.content_type
+      }));
+
+const getAudioNative = graph =>
+  graph &&
+  graph.player &&
+  graph.player.stream &&
+  graph.player.stream.url &&
+  graph.player.stream.content_type === "audio/mpeg" && {
+    url: graph.player.stream.url
+  };
 
 const getOpengraphFrameOverride = graphUrl => {
   let iframeUrl = null;
@@ -187,16 +258,32 @@ module.exports = {
       .trim()
       .replace(`\n`, ` `);
 
-    const graph = $(`head meta[property^="og:"]`)
+    let rawOpengraph = $(`head meta[property^="og:"]`)
       .map((i, el) => el.attribs)
       .get()
+      .map(meta => [meta.property.slice(3), meta.content]);
+
+    if (rawOpengraph.length === 0) {
+      // overcast.fm has incorrect <meta> tags
+      // https://overcast.fm/+FNoE1mS94
+      rawOpengraph = $(`head meta[name^="og:"]`)
+        .map((i, el) => el.attribs)
+        .get()
+        .map(meta => [meta.name.slice(3), meta.content]);
+    }
+
+    const rawTwitter = $(`head meta[name^="twitter:"]`)
+      .map((i, el) => el.attribs)
+      .get()
+      .map(meta => [meta.name.slice(8), meta.content]);
+
+    const graph = [...rawOpengraph, ...rawTwitter]
       .filter(hasContent)
-      .map(meta => [meta.property.slice(3), meta.content])
       .filter(numericIfNeeded)
       .reduce(metaPropertiesReducer, {
         _raw: [],
         title: htmlTitle,
-        url: url
+        url: ogPageURL
       });
 
     if (!(graph.title && graph.url && graph.image)) {
@@ -215,11 +302,11 @@ module.exports = {
   },
 
   get: async (req, res) => {
-    const user = authed(req, res);
+    // const user = authed(req, res);
 
-    if (!user) {
-      return sendToAuthProvider(req, res);
-    }
+    // if (!user) {
+    //   return sendToAuthProvider(req, res);
+    // }
 
     const query = url.parse(req.url, true).query;
     if (!query.url) {
@@ -243,8 +330,16 @@ module.exports = {
       };
     }
 
+    let audio = null;
+    let audioNative = getAudioNative(graph);
+    if (audioNative) {
+      audio = {
+        src: audioNative.url
+      };
+    }
+
     let iframe = null;
-    let videoIframe = videoNative ? null : getVideoIframe(graph);
+    let videoIframe = videoNative || audioNative ? null : getVideoIframe(graph);
     if (videoIframe) {
       iframe = {
         src: videoIframe.url,
@@ -268,6 +363,7 @@ module.exports = {
       blog: { title: "embed" },
       title: graph.title,
       graph,
+      audio,
       video,
       iframe,
       img,

@@ -82,3 +82,37 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   );
 });
+
+document.addEventListener("DOMContentLoaded", function() {
+  function handleAudioControl(e) {
+    if (e.ctrlKey || e.metaKey) {
+      return true;
+    }
+
+    var target = e.currentTarget;
+    var src = target.getAttribute("data-src");
+    if (!src) {
+      return true;
+    }
+
+    var audio = document.querySelector('audio[src="' + src + '"]');
+    if (!audio) {
+      return true;
+    }
+
+    if (audio.paused) {
+      audio.play();
+    } else {
+      audio.pause();
+    }
+
+    e.preventDefault();
+  }
+
+  Array.prototype.forEach.call(
+    document.querySelectorAll("figure.card img.audio-control"),
+    function(ac) {
+      ac.addEventListener("click", handleAudioControl);
+    }
+  );
+});

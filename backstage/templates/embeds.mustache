@@ -45,9 +45,10 @@
     {{/ iframe }}
     {{^ iframe }}
       {{^ video }}
-        <a href="{{graph.url}}">
+        {{# audio }}
           {{# img }}
-            <img
+            <img class="audio-control"
+              data-src="{{audio.src}}"
               {{# alt}}
                 alt="{{alt}}"
               {{/ alt}}
@@ -60,12 +61,34 @@
               src="{{src}}"
             >
           {{/ img }}
-        </a>
+        {{/ audio }}
+        {{^ audio }}
+          <a href="{{graph.url}}">
+            {{# img }}
+              <img
+                {{# alt}}
+                  alt="{{alt}}"
+                {{/ alt}}
+                {{# width}}
+                  width="{{width}}"
+                {{/ width}}
+                {{# height}}
+                  height="{{height}}"
+                {{/ height}}
+                src="{{src}}"
+              >
+            {{/ img }}
+          </a>
+        {{/ audio }}
       {{/ video }}
     {{/ iframe }}
 
+    {{# audio }}
+      <audio controls preload="metadata" src="{{src}}"></audio>
+    {{/ audio }}
+
     <figcaption>
-      <a href="{{ graph.url }}"><b>{{ graph.title }}</b> • {{ graph.site_name }}</a>
+      <a href="{{ graph.url }}"><b>{{ graph.title }}</b>{{# graph.site_name }} • {{ graph.site_name }}{{/ graph.site_name }}</a>
       {{# graph.description }}
         <i>{{ graph.description }}</i>
       {{/ graph.description }}

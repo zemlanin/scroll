@@ -26,7 +26,13 @@ const { authed, sendToAuthProvider } = require("./auth.js");
     https://soundcloud.com/fairtomidland/the-greener-grass
 */
 
-const hasContent = ([_, content]) => content;
+const hasContent = meta => meta.content;
+const metaNameOG = meta => meta.name && meta.name.startsWith("og:");
+const tupleNameOG = meta => [meta.name.slice(3), meta.content];
+const metaPropertyOG = meta => meta.property && meta.property.startsWith("og:");
+const tuplePropertyOG = meta => [meta.property.slice(3), meta.content];
+const metaNameTwitter = meta => meta.name && meta.name.startsWith("twitter:");
+const tupleNameTwitter = meta => [meta.name.slice(8), meta.content];
 
 const cheerioAttrs = (i, el) => el.attribs;
 
@@ -270,34 +276,27 @@ module.exports = {
       .trim()
       .replace(`\n`, ` `);
 
-    let rawOpengraph = $(`head meta[property^="og:"]`)
-      .map(cheerioAttrs)
-      .get()
-      .map(meta => [meta.property.slice(3), meta.content]);
-
-    if (rawOpengraph.length === 0) {
-      // overcast.fm has incorrect <meta> tags
-      // https://overcast.fm/+FNoE1mS94
-      rawOpengraph = $(`head meta[name^="og:"]`)
-        .map(cheerioAttrs)
-        .get()
-        .map(meta => [meta.name.slice(3), meta.content]);
-    }
-
-    const rawTwitter = $(`head meta[name^="twitter:"]`)
-      .map(cheerioAttrs)
-      .get()
-      .map(meta => [meta.name.slice(8), meta.content]);
-
     const rawMeta = $(
       `head meta[property^="og:"], head meta[name^="og:"], head meta[name^="twitter:"]`
     )
       .map(cheerioAttrs)
       .get()
+      .filter(hasContent)
       .reduce(rawMetaReducer, []);
 
+    $ = null;
+
+    let rawOpengraph = rawMeta.filter(metaPropertyOG).map(tuplePropertyOG);
+
+    if (rawOpengraph.length === 0) {
+      // overcast.fm has incorrect <meta> tags
+      // https://overcast.fm/+FNoE1mS94
+      rawOpengraph = rawMeta.filter(metaNameOG).map(tupleNameOG);
+    }
+
+    const rawTwitter = rawMeta.filter(metaNameTwitter).map(tupleNameTwitter);
+
     const graph = [...rawOpengraph, ...rawTwitter]
-      .filter(hasContent)
       .filter(numericIfNeeded)
       .reduce(metaPropertiesReducer, {
         _raw: rawMeta,
@@ -365,8 +364,8 @@ module.exports = {
         };
       }
 
-      if (graph.image && graph.image.some(v => v.url)) {
-        const image = graph.image.find(v => v.url);
+      const image = graph.image && graph.image.find(v => v.url);
+      if (image) {
         img = {
           src: image.url,
           alt: image.alt,

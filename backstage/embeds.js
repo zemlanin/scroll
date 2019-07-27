@@ -75,7 +75,7 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
           [prop]: [...acc[prop], { ...prevObj, url: value }]
         };
       } else {
-        patch = { [prop0]: [...acc[prop], prevObj, { url: value }] };
+        patch = { [prop]: [...acc[prop], prevObj, { url: value }] };
       }
     } else {
       patch = { [prop]: [{ url: value }] };

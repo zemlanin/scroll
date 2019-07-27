@@ -7,8 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "npm run prettier -- -l && npm run eslint",
     "fmt": "npm run prettier -- --write",
-    "prettier": "prettier \"{.,import,server,templates}/**/*.{js,css}\"",
-    "eslint": "eslint \"{.,import,server,templates}/**/*.js\""
+    "prettier": "prettier \"./**/*.{js,css}\"",
+    "eslint": "eslint \"./**/*.js\""
   },
   "keywords": [],
   "author": "",
@@ -43,8 +43,8 @@
     "url-pattern": "1.0.3"
   },
   "devDependencies": {
-    "eslint": "5.16.0",
-    "prettier": "1.15.3"
+    "eslint": "6.1.0",
+    "prettier": "1.18.2"
   },
   "eslintConfig": {
     "extends": "eslint:recommended",
@@ -57,7 +57,8 @@
       "ecmaVersion": 9
     },
     "rules": {
-      "no-console": 1
+      "no-console": 1,
+      "require-atomic-updates": 0
     }
   }
 }

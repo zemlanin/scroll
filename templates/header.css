@@ -70,7 +70,7 @@ article {
 }
 
 article figure.card {
-  background: #eee;
+  background: #dedede;
   border-radius: 4px;
 }
 
@@ -81,7 +81,7 @@ article figure.card {
 }
 
 article figure.card figcaption {
-  border: #eee 1px solid;
+  border: #dedede 1px solid;
   border-top: none;
   border-radius: 0 0 4px 4px;
   padding: 0.5em;
@@ -103,12 +103,23 @@ article figure.card figcaption i {
   max-width: 100%;
 }
 
+@media (prefers-color-scheme: dark) {
+  article figure.card {
+    background: #414141;
+  }
+
+  article figure.card figcaption {
+    border-color: #414141;
+    background-color: black;
+  }
+}
+
 body.dark article figure.card {
-  background: #222;
+  background: #414141;
 }
 
 body.dark article figure.card figcaption {
-  border-color: #222;
+  border-color: #414141;
   background-color: black;
 }
 
@@ -160,19 +171,20 @@ article a.future-frame:after {
   width: 100%;
   content: "▶ play";
   text-align: center;
-  background: #eee;
+  background: #dedede;
+}
+
+@media (prefers-color-scheme: dark) {
+  article a.future-frame:after {
+    background: #414141;
+  }
 }
 
 body.dark article a.future-frame:after {
-  background: #222;
+  background: #414141;
 }
 
 article a.future-frame:hover:after {
-  color: white;
-  background: #00a500;
-}
-
-body.dark article a.future-frame:hover:after {
   color: white;
   background: #00a500;
 }

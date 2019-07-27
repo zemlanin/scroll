@@ -1,6 +1,9 @@
 /* eslint-env browser */
 document.addEventListener("DOMContentLoaded", function() {
   var nightModeCheckbox = document.getElementById("night-mode");
+  if (!nightModeCheckbox) {
+    return;
+  }
   var classList = document.body.classList;
 
   var enabledNightModeCookie =

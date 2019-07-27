@@ -21,16 +21,18 @@
   </script>
 </head>
 <body>
-<header style="display: flex; justify-content: space-between">
+<header style="display: flex; justify-content: space-between; border-bottom: 2px #ddd solid">
   <a href="/backstage">&larr;</a>
   <form method="GET" action="/backstage/embeds">
-    <input name="url" value="{{ url }}">
+    <input name="url" value="{{ url }}"
+      {{^ card }}autofocus{{/ card }}
+    >
     <button>&rarr;</button>
   </form>
   <form method="POST" action="#">
-    <a>loaded @ 2019-07-27</a>
-    <button name="save">save</button>
     <button name="delete">delete</button>
+    <a>@ 2019-07-27</a>
+    <button name="save">save</button>
   </form>
 </header>
 <main>

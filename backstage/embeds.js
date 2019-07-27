@@ -67,14 +67,26 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
   if (isSimpleProp(prop)) {
     patch = { [prop]: value };
   } else if (isBasicMediaProp(prop)) {
-    patch = { [prop]: [...(acc[prop] || []), { url: value }] };
+    if (acc[prop] && acc[prop].length > 0) {
+      const prevObj = acc[prop].pop();
+
+      if (!prevObj.url) {
+        patch = {
+          [prop]: [...acc[prop], { ...prevObj, url: value }]
+        };
+      } else {
+        patch = { [prop0]: [...acc[prop], prevObj, { url: value }] };
+      }
+    } else {
+      patch = { [prop]: [{ url: value }] };
+    }
   } else if (isInitialMediaProp(prop)) {
     const prop0 = prop.split(":")[0]; // "image" or "video"
 
     if (acc[prop0] && acc[prop0].length > 0) {
       const prevObj = acc[prop0].pop();
 
-      if (prevObj.url !== value) {
+      if (!prevObj.url) {
         patch = {
           [prop0]: [...acc[prop0], { ...prevObj, url: value }]
         };
@@ -82,7 +94,7 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
         patch = { [prop0]: [...acc[prop0], prevObj, { url: value }] };
       }
     } else {
-      patch = { [prop0]: [...(acc[prop0] || []), { url: value }] };
+      patch = { [prop0]: [{ url: value }] };
     }
   } else if (isMediaProp(prop) || isSecureUrlMediaProp(prop)) {
     let [prop0, prop1] = prop.split(":");
@@ -98,7 +110,7 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
         [prop0]: [...acc[prop0], { ...prevObj, [prop1]: value }]
       };
     } else {
-      patch = { [prop0]: [{ [prop0]: value }] };
+      patch = { [prop0]: [{ [prop1]: value }] };
     }
   }
 

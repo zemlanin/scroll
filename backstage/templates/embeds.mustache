@@ -2,6 +2,20 @@
 
 <article>
   <figure class="card">
+    {{# video }}
+      <video playsinline controls preload="none"
+        src="{{src}}"
+        {{# width}}
+          width="{{width}}"
+        {{/ width}}
+        {{# height}}
+          height="{{height}}"
+        {{/ height}}
+        {{# img }}
+          poster="{{ img.src }}"
+        {{/ img }}
+      ></video>
+    {{/ video }}
     {{# iframe }}
       <a href="{{graph.url}}"
         class="future-frame"
@@ -30,22 +44,24 @@
       </a>
     {{/ iframe }}
     {{^ iframe }}
-      <a href="{{graph.url}}">
-        {{# img }}
-          <img
-            {{# alt}}
-              alt="{{alt}}"
-            {{/ alt}}
-            {{# width}}
-              width="{{width}}"
-            {{/ width}}
-            {{# height}}
-              height="{{height}}"
-            {{/ height}}
-            src="{{src}}"
-          >
-        {{/ img }}
-      </a>
+      {{^ video }}
+        <a href="{{graph.url}}">
+          {{# img }}
+            <img
+              {{# alt}}
+                alt="{{alt}}"
+              {{/ alt}}
+              {{# width}}
+                width="{{width}}"
+              {{/ width}}
+              {{# height}}
+                height="{{height}}"
+              {{/ height}}
+              src="{{src}}"
+            >
+          {{/ img }}
+        </a>
+      {{/ video }}
     {{/ iframe }}
 
     <figcaption>

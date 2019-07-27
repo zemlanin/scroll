@@ -121,12 +121,17 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
   };
 };
 
-const graphHasIFrame = graph =>
+const getVideoIframe = graph =>
   graph &&
   graph.video &&
-  graph.video.some(v => v.url && v.type === "text/html");
+  graph.video.find(v => v.url && v.type === "text/html");
 
-const getOpengraphVideo = graphUrl => {
+const getVideoNative = graph =>
+  graph &&
+  graph.video &&
+  graph.video.find(v => v.url && v.type === "video/mp4");
+
+const getOpengraphFrameOverride = graphUrl => {
   let iframeUrl = null;
 
   const funnyOrDieId = graphUrl.match(
@@ -198,8 +203,8 @@ module.exports = {
       return null;
     }
 
-    if (!graphHasIFrame(graph)) {
-      const videoOverride = getOpengraphVideo(graph.url);
+    if (!getVideoIframe(graph) || !getVideoNative(graph)) {
+      const videoOverride = getOpengraphFrameOverride(graph.url);
 
       if (videoOverride) {
         graph.video = [videoOverride, ...(graph.video || [])];
@@ -228,13 +233,23 @@ module.exports = {
       return `no opengraph data`;
     }
 
+    let video = null;
+    let videoNative = getVideoNative(graph);
+    if (videoNative) {
+      video = {
+        src: videoNative.url,
+        width: videoNative.width || 640,
+        height: videoNative.height || 360
+      };
+    }
+
     let iframe = null;
-    if (graphHasIFrame(graph)) {
-      const video = graph.video.find(v => v.url && v.type === "text/html");
+    let videoIframe = videoNative ? null : getVideoIframe(graph);
+    if (videoIframe) {
       iframe = {
-        src: video.url,
-        width: video.width || 640,
-        height: video.height || 360
+        src: videoIframe.url,
+        width: videoIframe.width || 640,
+        height: videoIframe.height || 360
       };
     }
 
@@ -253,6 +268,7 @@ module.exports = {
       blog: { title: "embed" },
       title: graph.title,
       graph,
+      video,
       iframe,
       img,
       graphJSON: JSON.stringify(graph, null, 2)

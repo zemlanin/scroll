@@ -91,12 +91,14 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
       prop1 = "url";
     }
 
-    if (acc[prop0].length > 0) {
+    if (acc[prop0] && acc[prop0].length > 0) {
       const prevObj = acc[prop0].pop();
 
       patch = {
         [prop0]: [...acc[prop0], { ...prevObj, [prop1]: value }]
       };
+    } else {
+      patch = { [prop0]: [{ [prop0]: value }] };
     }
   }
 

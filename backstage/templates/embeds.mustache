@@ -1,16 +1,52 @@
-{{> header}}
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns#" xmlns:og="http://opengraphprotocol.org/schema/">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/vnd.microsoft.icon" href="{{ blog.static.favicon.ico }}" />
+  <link rel="icon" type="image/png" href="{{ blog.static.favicon.png }}" />
+  <link rel="icon" type="image/svg+xml" href="{{ blog.static.favicon.svg }}" />
+  <link rel="apple-touch-icon-precomposed" href="{{ blog.static.favicon.png }}" />
+  <link rel="mask-icon" href="{{ blog.static.mask-icon.svg }}" color="#00a500" />
+  <title>
+    {{#title}}{{title}} - {{/title}}
+    {{blog.title}}
+  </title>
+  <style type="text/css">
+    {{> header.css}}
+    {{> highlight.css}}
+  </style>
+  <script type="text/javascript">
+    {{> header.js}}
+  </script>
+</head>
+<body>
+<header style="display: flex; justify-content: space-between">
+  <a href="/backstage">&larr;</a>
+  <form method="GET" action="/backstage/embeds">
+    <input name="url" value="{{ url }}">
+    <button>&rarr;</button>
+  </form>
+  <form method="POST" action="#">
+    <a>loaded @ 2019-07-27</a>
+    <button name="save">save</button>
+    <button name="delete">delete</button>
+  </form>
+</header>
+<main>
 
 <article>
+  {{# card }}
   <figure class="card">
     {{# video }}
       <video playsinline controls preload="none"
-        src="{{src}}"
-        {{# width}}
-          width="{{width}}"
-        {{/ width}}
-        {{# height}}
-          height="{{height}}"
-        {{/ height}}
+        src="{{video.src}}"
+        {{# video.width}}
+          width="{{video.width}}"
+        {{/ video.width}}
+        {{# video.height}}
+          height="{{video.height}}"
+        {{/ video.height}}
         {{# img }}
           poster="{{ img.src }}"
         {{/ img }}
@@ -29,16 +65,16 @@
       >
         {{# img }}
           <img
-            {{# alt}}
-              alt="{{alt}}"
-            {{/ alt}}
-            {{# width}}
-              width="{{width}}"
-            {{/ width}}
-            {{# height}}
-              height="{{height}}"
-            {{/ height}}
-            src="{{src}}"
+            {{# img.alt}}
+              alt="{{img.alt}}"
+            {{/ img.alt}}
+            {{# img.width}}
+              width="{{img.width}}"
+            {{/ img.width}}
+            {{# img.height}}
+              height="{{img.height}}"
+            {{/ img.height}}
+            src="{{img.src}}"
           >
         {{/ img }}
       </a>
@@ -49,16 +85,16 @@
           {{# img }}
             <img class="audio-control"
               data-src="{{audio.src}}"
-              {{# alt}}
-                alt="{{alt}}"
-              {{/ alt}}
-              {{# width}}
-                width="{{width}}"
-              {{/ width}}
-              {{# height}}
-                height="{{height}}"
-              {{/ height}}
-              src="{{src}}"
+              {{# img.alt}}
+                alt="{{img.alt}}"
+              {{/ img.alt}}
+              {{# img.width}}
+                width="{{img.width}}"
+              {{/ img.width}}
+              {{# img.height}}
+                height="{{img.height}}"
+              {{/ img.height}}
+              src="{{img.src}}"
             >
           {{/ img }}
         {{/ audio }}
@@ -66,16 +102,16 @@
           <a href="{{graph.url}}">
             {{# img }}
               <img
-                {{# alt}}
-                  alt="{{alt}}"
-                {{/ alt}}
-                {{# width}}
-                  width="{{width}}"
-                {{/ width}}
-                {{# height}}
-                  height="{{height}}"
-                {{/ height}}
-                src="{{src}}"
+                {{# img.alt}}
+                  alt="{{img.alt}}"
+                {{/ img.alt}}
+                {{# img.width}}
+                  width="{{img.width}}"
+                {{/ img.width}}
+                {{# img.height}}
+                  height="{{img.height}}"
+                {{/ img.height}}
+                src="{{img.src}}"
               >
             {{/ img }}
           </a>
@@ -84,7 +120,7 @@
     {{/ iframe }}
 
     {{# audio }}
-      <audio controls preload="metadata" src="{{src}}"></audio>
+      <audio controls preload="metadata" src="{{audio.src}}"></audio>
     {{/ audio }}
 
     <figcaption>
@@ -94,8 +130,11 @@
       {{/ graph.description }}
     </figcaption>
   </figure>
+  {{/ card }}
 
   <pre><code>{{ graphJSON }}</code></pre>
 </article>
 
-{{> footer}}
+</main>
+</body>
+</html>

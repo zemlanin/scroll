@@ -251,7 +251,9 @@ module.exports = {
         transform2xxOnly: true
       });
     } catch (e) {
-      return null;
+      return {
+        error: `HTTP Request Error: ${e.statusCode}`
+      };
     }
 
     const htmlTitle = $(`head title`)
@@ -288,10 +290,10 @@ module.exports = {
       });
 
     if (!(graph.title && graph.url && graph.image)) {
-      return null;
+      return { error: "not enough info" };
     }
 
-    if (!getVideoIframe(graph) || !getVideoNative(graph)) {
+    if (!getVideoIframe(graph) && !getVideoNative(graph)) {
       const videoOverride = getOpengraphFrameOverride(graph.url);
 
       if (videoOverride) {
@@ -310,59 +312,59 @@ module.exports = {
     }
 
     const query = url.parse(req.url, true).query;
-    if (!query.url) {
-      res.statusCode = 404;
-      return `404`;
-    }
 
-    const graph = await module.exports.loadOpenGraph(query.url);
-
-    if (!graph) {
-      return `no opengraph data`;
-    }
-
-    let video = null;
-    let videoNative = getVideoNative(graph);
-    if (videoNative) {
-      video = {
-        src: videoNative.url,
-        width: videoNative.width || 640,
-        height: videoNative.height || 360
-      };
-    }
-
-    let audio = null;
-    let audioNative = getAudioNative(graph);
-    if (audioNative) {
-      audio = {
-        src: audioNative.url
-      };
-    }
-
-    let iframe = null;
-    let videoIframe = videoNative || audioNative ? null : getVideoIframe(graph);
-    if (videoIframe) {
-      iframe = {
-        src: videoIframe.url,
-        width: videoIframe.width || 640,
-        height: videoIframe.height || 360
-      };
-    }
+    const graph = query.url
+      ? await module.exports.loadOpenGraph(query.url)
+      : null;
 
     let img = null;
-    if (graph.image && graph.image.some(v => v.url)) {
-      const image = graph.image.find(v => v.url);
-      img = {
-        src: image.url,
-        alt: image.alt,
-        width: image.width,
-        height: image.height
-      };
+    let video = null;
+    let audio = null;
+    let iframe = null;
+
+    if (graph && !graph.error) {
+      let videoNative = getVideoNative(graph);
+      if (videoNative) {
+        video = {
+          src: videoNative.url,
+          width: videoNative.width || 640,
+          height: videoNative.height || 360
+        };
+      }
+
+      let audioNative = getAudioNative(graph);
+      if (audioNative) {
+        audio = {
+          src: audioNative.url
+        };
+      }
+
+      let videoIframe =
+        videoNative || audioNative ? null : getVideoIframe(graph);
+      if (videoIframe) {
+        iframe = {
+          src: videoIframe.url,
+          width: videoIframe.width || 640,
+          height: videoIframe.height || 360
+        };
+      }
+
+      if (graph.image && graph.image.some(v => v.url)) {
+        const image = graph.image.find(v => v.url);
+        img = {
+          src: image.url,
+          alt: image.alt,
+          width: image.width,
+          height: image.height
+        };
+      }
     }
 
     return render(`backstage/templates/embeds.mustache`, {
       blog: { title: "embed" },
-      title: graph.title,
+      title: (graph && graph.title) || "",
+      url: query.url,
+      card: graph && !graph.error,
       graph,
       audio,
       video,

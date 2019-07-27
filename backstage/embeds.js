@@ -28,6 +28,8 @@ const { authed, sendToAuthProvider } = require("./auth.js");
 
 const hasContent = ([_, content]) => content;
 
+const cheerioAttrs = (i, el) => el.attribs;
+
 const isSimpleProp = prop =>
   prop === "url" ||
   prop === "type" ||
@@ -75,6 +77,14 @@ const isPlayerProp = prop =>
 
 const numericIfNeeded = ([prop, value]) =>
   !isNumericProp(prop) || value.match(/^[0-9]+$/);
+
+const rawMetaReducer = (acc, meta) => {
+  if (meta.property) {
+    return [...acc, { property: meta.property, content: meta.content }];
+  } else {
+    return [...acc, { name: meta.name, content: meta.content }];
+  }
+};
 
 const metaPropertiesReducer = (acc, [prop, value]) => {
   let patch = {};
@@ -167,8 +177,7 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
 
   return {
     ...acc,
-    ...patch,
-    _raw: [...acc._raw, { [prop]: value }]
+    ...patch
   };
 };
 
@@ -262,7 +271,7 @@ module.exports = {
       .replace(`\n`, ` `);
 
     let rawOpengraph = $(`head meta[property^="og:"]`)
-      .map((i, el) => el.attribs)
+      .map(cheerioAttrs)
       .get()
       .map(meta => [meta.property.slice(3), meta.content]);
 
@@ -270,27 +279,34 @@ module.exports = {
       // overcast.fm has incorrect <meta> tags
       // https://overcast.fm/+FNoE1mS94
       rawOpengraph = $(`head meta[name^="og:"]`)
-        .map((i, el) => el.attribs)
+        .map(cheerioAttrs)
         .get()
         .map(meta => [meta.name.slice(3), meta.content]);
     }
 
     const rawTwitter = $(`head meta[name^="twitter:"]`)
-      .map((i, el) => el.attribs)
+      .map(cheerioAttrs)
       .get()
       .map(meta => [meta.name.slice(8), meta.content]);
+
+    const rawMeta = $(
+      `head meta[property^="og:"], head meta[name^="og:"], head meta[name^="twitter:"]`
+    )
+      .map(cheerioAttrs)
+      .get()
+      .reduce(rawMetaReducer, []);
 
     const graph = [...rawOpengraph, ...rawTwitter]
       .filter(hasContent)
       .filter(numericIfNeeded)
       .reduce(metaPropertiesReducer, {
-        _raw: [],
+        _raw: rawMeta,
         title: htmlTitle,
         url: ogPageURL
       });
 
     if (!(graph.title && graph.url && graph.image)) {
-      return { error: "not enough info" };
+      return { _raw: rawMeta, error: "not enough info" };
     }
 
     if (!getVideoIframe(graph) && !getVideoNative(graph)) {

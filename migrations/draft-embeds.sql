@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS "embeds" (
 	`og:image` JSON,
 	`og:video` JSON,
 	`og:audio` JSON,
+	`twitter:player` JSON,
 	`raw_og` JSON,
 	PRIMARY KEY (`original_url`)
 );

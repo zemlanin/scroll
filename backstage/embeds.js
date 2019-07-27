@@ -129,9 +129,9 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
     }
   } else if (isPlayerProp(prop)) {
     // prop0 = "player"
-    // prop1 = "stream"
-    // prop2 = ???
-    let [prop0, prop1, prop2] = prop.split(":");
+    // prop1 = undefined | "width" | "height" | "stream"
+    // prop2 = undefined | "content_type"
+    let [/* prop0 */ prop1, prop2] = prop.split(":").slice(1);
 
     if (prop === "player") {
       patch = {
@@ -148,6 +148,7 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
         }
       };
     } else {
+      // else if (prop1 === "stream")
       if (prop1 === "stream" && prop2 === undefined) {
         prop2 = "url";
       }
@@ -302,11 +303,11 @@ module.exports = {
   },
 
   get: async (req, res) => {
-    // const user = authed(req, res);
+    const user = authed(req, res);
 
-    // if (!user) {
-    //   return sendToAuthProvider(req, res);
-    // }
+    if (!user) {
+      return sendToAuthProvider(req, res);
+    }
 
     const query = url.parse(req.url, true).query;
     if (!query.url) {

@@ -27,6 +27,8 @@ const { authed, sendToAuthProvider } = require("./auth.js");
 */
 
 const hasContent = meta => meta.content;
+const metaInitial = meta => meta.name === "url" || meta.name === "title";
+const tupleInitial = meta => [meta.name, meta.content];
 const metaNameOG = meta => meta.name && meta.name.startsWith("og:");
 const tupleNameOG = meta => [meta.name.slice(3), meta.content];
 const metaPropertyOG = meta => meta.property && meta.property.startsWith("og:");
@@ -94,7 +96,7 @@ const rawMetaReducer = (acc, meta) => {
 const metaPropertiesReducer = (acc, [prop, value]) => {
   let patch = {};
 
-  if (isSimpleProp(prop)) {
+  if (isSimpleProp(prop) && !acc[prop]) {
     patch = { [prop]: value };
   } else if (isBasicMediaProp(prop)) {
     if (acc[prop] && acc[prop].length > 0) {
@@ -251,24 +253,17 @@ const getOpengraphFrameOverride = graphUrl => {
 };
 
 module.exports = {
-  loadOpenGraph: async ogPageURL => {
-    let $;
-    try {
-      $ = await rp.get({
-        url: ogPageURL,
-        followRedirect: true,
-        headers: {
-          Accept: "text/html",
-          "User-Agent": "request (+https://zemlan.in)"
-        },
-        transform: body => cheerio.load(body),
-        transform2xxOnly: true
-      });
-    } catch (e) {
-      return {
-        error: `HTTP Request Error: ${e.statusCode}`
-      };
-    }
+  loadMetadata: async ogPageURL => {
+    let $ = await rp.get({
+      url: ogPageURL,
+      followRedirect: true,
+      headers: {
+        Accept: "text/html",
+        "User-Agent": "request (+https://zemlan.in)"
+      },
+      transform: body => cheerio.load(body),
+      transform2xxOnly: true
+    });
 
     const htmlTitle = $(`head title`)
       .text()
@@ -281,9 +276,20 @@ module.exports = {
       .map(cheerioAttrs)
       .get()
       .filter(hasContent)
-      .reduce(rawMetaReducer, []);
+      .reduce(rawMetaReducer, [
+        { name: "url", content: ogPageURL },
+        { name: "title", content: htmlTitle }
+      ]);
 
     $ = null;
+    return rawMeta;
+  },
+  generateCardJSON: rawMeta => {
+    if (rawMeta.error) {
+      return null;
+    }
+
+    const rawInitial = rawMeta.filter(metaInitial).map(tupleInitial);
 
     let rawOpengraph = rawMeta.filter(metaPropertyOG).map(tuplePropertyOG);
 
@@ -295,27 +301,90 @@ module.exports = {
 
     const rawTwitter = rawMeta.filter(metaNameTwitter).map(tupleNameTwitter);
 
-    const graph = [...rawOpengraph, ...rawTwitter]
+    const parsedMetadata = [...rawOpengraph, ...rawTwitter, ...rawInitial]
       .filter(numericIfNeeded)
-      .reduce(metaPropertiesReducer, {
-        _raw: rawMeta,
-        title: htmlTitle,
-        url: ogPageURL
-      });
+      .reduce(metaPropertiesReducer, {});
 
-    if (!(graph.title && graph.url && graph.image)) {
-      return { _raw: rawMeta, error: "not enough info" };
+    if (!(parsedMetadata.title && parsedMetadata.url && parsedMetadata.image)) {
+      return {
+        error: "not enough info",
+        _parsedMetadata: parsedMetadata
+      };
     }
 
-    if (!getVideoIframe(graph) && !getVideoNative(graph)) {
-      const videoOverride = getOpengraphFrameOverride(graph.url);
+    if (!getVideoIframe(parsedMetadata) && !getVideoNative(parsedMetadata)) {
+      const videoOverride = getOpengraphFrameOverride(parsedMetadata.url);
 
       if (videoOverride) {
-        graph.video = [videoOverride, ...(graph.video || [])];
+        parsedMetadata.video = [videoOverride, ...(parsedMetadata.video || [])];
       }
     }
 
-    return graph;
+    let img = null;
+    let video = null;
+    let audio = null;
+    let iframe = null;
+
+    let videoNative = getVideoNative(parsedMetadata);
+    if (videoNative) {
+      video = {
+        src: videoNative.url,
+        width: videoNative.width || 640,
+        height: videoNative.height || 360
+      };
+    }
+
+    let audioNative = getAudioNative(parsedMetadata);
+    if (audioNative) {
+      audio = {
+        src: audioNative.url
+      };
+    }
+
+    let videoIframe =
+      videoNative || audioNative ? null : getVideoIframe(parsedMetadata);
+    if (videoIframe) {
+      iframe = {
+        src: videoIframe.url,
+        width: videoIframe.width || 640,
+        height: videoIframe.height || 360
+      };
+    }
+
+    const image = parsedMetadata.image && parsedMetadata.image.find(v => v.url);
+    if (image) {
+      img = {
+        src: image.url,
+        alt: image.alt,
+        width: image.width,
+        height: image.height
+      };
+    }
+
+    const card = parsedMetadata
+      ? {
+          _parsedMetadata: parsedMetadata,
+          title: parsedMetadata.title || "",
+          url: parsedMetadata.url,
+          description: parsedMetadata.description,
+          site_name: parsedMetadata.site_name,
+          audio,
+          video,
+          iframe,
+          img
+        }
+      : null;
+
+    return card;
+  },
+  renderCard: async card => {
+    if (!card || card.error) {
+      return "";
+    }
+
+    return await render(`templates/card.mustache`, {
+      card
+    });
   },
 
   get: async (req, res) => {
@@ -327,77 +396,41 @@ module.exports = {
 
     const query = url.parse(req.url, true).query;
 
-    const graph = query.url
-      ? await module.exports.loadOpenGraph(query.url)
-      : null;
-
-    let img = null;
-    let video = null;
-    let audio = null;
-    let iframe = null;
-
-    if (graph && !graph.error) {
-      let videoNative = getVideoNative(graph);
-      if (videoNative) {
-        video = {
-          src: videoNative.url,
-          width: videoNative.width || 640,
-          height: videoNative.height || 360
-        };
-      }
-
-      let audioNative = getAudioNative(graph);
-      if (audioNative) {
-        audio = {
-          src: audioNative.url
-        };
-      }
-
-      let videoIframe =
-        videoNative || audioNative ? null : getVideoIframe(graph);
-      if (videoIframe) {
-        iframe = {
-          src: videoIframe.url,
-          width: videoIframe.width || 640,
-          height: videoIframe.height || 360
-        };
-      }
-
-      const image = graph.image && graph.image.find(v => v.url);
-      if (image) {
-        img = {
-          src: image.url,
-          alt: image.alt,
-          width: image.width,
-          height: image.height
-        };
-      }
+    let rawMetadata;
+    let error;
+    try {
+      rawMetadata = query.url
+        ? await module.exports.loadMetadata(query.url)
+        : null;
+    } catch (e) {
+      error = `${e.name}${e.statusCode ? ": " + e.statusCode : ""}`;
     }
 
-    const card =
-      graph && !graph.error
-        ? {
-            title: graph.title || "",
-            url: graph.url,
-            description: graph.description,
-            site_name: graph.site_name,
-            audio,
-            video,
-            iframe,
-            img
-          }
-        : null;
+    const cardWithMetadata = rawMetadata
+      ? await module.exports.generateCardJSON(rawMetadata)
+      : null;
 
-    const { _raw: graphRaw, ...graphWithoutRaw } = graph || {};
+    let parsedMetadata = null;
+    let card = null;
+
+    if (cardWithMetadata) {
+      ({ _parsedMetadata: parsedMetadata, ...card } = cardWithMetadata);
+    }
+
+    const cardHTML = cardWithMetadata
+      ? await module.exports.renderCard(cardWithMetadata)
+      : null;
 
     return render(`backstage/templates/embeds.mustache`, {
       blog: { title: "embed" },
       title: card ? card.title : "",
       url: query.url,
       card,
-      cardJSON: JSON.stringify(card, null, 2),
-      graphJSON: JSON.stringify(graphWithoutRaw, null, 2),
-      rawMetadata: graphRaw
+      cardHTML,
+      cardJSON: JSON.stringify(error || card, null, 2),
+      parsedMetadataJSON:
+        parsedMetadata && JSON.stringify(parsedMetadata, null, 2),
+      rawMetadata
     });
   }
 };

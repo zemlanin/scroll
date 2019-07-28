@@ -25,7 +25,7 @@
   <a href="/backstage">&larr;</a>
   <form method="GET" action="/backstage/embeds">
     <input name="url" value="{{ url }}"
-      {{^ card }}autofocus{{/ card }}
+      {{^ cardHTML }}autofocus{{/ cardHTML }}
     >
     <button>&rarr;</button>
   </form>
@@ -38,105 +38,13 @@
 <main>
 
 <article>
-  {{# card }}
-  <figure class="card">
-    {{# video }}
-      <video playsinline controls preload="none"
-        src="{{video.src}}"
-        {{# video.width}}
-          width="{{video.width}}"
-        {{/ video.width}}
-        {{# video.height}}
-          height="{{video.height}}"
-        {{/ video.height}}
-        {{# img }}
-          poster="{{ img.src }}"
-        {{/ img }}
-      ></video>
-    {{/ video }}
-    {{# iframe }}
-      <a href="{{card.url}}"
-        class="future-frame"
-        data-src="{{iframe.src}}"
-        {{# iframe.width}}
-          data-width="{{iframe.width}}"
-        {{/ iframe.width}}
-        {{# iframe.height}}
-          data-height="{{iframe.height}}"
-        {{/ iframe.height}}
-      >
-        {{# img }}
-          <img
-            {{# img.alt}}
-              alt="{{img.alt}}"
-            {{/ img.alt}}
-            {{# img.width}}
-              width="{{img.width}}"
-            {{/ img.width}}
-            {{# img.height}}
-              height="{{img.height}}"
-            {{/ img.height}}
-            src="{{img.src}}"
-          >
-        {{/ img }}
-      </a>
-    {{/ iframe }}
-    {{^ iframe }}
-      {{^ video }}
-        {{# audio }}
-          {{# img }}
-            <img class="audio-control"
-              data-src="{{audio.src}}"
-              {{# img.alt}}
-                alt="{{img.alt}}"
-              {{/ img.alt}}
-              {{# img.width}}
-                width="{{img.width}}"
-              {{/ img.width}}
-              {{# img.height}}
-                height="{{img.height}}"
-              {{/ img.height}}
-              src="{{img.src}}"
-            >
-          {{/ img }}
-        {{/ audio }}
-        {{^ audio }}
-          <a href="{{card.url}}">
-            {{# img }}
-              <img
-                {{# img.alt}}
-                  alt="{{img.alt}}"
-                {{/ img.alt}}
-                {{# img.width}}
-                  width="{{img.width}}"
-                {{/ img.width}}
-                {{# img.height}}
-                  height="{{img.height}}"
-                {{/ img.height}}
-                src="{{img.src}}"
-              >
-            {{/ img }}
-          </a>
-        {{/ audio }}
-      {{/ video }}
-    {{/ iframe }}
-
-    {{# audio }}
-      <audio controls preload="metadata" src="{{audio.src}}"></audio>
-    {{/ audio }}
-
-    <figcaption>
-      <a href="{{ card.url }}"><b>{{ card.title }}</b>{{# card.site_name }} • {{ card.site_name }}{{/ card.site_name }}</a>
-      {{# card.description }}
-        <i>{{ card.description }}</i>
-      {{/ card.description }}
-    </figcaption>
-  </figure>
-  {{/ card }}
+  {{{ cardHTML }}}
 
   <pre><code>{{ cardJSON }}</code></pre>
 
-  <pre><code>{{ graphJSON }}</code></pre>
+  {{# parsedMetadataJSON }}
+  <pre><code>{{ parsedMetadataJSON }}</code></pre>
+  {{/ parsedMetadataJSON }}
 
   <pre><code>{{# rawMetadata }}{{#name}}&lt;meta name="{{name}}" content="{{content}}"&gt;{{/name}}{{#property}}&lt;meta property="{{property}}" content="{{content}}"&gt;{{/property}}
 {{/ rawMetadata }}</code></pre>

@@ -14,7 +14,7 @@ const { authed, sendToAuthProvider } = require("./auth.js");
     https://www.youtube.com/watch?v=PA6mzvHeMk4 (iframe)
     https://eidolamusic.bandcamp.com/album/to-speak-to-listen (iframe)
     https://m.imgur.com/t/cats/vSfGFEH (native video)
-    http://dobyfriday.com/142 (twitter card player)
+    http://dobyfriday.com/142 (twitter card player; audio)
     https://overcast.fm/%2BFNoE1mS94 (twitter card player; audio; escaped `+`)
     https://atp.fm/episodes/300 (no image -> no card)
     https://music.apple.com/ua/album/no-stopping-us-feat-jenny/1215204298?i=1215204497
@@ -38,7 +38,6 @@ const cheerioAttrs = (i, el) => el.attribs;
 
 const isSimpleProp = prop =>
   prop === "url" ||
-  prop === "type" ||
   prop === "title" ||
   prop === "site_name" ||
   prop === "description";
@@ -375,17 +374,30 @@ module.exports = {
       }
     }
 
+    const card =
+      graph && !graph.error
+        ? {
+            title: graph.title || "",
+            url: graph.url,
+            description: graph.description,
+            site_name: graph.site_name,
+            audio,
+            video,
+            iframe,
+            img
+          }
+        : null;
+
+    const { _raw: graphRaw, ...graphWithoutRaw } = graph || {};
+
     return render(`backstage/templates/embeds.mustache`, {
       blog: { title: "embed" },
-      title: (graph && graph.title) || "",
+      title: card ? card.title : "",
       url: query.url,
-      card: graph && !graph.error,
-      graph,
-      audio,
-      video,
-      iframe,
-      img,
-      graphJSON: JSON.stringify(graph, null, 2)
+      card,
+      cardJSON: JSON.stringify(card, null, 2),
+      graphJSON: JSON.stringify(graphWithoutRaw, null, 2),
+      rawMetadata: graphRaw
     });
   }
 };

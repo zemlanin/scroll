@@ -3,17 +3,9 @@ CREATE TABLE IF NOT EXISTS "embeds" (
 	`original_url` TEXT,
 	`created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`mimetype` TEXT NOT NULL,
+	`raw_metadata` JSON,
 
-	`og:url` TEXT NOT NULL,
-	`og:type` TEXT,
-	`og:title` TEXT,
-	`og:site_name` TEXT,
-	`og:description` TEXT,
-	`og:image` JSON,
-	`og:video` JSON,
-	`og:audio` JSON,
-	`twitter:player` JSON,
-	`raw_og` JSON,
+	`rendered_html` TEXT NOT NULL,
 	PRIMARY KEY (`original_url`)
 );
 

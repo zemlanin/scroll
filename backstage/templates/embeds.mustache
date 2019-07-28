@@ -55,7 +55,7 @@
       ></video>
     {{/ video }}
     {{# iframe }}
-      <a href="{{graph.url}}"
+      <a href="{{card.url}}"
         class="future-frame"
         data-src="{{iframe.src}}"
         {{# iframe.width}}
@@ -101,7 +101,7 @@
           {{/ img }}
         {{/ audio }}
         {{^ audio }}
-          <a href="{{graph.url}}">
+          <a href="{{card.url}}">
             {{# img }}
               <img
                 {{# img.alt}}
@@ -126,15 +126,20 @@
     {{/ audio }}
 
     <figcaption>
-      <a href="{{ graph.url }}"><b>{{ graph.title }}</b>{{# graph.site_name }} • {{ graph.site_name }}{{/ graph.site_name }}</a>
-      {{# graph.description }}
-        <i>{{ graph.description }}</i>
-      {{/ graph.description }}
+      <a href="{{ card.url }}"><b>{{ card.title }}</b>{{# card.site_name }} • {{ card.site_name }}{{/ card.site_name }}</a>
+      {{# card.description }}
+        <i>{{ card.description }}</i>
+      {{/ card.description }}
     </figcaption>
   </figure>
   {{/ card }}
 
+  <pre><code>{{ cardJSON }}</code></pre>
+
   <pre><code>{{ graphJSON }}</code></pre>
+
+  <pre><code>{{# rawMetadata }}{{#name}}&lt;meta name="{{name}}" content="{{content}}"&gt;{{/name}}{{#property}}&lt;meta property="{{property}}" content="{{content}}"&gt;{{/property}}
+{{/ rawMetadata }}</code></pre>
 </article>
 
 </main>

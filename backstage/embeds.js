@@ -430,7 +430,13 @@ module.exports = {
       cardJSON: JSON.stringify(error || card, null, 2),
       parsedMetadataJSON:
         parsedMetadata && JSON.stringify(parsedMetadata, null, 2),
-      rawMetadata
+      rawMetadata,
+      rawMetadataJSON: rawMetadata && JSON.stringify(rawMetadata),
+      status: {
+        saved: true,
+        preview: true,
+        empty: true
+      }
     });
   }
 };

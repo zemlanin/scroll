@@ -97,6 +97,10 @@ article figure.card figcaption i {
   color: #888;
   font-size: 0.8em;
   display: block;
+  white-space: pre-wrap;
+}
+
+article figure.card figcaption i.truncated {
   white-space: nowrap;
   overflow-x: hidden;
   text-overflow: ellipsis;

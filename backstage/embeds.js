@@ -252,6 +252,18 @@ const getOpengraphFrameOverride = graphUrl => {
   return null;
 };
 
+const shouldDescriptionBeTruncated = metadata => {
+  if (
+    metadata &&
+    metadata.url &&
+    metadata.url.startsWith("https://twitter.com/")
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
 module.exports = {
   loadMetadata: async ogPageURL => {
     if (ogPageURL && ogPageURL.startsWith("https://mobile.twitter.com/")) {
@@ -318,6 +330,10 @@ module.exports = {
       };
     }
 
+    parsedMetadata._truncateDescription = shouldDescriptionBeTruncated(
+      parsedMetadata
+    );
+
     if (!getVideoIframe(parsedMetadata) && !getVideoNative(parsedMetadata)) {
       const videoOverride = getOpengraphFrameOverride(parsedMetadata.url);
 
@@ -373,6 +389,7 @@ module.exports = {
           title: parsedMetadata.title || "",
           url: parsedMetadata.url,
           description: parsedMetadata.description,
+          _truncateDescription: parsedMetadata._truncateDescription,
           site_name: parsedMetadata.site_name,
           audio,
           video,

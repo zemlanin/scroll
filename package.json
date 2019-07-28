@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "npm run prettier -- -l && npm run eslint",
+    "lint": "npm run eslint && npm run prettier -- -l",
     "fmt": "npm run prettier -- --write",
     "prettier": "prettier \"./**/*.{js,css}\"",
     "eslint": "eslint \"./**/*.js\""

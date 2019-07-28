@@ -72,11 +72,13 @@ article {
 article figure.card {
   background: #dedede;
   border-radius: 4px;
+  max-width: 30em;
+  margin: 1em auto;
 }
 
 @media (max-width: 40em) {
   article figure.card {
-    margin: 0 auto;
+    margin: 0.5em auto;
   }
 }
 

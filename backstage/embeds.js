@@ -254,7 +254,14 @@ const getOpengraphFrameOverride = graphUrl => {
 
 module.exports = {
   loadMetadata: async ogPageURL => {
-    let $ = await rp.get({
+    if (ogPageURL && ogPageURL.startsWith("https://mobile.twitter.com/")) {
+      ogPageURL = ogPageURL.replace(
+        "https://mobile.twitter.com/",
+        "https://twitter.com/"
+      );
+    }
+
+    const $ = await rp.get({
       url: ogPageURL,
       followRedirect: true,
       headers: {
@@ -281,7 +288,6 @@ module.exports = {
         { name: "title", content: htmlTitle }
       ]);
 
-    $ = null;
     return rawMeta;
   },
   generateCardJSON: rawMeta => {
@@ -385,6 +391,14 @@ module.exports = {
     return await render(`templates/card.mustache`, {
       card
     });
+  },
+
+  post: async (req, res) => {
+    const user = authed(req, res);
+
+    if (!user) {
+      return sendToAuthProvider(req, res);
+    }
   },
 
   get: async (req, res) => {

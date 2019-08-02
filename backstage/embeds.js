@@ -148,7 +148,7 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
     // prop0 = "player"
     // prop1 = undefined | "width" | "height" | "stream"
     // prop2 = undefined | "content_type"
-    let [/* prop0 */ prop1, prop2] = prop.split(":").slice(1);
+    let [/* prop0, */ prop1, prop2] = prop.split(":").slice(1);
 
     if (prop === "player") {
       patch = {
@@ -262,7 +262,7 @@ const getImageNative = graph =>
 //                                    ($1          )              ($2)
 const APPLE_MUSIC_REGEX = /^https:\/\/(itunes|music)\.apple\.com\/(.+)/;
 
-const getOpengraphFrameBackup = graphUrl => {
+const getFrameFallback = graphUrl => {
   const funnyOrDieId = graphUrl.match(
     /\/\/www\.funnyordie\.com\/videos\/([0-9a-f]+)/
   );
@@ -360,9 +360,9 @@ module.exports = {
       .map(tupleInitial)
       .filter(numericIfNeeded)
       .reduce(metaPropertiesReducer, {});
-    const frameBackup = getOpengraphFrameBackup(rawInitial.url);
-    if (frameBackup.video) {
-      rawInitial.video = frameBackup.video;
+    const frameFallback = getFrameFallback(rawInitial.url);
+    if (frameFallback.video) {
+      rawInitial.video = frameFallback.video;
     }
 
     let rawOpengraph = rawMeta

@@ -197,67 +197,115 @@ const getVideoIframe = graph =>
       height: graph.player.height
     }));
 
-const getVideoNative = graph =>
-  graph &&
-  ((graph.video && graph.video.find(v => v.url && v.type === "video/mp4")) ||
-    (graph.player &&
-      graph.player.stream &&
-      graph.player.stream.url &&
-      graph.player.stream.content_type === "video/mp4" && {
-        url: graph.player.stream.url,
-        width: graph.player.width,
-        height: graph.player.height,
-        type: graph.player.stream.content_type
-      }));
+const getVideoNative = graph => {
+  if (!graph) {
+    return null;
+  }
 
-const getAudioNative = graph =>
-  graph &&
-  graph.player &&
-  graph.player.stream &&
-  graph.player.stream.url &&
-  graph.player.stream.content_type === "audio/mpeg" && {
-    url: graph.player.stream.url
-  };
+  let video = null;
 
-const getOpengraphFrameOverride = graphUrl => {
-  let iframeUrl = null;
+  if (!video && graph.video) {
+    video = graph.video.find(v => v.url && v.type === "video/mp4");
+  }
 
+  if (
+    !video &&
+    graph.player &&
+    graph.player.stream &&
+    graph.player.stream.url &&
+    graph.player.stream.content_type === "video/mp4"
+  ) {
+    video = {
+      url: graph.player.stream.url,
+      width: graph.player.width,
+      height: graph.player.height,
+      type: graph.player.stream.content_type
+    };
+  }
+
+  if (video) {
+    video.poster = getImageNative(graph);
+  }
+
+  return video;
+};
+
+const getAudioNative = graph => {
+  if (!graph) {
+    return null;
+  }
+
+  let audio = null;
+
+  if (
+    !audio &&
+    graph.player &&
+    graph.player.stream &&
+    graph.player.stream.url &&
+    graph.player.stream.content_type === "audio/mpeg"
+  ) {
+    audio = {
+      url: graph.player.stream.url
+    };
+  }
+
+  if (audio) {
+    audio.poster = getImageNative(graph);
+  }
+
+  return audio;
+};
+
+const getImageNative = graph =>
+  graph && graph.image && graph.image.find(v => v.url);
+
+//                                    ($1          )              ($2)
+const APPLE_MUSIC_REGEX = /^https:\/\/(itunes|music)\.apple\.com\/(.+)/;
+
+const getOpengraphFrameBackup = graphUrl => {
   const funnyOrDieId = graphUrl.match(
     /\/\/www\.funnyordie\.com\/videos\/([0-9a-f]+)/
   );
   if (funnyOrDieId) {
-    iframeUrl = `https://www.funnyordie.com/embed/${funnyOrDieId[1]}`;
+    return {
+      video: [
+        {
+          url: `https://www.funnyordie.com/embed/${funnyOrDieId[1]}`,
+          type: "text/html"
+        }
+      ]
+    };
   }
 
   const vimeoId = graphUrl.match(/(vimeo\.com\/)(\d+)/);
   if (vimeoId) {
-    iframeUrl = `https://player.vimeo.com/video/${vimeoId[2]}`;
-  }
-
-  const appleMusicPath = graphUrl.match(
-    //         ($1          )              ($2)
-    /https:\/\/(itunes|music)\.apple\.com\/(.+)/
-  );
-  if (appleMusicPath) {
-    iframeUrl = `https://embed.music.apple.com/${appleMusicPath[2]}`;
-  }
-
-  if (iframeUrl) {
     return {
-      url: iframeUrl,
-      type: "text/html"
+      video: [
+        {
+          url: `https://player.vimeo.com/video/${vimeoId[2]}`,
+          type: "text/html"
+        }
+      ]
     };
   }
 
-  return null;
+  const appleMusicPath = graphUrl.match(APPLE_MUSIC_REGEX);
+  if (appleMusicPath) {
+    return {
+      video: [
+        {
+          url: `https://embed.music.apple.com/${appleMusicPath[2]}`,
+          type: "text/html"
+        }
+      ]
+    };
+  }
+
+  return {};
 };
 
-const shouldDescriptionBeTruncated = metadata => {
-  if (
-    metadata &&
-    metadata.url &&
-    metadata.url.startsWith("https://twitter.com/")
-  ) {
+const shouldDescriptionBeTruncated = cardURL => {
+  if (cardURL && cardURL.startsWith("https://twitter.com/")) {
     return false;
   }
 
@@ -307,96 +355,141 @@ module.exports = {
       return null;
     }
 
-    const rawInitial = rawMeta.filter(metaInitial).map(tupleInitial);
+    const rawInitial = rawMeta
+      .filter(metaInitial)
+      .map(tupleInitial)
+      .filter(numericIfNeeded)
+      .reduce(metaPropertiesReducer, {});
+    const frameBackup = getOpengraphFrameBackup(rawInitial.url);
+    if (frameBackup.video) {
+      rawInitial.video = frameBackup.video;
+    }
 
-    let rawOpengraph = rawMeta.filter(metaPropertyOG).map(tuplePropertyOG);
+    let rawOpengraph = rawMeta
+      .filter(metaPropertyOG)
+      .map(tuplePropertyOG)
+      .filter(numericIfNeeded);
 
     if (rawOpengraph.length === 0) {
       // overcast.fm has incorrect <meta> tags
       // https://overcast.fm/+FNoE1mS94
-      rawOpengraph = rawMeta.filter(metaNameOG).map(tupleNameOG);
+      rawOpengraph = rawMeta
+        .filter(metaNameOG)
+        .map(tupleNameOG)
+        .filter(numericIfNeeded);
     }
 
-    const rawTwitter = rawMeta.filter(metaNameTwitter).map(tupleNameTwitter);
+    rawOpengraph = rawOpengraph.reduce(metaPropertiesReducer, {});
 
-    const parsedMetadata = [...rawOpengraph, ...rawTwitter, ...rawInitial]
+    const rawTwitter = rawMeta
+      .filter(metaNameTwitter)
+      .map(tupleNameTwitter)
       .filter(numericIfNeeded)
       .reduce(metaPropertiesReducer, {});
 
-    if (!(parsedMetadata.title && parsedMetadata.url && parsedMetadata.image)) {
-      return {
-        error: "not enough info",
-        _parsedMetadata: parsedMetadata
-      };
+    const card = {
+      _parsedMetadata: {
+        _: rawInitial,
+        og: rawOpengraph,
+        twitter: rawTwitter
+      },
+      title: rawOpengraph.title || rawTwitter.title || rawInitial.title,
+      url: rawOpengraph.url || rawTwitter.url || rawInitial.url,
+      description:
+        rawOpengraph.description ||
+        rawTwitter.description ||
+        rawInitial.description,
+      _truncateDescription: false,
+      site_name: rawOpengraph.site_name || rawTwitter.site_name || "",
+      img: null,
+      video: null,
+      audio: null,
+      iframe: null
+    };
+
+    if (shouldDescriptionBeTruncated(card.url)) {
+      card._truncateDescription = true;
     }
 
-    parsedMetadata._truncateDescription = shouldDescriptionBeTruncated(
-      parsedMetadata
-    );
-
-    if (!getVideoIframe(parsedMetadata) && !getVideoNative(parsedMetadata)) {
-      const videoOverride = getOpengraphFrameOverride(parsedMetadata.url);
-
-      if (videoOverride) {
-        parsedMetadata.video = [videoOverride, ...(parsedMetadata.video || [])];
-      }
-    }
-
-    let img = null;
-    let video = null;
-    let audio = null;
-    let iframe = null;
-
-    let videoNative = getVideoNative(parsedMetadata);
+    const videoNative =
+      getVideoNative(rawTwitter) ||
+      getVideoNative(rawOpengraph) ||
+      getVideoNative(rawInitial);
     if (videoNative) {
-      video = {
+      card.video = {
         src: videoNative.url,
         width: videoNative.width || 640,
         height: videoNative.height || 360
       };
+
+      if (videoNative.poster) {
+        card.img = {
+          src: videoNative.poster.url,
+          alt: videoNative.poster.alt,
+          width: videoNative.poster.width,
+          height: videoNative.poster.height
+        };
+      }
     }
 
-    let audioNative = getAudioNative(parsedMetadata);
+    const audioNative =
+      getAudioNative(rawOpengraph) ||
+      getAudioNative(rawTwitter) ||
+      getAudioNative(rawInitial);
     if (audioNative) {
-      audio = {
+      card.audio = {
         src: audioNative.url
       };
+
+      if (audioNative.poster) {
+        card.img = {
+          src: audioNative.poster.url,
+          alt: audioNative.poster.alt,
+          width: audioNative.poster.width,
+          height: audioNative.poster.height
+        };
+      }
     }
 
-    let videoIframe =
-      videoNative || audioNative ? null : getVideoIframe(parsedMetadata);
-    if (videoIframe) {
-      iframe = {
-        src: videoIframe.url,
-        width: videoIframe.width || 640,
-        height: videoIframe.height || 360
+    if (!videoNative && !audioNative) {
+      const videoIframe =
+        getVideoIframe(rawOpengraph) ||
+        getVideoIframe(rawTwitter) ||
+        getVideoIframe(rawInitial);
+      if (videoIframe) {
+        card.iframe = {
+          src: videoIframe.url,
+          width: videoIframe.width || 640,
+          height: videoIframe.height || 360
+        };
+      }
+    }
+
+    if (!card.img) {
+      const image = card.url.match(APPLE_MUSIC_REGEX)
+        ? getImageNative(rawTwitter) ||
+          getImageNative(rawOpengraph) ||
+          getImageNative(rawInitial)
+        : getImageNative(rawOpengraph) ||
+          getImageNative(rawTwitter) ||
+          getImageNative(rawInitial);
+
+      if (image) {
+        card.img = {
+          src: image.url,
+          alt: image.alt,
+          width: image.width,
+          height: image.height
+        };
+      }
+    }
+
+    if (!(card.title && card.url && card.img)) {
+      return {
+        error: "not enough info",
+        _parsedMetadata: card._parsedMetadata
       };
     }
-
-    const image = parsedMetadata.image && parsedMetadata.image.find(v => v.url);
-    if (image) {
-      img = {
-        src: image.url,
-        alt: image.alt,
-        width: image.width,
-        height: image.height
-      };
-    }
-
-    const card = parsedMetadata
-      ? {
-          _parsedMetadata: parsedMetadata,
-          title: parsedMetadata.title || "",
-          url: parsedMetadata.url,
-          description: parsedMetadata.description,
-          _truncateDescription: parsedMetadata._truncateDescription,
-          site_name: parsedMetadata.site_name,
-          audio,
-          video,
-          iframe,
-          img
-        }
-      : null;
 
     return card;
   },

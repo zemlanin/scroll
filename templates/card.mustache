@@ -86,9 +86,9 @@
     {{/ audio }}
 
     <figcaption>
-      <a href="{{ card.url }}"><b>{{ card.title }}</b>{{# card.site_name }} • {{ card.site_name }}{{/ card.site_name }}</a>
+      <a href="{{ card.url }}"><b>{{{ card.title }}}</b>{{# card.site_name }} • {{{ card.site_name }}}{{/ card.site_name }}</a>
       {{# card.description }}
-        <i {{# card._truncateDescription }}class="truncated"{{/ card._truncateDescription }}>{{ card.description }}</i>
+        <i {{# card._truncateDescription }}class="truncated"{{/ card._truncateDescription }}>{{{ card.description }}}</i>
       {{/ card.description }}
     </figcaption>
   </figure>

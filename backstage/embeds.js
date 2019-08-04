@@ -15,7 +15,7 @@ const { authed, sendToAuthProvider } = require("./auth.js");
     https://eidolamusic.bandcamp.com/album/to-speak-to-listen (iframe)
     https://m.imgur.com/t/cats/vSfGFEH (native video)
     http://dobyfriday.com/142 (twitter card player; audio)
-    https://overcast.fm/%2BFNoE1mS94 (twitter card player; audio; escaped `+`)
+    https://overcast.fm/+FNoE1mS94 (twitter card player; audio)
     https://atp.fm/episodes/300 (no image -> no card)
     https://music.apple.com/ua/album/no-stopping-us-feat-jenny/1215204298?i=1215204497
     https://twitter.com/mikeyface/status/774823160852217856
@@ -491,6 +491,20 @@ module.exports = {
       };
     }
 
+    card.title = card.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+    if (card.site_name) {
+      card.site_name = card.site_name
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    if (card.description) {
+      card.description = card.description
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
     return card;
   },
   renderCard: async card => {
@@ -546,8 +560,6 @@ module.exports = {
       : null;
 
     return render(`backstage/templates/embeds.mustache`, {
-      blog: { title: "embed" },
-      title: card ? card.title : "",
       url: query.url,
       card,
       cardHTML,

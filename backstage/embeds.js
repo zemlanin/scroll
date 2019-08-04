@@ -3,7 +3,8 @@ const url = require("url");
 const cheerio = require("cheerio");
 const rp = require("request-promise-native");
 
-const { render } = require("../common.js");
+const { render: commonRender } = require("../common.js");
+const { render } = require("./templates/index.js");
 
 const { authed, sendToAuthProvider } = require("./auth.js");
 
@@ -312,6 +313,16 @@ const shouldDescriptionBeTruncated = cardURL => {
   return true;
 };
 
+const prepareEmbed = embed => {
+  embed.original_url_encoded = encodeURIComponent(embed.original_url);
+  embed.raw_metadata = JSON.parse(embed.raw_metadata);
+  embed.created = new Date(parseInt(embed.created))
+    .toISOString()
+    .replace(/:\d{2}\.\d{3}Z$/, "");
+
+  return embed;
+};
+
 async function queryEmbed(db, embedURL) {
   if (!embedURL) {
     return null;
@@ -335,11 +346,107 @@ async function queryEmbed(db, embedURL) {
     return null;
   }
 
-  embed.raw_metadata = JSON.parse(embed.raw_metadata);
-  embed.created = new Date(parseInt(embed.created))
-    .toISOString()
-    .replace(/:\d{2}\.\d{3}Z$/, "");
-  return embed;
+  return prepareEmbed(embed);
+}
+
+async function getSingleEmbed(req, _res) {
+  const query = url.parse(req.url, true).query;
+
+  const db = await req.db();
+
+  const existingEmbed = await queryEmbed(db, query.url);
+
+  let cardHTML;
+  let rawMetadata;
+  let requested;
+  if (!existingEmbed || query.request) {
+    let error;
+    try {
+      rawMetadata = query.url
+        ? await module.exports.loadMetadata(query.url)
+        : null;
+    } catch (e) {
+      error = `${e.name}${e.statusCode ? ": " + e.statusCode : ""}`;
+    }
+
+    const cardWithMetadata = rawMetadata
+      ? await module.exports.generateCardJSON(rawMetadata)
+      : null;
+
+    let parsedMetadata = null;
+    let card = null;
+
+    if (cardWithMetadata) {
+      ({ _parsedMetadata: parsedMetadata, ...card } = cardWithMetadata);
+    }
+
+    cardHTML = cardWithMetadata
+      ? await module.exports.renderCard(cardWithMetadata)
+      : null;
+
+    requested = {
+      cardJSON: JSON.stringify(error || card, null, 2),
+      parsedMetadataJSON:
+        parsedMetadata && JSON.stringify(parsedMetadata, null, 2)
+    };
+  } else if (existingEmbed) {
+    cardHTML = existingEmbed.rendered_html;
+    rawMetadata = existingEmbed.raw_metadata;
+  }
+
+  return commonRender(`backstage/templates/embed.mustache`, {
+    url: query.url,
+    existingEmbed,
+    cardHTML,
+    requested,
+    rawMetadata,
+    rawMetadataJSON: rawMetadata && JSON.stringify(rawMetadata),
+    status: {
+      saved: !query.request && Boolean(existingEmbed),
+      requested: cardHTML && (!existingEmbed || Boolean(query.request))
+    }
+  });
+}
+
+const PAGE_SIZE = 20;
+
+async function getEmbedsList(req, _res) {
+  const db = await req.db();
+  const query = url.parse(req.url, true).query;
+
+  const offset = +query.offset || 0;
+  const embeds = (await db.all(
+    `
+      SELECT
+        original_url,
+        strftime('%s000', created) created,
+        mimetype,
+        raw_metadata,
+        rendered_html
+      FROM embeds
+      ORDER BY datetime(created) DESC, original_url DESC
+      LIMIT ?2 OFFSET ?1
+    `,
+    { 1: offset, 2: PAGE_SIZE + 1 }
+  )).map(prepareEmbed);
+
+  const moreEmbeds = embeds.length > PAGE_SIZE;
+
+  return render(`embeds.mustache`, {
+    embeds,
+    older: moreEmbeds
+      ? url.resolve(
+          req.absolute,
+          `/backstage/embeds?offset=${offset + PAGE_SIZE}`
+        )
+      : null,
+    newer: +offset
+      ? url.resolve(
+          req.absolute,
+          `/backstage/embeds?offset=${Math.max(offset - PAGE_SIZE, 0)}`
+        )
+      : null
+  });
 }
 
 module.exports = {
@@ -542,7 +649,7 @@ module.exports = {
       return "";
     }
 
-    return await render(`templates/card.mustache`, {
+    return await commonRender(`templates/card.mustache`, {
       card
     });
   },
@@ -662,61 +769,12 @@ module.exports = {
       return sendToAuthProvider(req, res);
     }
 
-    const db = await req.db();
-
     const query = url.parse(req.url, true).query;
 
-    const existingEmbed = await queryEmbed(db, query.url);
-
-    let cardHTML;
-    let rawMetadata;
-    let requested;
-    if (!existingEmbed || query.request) {
-      let error;
-      try {
-        rawMetadata = query.url
-          ? await module.exports.loadMetadata(query.url)
-          : null;
-      } catch (e) {
-        error = `${e.name}${e.statusCode ? ": " + e.statusCode : ""}`;
-      }
-
-      const cardWithMetadata = rawMetadata
-        ? await module.exports.generateCardJSON(rawMetadata)
-        : null;
-
-      let parsedMetadata = null;
-      let card = null;
-
-      if (cardWithMetadata) {
-        ({ _parsedMetadata: parsedMetadata, ...card } = cardWithMetadata);
-      }
-
-      cardHTML = cardWithMetadata
-        ? await module.exports.renderCard(cardWithMetadata)
-        : null;
-
-      requested = {
-        cardJSON: JSON.stringify(error || card, null, 2),
-        parsedMetadataJSON:
-          parsedMetadata && JSON.stringify(parsedMetadata, null, 2)
-      };
-    } else if (existingEmbed) {
-      cardHTML = existingEmbed.rendered_html;
-      rawMetadata = existingEmbed.raw_metadata;
+    if (query.url) {
+      return await getSingleEmbed(req, res);
     }
 
-    return render(`backstage/templates/embeds.mustache`, {
-      url: query.url,
-      existingEmbed,
-      cardHTML,
-      requested,
-      rawMetadata,
-      rawMetadataJSON: rawMetadata && JSON.stringify(rawMetadata),
-      status: {
-        saved: !query.request && Boolean(existingEmbed),
-        requested: cardHTML && (!existingEmbed || Boolean(query.request))
-      }
-    });
+    return await getEmbedsList(req, res);
   }
 };

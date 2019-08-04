@@ -1,71 +1,77 @@
 <!DOCTYPE html>
-<html prefix="og: http://ogp.me/ns#" xmlns:og="http://opengraphprotocol.org/schema/">
+<html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/vnd.microsoft.icon" href="{{ blog.static.favicon.ico }}" />
-  <link rel="icon" type="image/png" href="{{ blog.static.favicon.png }}" />
-  <link rel="icon" type="image/svg+xml" href="{{ blog.static.favicon.svg }}" />
-  <link rel="apple-touch-icon-precomposed" href="{{ blog.static.favicon.png }}" />
-  <link rel="mask-icon" href="{{ blog.static.mask-icon.svg }}" color="#00a500" />
-  <title>
-    embeds{{# url }} - {{url}}{{/url}}
-  </title>
-  <style type="text/css">
-    {{> header.css}}
-    {{> highlight.css}}
-    input {
-      font-size: 0.9em;
-    }
-  </style>
-  <script type="text/javascript">
-    {{> header.js}}
-  </script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        {{> bulma.css}}
+    </style>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      nav {
+        margin-top: 1em;
+        margin-bottom: 1em;
+      }
+
+      textarea,
+      input[name="slug"]{
+        width: 100%;
+        font-size: 1em;
+        font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
+          "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
+          "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
+          "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+      }
+
+      textarea {
+        min-height: 40vh;
+      }
+
+      section {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        margin-bottom: 64px;
+      }
+    </style>
 </head>
-<body>
-<header
-  style="display: flex; flex-flow: row wrap; justify-content: space-between; border-bottom: 2px #ddd solid; margin-bottom: 0.3em;"
->
-  <a href="/backstage">&larr;</a>
-  <form method="GET" action="/backstage/embeds">
-    <input name="url" value="{{ url }}"
-      {{^ cardHTML }}autofocus{{/ cardHTML }}
-    >
-    <button>&rarr;</button>
-    <button name="request" value="1">&circlearrowright;</button>
-  </form>
-  <form method="POST" action="#" style="width: 100%">
-    <input type="hidden" name="original_url" value="{{url}}">
-    {{# existingEmbed }}
-      <a>saved @ {{ existingEmbed.created }}</a>
-    {{/ existingEmbed }}
-    {{# status.saved }}
-      <button name="delete" value="1" onclick="return confirm('are you sure?');">delete</button>
-    {{/ status.saved }}
-    {{# status.requested }}
-      <input type="hidden" name="raw_metadata" value="{{rawMetadataJSON}}">
-      <input type="hidden" name="rendered_html" value="{{cardHTML}}">
-      <button name="save" value="1">save</button>
-    {{/ status.requested }}
-  </form>
-</header>
-<main>
+<body class="container is-fluid" style="margin: 1em 1em 80px 1em">
+    <nav class="level">
+      <div class="level-left">
+        <a class="button" href="/backstage">&larr; backstage</a>
+      </div>
+      <form
+        class="field has-addons level-right"
+        action="/backstage/embeds"
+        method="GET"
+      >
+        <div class="control is-expanded">
+          <input name="url" type="url" class="input" autofocus >
+        </div>
+        <div class="control">
+          <button class="button">&rarr;</button>
+        </div>
+      </form>
+    </nav>
 
-<article>
-  {{{ cardHTML }}}
+    {{#embeds}}
+      <div class="card">
+        <a href="/backstage/embeds/?url={{original_url_encoded}}">
+        <div class="card-content">
+            {{ original_url }}
+        </div>
+        </a>
+      </div>
+    {{/embeds}}
 
-  {{# requested }}
-  <pre><code>{{ requested.cardJSON }}</code></pre>
-  {{/ requested }}
-
-  {{# requested.parsedMetadataJSON }}
-  <pre><code>{{ requested.parsedMetadataJSON }}</code></pre>
-  {{/ requested.parsedMetadataJSON }}
-
-  <pre {{^ rawMetadata }}hidden{{/ rawMetadata }}><code>{{# rawMetadata }}{{#name}}&lt;meta name="{{name}}" content="{{content}}"&gt;{{/name}}{{#property}}&lt;meta property="{{property}}" content="{{content}}"&gt;{{/property}}
-{{/ rawMetadata }}</code></pre>
-</article>
-
-</main>
+    <nav class="field" style="margin-top: 0.5em">
+      {{#urls.newer}}<a class="button" href="{{{urls.newer}}}">&larr; newer</a>{{/urls.newer}}
+      {{^urls.newer}}<button class="button" disabled>&larr; newer</button>{{/urls.newer}}
+      {{#urls.older}}<a class="button" href="{{{urls.older}}}">older &rarr;</a>{{/urls.older}}
+      {{^urls.older}}<button class="button" disabled>older &rarr;</button>{{/urls.older}}
+    </nav>
 </body>
 </html>

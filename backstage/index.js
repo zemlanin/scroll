@@ -1,4 +1,5 @@
 const url = require("url");
+const cookie = require("cookie");
 
 const { authed, logout, sendToAuthProvider } = require("./auth.js");
 const { render } = require("./templates/index.js");
@@ -98,6 +99,12 @@ module.exports = async (req, res) => {
     suggestion: suggestion,
     gauges: {
       id: process.env.GAUGES_ID
+    },
+    devMode: {
+      canEnter: process.env.NODE_ENV === "production",
+      canExit:
+        process.env.NODE_ENV === "development" &&
+        cookie.parse(req.headers.cookie || "").dev
     },
     urls: {
       logout: url.resolve(req.absolute, "/backstage/?logout=1"),

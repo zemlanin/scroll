@@ -126,6 +126,12 @@
             class="button"
           ><img src="/backstage/gauges.svg" style="height:1em; width: 3em"></a>
         {{/gauges.id}}
+        {{# devMode.canEnter }}
+          <a href="/enter_dev" class="button">&#128679;</a>
+        {{/ devMode.canEnter }}
+        {{# devMode.canExit }}
+          <a href="/exit_dev" class="button">&#128120;</a>
+        {{/ devMode.canExit }}
     </nav>
 
     {{#suggestion}}

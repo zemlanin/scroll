@@ -312,6 +312,36 @@ const shouldDescriptionBeTruncated = cardURL => {
   return true;
 };
 
+async function queryEmbed(db, embedURL) {
+  if (!embedURL) {
+    return null;
+  }
+
+  const embed = await db.get(
+    `
+      SELECT
+        original_url,
+        strftime('%s000', created) created,
+        mimetype,
+        raw_metadata,
+        rendered_html
+      FROM embeds
+      WHERE original_url = ?1
+    `,
+    { 1: embedURL }
+  );
+
+  if (!embed) {
+    return null;
+  }
+
+  embed.raw_metadata = JSON.parse(embed.raw_metadata);
+  embed.created = new Date(parseInt(embed.created))
+    .toISOString()
+    .replace(/:\d{2}\.\d{3}Z$/, "");
+  return embed;
+}
+
 module.exports = {
   loadMetadata: async ogPageURL => {
     if (ogPageURL && ogPageURL.startsWith("https://mobile.twitter.com/")) {
@@ -523,6 +553,106 @@ module.exports = {
     if (!user) {
       return sendToAuthProvider(req, res);
     }
+
+    const db = await req.db();
+
+    const original_url = req.post.original_url;
+
+    if (!original_url) {
+      res.statusCode = 400;
+      return `original_url is required`;
+    }
+
+    const existingEmbed = await queryEmbed(db, original_url);
+
+    if (req.post.delete === "1") {
+      if (existingEmbed) {
+        await db.run(`DELETE FROM embeds WHERE original_url = ?1`, {
+          1: original_url
+        });
+
+        res.writeHead(303, {
+          Location: url.resolve(req.absolute, `/backstage/embeds`)
+        });
+
+        return;
+      } else {
+        res.statusCode = 404;
+        return;
+      }
+    }
+
+    const mimetype = "text/html";
+    let rendered_html;
+    let raw_metadata;
+
+    if (req.post.rendered_html && req.post.raw_metadata) {
+      raw_metadata = req.post.raw_metadata;
+      rendered_html = req.post.rendered_html;
+    } else {
+      try {
+        raw_metadata = await module.exports.loadMetadata(original_url);
+      } catch (e) {
+        res.statusCode = 500;
+        return `${e.name}${e.statusCode ? ": " + e.statusCode : ""}`;
+      }
+
+      if (!raw_metadata) {
+        res.statusCode = 404;
+        return;
+      }
+
+      const cardWithMetadata = await module.exports.generateCardJSON(
+        raw_metadata
+      );
+
+      if (!cardWithMetadata) {
+        res.statusCode = 404;
+        return;
+      }
+
+      rendered_html = await module.exports.renderCard(cardWithMetadata);
+    }
+
+    if (existingEmbed) {
+      await db.run(
+        `UPDATE embeds SET
+          raw_metadata = ?2,
+          rendered_html = ?3,
+          mimetype = ?4,
+          created = ?5
+          WHERE original_url = ?1`,
+        {
+          1: original_url,
+          2: raw_metadata,
+          3: rendered_html,
+          4: mimetype,
+          5: new Date().toISOString().replace(/\.\d{3}Z$/, "Z")
+        }
+      );
+    } else {
+      await db.run(
+        `INSERT INTO embeds
+          (original_url, raw_metadata, rendered_html, mimetype, created)
+          VALUES (?1, ?2, ?3, ?4, ?5)`,
+        {
+          1: original_url,
+          2: raw_metadata,
+          3: rendered_html,
+          4: mimetype,
+          5: new Date().toISOString().replace(/\.\d{3}Z$/, "Z")
+        }
+      );
+    }
+
+    res.writeHead(303, {
+      Location: url.resolve(
+        req.absolute,
+        `/backstage/embeds?url=${encodeURIComponent(original_url)}`
+      )
+    });
+
+    return;
   },
 
   get: async (req, res) => {
@@ -532,46 +662,60 @@ module.exports = {
       return sendToAuthProvider(req, res);
     }
 
+    const db = await req.db();
+
     const query = url.parse(req.url, true).query;
 
+    const existingEmbed = await queryEmbed(db, query.url);
+
+    let cardHTML;
     let rawMetadata;
-    let error;
-    try {
-      rawMetadata = query.url
-        ? await module.exports.loadMetadata(query.url)
+    let requested;
+    if (!existingEmbed || query.request) {
+      let error;
+      try {
+        rawMetadata = query.url
+          ? await module.exports.loadMetadata(query.url)
+          : null;
+      } catch (e) {
+        error = `${e.name}${e.statusCode ? ": " + e.statusCode : ""}`;
+      }
+
+      const cardWithMetadata = rawMetadata
+        ? await module.exports.generateCardJSON(rawMetadata)
         : null;
-    } catch (e) {
-      error = `${e.name}${e.statusCode ? ": " + e.statusCode : ""}`;
+
+      let parsedMetadata = null;
+      let card = null;
+
+      if (cardWithMetadata) {
+        ({ _parsedMetadata: parsedMetadata, ...card } = cardWithMetadata);
+      }
+
+      cardHTML = cardWithMetadata
+        ? await module.exports.renderCard(cardWithMetadata)
+        : null;
+
+      requested = {
+        cardJSON: JSON.stringify(error || card, null, 2),
+        parsedMetadataJSON:
+          parsedMetadata && JSON.stringify(parsedMetadata, null, 2)
+      };
+    } else if (existingEmbed) {
+      cardHTML = existingEmbed.rendered_html;
+      rawMetadata = existingEmbed.raw_metadata;
     }
-
-    const cardWithMetadata = rawMetadata
-      ? await module.exports.generateCardJSON(rawMetadata)
-      : null;
-
-    let parsedMetadata = null;
-    let card = null;
-
-    if (cardWithMetadata) {
-      ({ _parsedMetadata: parsedMetadata, ...card } = cardWithMetadata);
-    }
-
-    const cardHTML = cardWithMetadata
-      ? await module.exports.renderCard(cardWithMetadata)
-      : null;
 
     return render(`backstage/templates/embeds.mustache`, {
       url: query.url,
-      card,
+      existingEmbed,
       cardHTML,
-      cardJSON: JSON.stringify(error || card, null, 2),
-      parsedMetadataJSON:
-        parsedMetadata && JSON.stringify(parsedMetadata, null, 2),
+      requested,
       rawMetadata,
       rawMetadataJSON: rawMetadata && JSON.stringify(rawMetadata),
       status: {
-        saved: true,
-        preview: true,
-        empty: true
+        saved: !query.request && Boolean(existingEmbed),
+        requested: cardHTML && (!existingEmbed || Boolean(query.request))
       }
     });
   }

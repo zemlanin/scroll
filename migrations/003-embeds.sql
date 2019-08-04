@@ -1,6 +1,6 @@
 -- up
 CREATE TABLE IF NOT EXISTS "embeds" (
-	`original_url` TEXT,
+	`original_url` TEXT NOT NULL,
 	`created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`mimetype` TEXT NOT NULL,
 	`raw_metadata` JSON,
@@ -10,10 +10,9 @@ CREATE TABLE IF NOT EXISTS "embeds" (
 );
 
 CREATE TABLE IF NOT EXISTS "post_embed_links" (
-	`id` TEXT,
+	`id` INTEGER PRIMARY KEY,
 	`post_id` TEXT,
 	`original_url` TEXT,
-	PRIMARY KEY (`id`),
 	UNIQUE (`post_id`, `original_url`)
 );
 

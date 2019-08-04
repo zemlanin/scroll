@@ -159,6 +159,7 @@ const handlers = [
   ["POST", "/backstage/convert", require("./backstage/convert.js").post],
   ["GET", "/backstage/gauges.svg", require("./backstage/gauges-graph.js")],
   ["GET", "/backstage/embeds", require("./backstage/embeds.js").get],
+  ["POST", "/backstage/embeds", require("./backstage/embeds.js").post],
   ["GET", "/:name(.html)", serveHtml]
 ].map(([m, p, h]) => [m, new UrlPattern(p), h]);
 

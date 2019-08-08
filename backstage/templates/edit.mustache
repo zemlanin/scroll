@@ -155,14 +155,7 @@
     </nav>
     <form method="POST" id="main-form">
         <input type="hidden" name="id" value="{{post.id}}">
-        <div
-            {{#post.slug}}
-                class="field is-horizontal has-addons"
-            {{/post.slug}}
-            {{^post.slug}}
-                class="field is-horizontal"
-            {{/post.slug}}
-        >
+        <div class="field is-horizontal has-addons">
             <div class="control" style="width: 100%; flex-grow: 1;">
                 <input
                     name="slug"
@@ -187,6 +180,17 @@
                     </a>
                 </div>
             {{/post.slug}}
+            <div class="control">
+                <a
+                    href="/backstage/preview/?id={{post.id}}&rss=1"
+                    target="_blank"
+                    class="button"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 448 512">
+                        <path fill="currentColor" d="{{fas.rss}}"></path>
+                    </svg>
+                </a>
+            </div>
         </div>
         <textarea
             name="text"
@@ -246,7 +250,7 @@
                             style="border: none; background: none;"
                             onclick="window.tabClick(event)"
                             name="teaser"
-                            value="1" 
+                            value="1"
                         >
                             <a>teaser</a>
                         </button>

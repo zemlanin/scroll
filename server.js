@@ -235,8 +235,10 @@ const server = http.createServer((req, res) => {
         const contentType = res.getHeader("content-type");
         if (
           typeof body === "string" ||
-          contentType === "text/plain" ||
+          contentType === "text/xml" ||
           contentType === "text/html" ||
+          contentType === "text/plain" ||
+          contentType === "text/markdown" ||
           (contentType && contentType.startsWith("image/"))
         ) {
           res.writeHead(res.statusCode, {

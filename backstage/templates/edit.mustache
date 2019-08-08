@@ -99,9 +99,7 @@
                             onclick="return confirm('delete {{id}}?')"
                             form="main-form"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 448 512">
-                                <path fill="currentColor" d="{{fas.trash}}"></path>
-                            </svg>
+                            {{#fas}}trash{{/fas}}
                         </button>
                     </div>
                 {{/draft}}
@@ -114,9 +112,7 @@
                     >
                         {{#draft}}draft{{/draft}}
                         {{^draft}}
-                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 576 512">
-                                <path fill="currentColor" d="{{ fas.eye-slash }}"></path>
-                            </svg>
+                            {{#fas}}eye-slash{{/fas}}
                         {{/draft}}
                     </button>
                 </div>
@@ -129,9 +125,7 @@
                     >
                         {{#private}}private{{/private}}
                         {{^private}}
-                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 512 512">
-                                <path fill="currentColor" d="{{ fas.shield-alt }}"></path>
-                            </svg>
+                            {{#fas}}shield-alt{{/fas}}
                         {{/private}}
                     </button>
                 </div>
@@ -144,9 +138,7 @@
                     >
                         {{#public}}public{{/public}}
                         {{^public}}
-                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 576 512">
-                                <path fill="currentColor" d="{{fas.newspaper}}"></path>
-                            </svg>
+                            {{#fas}}newspaper{{/fas}}
                         {{/public}}
                     </button>
                 </div>
@@ -174,9 +166,7 @@
             {{#post.slug}}
                 <div class="control">
                     <a href="/{{post.slug}}.html" target="_blank" class="button">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 576 512">
-                            <path fill="currentColor" d="{{fas.link}}"></path>
-                        </svg>
+                        {{#fas}}link{{/fas}}
                     </a>
                 </div>
             {{/post.slug}}
@@ -186,9 +176,7 @@
                     target="_blank"
                     class="button"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 448 512">
-                        <path fill="currentColor" d="{{fas.rss}}"></path>
-                    </svg>
+                  {{#fas}}rss{{/fas}}
                 </a>
             </div>
         </div>
@@ -204,17 +192,13 @@
               class="button new-media-camera"
               disabled
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 512 512">
-                <path fill="currentColor" d="{{fas.camera}}"></path>
-              </svg>
+              {{#fas}}camera{{/fas}}
             </button>
             <button type="button"
               class="button new-media-upload"
               disabled
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 512 512">
-                <path fill="currentColor" d="{{fas.upload}}"></path>
-              </svg>
+              {{#fas}}upload{{/fas}}
             </button>
           </div>
           {{#mediaJson}}

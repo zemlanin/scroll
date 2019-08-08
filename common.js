@@ -22,15 +22,12 @@ const zlibPromises = {
   gzip: promisify(zlib.gzip)
 };
 
-const fontAwesomeSVGReducer = (acc, icon) =>
-  icon.icon ? { ...acc, [icon.iconName]: icon.icon[4] } : acc;
-
-const fas = Object.values(
+const fas = require("./font-awesome-mustache.js")(
   require("@fortawesome/fontawesome-free-solid")
-).reduce(fontAwesomeSVGReducer, {});
-const fab = Object.values(
+);
+const fab = require("./font-awesome-mustache.js")(
   require("@fortawesome/fontawesome-free-brands")
-).reduce(fontAwesomeSVGReducer, {});
+);
 
 const PAGE_SIZE = 10;
 const MINIMUM_INDEX_PAGE_SIZE = 5;

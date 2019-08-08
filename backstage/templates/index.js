@@ -8,15 +8,12 @@ const fsPromises = {
 
 const mustache = require("mustache");
 
-const fontAwesomeSVGReducer = (acc, icon) =>
-  icon.icon ? { ...acc, [icon.iconName]: icon.icon[4] } : acc;
-
-const fas = Object.values(
+const fas = require("../../font-awesome-mustache.js")(
   require("@fortawesome/fontawesome-free-solid")
-).reduce(fontAwesomeSVGReducer, {});
-const fab = Object.values(
+);
+const fab = require("../../font-awesome-mustache.js")(
   require("@fortawesome/fontawesome-free-brands")
-).reduce(fontAwesomeSVGReducer, {});
+);
 
 async function loadTemplate(tmpl) {
   if (process.env.NODE_ENV === "development") {

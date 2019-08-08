@@ -99,7 +99,7 @@ async function generate(db, stdout, stderr) {
 
   await copyStaticContent(tmpFolder);
 
-  const blog = await getBlogObject(db);
+  const blog = await getBlogObject();
 
   let preparedPosts = await getPosts(db, {}, `draft = 0`, null);
 

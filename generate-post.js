@@ -245,7 +245,7 @@ async function getPagination(db, postsCreatedAfter) {
 }
 
 async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
-  const blog = await getBlogObject(db);
+  const blog = await getBlogObject();
   const post = await getPost(db, postId);
   const newStatus = post.status;
   const newCreated = post.created;

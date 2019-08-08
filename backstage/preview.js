@@ -71,7 +71,7 @@ module.exports = async (req, res) => {
 
   const showTeaser = (req.post && req.post.teaser) || query.teaser;
 
-  const blog = await getBlogObject(db);
+  const blog = await getBlogObject(req.absolute);
   blog.url = url.resolve(req.absolute, "/backstage");
 
   if (showTeaser) {

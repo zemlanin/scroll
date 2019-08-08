@@ -479,22 +479,26 @@ const cleanCSS = new CleanCSS({
   level: 2
 });
 
-async function getBlogObject(/* db */) {
+async function getBlogObject(baseUrl) {
+  if (!baseUrl) {
+    baseUrl = BLOG_BASE_URL;
+  }
+
   return {
     title: BLOG_TITLE,
-    url: url.resolve(BLOG_BASE_URL, "/"),
+    url: url.resolve(baseUrl, "/"),
     feed: {
       description: `Everything feed - ${BLOG_TITLE}`,
-      url: url.resolve(BLOG_BASE_URL, "/rss.xml")
+      url: url.resolve(baseUrl, "/rss.xml")
     },
     static: {
       favicon: {
-        ico: url.resolve(BLOG_BASE_URL, "/favicon.ico"),
-        png: url.resolve(BLOG_BASE_URL, "/favicon.png"),
-        svg: url.resolve(BLOG_BASE_URL, "/favicon.svg")
+        ico: url.resolve(baseUrl, "/favicon.ico"),
+        png: url.resolve(baseUrl, "/favicon.png"),
+        svg: url.resolve(baseUrl, "/favicon.svg")
       },
       "mask-icon": {
-        svg: url.resolve(BLOG_BASE_URL, "/mask-icon.svg")
+        svg: url.resolve(baseUrl, "/mask-icon.svg")
       }
     }
   };

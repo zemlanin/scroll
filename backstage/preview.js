@@ -76,19 +76,30 @@ module.exports = async (req, res) => {
 
   const blog = await getBlogObject(req.absolute);
   blog.url = url.resolve(req.absolute, "/backstage");
-  blog.title = `${blog.title} / ${preparedPost.title}`;
-  blog.feed.url = rssEscape(
-    url.resolve(req.absolute, `/backstage/preview/?id=${post.id}&rss=1`)
-  );
 
   if (rss) {
     res.setHeader("content-type", "text/xml");
 
     return render(path.resolve(__dirname, "..", "templates", "rss.mustache"), {
-      blog: blog,
+      blog: {
+        ...blog,
+        title: `${blog.title} / ${preparedPost.title}`,
+        feed: {
+          ...blog.feed,
+          url: rssEscape(
+            url.resolve(req.absolute, `/backstage/preview/?id=${post.id}&rss=1`)
+          )
+        }
+      },
       posts: [preparedPost],
       pubDate: new Date().toUTCString()
     });
+  }
+
+  const naked = (req.post && req.post.naked) || query.naked;
+
+  if (naked) {
+    return (preparedPost.htmlTitle || "") + preparedPost.html;
   }
 
   const showTeaser = (req.post && req.post.teaser) || query.teaser;

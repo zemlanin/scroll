@@ -62,7 +62,7 @@ async function mkdirP(p) {
   }
 }
 
-async function copyStaticContent(destination) {
+async function copyStaticContent(destination, stdout) {
   const staticPath = path.resolve(__dirname, "static");
 
   for (const filename of await fsPromises.readdir(staticPath)) {
@@ -77,7 +77,7 @@ async function copyStaticContent(destination) {
     }
 
     const mimeType = mime.getType(filename);
-    console.log(filename, mimeType);
+    stdout.write(`${filename} ${mimeType}`);
 
     if (mimeType.startsWith("text/") || mimeType == "image/svg+xml") {
       await writeFileWithGzip(
@@ -91,13 +91,13 @@ async function copyStaticContent(destination) {
   }
 }
 
-async function generate(db, stdout, stderr) {
+async function generate(db, destination, stdout, stderr) {
   const tmpFolder = await fsPromises.mkdtemp(path.join(os.tmpdir(), "scroll-"));
   await fsPromises.mkdir(path.join(tmpFolder, "/media"));
 
   stdout.write(`made tmp dir: ${tmpFolder}\n`);
 
-  await copyStaticContent(tmpFolder);
+  await copyStaticContent(tmpFolder, stdout);
 
   const blog = await getBlogObject();
 
@@ -263,7 +263,7 @@ async function generate(db, stdout, stderr) {
       .set("delete")
       .flags("Icru")
       .source(tmpFolder + path.sep)
-      .destination(DIST);
+      .destination(destination);
 
     rsync.execute(
       function(error) {
@@ -285,7 +285,7 @@ if (require.main === module) {
   sqlite.open(POSTS_DB).then(db =>
     db
       .migrate({ migrationsPath: path.resolve(__dirname, "migrations") })
-      .then(() => generate(db, process.stdout, process.stderr))
+      .then(() => generate(db, DIST, process.stdout, process.stderr))
       .then(() => {
         console.log("done");
         return db.close().then(() => {

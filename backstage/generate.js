@@ -9,7 +9,7 @@ const { DIST } = require("../common.js");
 const { convertMedia, getConversionTags } = require("./convert.js");
 const { render } = require("./templates/index.js");
 
-async function generateDefaultMedia(db, stdout, stderr) {
+async function generateDefaultMedia(db, destination, stdout, stderr) {
   const media = await db.all("SELECT id from media");
 
   stdout.write(`total media: ${media.length}\n`);
@@ -38,7 +38,7 @@ async function generateDefaultMedia(db, stdout, stderr) {
                     m.data,
                     m.id,
                     mimeType,
-                    path.resolve(DIST, "media")
+                    path.resolve(destination, "media")
                   );
                 }
                 stdout.write(`+`);
@@ -95,8 +95,8 @@ module.exports = {
 
     const generator =
       req.post.generator === "default-media"
-        ? async () => generateDefaultMedia(await req.db(), res, res)
-        : async () => generate(await req.db(), res, res);
+        ? async () => generateDefaultMedia(await req.db(), DIST, res, res)
+        : async () => generate(await req.db(), DIST, res, res);
 
     return generator()
       .then(() => {

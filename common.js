@@ -254,6 +254,10 @@ renderer.image = function(href, title, text) {
     </a>`;
   }
 
+  if (isOwnMedia(href) && mimeObj.text) {
+    return `<iframe src="${href}" width="640" height="360" frameborder="0"></iframe>`;
+  }
+
   return ogImage(href, title, text);
 };
 

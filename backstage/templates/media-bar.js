@@ -12,7 +12,9 @@ document.addEventListener("DOMContentLoaded", function() {
       if (moreMediaIntersectionObserver.unobserve) {
         const moreMediaButton = mediaBar.querySelector("[data-more-media-url]");
 
-        moreMediaIntersectionObserver.unobserve(moreMediaButton);
+        if (moreMediaButton) {
+          moreMediaIntersectionObserver.unobserve(moreMediaButton);
+        }
       } else if (moreMediaIntersectionObserver.disconnect) {
         moreMediaIntersectionObserver.disconnect();
       }
@@ -218,9 +220,25 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
+  const uploadForm = document.getElementById("upload-form");
+  uploadForm.addEventListener("change", function() {
+    const data = new FormData(uploadForm);
+
+    fetch(uploadForm.action, {
+      method: uploadForm.method,
+      body: data,
+      credentials: "include"
+    }).then(replaceMediaBarHTML);
+  });
+
   const newMediaUploadButton = mediaBar.querySelector(
     "[data-new-media-upload]"
   );
+  if (newMediaUploadButton) {
+    newMediaUploadButton.addEventListener("click", function() {
+      uploadForm.querySelector("input").click();
+    });
+  }
 
   let dndCounter = 0;
 
@@ -278,8 +296,8 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     }
 
-    fetch("/backstage/media/?bar=1", {
-      method: "POST",
+    fetch(uploadForm.action, {
+      method: uploadForm.method,
       body: data,
       credentials: "include"
     }).then(replaceMediaBarHTML);

@@ -187,7 +187,7 @@
             rows="8"
         >{{{post.text}}}</textarea>
         <div id="media-bar">
-          <div class="new-media buttons has-addons">
+          <div class="new-media">
             <button type="button"
               class="button"
               data-new-media-upload
@@ -264,6 +264,14 @@
         frameborder="0"
     ></iframe>
     <form id="dummy"></form>
+    <form enctype="multipart/form-data"
+      action="/backstage/media/?bar=1"
+      method="POST"
+      id="upload-form"
+      style="display: none;"
+    >
+      <input name="files" type="file" multiple class="input" />
+    </form>
     <script>
         /* eslint-env browser */
         window.tabClick = function (event) {

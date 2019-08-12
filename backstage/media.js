@@ -113,7 +113,7 @@ const mediaId = {
         SELECT
           id,
           ext,
-          CASE 
+          CASE
             WHEN length(data) < 1024 THEN length(data) || 'B'
             WHEN length(data) >=  1024 AND length(data) < (1024 * 1024) THEN (length(data) / 1024) || 'KB'
             WHEN length(data) >= (1024 * 1024) THEN (length(data) / (1024 * 1024)) || 'MB'
@@ -138,7 +138,7 @@ const mediaId = {
           media_id,
           tag,
           ext,
-          CASE 
+          CASE
             WHEN length(data) < 1024 THEN length(data) || 'B'
             WHEN length(data) >=  1024 AND length(data) < (1024 * 1024) THEN (length(data) / 1024) || 'KB'
             WHEN length(data) >= (1024 * 1024) THEN (length(data) / (1024 * 1024)) || 'MB'
@@ -377,11 +377,17 @@ module.exports = {
       await fsPromises.unlink(f.path);
     }
 
+    let location;
+    if (query.bar) {
+      location = `/backstage/media/?bar=1`;
+    } else if (files.files.length === 1) {
+      location = `/backstage/media/?id=${lastMedia.id}`;
+    } else {
+      location = `/backstage/media/`;
+    }
+
     res.writeHead(303, {
-      Location:
-        files.files.length === 1
-          ? `/backstage/media/?id=${lastMedia.id}`
-          : `/backstage/media/`
+      Location: location
     });
     res.end();
     return;

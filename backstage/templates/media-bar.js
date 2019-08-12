@@ -4,6 +4,32 @@ document.addEventListener("DOMContentLoaded", function() {
   mediaBar.scrollLeft = 0;
   let moreMediaIntersectionObserver = null;
 
+  async function replaceMediaBarHTML(response) {
+    const htmlTag = document.createElement("html");
+    htmlTag.innerHTML = await response.text();
+
+    if (moreMediaIntersectionObserver) {
+      if (moreMediaIntersectionObserver.unobserve) {
+        const moreMediaButton = mediaBar.querySelector("[data-more-media-url]");
+
+        moreMediaIntersectionObserver.unobserve(moreMediaButton);
+      } else if (moreMediaIntersectionObserver.disconnect) {
+        moreMediaIntersectionObserver.disconnect();
+      }
+    }
+
+    mediaBar.querySelector(".media-thumbnail-list").remove();
+    mediaBar.insertBefore(htmlTag.querySelector(".media-thumbnail-list"), null);
+    htmlTag.innerHTML = "";
+    bindThumbnailHandlers(mediaBar.querySelector(".media-thumbnail-list"));
+
+    const newMoreButton = mediaBar.querySelector("[data-more-media-url]");
+
+    if (newMoreButton) {
+      moreMediaIntersectionObserver.observe(newMoreButton);
+    }
+  }
+
   function loadMore() {
     const moreMediaButton = mediaBar.querySelector("[data-more-media-url]");
     if (!moreMediaButton) {
@@ -39,13 +65,14 @@ document.addEventListener("DOMContentLoaded", function() {
             newMoreButton.getAttribute("data-more-media-url")
           );
         } else {
-          parent.removeChild(moreMediaButtonLi);
-          if (
-            moreMediaIntersectionObserver &&
-            moreMediaIntersectionObserver.disconnect
-          ) {
-            moreMediaIntersectionObserver.disconnect();
+          if (moreMediaIntersectionObserver) {
+            if (moreMediaIntersectionObserver.unobserve) {
+              moreMediaIntersectionObserver.unobserve(moreMediaButton);
+            } else if (moreMediaIntersectionObserver.disconnect) {
+              moreMediaIntersectionObserver.disconnect();
+            }
           }
+          parent.removeChild(moreMediaButtonLi);
         }
       })
       .catch(e => {
@@ -161,14 +188,17 @@ document.addEventListener("DOMContentLoaded", function() {
     )) {
       convertButton.addEventListener("click", convertButtonClick);
     }
+
+    const moreMediaButton = parentEl.querySelector("[data-more-media-url]");
+    if (moreMediaButton) {
+      moreMediaButton.addEventListener("click", loadMore);
+    }
   }
 
   bindThumbnailHandlers(mediaBar);
 
   const moreMediaButton = mediaBar.querySelector("[data-more-media-url]");
   if (moreMediaButton) {
-    moreMediaButton.addEventListener("click", loadMore);
-
     if (typeof IntersectionObserver != "undefined") {
       const observerCallback = entries => {
         for (const entry of entries) {
@@ -187,4 +217,71 @@ document.addEventListener("DOMContentLoaded", function() {
       moreMediaIntersectionObserver.observe(moreMediaButton);
     }
   }
+
+  const newMediaUploadButton = mediaBar.querySelector(
+    "[data-new-media-upload]"
+  );
+
+  let dndCounter = 0;
+
+  window.addEventListener("dragover", event => {
+    event.stopPropagation();
+    event.preventDefault();
+    return false;
+  });
+  window.addEventListener("dragenter", event => {
+    dndCounter++;
+    event.dataTransfer.dropEffect = "copy";
+
+    event.stopPropagation();
+    event.preventDefault();
+
+    if (newMediaUploadButton) {
+      newMediaUploadButton.classList.add("has-background-info");
+    }
+
+    return false;
+  });
+  window.addEventListener("dragleave", event => {
+    dndCounter--;
+
+    event.stopPropagation();
+    event.preventDefault();
+
+    if (newMediaUploadButton && dndCounter === 0) {
+      newMediaUploadButton.classList.remove("has-background-info");
+    }
+
+    return false;
+  });
+  window.addEventListener("drop", event => {
+    dndCounter = 0;
+
+    event.stopPropagation();
+    event.preventDefault();
+
+    if (newMediaUploadButton) {
+      newMediaUploadButton.style.backgroundColor = "inherit";
+    }
+
+    const data = new FormData();
+
+    if (event.dataTransfer.items) {
+      for (const item of event.dataTransfer.items) {
+        if (item.kind === "file") {
+          data.append("files", item.getAsFile());
+        }
+      }
+    } else {
+      for (const item of event.dataTransfer.files) {
+        data.append("files", item.getAsFile());
+      }
+    }
+
+    fetch("/backstage/media/?bar=1", {
+      method: "POST",
+      body: data,
+      credentials: "include"
+    }).then(replaceMediaBarHTML);
+  });
 });

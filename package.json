@@ -38,7 +38,7 @@
     "request": "2.88.0",
     "request-promise-native": "1.0.7",
     "rsync": "0.6.1",
-    "sharp": "0.21.1",
+    "sharp": "0.23.0",
     "sqlite": "3.0.3",
     "uglify-js": "3.4.5",
     "url-pattern": "1.0.3"

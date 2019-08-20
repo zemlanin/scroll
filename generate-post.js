@@ -143,6 +143,13 @@ async function generateIndexPage(db, blog, newestPage) {
   });
 }
 
+async function generateSettingsPage(db, blog) {
+  return await render("./templates/settings.mustache", {
+    blog,
+    title: "Settings"
+  });
+}
+
 async function generateArchivePage(db, blog) {
   let postMonths = await db.all(`
     SELECT strftime('%Y-%m', created) month
@@ -338,6 +345,7 @@ module.exports = {
   generatePostPage,
   getPagination,
   generatePaginationPage,
+  generateSettingsPage,
   generateArchivePage,
   generateIndexPage,
   generateRSSPage

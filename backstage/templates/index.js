@@ -11,6 +11,9 @@ const mustache = require("mustache");
 const fas = require("../../font-awesome-mustache.js")(
   require("@fortawesome/fontawesome-free-solid")
 );
+const far = require("../../font-awesome-mustache.js")(
+  require("@fortawesome/fontawesome-free-regular")
+);
 const fab = require("../../font-awesome-mustache.js")(
   require("@fortawesome/fontawesome-free-brands")
 );
@@ -32,6 +35,7 @@ async function render(tmpl, data) {
     await loadTemplate(path.resolve(__dirname, tmpl)),
     {
       fas,
+      far,
       fab,
       ...data
     },

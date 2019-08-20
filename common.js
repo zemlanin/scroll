@@ -25,6 +25,9 @@ const zlibPromises = {
 const fas = require("./font-awesome-mustache.js")(
   require("@fortawesome/fontawesome-free-solid")
 );
+const far = require("./font-awesome-mustache.js")(
+  require("@fortawesome/fontawesome-free-regular")
+);
 const fab = require("./font-awesome-mustache.js")(
   require("@fortawesome/fontawesome-free-brands")
 );
@@ -510,6 +513,7 @@ async function render(tmpl, data) {
     await loadTemplate(path.resolve(__dirname, tmpl)),
     {
       fas,
+      far,
       fab,
       ...data
     },
@@ -536,6 +540,20 @@ async function render(tmpl, data) {
       ),
       "highlight.css": await loadTemplate(
         path.resolve(__dirname, "templates", "highlight.css"),
+        code => cleanCSS.minify(code).styles
+      ),
+      "settings.js": await loadTemplate(
+        path.resolve(__dirname, "templates", "settings.js"),
+        code => {
+          let c = UglifyJS.minify(code).code;
+          if (!c) {
+            throw new Error("Empty settings.js");
+          }
+          return c;
+        }
+      ),
+      "settings.css": await loadTemplate(
+        path.resolve(__dirname, "templates", "settings.css"),
         code => cleanCSS.minify(code).styles
       ),
       gauges: await loadTemplate(

@@ -110,16 +110,16 @@ renderer.image = function(href, title, text) {
     const ytHref = `https://www.youtube.com/watch?v=${youtubeId}`;
 
     return `<a class="future-frame" href="${ytHref}" data-src="${dataSrc}">
-      <img src="${imgSrc}">
+      <img src="${imgSrc}" loading="lazy">
     </a>`;
   }
 
   if (href.indexOf("//player.vimeo.com/video/") > -1) {
-    return `<iframe src="${href}" width="640" height="360" frameborder="0" allowfullscreen></iframe>`;
+    return `<iframe src="${href}" width="640" height="360" frameborder="0" allowfullscreen loading="lazy"></iframe>`;
   }
 
   if (href.indexOf("//www.funnyordie.com/embed/") > -1) {
-    return `<iframe src="${href}" width="640" height="360" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+    return `<iframe src="${href}" width="640" height="360" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen loading="lazy"></iframe>`;
   }
 
   if (href.indexOf("//embed.music.apple.com/") > -1) {
@@ -127,7 +127,7 @@ renderer.image = function(href, title, text) {
       href.indexOf("/album/") > -1 && href.match(/[?&]i=\d+/)
         ? 150 // track
         : 360; // album/playlist
-    return `<iframe width="640" height="${height}" allow="autoplay *; encrypted-media *;" frameborder="0" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation" src="${href}"></iframe>`;
+    return `<iframe width="640" height="${height}" allow="autoplay *; encrypted-media *;" frameborder="0" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation" src="${href}" loading="lazy"></iframe>`;
   }
 
   if (process.env.BLOG_BASE_URL && href.startsWith("/media/")) {
@@ -184,7 +184,7 @@ renderer.image = function(href, title, text) {
 
       const imgSrc = attrs.match(/poster=['"]?([^'" ]+)['"]?/)[1];
       return `<a class="future-frame" href="${href}" data-src="${frameSrc}">
-        <img src="${imgSrc}">
+        <img src="${imgSrc}" loading="lazy">
       </a>`;
     } else {
       return `<iframe src="${frameSrc}"
@@ -193,6 +193,7 @@ renderer.image = function(href, title, text) {
         height="360"
         allow="autoplay; encrypted-media"
         allowfullscreen="1"
+        loading="lazy"
       ></iframe>`;
     }
   }
@@ -258,10 +259,10 @@ renderer.image = function(href, title, text) {
   }
 
   if (isOwnMedia(href) && mimeObj.text) {
-    return `<iframe src="${href}" width="640" height="360" frameborder="0"></iframe>`;
+    return `<iframe src="${href}" width="640" height="360" frameborder="0" loading="lazy"></iframe>`;
   }
 
-  return ogImage(href, title, text);
+  return ogImage(href, title, text).replace(/(\/?>)$/, ' loading="lazy" $1');
 };
 
 renderer.link = function(href, title, text) {

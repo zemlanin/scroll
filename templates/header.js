@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", function() {
     window.open(
       settingsIcon.href,
       "Settings",
-      "height=200,width=300,location=off" + ",top=" + top + ",left=" + left
+      "height=200,width=300,top=" + top + ",left=" + left
     );
 
     event.preventDefault();

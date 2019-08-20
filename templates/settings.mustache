@@ -27,10 +27,13 @@
 </head>
 <body>
   <header>
-    {{#title}}<h1>{{title}}</h1>{{/title}}
-    <a href="javascript:window.close()" title="Close">
+    <h1>
+      {{#title}}{{title}}{{/title}}
+      {{^title}}&nbsp;{{/title}}
+    </h1>
+    <button onclick="window.close(); return false;" title="Close">
       <svg role='img' xmlns='http://www.w3.org/2000/svg' style="vertical-align: middle;" width="1.5em" height="1.5em" viewBox='{{fas.times.viewBox}}'><path fill='currentColor' d='{{fas.times}}'></path></svg>
-    </a>
+    </button>
   </header>
 
   <form id="night-mode" action="javascript:void(0)">

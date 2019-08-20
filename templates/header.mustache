@@ -48,7 +48,9 @@
     {{#post}}
       <h2>
         <a href="{{{blog.url}}}">{{blog.title}}</a>
-        <span class="print:hidden">&nbsp;/&nbsp;<span><a href="{{{url}}}" class="print:hidden">&infin;</a>
+        {{^htmlTitle}}
+          <span class="print:hidden">&nbsp;/&nbsp;<span><a href="{{{url}}}" class="print:hidden">&infin;</a>
+        {{/htmlTitle}}
       </h2>
     {{/post}}
     {{^post}}

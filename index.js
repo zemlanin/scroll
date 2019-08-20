@@ -78,7 +78,7 @@ async function copyStaticContent(destination, stdout) {
     }
 
     const mimeType = mime.getType(filename);
-    stdout.write(`${filename} ${mimeType}`);
+    stdout.write(`${filename} ${mimeType}\n`);
 
     if (mimeType.startsWith("text/") || mimeType == "image/svg+xml") {
       await writeFileWithGzip(

@@ -16,7 +16,7 @@ const fsPromises = {
 };
 const { authed, sendToAuthProvider } = require("./auth.js");
 const { convertMedia, getConversionTags } = require("./convert.js");
-const { DIST, getMimeObj, renderer } = require("../common.js");
+const { DIST, getMimeObj, embedCallback } = require("../common.js");
 const { render } = require("./templates/index.js");
 
 const PAGE_SIZE = 20;
@@ -189,7 +189,7 @@ const mediaId = {
       possibleConversions: possibleConversions,
       media: {
         ...m,
-        displayHtml: renderer.image(
+        displayHtml: embedCallback(
           `/media/${m.id}.${m.ext}`,
           "",
           poster ? `poster="${poster}"` : ""

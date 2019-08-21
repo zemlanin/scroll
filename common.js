@@ -70,7 +70,8 @@ const ogImage = renderer.image.bind(renderer);
 const ogLink = renderer.link.bind(renderer);
 const ogHTML = renderer.html.bind(renderer);
 const ogParagraph = renderer.paragraph.bind(renderer);
-renderer.image = function(href, title, text) {
+
+function embedCallback(href, title, text) {
   const youtubeId = href.match(
     /(youtu\.be\/|youtube\.com\/watch\?v=)([^&\\]+)/
   );
@@ -263,7 +264,9 @@ renderer.image = function(href, title, text) {
   }
 
   return ogImage(href, title, text).replace(/(\/?>)$/, ' loading="lazy" $1');
-};
+}
+
+renderer.image = embedCallback;
 
 renderer.link = function(href, title, text) {
   if (href.startsWith("/media/")) {
@@ -290,19 +293,6 @@ renderer.paragraph = function(text) {
 
   return ogParagraph(text);
 };
-
-marked.setOptions({
-  gfm: true,
-  smartypants: false,
-  renderer: renderer,
-  highlight: function(code, lang) {
-    return require("highlight.js").highlightAuto(
-      code,
-      lang ? [lang] : undefined
-    ).value;
-  },
-  baseUrl: process.env.BLOG_BASE_URL || null
-});
 
 function getPostUrl(post) {
   return `${BLOG_BASE_URL}/${post.slug || post.id}.html`;
@@ -338,9 +328,27 @@ function escapeKaomoji(str) {
   return str.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯");
 }
 
+function getMarkedOptions() {
+  return {
+    gfm: true,
+    smartypants: false,
+    renderer: renderer,
+    highlight: function(code, lang) {
+      return require("highlight.js").highlightAuto(
+        code,
+        lang ? [lang] : undefined
+      ).value;
+    },
+    baseUrl: process.env.BLOG_BASE_URL || null
+  };
+}
+
 async function prepare(post) {
   post.text = escapeKaomoji(post.text);
-  const tokens = marked.lexer(post.text);
+
+  const markedOptions = getMarkedOptions();
+
+  const tokens = marked.lexer(post.text, markedOptions);
   const assignLinks = ts => {
     if (ts) {
       ts.links = tokens.links;
@@ -374,14 +382,17 @@ async function prepare(post) {
 
   if (header1Token) {
     const headerPrefix = "#".repeat(header1Token.depth);
-    htmlTitle = marked(`${headerPrefix} [${header1Token.text}](${post.url})`);
+    htmlTitle = marked(
+      `${headerPrefix} [${header1Token.text}](${post.url})`,
+      markedOptions
+    );
     rss.title = title = cheerio
       .load(htmlTitle)
       .text()
       .trim();
 
     const tokensWithoutTitle = tokens.slice(1);
-    html = marked.parser(assignLinks([...tokensWithoutTitle]));
+    html = marked.parser(assignLinks([...tokensWithoutTitle]), markedOptions);
 
     const teaser = isTeaserToken(tokensWithoutTitle[0])
       ? marked.parser(
@@ -390,7 +401,8 @@ async function prepare(post) {
               .slice(0, 3)
               .filter(isTeaserToken)
               .slice(0, 2)
-          ])
+          ]),
+          markedOptions
         )
       : "";
     const parsedTeaser = teaser && cheerio.load(teaser);
@@ -427,7 +439,7 @@ async function prepare(post) {
         null;
     }
   } else {
-    rss.html = html = marked(post.text);
+    rss.html = html = marked(post.text, markedOptions);
   }
 
   let status;
@@ -596,7 +608,7 @@ module.exports = {
   getBlogObject,
   prepare,
   render,
-  renderer,
+  embedCallback,
   writeFileWithGzip,
   unlinkFileWithGzip
 };

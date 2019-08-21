@@ -4,13 +4,44 @@ const path = require("path");
 
 const test = require("tape-promise/tape");
 const sqlite = require("sqlite");
-
-const generate = require("../../index.js");
+const mockery = require("mockery");
 
 const noopStream = new require("stream").Writable({
   write(chunk, encoding, callback) {
     setImmediate(callback);
   }
+});
+
+mockery.enable({
+  warnOnReplace: false,
+  warnOnUnregistered: false,
+  useCleanCache: true
+});
+
+mockery.registerMock("request-promise-native", {
+  head: function() {
+    return {
+      "content-type": "text/html; charset=utf-8"
+    };
+  },
+  get: function({ transform }) {
+    return fs.promises
+      .readFile(path.resolve(__dirname, "./yt-rickroll.html"), "utf8")
+      .then(body =>
+        transform(body, {
+          headers: {
+            "content-type": "text/html; charset=utf-8"
+          }
+        })
+      );
+  }
+});
+
+const generate = require("../../index.js");
+
+test.onFinish(() => {
+  mockery.disable();
+  mockery.deregisterAll();
 });
 
 test("empty database", async t => {
@@ -28,7 +59,7 @@ test("empty database", async t => {
   t.end();
 });
 
-test("database with posts only", async t => {
+test("database with posts and embeds", async t => {
   const db = await sqlite.open(":memory:");
   await db.migrate();
 
@@ -61,18 +92,13 @@ test("database with posts only", async t => {
   );
 
   const post4 = await fs.promises.readFile(path.join(tmpFolder, "4.html"));
-  t.ok(
-    post4.indexOf(`<img src="/media/example.png" alt="" loading="lazy" >`) > -1
-  );
+  t.ok(post4.indexOf(`<img src="/media/example.png" alt loading="lazy">`) > -1);
 
+  const YTEmbed = `<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.com/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
+          <img src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg">
+      </a>`;
   const post5 = await fs.promises.readFile(path.join(tmpFolder, "5.html"));
-  t.ok(
-    post5.indexOf(
-      `<a class="future-frame" href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" data-src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&modestbranding=1&playsinline=1">
-      <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg" loading="lazy">
-    </a>`
-    ) > -1
-  );
+  t.ok(post5.indexOf(YTEmbed) > -1);
 
   t.end();
 });

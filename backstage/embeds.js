@@ -458,11 +458,18 @@ async function getEmbedsList(req, _res) {
 module.exports = {
   queryEmbed,
   loadMetadata: async ogPageURL => {
-    if (ogPageURL && ogPageURL.startsWith("https://mobile.twitter.com/")) {
-      ogPageURL = ogPageURL.replace(
-        "https://mobile.twitter.com/",
-        "https://twitter.com/"
-      );
+    if (ogPageURL) {
+      if (ogPageURL.startsWith("https://mobile.twitter.com/")) {
+        ogPageURL = ogPageURL.replace(
+          "https://mobile.twitter.com/",
+          "https://twitter.com/"
+        );
+      } else if (ogPageURL.startsWith("https://www.youtube.com/embed/")) {
+        ogPageURL = ogPageURL.replace(
+          "https://www.youtube.com/embed/",
+          "https://www.youtube.com/watch?v="
+        );
+      }
     }
 
     const headers = await rp.head({

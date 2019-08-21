@@ -8,8 +8,9 @@ const {
 } = require("./backstage/embeds.js");
 
 module.exports = class EmbedsLoader {
-  constructor(db) {
+  constructor(db, insertOnLoad = true) {
     this.db = db;
+    this.insertOnLoad = insertOnLoad;
 
     this.cache = {};
   }
@@ -48,18 +49,19 @@ module.exports = class EmbedsLoader {
 
       const rendered_html = await renderCard(cardWithMetadata);
 
-      await this.db.run(
-        `INSERT INTO embeds
-          (original_url, raw_metadata, rendered_html, mimetype, created)
-          VALUES (?1, ?2, ?3, ?4, ?5)`,
-        {
-          1: url,
-          2: raw_metadata,
-          3: rendered_html,
-          4: cardWithMetadata.mimetype,
-          5: new Date().toISOString().replace(/\.\d{3}Z$/, "Z")
-        }
-      );
+      if (this.insertOnLoad) {
+        await this.db.run(
+          `INSERT INTO embeds
+            (original_url, raw_metadata, mimetype, created)
+            VALUES (?1, ?2, ?4, ?5)`,
+          {
+            1: url,
+            2: JSON.stringify(raw_metadata),
+            4: cardWithMetadata.mimetype,
+            5: new Date().toISOString().replace(/\.\d{3}Z$/, "Z")
+          }
+        );
+      }
 
       this.cache[url] = rendered_html;
     }

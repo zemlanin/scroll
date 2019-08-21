@@ -73,7 +73,7 @@ module.exports = async (req, res) => {
   const preparedPost = await prepare(post, {
     url: url.resolve(req.absolute, `/backstage/preview/?id=${post.id}`),
     baseUrl: url.resolve(req.absolute, "/"),
-    embedsLoader: new EmbedsLoader(db)
+    embedsLoader: new EmbedsLoader(db, false)
   });
 
   const blog = await getBlogObject(req.absolute);

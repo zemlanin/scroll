@@ -1,5 +1,34 @@
 const cheerio = require("cheerio");
 
+const load = cheerio.load;
+
+function decode(string) {
+  return string.replace(/&#x([0-9a-f]{1,6});/gi, (entity, code) => {
+    code = parseInt(code, 16);
+
+    // Don't unescape ASCII characters, assuming they're encoded for a good reason
+    if (code < 0x80) return entity;
+
+    return String.fromCodePoint(code);
+  });
+}
+
+function wrapHtml(fn) {
+  return function() {
+    const result = fn.apply(this, arguments);
+    return typeof result === "string" ? decode(result) : result;
+  };
+}
+
+cheerio.load = function() {
+  const instance = load.apply(this, arguments);
+
+  instance.html = wrapHtml(instance.html);
+  instance.prototype.html = wrapHtml(instance.prototype.html);
+
+  return instance;
+};
+
 const {
   loadMetadata,
   generateCardJSON,
@@ -78,6 +107,10 @@ module.exports = class EmbedsLoader {
       urlsToLoad.push(href);
     });
 
+    if (!urlsToLoad.length) {
+      return html;
+    }
+
     await this.query(urlsToLoad);
 
     const cache = this.cache;
@@ -88,6 +121,6 @@ module.exports = class EmbedsLoader {
       $this.replaceWith(cache[href] || `<a href="${href}">${text || href}</a>`);
     });
 
-    return $.html();
+    return $("body").html();
   }
 };

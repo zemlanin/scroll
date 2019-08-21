@@ -153,7 +153,6 @@ const handlers = [
   ["POST", "/backstage/preview", require("./backstage/preview.js")],
   ["GET", "/backstage/generate", require("./backstage/generate.js").get],
   ["POST", "/backstage/generate", require("./backstage/generate.js").post],
-  ["POST", "/backstage/jwt", require("./backstage/jwt.js")],
   ["GET", "/backstage/media", require("./backstage/media.js").get],
   ["POST", "/backstage/media", require("./backstage/media.js").post],
   ["POST", "/backstage/convert", require("./backstage/convert.js").post],

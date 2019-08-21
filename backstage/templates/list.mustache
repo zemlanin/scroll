@@ -10,6 +10,16 @@
           overflow-wrap: break-word;
         }
 
+        .card-content {
+          max-width: 40em;
+          margin: auto;
+        }
+
+        .card-content h1 {
+          font-size: 2em;
+          font-weight: bold;
+        }
+
         .card-content img,
         .card-content video,
         .card-content audio {
@@ -19,6 +29,30 @@
           height: auto;
           display: block;
           margin: auto;
+        }
+
+        .card-content figure.card {
+          max-width: 30em;
+          margin: 1em auto;
+        }
+
+        .card-content figure.card figcaption a {
+          text-decoration: none;
+          display: block;
+        }
+
+        .card-content figure.card figcaption i {
+          color: #888;
+          font-size: 0.8em;
+          display: block;
+          white-space: pre-wrap;
+        }
+
+        .card-content figure.card figcaption i.truncated {
+          white-space: nowrap;
+          overflow-x: hidden;
+          text-overflow: ellipsis;
+          max-width: 100%;
         }
 
         .card-content iframe,
@@ -114,7 +148,7 @@
         });
     </script>
 </head>
-<body class="container is-fluid" style="margin: 1em 1em 80px 1em">
+<body class="container is-fluid" style="margin: 1em auto 80px; max-width: 60em; padding-left: 0.75em; padding-right: 0.75em;">
     <nav class="field">
         <a href="/" class="button">blog</a>
         <a href="/backstage/edit" class="button">new post</a>
@@ -132,6 +166,7 @@
         {{# devMode.canExit }}
           <a href="/exit_dev" class="button">&#128120;</a>
         {{/ devMode.canExit }}
+        <a href="{{urls.logout}}" class="button">logout</a>
     </nav>
 
     {{#suggestion}}
@@ -177,13 +212,5 @@
         {{#urls.older}}<a class="button" href="{{{urls.older}}}">older &rarr;</a>{{/urls.older}}
         {{^urls.older}}<button class="button" disabled>older &rarr;</button>{{/urls.older}}
     </nav>
-
-    <form method="POST" action="{{urls.jwt}}">
-        <button>jwt</button>
-    </form>
-
-    <div>
-        <a href="{{urls.logout}}">logout</a>
-    </div>
 </body>
 </html>

@@ -10,27 +10,28 @@
         * {
             box-sizing: border-box;
         }
-
-        form, form button {
-            font-size: 1em;
-            font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
-            "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
-            "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
-            "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
-        }
     </style>
 </head>
-<body class="container is-fluid" style="margin: 1em 1em 80px 1em">
+<body class="container is-fluid" style="margin: 1em auto 80px; max-width: 60em; padding-left: 0.75em; padding-right: 0.75em;">
     <nav style="display: flex; justify-content: space-between;">
         <a href="/backstage" class="button">&larr; backstage</a>
-        <form method="POST" target="stdout">
-            <button class="button" name="generator" value="default-media">
-                generate default conversions
-            </button>
-        </form>
-        <form method="POST" target="stdout">
-            <button class="button">generate pages</button>
-        </form>
+        <div style="display: flex; justify-content: space-between;" class="field has-addons">
+          <form method="POST" target="stdout" class="control">
+              <button class="control button" name="generator" value="default-media">
+                  default conversions
+              </button>
+          </form>
+          <form method="POST" target="stdout" class="control">
+              <button class="control button" name="generator" value="pages">
+                  pages
+              </button>
+          </form>
+          <form method="POST" target="stdout" class="control">
+              <button class="control button" name="generator" value="jwt">
+                  jwt
+              </button>
+          </form>
+        </div>
     </nav>
     <iframe name="stdout"
         width="100%"

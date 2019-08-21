@@ -108,7 +108,6 @@ module.exports = async (req, res) => {
     },
     urls: {
       logout: url.resolve(req.absolute, "/backstage/?logout=1"),
-      jwt: url.resolve(req.absolute, "/backstage/jwt"),
       older: morePosts
         ? url.resolve(req.absolute, `/backstage/?offset=${offset + PAGE_SIZE}`)
         : null,

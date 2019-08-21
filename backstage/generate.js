@@ -2,7 +2,7 @@ const path = require("path");
 const mime = require("mime");
 const chunk = require("lodash.chunk");
 
-const { authed, sendToAuthProvider } = require("./auth.js");
+const { authed, generateToken, sendToAuthProvider } = require("./auth.js");
 
 const generate = require("../index.js");
 const { DIST } = require("../common.js");
@@ -93,10 +93,22 @@ module.exports = {
           <pre style="word-wrap: break-word; white-space: pre-wrap;">`
     );
 
-    const generator =
-      req.post.generator === "default-media"
-        ? async () => generateDefaultMedia(await req.db(), DIST, res, res)
-        : async () => generate(await req.db(), DIST, res, res);
+    let generator = async () =>
+      res.write(`Unknown generator: ${req.post.generator}\n`);
+
+    switch (req.post.generator) {
+      case "default-media":
+        generator = async () =>
+          generateDefaultMedia(await req.db(), DIST, res, res);
+        break;
+      case "pages":
+        generator = async () => generate(await req.db(), DIST, res, res);
+        break;
+      case "jwt":
+        generator = async () =>
+          res.write(`${generateToken(user, 60 * 60 * 24 * 120)}\n`);
+        break;
+    }
 
     return generator()
       .then(() => {

@@ -92,7 +92,7 @@ test("database with posts and embeds", async t => {
   );
 
   const post4 = await fs.promises.readFile(path.join(tmpFolder, "4.html"));
-  t.ok(post4.indexOf(`<img src="/media/example.png" alt loading="lazy">`) > -1);
+  t.ok(post4.indexOf(`<img src="/media/example.png" alt="" loading="lazy" >`) > -1);
 
   const YTEmbed = `<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.com/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
           <img src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg">

@@ -337,8 +337,7 @@ async function queryEmbed(db, embedURL) {
         original_url,
         strftime('%s000', created) created,
         mimetype,
-        raw_metadata,
-        rendered_html
+        raw_metadata
       FROM embeds
       WHERE original_url = ?1
     `,
@@ -374,7 +373,7 @@ async function getSingleEmbed(req, _res) {
     }
 
     const cardWithMetadata = rawMetadata
-      ? await module.exports.generateCardJSON(rawMetadata)
+      ? module.exports.generateCardJSON(rawMetadata)
       : null;
 
     let parsedMetadata = null;
@@ -396,8 +395,9 @@ async function getSingleEmbed(req, _res) {
     };
   } else if (existingEmbed) {
     mimetype = existingEmbed.mimetype;
-    cardHTML = existingEmbed.rendered_html;
     rawMetadata = existingEmbed.raw_metadata;
+    const cardWithMetadata = module.exports.generateCardJSON(rawMetadata);
+    cardHTML = await module.exports.renderCard(cardWithMetadata);
   }
 
   return commonRender(`backstage/templates/embed.mustache`, {
@@ -428,8 +428,7 @@ async function getEmbedsList(req, _res) {
         original_url,
         strftime('%s000', created) created,
         mimetype,
-        raw_metadata,
-        rendered_html
+        raw_metadata
       FROM embeds
       ORDER BY datetime(created) DESC, original_url DESC
       LIMIT ?2 OFFSET ?1
@@ -520,10 +519,6 @@ module.exports = {
     return rawMeta;
   },
   generateCardJSON: rawMeta => {
-    if (rawMeta.error) {
-      return null;
-    }
-
     const rawInitial = rawMeta
       .filter(metaInitial)
       .map(tupleInitial)
@@ -733,67 +728,46 @@ module.exports = {
       }
     }
 
-    let mimetype;
-    let rendered_html;
-    let raw_metadata;
+    if (!req.post.mimetype) {
+      res.statusCode = 400;
+      return `mimetype is required to save`;
+    }
 
-    if (req.post.rendered_html && req.post.raw_metadata && req.post.mimetype) {
-      mimetype = req.post.mimetype;
-      raw_metadata = req.post.raw_metadata;
-      rendered_html = req.post.rendered_html;
-    } else {
-      try {
-        raw_metadata = await module.exports.loadMetadata(original_url);
-      } catch (e) {
-        console.error(e);
-        res.statusCode = 500;
-        return `${e.name}${e.statusCode ? ": " + e.statusCode : ""}`;
-      }
+    if (!req.post.raw_metadata) {
+      res.statusCode = 400;
+      return `raw_metadata is required to save`;
+    }
 
-      if (!raw_metadata) {
-        res.statusCode = 404;
-        return;
-      }
-
-      const cardWithMetadata = await module.exports.generateCardJSON(
-        raw_metadata
-      );
-
-      if (!cardWithMetadata) {
-        res.statusCode = 404;
-        return;
-      }
-
-      mimetype = cardWithMetadata.mimetype;
-      rendered_html = await module.exports.renderCard(cardWithMetadata);
+    try {
+      JSON.parse(req.post.raw_metadata);
+    } catch (e) {
+      res.statusCode = 400;
+      return `raw_metadata has to be in JSON format`;
     }
 
     if (existingEmbed) {
       await db.run(
         `UPDATE embeds SET
           raw_metadata = ?2,
-          rendered_html = ?3,
           mimetype = ?4,
           created = ?5
           WHERE original_url = ?1`,
         {
           1: original_url,
-          2: raw_metadata,
-          3: rendered_html,
-          4: mimetype,
+          2: req.post.raw_metadata,
+          4: req.post.mimetype,
           5: new Date().toISOString().replace(/\.\d{3}Z$/, "Z")
         }
       );
     } else {
       await db.run(
         `INSERT INTO embeds
-          (original_url, raw_metadata, rendered_html, mimetype, created)
-          VALUES (?1, ?2, ?3, ?4, ?5)`,
+          (original_url, raw_metadata, mimetype, created)
+          VALUES (?1, ?2, ?4, ?5)`,
         {
           1: original_url,
-          2: raw_metadata,
-          3: rendered_html,
-          4: mimetype,
+          2: req.post.raw_metadata,
+          4: req.post.mimetype,
           5: new Date().toISOString().replace(/\.\d{3}Z$/, "Z")
         }
       );

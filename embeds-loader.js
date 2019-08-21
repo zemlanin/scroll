@@ -21,7 +21,9 @@ module.exports = class EmbedsLoader {
     for (const url of urlsToQuery) {
       const embedFromDB = await queryEmbed(this.db, url);
       if (embedFromDB) {
-        this.cache[url] = embedFromDB.rendered_html;
+        this.cache[url] = await renderCard(
+          generateCardJSON(embedFromDB.raw_metadata)
+        );
       }
     }
 
@@ -34,14 +36,13 @@ module.exports = class EmbedsLoader {
       } catch (e) {
         console.error(e);
         // `${e.name}${e.statusCode ? ": " + e.statusCode : ""}`;
-        continue;
       }
 
       if (!raw_metadata) {
         continue;
       }
 
-      const cardWithMetadata = await generateCardJSON(raw_metadata);
+      const cardWithMetadata = generateCardJSON(raw_metadata);
 
       if (!cardWithMetadata) {
         continue;

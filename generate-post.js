@@ -14,6 +14,7 @@ const {
   writeFileWithGzip,
   unlinkFileWithGzip
 } = require("./common.js");
+const EmbedsLoader = require("./embeds-loader.js");
 
 function getPostsQuery(where, limit) {
   let query = `
@@ -43,13 +44,21 @@ function getPostsQuery(where, limit) {
 }
 
 async function getPosts(db, params, where, limit) {
+  const embedsLoader = new EmbedsLoader(db);
+
   return Promise.all(
-    (await db.all(getPostsQuery(where, limit), params)).map(prepare)
+    (await db.all(getPostsQuery(where, limit), params)).map(row =>
+      prepare(row, embedsLoader)
+    )
   );
 }
 
 async function getPost(db, postId) {
-  return await prepare(await db.get(getPostsQuery(`id = ?1`), { 1: postId }));
+  const embedsLoader = new EmbedsLoader(db);
+  return await prepare(
+    await db.get(getPostsQuery(`id = ?1`), { 1: postId }),
+    embedsLoader
+  );
 }
 
 async function removePostPage(post) {

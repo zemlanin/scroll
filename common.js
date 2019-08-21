@@ -72,65 +72,6 @@ const ogHTML = renderer.html.bind(renderer);
 const ogParagraph = renderer.paragraph.bind(renderer);
 
 function embedCallback(href, title, text) {
-  const youtubeId = href.match(
-    /(youtu\.be\/|youtube\.com\/watch\?v=)([^&\\]+)/
-  );
-  if (youtubeId) {
-    href = `https://www.youtube.com/embed/${youtubeId[2]}`;
-  }
-
-  const vimeoId = href.match(/(vimeo\.com\/)(\d+)/);
-  if (vimeoId) {
-    href = `https://player.vimeo.com/video/${vimeoId[2]}`;
-  }
-
-  const funnyOrDieId = href.match(
-    /\/\/www\.funnyordie\.com\/videos\/([0-9a-f]+)/
-  );
-  if (funnyOrDieId) {
-    href = `https://www.funnyordie.com/embed/${funnyOrDieId[1]}`;
-  }
-
-  const appleMusicPath = href.match(
-    //         ($1          )              ($2)
-    /https:\/\/(itunes|music)\.apple\.com\/(.+)/
-  );
-  if (appleMusicPath) {
-    href = `https://embed.music.apple.com/${appleMusicPath[2]}`;
-  }
-
-  if (href.indexOf("//www.youtube.com/embed/") > -1) {
-    const youtubeId = href.match(/\/embed\/([^?]+)/)[1];
-
-    const imgSrc = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
-    const dataSrc =
-      href +
-      (href.indexOf("?") === -1
-        ? "?rel=0&modestbranding=1&playsinline=1"
-        : "&rel=0&modestbranding=1&playsinline=1");
-    const ytHref = `https://www.youtube.com/watch?v=${youtubeId}`;
-
-    return `<a class="future-frame" href="${ytHref}" data-src="${dataSrc}">
-      <img src="${imgSrc}" loading="lazy">
-    </a>`;
-  }
-
-  if (href.indexOf("//player.vimeo.com/video/") > -1) {
-    return `<iframe src="${href}" width="640" height="360" frameborder="0" allowfullscreen loading="lazy"></iframe>`;
-  }
-
-  if (href.indexOf("//www.funnyordie.com/embed/") > -1) {
-    return `<iframe src="${href}" width="640" height="360" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen loading="lazy"></iframe>`;
-  }
-
-  if (href.indexOf("//embed.music.apple.com/") > -1) {
-    const height =
-      href.indexOf("/album/") > -1 && href.match(/[?&]i=\d+/)
-        ? 150 // track
-        : 360; // album/playlist
-    return `<iframe width="640" height="${height}" allow="autoplay *; encrypted-media *;" frameborder="0" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-top-navigation-by-user-activation" src="${href}" loading="lazy"></iframe>`;
-  }
-
   if (process.env.BLOG_BASE_URL && href.startsWith("/media/")) {
     href = process.env.BLOG_BASE_URL + href;
   } else if (process.env.BLOG_BASE_URL && href.startsWith("media/")) {
@@ -140,9 +81,11 @@ function embedCallback(href, title, text) {
   }
 
   const mimeObj = getMimeObj(href);
+  const hrefIsDataURI = href.startsWith("data:text/html;base64");
+  const hrefIsOwnMedia = isOwnMedia(href);
 
   if (
-    (isOwnMedia(href) || (text && text.indexOf("poster=") > -1)) &&
+    (hrefIsOwnMedia || (text && text.indexOf("poster=") > -1)) &&
     mimeObj.video
   ) {
     let attrs =
@@ -156,7 +99,7 @@ function embedCallback(href, title, text) {
         );
 
     const isGIFVattr = attrs.match(/(^|\s+)gifv($|\s+)/g);
-    const isOwnGIFV = isOwnMedia(href) && href.indexOf("/gifv.mp4") > -1;
+    const isOwnGIFV = hrefIsOwnMedia && href.indexOf("/gifv.mp4") > -1;
 
     if (isGIFVattr || isOwnGIFV) {
       attrs = isGIFVattr ? attrs.replace(isGIFVattr[0], ``) : attrs;
@@ -167,7 +110,7 @@ function embedCallback(href, title, text) {
       ""}></video>`;
   }
 
-  if (isOwnMedia(href) && mimeObj.pdf) {
+  if (hrefIsOwnMedia && mimeObj.pdf) {
     const frameSrc = `https://drive.google.com/viewerng/viewer?pid=explorer&efh=false&a=v&chrome=false&embedded=true&url=${encodeURIComponent(
       href
     )}`;
@@ -199,7 +142,7 @@ function embedCallback(href, title, text) {
     }
   }
 
-  if (href.startsWith("data:text/html;base64")) {
+  if (hrefIsDataURI) {
     const frameSrc = href;
     let imgSrc = null;
 
@@ -259,8 +202,12 @@ function embedCallback(href, title, text) {
     </a>`;
   }
 
-  if (isOwnMedia(href) && mimeObj.text) {
+  if (hrefIsOwnMedia && mimeObj.text) {
     return `<iframe src="${href}" width="640" height="360" frameborder="0" loading="lazy"></iframe>`;
+  }
+
+  if (!hrefIsDataURI && !hrefIsOwnMedia && !mimeObj.image) {
+    return `<x-embed>${JSON.stringify({ href, title, text })}</x-embed>`;
   }
 
   return ogImage(href, title, text).replace(/(\/?>)$/, ' loading="lazy" $1');
@@ -343,7 +290,7 @@ function getMarkedOptions() {
   };
 }
 
-async function prepare(post) {
+async function prepare(post, embedsLoader) {
   post.text = escapeKaomoji(post.text);
 
   const markedOptions = getMarkedOptions();
@@ -382,10 +329,13 @@ async function prepare(post) {
 
   if (header1Token) {
     const headerPrefix = "#".repeat(header1Token.depth);
-    htmlTitle = marked(
+    htmlTitle = marked.parse(
       `${headerPrefix} [${header1Token.text}](${post.url})`,
       markedOptions
     );
+
+    htmlTitle = await embedsLoader.load(htmlTitle);
+
     rss.title = title = cheerio
       .load(htmlTitle)
       .text()
@@ -393,8 +343,9 @@ async function prepare(post) {
 
     const tokensWithoutTitle = tokens.slice(1);
     html = marked.parser(assignLinks([...tokensWithoutTitle]), markedOptions);
+    html = await embedsLoader.load(html);
 
-    const teaser = isTeaserToken(tokensWithoutTitle[0])
+    let teaser = isTeaserToken(tokensWithoutTitle[0])
       ? marked.parser(
           assignLinks([
             ...tokensWithoutTitle
@@ -405,6 +356,9 @@ async function prepare(post) {
           markedOptions
         )
       : "";
+
+    teaser = await embedsLoader.load(teaser);
+
     const parsedTeaser = teaser && cheerio.load(teaser);
     opengraph.image =
       parsedTeaser &&
@@ -439,7 +393,8 @@ async function prepare(post) {
         null;
     }
   } else {
-    rss.html = html = marked(post.text, markedOptions);
+    html = marked.parse(post.text, markedOptions);
+    rss.html = html = await embedsLoader.load(html);
   }
 
   let status;

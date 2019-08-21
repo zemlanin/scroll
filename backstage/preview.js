@@ -7,10 +7,11 @@ const {
   render,
   getBlogObject
 } = require("../common.js");
+const EmbedsLoader = require("../embeds-loader.js");
 
 async function prepare(post, options) {
   return {
-    ...(await commonPrepare(post)),
+    ...(await commonPrepare(post, options.embedsLoader)),
     url: options.url
   };
 }
@@ -71,7 +72,8 @@ module.exports = async (req, res) => {
 
   const preparedPost = await prepare(post, {
     url: url.resolve(req.absolute, `/backstage/preview/?id=${post.id}`),
-    baseUrl: url.resolve(req.absolute, "/")
+    baseUrl: url.resolve(req.absolute, "/"),
+    embedsLoader: new EmbedsLoader(db)
   });
 
   const blog = await getBlogObject(req.absolute);

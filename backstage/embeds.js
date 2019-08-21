@@ -1,5 +1,6 @@
 const url = require("url");
 
+const mime = require("mime");
 const cheerio = require("cheerio");
 const rp = require("request-promise-native");
 
@@ -28,7 +29,8 @@ const { authed, sendToAuthProvider } = require("./auth.js");
 */
 
 const hasContent = meta => meta.content;
-const metaInitial = meta => meta.name === "url" || meta.name === "title";
+const metaInitial = meta =>
+  meta.name === "url" || meta.name === "title" || meta.name === "mimetype";
 const tupleInitial = meta => [meta.name, meta.content];
 const metaNameOG = meta => meta.name && meta.name.startsWith("og:");
 const tupleNameOG = meta => [meta.name.slice(3), meta.content];
@@ -42,6 +44,7 @@ const cheerioAttrs = (i, el) => el.attribs;
 const isSimpleProp = prop =>
   prop === "url" ||
   prop === "title" ||
+  prop === "mimetype" ||
   prop === "site_name" ||
   prop === "description";
 
@@ -356,6 +359,7 @@ async function getSingleEmbed(req, _res) {
 
   const existingEmbed = await queryEmbed(db, query.url);
 
+  let mimetype;
   let cardHTML;
   let rawMetadata;
   let requested;
@@ -380,6 +384,7 @@ async function getSingleEmbed(req, _res) {
       ({ _parsedMetadata: parsedMetadata, ...card } = cardWithMetadata);
     }
 
+    mimetype = cardWithMetadata ? cardWithMetadata.mimetype : null;
     cardHTML = cardWithMetadata
       ? await module.exports.renderCard(cardWithMetadata)
       : null;
@@ -390,6 +395,7 @@ async function getSingleEmbed(req, _res) {
         parsedMetadata && JSON.stringify(parsedMetadata, null, 2)
     };
   } else if (existingEmbed) {
+    mimetype = existingEmbed.mimetype;
     cardHTML = existingEmbed.rendered_html;
     rawMetadata = existingEmbed.raw_metadata;
   }
@@ -397,6 +403,7 @@ async function getSingleEmbed(req, _res) {
   return commonRender(`backstage/templates/embed.mustache`, {
     url: query.url,
     existingEmbed,
+    mimetype,
     cardHTML,
     requested,
     rawMetadata,
@@ -450,12 +457,34 @@ async function getEmbedsList(req, _res) {
 }
 
 module.exports = {
+  queryEmbed,
   loadMetadata: async ogPageURL => {
     if (ogPageURL && ogPageURL.startsWith("https://mobile.twitter.com/")) {
       ogPageURL = ogPageURL.replace(
         "https://mobile.twitter.com/",
         "https://twitter.com/"
       );
+    }
+
+    const headers = await rp.head({
+      url: ogPageURL,
+      followRedirect: true,
+      headers: {
+        Accept: "text/html,*/*;q=0.8",
+        "User-Agent": "request (+https://zemlan.in)"
+      }
+    });
+
+    const mimetype =
+      headers &&
+      headers["content-type"] &&
+      mime.getType(mime.getExtension(headers["content-type"]));
+
+    if (mimetype !== "text/html") {
+      return [
+        { name: "url", content: ogPageURL },
+        { name: "mimetype", content: mimetype }
+      ];
     }
 
     const $ = await rp.get({
@@ -474,16 +503,19 @@ module.exports = {
       .trim()
       .replace(`\n`, ` `);
 
+    const initialMeta = [
+      { name: "url", content: ogPageURL },
+      htmlTitle && { name: "title", content: htmlTitle },
+      { name: "mimetype", content: mimetype }
+    ].filter(Boolean);
+
     const rawMeta = $(
       `head meta[property^="og:"], head meta[name^="og:"], head meta[name^="twitter:"]`
     )
       .map(cheerioAttrs)
       .get()
       .filter(hasContent)
-      .reduce(rawMetaReducer, [
-        { name: "url", content: ogPageURL },
-        { name: "title", content: htmlTitle }
-      ]);
+      .reduce(rawMetaReducer, initialMeta);
 
     return rawMeta;
   },
@@ -530,6 +562,7 @@ module.exports = {
         og: rawOpengraph,
         twitter: rawTwitter
       },
+      mimetype: rawInitial.mimetype || "text/html",
       title: rawOpengraph.title || rawTwitter.title || rawInitial.title,
       url: rawOpengraph.url || rawTwitter.url || rawInitial.url,
       description:
@@ -621,14 +654,9 @@ module.exports = {
       }
     }
 
-    if (!(card.title && card.url && card.img)) {
-      return {
-        error: "not enough info",
-        _parsedMetadata: card._parsedMetadata
-      };
+    if (card.title) {
+      card.title = card.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
-
-    card.title = card.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
     if (card.site_name) {
       card.site_name = card.site_name
@@ -647,6 +675,22 @@ module.exports = {
   renderCard: async card => {
     if (!card || card.error) {
       return "";
+    }
+
+    if (card.mimetype.startsWith("image/")) {
+      return `<img src="${card.url}" title="${card.title}" loading="lazy" />`;
+    }
+
+    if (card.mimetype.startsWith("video/")) {
+      return `<video playsinline controls preload="metadata" src="${card.url}"></video>`;
+    }
+
+    if (card.mimetype.startsWith("audio/")) {
+      return `<audio controls preload="metadata" src="${card.url}"></audio>`;
+    }
+
+    if (!card.img && !card.audio && !card.video && !card.iframe) {
+      return `<a href="${card.url}">${card.title || card.url}</a>`;
     }
 
     return await commonRender(`templates/card.mustache`, {
@@ -689,17 +733,19 @@ module.exports = {
       }
     }
 
-    const mimetype = "text/html";
+    let mimetype;
     let rendered_html;
     let raw_metadata;
 
-    if (req.post.rendered_html && req.post.raw_metadata) {
+    if (req.post.rendered_html && req.post.raw_metadata && req.post.mimetype) {
+      mimetype = req.post.mimetype;
       raw_metadata = req.post.raw_metadata;
       rendered_html = req.post.rendered_html;
     } else {
       try {
         raw_metadata = await module.exports.loadMetadata(original_url);
       } catch (e) {
+        console.error(e);
         res.statusCode = 500;
         return `${e.name}${e.statusCode ? ": " + e.statusCode : ""}`;
       }
@@ -718,6 +764,7 @@ module.exports = {
         return;
       }
 
+      mimetype = cardWithMetadata.mimetype;
       rendered_html = await module.exports.renderCard(cardWithMetadata);
     }
 

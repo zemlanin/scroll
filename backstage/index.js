@@ -4,6 +4,7 @@ const cookie = require("cookie");
 const { authed, logout, sendToAuthProvider } = require("./auth.js");
 const { render } = require("./templates/index.js");
 const { prepare: commonPrepare } = require("../common.js");
+const EmbedsLoader = require("../embeds-loader.js");
 
 const PAGE_SIZE = 10;
 
@@ -15,7 +16,7 @@ async function prepare(post, options) {
   };
 
   return {
-    ...(await commonPrepare(post)),
+    ...(await commonPrepare(post, options.embedsLoader)),
     urls: urls
   };
 }
@@ -86,13 +87,15 @@ module.exports = async (req, res) => {
 
   const morePosts = posts.length > PAGE_SIZE;
   const suggestion = await getSuggestion(db, req);
+  const embedsLoader = new EmbedsLoader(db);
 
   return render("list.mustache", {
     user: user,
     posts: await Promise.all(
       posts.slice(0, PAGE_SIZE).map(p =>
         prepare(p, {
-          baseUrl: req.absolute
+          baseUrl: req.absolute,
+          embedsLoader: embedsLoader
         })
       )
     ),

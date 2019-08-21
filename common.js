@@ -65,6 +65,14 @@ function getMimeObj(href, fullMimeType) {
   };
 }
 
+const textRenderer = new marked.TextRenderer();
+textRenderer.paragraph = function(text) {
+  return text + "\n\n";
+};
+textRenderer.image = function() {
+  return "";
+};
+
 const renderer = new marked.Renderer();
 const ogImage = renderer.image.bind(renderer);
 const ogLink = renderer.link.bind(renderer);
@@ -387,10 +395,25 @@ async function prepare(post, embedsLoader) {
           `\n<a href="${post.url}" class="more">${longread.more} &rarr;</a>`;
       }
 
+      const description =
+        teaser &&
+        marked
+          .parser(
+            assignLinks([
+              ...tokensWithoutTitle
+                .slice(0, 3)
+                .filter(isTeaserToken)
+                .slice(0, 2)
+            ]),
+            {
+              ...markedOptions,
+              renderer: textRenderer
+            }
+          )
+          .trim();
+
       opengraph.description =
-        (teaser && parsedTeaser.text().trim()) ||
-        (longread && longread.more) ||
-        null;
+        description || (longread && longread.more) || null;
     }
   } else {
     html = marked.parse(post.text, markedOptions);

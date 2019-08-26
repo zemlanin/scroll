@@ -458,17 +458,49 @@ async function getEmbedsList(req, _res) {
 module.exports = {
   queryEmbed,
   loadMetadata: async ogPageURL => {
-    if (ogPageURL) {
-      if (ogPageURL.startsWith("https://mobile.twitter.com/")) {
-        ogPageURL = ogPageURL.replace(
-          "https://mobile.twitter.com/",
-          "https://twitter.com/"
-        );
-      } else if (ogPageURL.startsWith("https://www.youtube.com/embed/")) {
-        ogPageURL = ogPageURL.replace(
-          "https://www.youtube.com/embed/",
-          "https://www.youtube.com/watch?v="
-        );
+    if (!ogPageURL) {
+      return null;
+    }
+
+    if (ogPageURL.startsWith("https://mobile.twitter.com/")) {
+      ogPageURL = ogPageURL.replace(
+        "https://mobile.twitter.com/",
+        "https://twitter.com/"
+      );
+    } else if (ogPageURL.startsWith("https://www.youtube.com/embed/")) {
+      ogPageURL = ogPageURL.replace(
+        "https://www.youtube.com/embed/",
+        "https://www.youtube.com/watch?v="
+      );
+    }
+
+    const pathname = new URL(ogPageURL).pathname;
+    const expectedMimetype = pathname && mime.getType(pathname);
+
+    let mimetypeFromURL = null;
+
+    if (
+      expectedMimetype &&
+      (expectedMimetype.startsWith("image/") ||
+        expectedMimetype.startsWith("video/") ||
+        expectedMimetype.startsWith("audio/"))
+    ) {
+      const headers = await rp.head({
+        url: ogPageURL,
+        followRedirect: true,
+        headers: {
+          Accept: mimetypeFromURL,
+          "User-Agent": "request (+https://zemlan.in)"
+        }
+      });
+
+      if (
+        headers &&
+        headers["content-type"] &&
+        mime.getType(mime.getExtension(headers["content-type"])) ===
+          expectedMimetype
+      ) {
+        mimetypeFromURL = expectedMimetype;
       }
     }
 
@@ -512,7 +544,7 @@ module.exports = {
     const initialMeta = [
       { name: "url", content: ogPageURL },
       htmlTitle && { name: "title", content: htmlTitle },
-      { name: "mimetype", content: mimetype }
+      { name: "mimetype", content: mimetypeFromURL || mimetype }
     ].filter(Boolean);
 
     const rawMeta = $(
@@ -677,6 +709,13 @@ module.exports = {
   renderCard: async card => {
     if (!card || card.error) {
       return "";
+    }
+
+    if (card.mimetype === "image/gif" && card.video && card.video.src) {
+      return `<video playsinline controls autoplay muted loop
+        src="${card.video.src}"
+        title="${card.title}"
+      ></video>`;
     }
 
     if (card.mimetype.startsWith("image/")) {

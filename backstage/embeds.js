@@ -438,8 +438,27 @@ async function getEmbedsList(req, _res) {
   const query = url.parse(req.url, true).query;
 
   const offset = +query.offset || 0;
-  const embeds = (await db.all(
-    `
+
+  let embeds;
+
+  if (query.q) {
+    embeds = (await db.all(
+      `
+      SELECT
+        original_url,
+        strftime('%s000', created) created,
+        mimetype,
+        raw_metadata
+      FROM embeds
+      WHERE instr(original_url, ?3)
+      ORDER BY datetime(created) DESC, original_url DESC
+      LIMIT ?2 OFFSET ?1
+    `,
+      { 1: offset, 2: PAGE_SIZE + 1, 3: query.q && decodeURIComponent(query.q) }
+    )).map(prepareEmbed);
+  } else {
+    embeds = (await db.all(
+      `
       SELECT
         original_url,
         strftime('%s000', created) created,
@@ -449,13 +468,15 @@ async function getEmbedsList(req, _res) {
       ORDER BY datetime(created) DESC, original_url DESC
       LIMIT ?2 OFFSET ?1
     `,
-    { 1: offset, 2: PAGE_SIZE + 1 }
-  )).map(prepareEmbed);
+      { 1: offset, 2: PAGE_SIZE + 1 }
+    )).map(prepareEmbed);
+  }
 
   const moreEmbeds = embeds.length > PAGE_SIZE;
 
   return render(`embeds.mustache`, {
     embeds,
+    q: query.q || "",
     urls: {
       older: moreEmbeds
         ? url.resolve(

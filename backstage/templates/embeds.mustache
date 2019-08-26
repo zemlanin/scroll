@@ -53,13 +53,35 @@
         method="GET"
       >
         <div class="control is-expanded">
-          <input name="url" type="url" class="input" autofocus >
+          <input name="q" type="search" class="input"
+            {{#q}}
+              value="{{q}}"
+              autofocus
+            {{/q}}
+          >
+        </div>
+        <div class="control">
+          <button class="button" type="search">{{#fas}}search{{/fas}}</button>
+        </div>
+      </form>
+    </nav>
+
+      <form
+        class="field has-addons level-right"
+        action="/backstage/embeds"
+        method="GET"
+      >
+        <div class="control is-expanded">
+          <input name="url" type="url" class="input" placeholder="url"
+            {{^q}}
+              autofocus
+            {{/q}}
+          >
         </div>
         <div class="control">
           <button class="button">&rarr;</button>
         </div>
       </form>
-    </nav>
 
     {{#embeds}}
       <div class="card">

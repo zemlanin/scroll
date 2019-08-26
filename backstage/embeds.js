@@ -729,10 +729,7 @@ module.exports = {
     }
 
     if (card.mimetype === "image/gif" && card.video && card.video.src) {
-      return `<video playsinline controls autoplay muted loop
-        src="${card.video.src}"
-        title="${card.title}"
-      ></video>`;
+      return `<video playsinline autoplay muted loop src="${card.video.src}" title="${card.title}"></video>`;
     }
 
     if (card.mimetype.startsWith("image/")) {

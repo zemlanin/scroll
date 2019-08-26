@@ -67,23 +67,47 @@ module.exports = async (req, res) => {
 
   const db = await req.db();
   const offset = +query.offset || 0;
-  const posts = await db.all(
-    `
-      SELECT
-        id,
-        slug,
-        draft,
-        private,
-        (NOT draft AND NOT private) public,
-        text,
-        strftime('%s000', created) created,
-        strftime('%s000', modified) modified
-      FROM posts
-      ORDER BY datetime(created) DESC, id DESC
-      LIMIT ?2 OFFSET ?1
-    `,
-    { 1: offset, 2: PAGE_SIZE + 1 }
-  );
+
+  let posts;
+
+  if (query.q) {
+    posts = await db.all(
+      `
+        SELECT
+          id,
+          slug,
+          draft,
+          private,
+          (NOT draft AND NOT private) public,
+          text,
+          strftime('%s000', created) created,
+          strftime('%s000', modified) modified
+        FROM posts
+        WHERE instr(id, ?3) OR instr(text, ?3)
+        ORDER BY datetime(created) DESC, id DESC
+        LIMIT ?2 OFFSET ?1
+      `,
+      { 1: offset, 2: PAGE_SIZE + 1, 3: decodeURIComponent(query.q) }
+    );
+  } else {
+    posts = await db.all(
+      `
+        SELECT
+          id,
+          slug,
+          draft,
+          private,
+          (NOT draft AND NOT private) public,
+          text,
+          strftime('%s000', created) created,
+          strftime('%s000', modified) modified
+        FROM posts
+        ORDER BY datetime(created) DESC, id DESC
+        LIMIT ?2 OFFSET ?1
+      `,
+      { 1: offset, 2: PAGE_SIZE + 1 }
+    );
+  }
 
   const morePosts = posts.length > PAGE_SIZE;
   const suggestion = await getSuggestion(db, req);
@@ -91,6 +115,7 @@ module.exports = async (req, res) => {
 
   return render("list.mustache", {
     user: user,
+    q: query.q || "",
     posts: await Promise.all(
       posts.slice(0, PAGE_SIZE).map(p =>
         prepare(p, {

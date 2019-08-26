@@ -167,6 +167,24 @@
           <a href="/exit_dev" class="button">&#128120;</a>
         {{/ devMode.canExit }}
         <a href="{{urls.logout}}" class="button">logout</a>
+        <form
+          class="field has-addons"
+          style="display: inline-flex;"
+          action="/backstage"
+          method="GET"
+        >
+          <div class="control">
+            <input name="q" type="search" class="input"
+              {{#q}}
+                value="{{q}}"
+                autofocus
+              {{/q}}
+            >
+          </div>
+          <div class="control">
+            <button class="button" type="search">{{#fas}}search{{/fas}}</button>
+          </div>
+        </form>
     </nav>
 
     {{#suggestion}}

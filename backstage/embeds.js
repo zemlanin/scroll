@@ -456,18 +456,21 @@ async function getEmbedsList(req, _res) {
 
   return render(`embeds.mustache`, {
     embeds,
-    older: moreEmbeds
-      ? url.resolve(
-          req.absolute,
-          `/backstage/embeds?offset=${offset + PAGE_SIZE}`
-        )
-      : null,
-    newer: +offset
-      ? url.resolve(
-          req.absolute,
-          `/backstage/embeds?offset=${Math.max(offset - PAGE_SIZE, 0)}`
-        )
-      : null
+    urls: {
+      older: moreEmbeds
+        ? url.resolve(
+            req.absolute,
+            `/backstage/embeds?offset=${offset + PAGE_SIZE}`
+          )
+        : null,
+
+      newer: +offset
+        ? url.resolve(
+            req.absolute,
+            `/backstage/embeds?offset=${Math.max(offset - PAGE_SIZE, 0)}`
+          )
+        : null
+    }
   });
 }
 

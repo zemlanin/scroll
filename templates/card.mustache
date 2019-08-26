@@ -1,8 +1,11 @@
 {{# card }}
   <figure class="card">
     {{# video }}
-      <video playsinline controls preload="none"
+      <video playsinline controls
         src="{{video.src}}"
+        {{#video.loop}}
+          loop
+        {{/video.loop}}
         {{# video.width}}
           width="{{video.width}}"
         {{/ video.width}}
@@ -10,6 +13,7 @@
           height="{{video.height}}"
         {{/ video.height}}
         {{# img }}
+          preload="none"
           poster="{{ img.src }}"
         {{/ img }}
       ></video>

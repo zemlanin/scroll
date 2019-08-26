@@ -89,6 +89,11 @@ const isPlayerProp = prop =>
 const numericIfNeeded = ([prop, value]) =>
   !isNumericProp(prop) || value.match(/^[0-9]+$/);
 
+const getURLMimetype = href => {
+  const pathname = new URL(href).pathname;
+  return (pathname && mime.getType(pathname)) || null;
+};
+
 const rawMetaReducer = (acc, meta) => {
   if (meta.property) {
     return [...acc, { property: meta.property, content: meta.content }];
@@ -228,7 +233,7 @@ const getVideoNative = graph => {
   }
 
   if (video) {
-    video.poster = getImageNative(graph);
+    video.poster = getImageNative(graph, { static: true });
   }
 
   return video;
@@ -260,8 +265,19 @@ const getAudioNative = graph => {
   return audio;
 };
 
-const getImageNative = graph =>
-  graph && graph.image && graph.image.find(v => v.url);
+const getImageNative = (graph, options) => {
+  if (!(graph && graph.image && graph.image.length)) {
+    return null;
+  }
+
+  if (options && options.static) {
+    return graph.image.find(
+      v => v.url && "image/gif" !== (v.type ? v.type : getURLMimetype(v.url))
+    );
+  }
+
+  return graph.image.find(v => v.url);
+};
 
 //                                    ($1          )              ($2)
 const APPLE_MUSIC_REGEX = /^https:\/\/(itunes|music)\.apple\.com\/(.+)/;
@@ -474,8 +490,7 @@ module.exports = {
       );
     }
 
-    const pathname = new URL(ogPageURL).pathname;
-    const expectedMimetype = pathname && mime.getType(pathname);
+    const expectedMimetype = getURLMimetype(ogPageURL);
 
     let mimetypeFromURL = null;
 
@@ -623,7 +638,8 @@ module.exports = {
       card.video = {
         src: videoNative.url,
         width: videoNative.width || 640,
-        height: videoNative.height || 360
+        height: videoNative.height || 360,
+        loop: getURLMimetype(card.url) === "image/gif"
       };
 
       if (videoNative.poster) {
@@ -670,13 +686,14 @@ module.exports = {
     }
 
     if (!card.img) {
+      const imageOptions = videoNative ? { static: true } : null;
       const image = card.url.match(APPLE_MUSIC_REGEX)
-        ? getImageNative(rawTwitter) ||
-          getImageNative(rawOpengraph) ||
-          getImageNative(rawInitial)
-        : getImageNative(rawOpengraph) ||
-          getImageNative(rawTwitter) ||
-          getImageNative(rawInitial);
+        ? getImageNative(rawTwitter, imageOptions) ||
+          getImageNative(rawOpengraph, imageOptions) ||
+          getImageNative(rawInitial, imageOptions)
+        : getImageNative(rawOpengraph, imageOptions) ||
+          getImageNative(rawTwitter, imageOptions) ||
+          getImageNative(rawInitial, imageOptions);
 
       if (image) {
         card.img = {

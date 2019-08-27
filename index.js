@@ -35,6 +35,7 @@ const {
 const {
   DIST,
   POSTS_DB,
+  loadIcu,
   writeFileWithGzip,
   getBlogObject
 } = require("./common.js");
@@ -289,23 +290,26 @@ async function generate(db, destination, stdout, stderr) {
 }
 
 if (require.main === module) {
-  sqlite.open(POSTS_DB).then(db =>
-    db
-      .migrate({ migrationsPath: path.resolve(__dirname, "migrations") })
-      .then(() => generate(db, DIST, process.stdout, process.stderr))
-      .then(() => {
-        console.log("done");
-        return db.close().then(() => {
-          process.exit(0);
-        });
-      })
-      .catch(err => {
-        console.error(err);
-        return db.close().then(() => {
-          process.exit(1);
-        });
-      })
-  );
+  sqlite
+    .open(POSTS_DB)
+    .then(db => loadIcu(db))
+    .then(db =>
+      db
+        .migrate({ migrationsPath: path.resolve(__dirname, "migrations") })
+        .then(() => generate(db, DIST, process.stdout, process.stderr))
+        .then(() => {
+          console.log("done");
+          return db.close().then(() => {
+            process.exit(0);
+          });
+        })
+        .catch(err => {
+          console.error(err);
+          return db.close().then(() => {
+            process.exit(1);
+          });
+        })
+    );
 } else {
   module.exports = generate;
 }

@@ -83,11 +83,15 @@ module.exports = async (req, res) => {
           strftime('%s000', created) created,
           strftime('%s000', modified) modified
         FROM posts
-        WHERE instr(id, ?3) OR instr(text, ?3)
+        WHERE instr(id, ?3) OR instr(lower(text), ?3)
         ORDER BY datetime(created) DESC, id DESC
         LIMIT ?2 OFFSET ?1
       `,
-      { 1: offset, 2: PAGE_SIZE + 1, 3: decodeURIComponent(query.q) }
+      {
+        1: offset,
+        2: PAGE_SIZE + 1,
+        3: decodeURIComponent(query.q).toLowerCase()
+      }
     );
   } else {
     posts = await db.all(

@@ -14,7 +14,7 @@ const UrlPattern = require("url-pattern");
 
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
-const { DIST, POSTS_DB, PORT } = require("./common.js");
+const { DIST, POSTS_DB, PORT, loadIcu } = require("./common.js");
 
 const fileServer = new static.Server(DIST, {
   cache: false,
@@ -220,7 +220,7 @@ const server = http.createServer((req, res) => {
 
     let db;
     req.db = async () => {
-      return db || (db = await sqlite.open(POSTS_DB));
+      return db || (db = await sqlite.open(POSTS_DB).then(loadIcu));
     };
 
     const result = handler(req, res);
@@ -268,10 +268,9 @@ const server = http.createServer((req, res) => {
 if (require.main === module) {
   sqlite
     .open(POSTS_DB)
+    .then(db => loadIcu(db))
     .then(db =>
-      db
-        .migrate({ migrationsPath: path.resolve(__dirname, "migrations") })
-        .then(() => db.close())
+      db.migrate({ migrationsPath: path.resolve(__dirname, "migrations") })
     )
     .then(() => {
       server.on("clientError", (err, socket) => {

@@ -574,6 +574,19 @@ async function unlinkFileWithGzip(path) {
   }
 }
 
+function loadIcu(db) {
+  return new Promise((resolve, reject) => {
+    if (!process.env.SQLITE_ICU) {
+      return resolve(db);
+    }
+
+    return db.driver.loadExtension(
+      path.resolve(__dirname, process.env.SQLITE_ICU),
+      error => (error ? reject(error) : resolve(db))
+    );
+  });
+}
+
 module.exports = {
   BLOG_TITLE,
   BLOG_BASE_URL,
@@ -586,6 +599,7 @@ module.exports = {
   getBlogObject,
   prepare,
   render,
+  loadIcu,
   embedCallback,
   writeFileWithGzip,
   unlinkFileWithGzip

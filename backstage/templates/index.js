@@ -8,15 +8,7 @@ const fsPromises = {
 
 const mustache = require("mustache");
 
-const fas = require("../../font-awesome-mustache.js")(
-  require("@fortawesome/fontawesome-free-solid")
-);
-const far = require("../../font-awesome-mustache.js")(
-  require("@fortawesome/fontawesome-free-regular")
-);
-const fab = require("../../font-awesome-mustache.js")(
-  require("@fortawesome/fontawesome-free-brands")
-);
+const { fas, far, fab } = require("../../font-awesome-mustache.js");
 
 async function loadTemplate(tmpl) {
   if (process.env.NODE_ENV === "development") {

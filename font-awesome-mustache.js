@@ -1,10 +1,12 @@
 const fontAwesomeSVGReducer = (acc, icon) => {
-  // icon.icon: undefined | [width, height, ???, unicode, path]
   if (icon.icon) {
+    // eslint-disable-next-line no-unused-vars
+    const [width, height, _ligatures, _unicode, svgPathData] = icon.icon;
+
     acc[icon.iconName] = {
-      viewBox: `0 0 ${icon.icon[0]} ${icon.icon[1]}`,
-      path: icon.icon[4],
-      toString: () => icon.icon[4]
+      viewBox: `0 0 ${width} ${height}`,
+      path: svgPathData,
+      toString: () => svgPathData
     };
   }
 
@@ -35,4 +37,12 @@ const renderFontAwesome = fontAwesomeModule => {
   );
 };
 
-module.exports = renderFontAwesome;
+const fab = renderFontAwesome(
+  require("@fortawesome/free-brands-svg-icons").fab
+);
+const far = renderFontAwesome(
+  require("@fortawesome/free-regular-svg-icons").far
+);
+const fas = renderFontAwesome(require("@fortawesome/free-solid-svg-icons").fas);
+
+module.exports = { fas, far, fab };

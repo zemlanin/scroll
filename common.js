@@ -22,15 +22,7 @@ const zlibPromises = {
   gzip: promisify(zlib.gzip)
 };
 
-const fas = require("./font-awesome-mustache.js")(
-  require("@fortawesome/fontawesome-free-solid")
-);
-const far = require("./font-awesome-mustache.js")(
-  require("@fortawesome/fontawesome-free-regular")
-);
-const fab = require("./font-awesome-mustache.js")(
-  require("@fortawesome/fontawesome-free-brands")
-);
+const { fas, far, fab } = require("./font-awesome-mustache.js");
 
 const PAGE_SIZE = 10;
 const MINIMUM_INDEX_PAGE_SIZE = 5;

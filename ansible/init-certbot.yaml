@@ -28,7 +28,7 @@
 
     - name: set cert auto-renewal
       cron: name="certbot renew"
-              job="certbot renew -q --standalone --pre-hook 'systemctl stop nginx' --post-hook 'systemctl start nginx'"
-              minute="35"
-              hour="4"
-              weekday="2,5"
+        job="certbot renew -q --standalone --pre-hook 'systemctl stop nginx' --post-hook 'systemctl start nginx'"
+        minute="35"
+        hour="4"
+        weekday="2,5"

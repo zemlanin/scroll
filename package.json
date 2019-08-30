@@ -8,7 +8,7 @@
     "test": "tape \"./tests/**/*.spec.js\"",
     "lint": "npm run eslint && npm run prettier -- -l",
     "fmt": "npm run prettier -- --write",
-    "prettier": "prettier \"./*.js\" \"./{src,backstage,static,migrations,templates,tests}/**/*.{js,json,css}\"",
+    "prettier": "prettier \"./*.js\" \"./{.github,ansible,src,backstage,static,migrations,templates,tests}/**/*.{js,json,css,yml,yaml}\"",
     "eslint": "eslint \"./*.js\" \"./{src,backstage,static,migrations,templates,tests}/**/*.js\""
   },
   "keywords": [],

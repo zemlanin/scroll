@@ -161,42 +161,49 @@
     </script>
 </head>
 <body class="container is-fluid" style="margin: 1em auto 80px; max-width: 60em; padding-left: 0.75em; padding-right: 0.75em;">
-    <nav class="field">
-        <a href="/" class="button">blog</a>
-        <a href="/backstage/edit" class="button">new post</a>
-        <a href="/backstage/media" class="button">media</a>
-        <a href="/backstage/embeds" class="button">embeds</a>
-        <a href="/backstage/generate" class="button">generate</a>
+    <nav class="field" style="display: flex; flex-flow: row wrap; justify-content: space-between;">
+      <div class="field has-addons">
+        <div class="control"><a href="/" class="button" title="back to blog">{{#fas}}scroll{{/fas}}</a></div>
+        <div class="control"><a href="{{urls.logout}}" class="button" title="logout">{{#fas}}sign-out-alt{{/fas}}</a></div>
+      </div>
+      <div class="field has-addons">
+        <div class="control"><a href="/backstage/edit" class="button" title="new post">{{#fas}}pencil-alt{{/fas}}</a></div>
+        <div class="control"><a href="/backstage/media" class="button" title="media">{{#fas}}photo-video{{/fas}}</a></div>
+        <div class="control"><a href="/backstage/embeds" class="button">embeds</a></div>
+        <div class="control"><a href="/backstage/generate" class="button">generate</a></div>
+      </div>
+      <div class="field has-addons">
         {{#gauges.id}}
-          <a href="https://secure.gaug.es/dashboard#/gauges/{{gauges.id}}/overview"
+          <div class="control"><a href="https://secure.gaug.es/dashboard#/gauges/{{gauges.id}}/overview"
             class="button"
-          ><img src="/backstage/gauges.svg" style="height:1em; width: 3em"></a>
+            title="gauges"
+          ><img src="/backstage/gauges.svg" style="height:1em; width: 3em"></a></div>
         {{/gauges.id}}
         {{# devMode.canEnter }}
-          <a href="/enter_dev" class="button">&#128679;</a>
+          <div class="control"><a href="/enter_dev" class="button" title="enter dev mode">&#128679;</a></div>
         {{/ devMode.canEnter }}
         {{# devMode.canExit }}
-          <a href="/exit_dev" class="button">&#128120;</a>
+          <div class="control"><a href="/exit_dev" class="button" title="exit dev mode">&#128120;</a></div>
         {{/ devMode.canExit }}
-        <a href="{{urls.logout}}" class="button">logout</a>
-        <form
-          class="field has-addons"
-          style="display: inline-flex;"
-          action="/backstage"
-          method="GET"
-        >
-          <div class="control">
-            <input name="q" type="search" class="input"
-              {{#q}}
-                value="{{q}}"
-                autofocus
-              {{/q}}
-            >
-          </div>
-          <div class="control">
-            <button class="button" type="search">{{#fas}}search{{/fas}}</button>
-          </div>
-        </form>
+      </div>
+      <form
+        class="field has-addons"
+        style="display: inline-flex;"
+        action="/backstage"
+        method="GET"
+      >
+        <div class="control">
+          <input name="q" type="search" class="input"
+            {{#q}}
+              value="{{q}}"
+              autofocus
+            {{/q}}
+          >
+        </div>
+        <div class="control">
+          <button class="button" type="search">{{#fas}}search{{/fas}}</button>
+        </div>
+      </form>
     </nav>
 
     {{#suggestion}}

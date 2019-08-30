@@ -8,7 +8,7 @@ const fsPromises = {
 
 const mustache = require("mustache");
 
-const { fas, far, fab } = require("../../font-awesome-mustache.js");
+const { fas, far, fab } = require("../font-awesome-mustache.js");
 
 async function loadTemplate(tmpl) {
   if (process.env.NODE_ENV === "development") {
@@ -22,9 +22,11 @@ async function loadTemplate(tmpl) {
 }
 loadTemplate.cache = {};
 
-async function render(tmpl, data) {
+const BACKSTAGE_TEMPLATES = path.resolve(__dirname, "templates");
+
+async function backstageRender(tmpl, data) {
   return mustache.render(
-    await loadTemplate(path.resolve(__dirname, tmpl)),
+    await loadTemplate(path.join(BACKSTAGE_TEMPLATES, tmpl)),
     {
       fas,
       far,
@@ -34,15 +36,17 @@ async function render(tmpl, data) {
     {
       "bulma.css": await loadTemplate(require.resolve("bulma/css/bulma.css")),
       "media-bar.js": await loadTemplate(
-        path.resolve(__dirname, "media-bar.js")
+        path.join(BACKSTAGE_TEMPLATES, "media-bar.js")
       ),
       "media-bar.mustache": await loadTemplate(
-        path.resolve(__dirname, "media-bar.mustache")
+        path.join(BACKSTAGE_TEMPLATES, "media-bar.mustache")
       )
     }
   );
 }
 
 module.exports = {
-  render
+  backstageRender,
+  render: backstageRender,
+  backstage: backstageRender
 };

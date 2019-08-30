@@ -5,8 +5,8 @@ const mime = require("mime");
 const cheerio = require("cheerio");
 const rp = require("request-promise-native");
 
-const { render: blogRender } = require("../templates/index.js");
-const { render } = require("./templates/index.js");
+const { blogRender } = require("../render.js");
+const { render } = require("./render.js");
 
 const { authed, sendToAuthProvider } = require("./auth.js");
 

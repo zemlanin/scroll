@@ -13,7 +13,7 @@ const {
   writeFileWithGzip,
   unlinkFileWithGzip
 } = require("./common.js");
-const { render } = require("./templates/index.js");
+const { render } = require("./render.js");
 const EmbedsLoader = require("./embeds-loader.js");
 
 function getPostsQuery(where, limit) {
@@ -62,12 +62,12 @@ async function getPost(db, postId) {
 }
 
 async function removePostPage(post) {
-  const postIdPagePath = path.resolve(DIST, `${post.id}.html`);
+  const postIdPagePath = path.join(DIST, `${post.id}.html`);
 
   await unlinkFileWithGzip(postIdPagePath);
 
   if (post.slug) {
-    const postSlugPagePath = path.resolve(DIST, `${post.slug}.html`);
+    const postSlugPagePath = path.join(DIST, `${post.slug}.html`);
 
     await unlinkFileWithGzip(postSlugPagePath);
   }
@@ -85,7 +85,7 @@ async function generatePostPage(post, blog) {
 }
 
 async function removePotentialPagination(newestPage) {
-  const pagePath = path.resolve(DIST, `page-${newestPage.index + 1}.html`);
+  const pagePath = path.join(DIST, `page-${newestPage.index + 1}.html`);
 
   await unlinkFileWithGzip(pagePath);
 }
@@ -273,15 +273,12 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
 
     if (post.slug && post.id !== post.slug) {
       await writeFileWithGzip(
-        path.resolve(DIST, `${post.slug}.html`),
+        path.join(DIST, `${post.slug}.html`),
         renderedPage
       );
     }
 
-    await writeFileWithGzip(
-      path.resolve(DIST, `${post.id}.html`),
-      renderedPage
-    );
+    await writeFileWithGzip(path.join(DIST, `${post.id}.html`), renderedPage);
   }
 
   if (oldStatus === "public" || newStatus === "public") {
@@ -299,13 +296,13 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
     await removePotentialPagination(newestPage);
 
     await writeFileWithGzip(
-      path.resolve(DIST, "index.html"),
+      path.join(DIST, "index.html"),
       await generateIndexPage(db, blog, newestPage)
     );
 
     if (pages.length <= 2) {
       await writeFileWithGzip(
-        path.resolve(DIST, "rss.xml"),
+        path.join(DIST, "rss.xml"),
         await generateRSSPage(db, blog)
       );
     }
@@ -315,7 +312,7 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
       const pageNumber = postPaginationPage.index;
 
       await writeFileWithGzip(
-        path.resolve(DIST, `page-${pageNumber}.html`),
+        path.join(DIST, `page-${pageNumber}.html`),
         await generatePaginationPage(
           db,
           blog,
@@ -329,7 +326,7 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
         const pageNumber = page.index;
 
         await writeFileWithGzip(
-          path.resolve(DIST, `page-${pageNumber}.html`),
+          path.join(DIST, `page-${pageNumber}.html`),
           await generatePaginationPage(
             db,
             blog,
@@ -341,7 +338,7 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
       }
 
       await writeFileWithGzip(
-        path.resolve(DIST, "archive.html"),
+        path.join(DIST, "archive.html"),
         await generateArchivePage(db, blog)
       );
     }

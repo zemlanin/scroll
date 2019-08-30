@@ -12,7 +12,7 @@ const sqlite = require("sqlite");
 const static = require("node-static");
 const UrlPattern = require("url-pattern");
 
-require("dotenv").config({ path: path.resolve(__dirname, ".env") });
+require("dotenv").config();
 
 const { DIST, POSTS_DB, PORT, loadIcu } = require("./common.js");
 
@@ -265,7 +265,7 @@ const server = http.createServer((req, res) => {
   }
 });
 
-if (require.main === module) {
+function start() {
   sqlite
     .open(POSTS_DB)
     .then(db => loadIcu(db))
@@ -285,8 +285,13 @@ if (require.main === module) {
       console.error(err);
       process.exit(1);
     });
+}
+
+if (require.main === module) {
+  start();
 } else {
   module.exports = {
-    server
+    server,
+    start
   };
 }

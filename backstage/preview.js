@@ -2,7 +2,7 @@ const url = require("url");
 
 const { authed } = require("./auth.js");
 const { prepare: commonPrepare, getBlogObject } = require("../common.js");
-const { render } = require("../templates/index.js");
+const { blogRender } = require("../render.js");
 const EmbedsLoader = require("../embeds-loader.js");
 
 async function prepare(post, options) {
@@ -78,7 +78,7 @@ module.exports = async (req, res) => {
   if (rss) {
     res.setHeader("content-type", "text/xml");
 
-    return render("rss.mustache", {
+    return blogRender("rss.mustache", {
       blog: {
         ...blog,
         title: `${blog.title} / ${preparedPost.title}`,
@@ -103,7 +103,7 @@ module.exports = async (req, res) => {
   const showTeaser = (req.post && req.post.teaser) || query.teaser;
 
   if (showTeaser) {
-    return render("list.mustache", {
+    return blogRender("list.mustache", {
       blog: blog,
       posts: [preparedPost],
       url: preparedPost.url,
@@ -112,7 +112,7 @@ module.exports = async (req, res) => {
     });
   }
 
-  return render("post.mustache", {
+  return blogRender("post.mustache", {
     blog: blog,
     title: preparedPost.title,
     post: preparedPost,

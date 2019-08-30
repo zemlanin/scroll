@@ -4,12 +4,12 @@ const chunk = require("lodash.chunk");
 
 const { authed, generateToken, sendToAuthProvider } = require("./auth.js");
 
-const generate = require("../index.js");
+const { generate } = require("../generate.js");
 const { DIST } = require("../common.js");
 const { convertMedia, getConversionTags } = require("./convert.js");
-const { render } = require("./templates/index.js");
+const { render } = require("./render.js");
 
-async function generateDefaultMedia(db, destination, stdout, stderr) {
+async function generateDefaultMedia(db, stdout, stderr) {
   const media = await db.all("SELECT id from media");
 
   stdout.write(`total media: ${media.length}\n`);
@@ -38,7 +38,7 @@ async function generateDefaultMedia(db, destination, stdout, stderr) {
                     m.data,
                     m.id,
                     mimeType,
-                    path.resolve(destination, "media")
+                    path.join(DIST, "media")
                   );
                 }
                 stdout.write(`+`);
@@ -98,11 +98,10 @@ module.exports = {
 
     switch (req.post.generator) {
       case "default-media":
-        generator = async () =>
-          generateDefaultMedia(await req.db(), DIST, res, res);
+        generator = async () => generateDefaultMedia(await req.db(), res, res);
         break;
       case "pages":
-        generator = async () => generate(await req.db(), DIST, res, res);
+        generator = async () => generate(await req.db(), res, res);
         break;
       case "jwt":
         generator = async () =>

@@ -17,7 +17,7 @@ const fsPromises = {
 const { authed, sendToAuthProvider } = require("./auth.js");
 const { convertMedia, getConversionTags } = require("./convert.js");
 const { DIST, getMimeObj, embedCallback } = require("../common.js");
-const { render } = require("./templates/index.js");
+const { render } = require("./render.js");
 
 const PAGE_SIZE = 20;
 
@@ -76,7 +76,7 @@ async function openFileMedia(src, filePath, db) {
 
   await fsPromises.copyFile(
     filePath,
-    path.resolve(DIST, "media", `${result.id}.${result.ext}`)
+    path.join(DIST, "media", `${result.id}.${result.ext}`)
   );
 
   const ctags = await getConversionTags(mimeType);
@@ -89,7 +89,7 @@ async function openFileMedia(src, filePath, db) {
         resp,
         result.id,
         mimeType,
-        path.resolve(DIST, "media")
+        path.join(DIST, "media")
       );
     }
   }
@@ -227,12 +227,12 @@ const mediaId = {
       await db.run(`DELETE FROM converted_media WHERE media_id = ?1`, {
         1: m.id
       });
-      await rmrf(path.resolve(DIST, "media", m.id));
+      await rmrf(path.join(DIST, "media", m.id));
 
       await db.run(`DELETE FROM media WHERE id = ?1`, {
         1: m.id
       });
-      await fsPromises.unlink(path.resolve(DIST, "media", `${m.id}.${m.ext}`));
+      await fsPromises.unlink(path.join(DIST, "media", `${m.id}.${m.ext}`));
 
       res.writeHead(303, { Location: `/backstage/media/` });
       res.end();

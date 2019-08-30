@@ -2,7 +2,7 @@ const url = require("url");
 const cookie = require("cookie");
 
 const { authed, logout, sendToAuthProvider } = require("./auth.js");
-const { render } = require("./templates/index.js");
+const { render } = require("./render.js");
 const { prepare: commonPrepare } = require("../common.js");
 const EmbedsLoader = require("../embeds-loader.js");
 

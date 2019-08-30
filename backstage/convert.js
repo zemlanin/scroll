@@ -354,7 +354,7 @@ module.exports = {
           1: existing.id
         });
 
-        const fpath = path.resolve(
+        const fpath = path.join(
           DIST,
           "media",
           media.id,
@@ -380,7 +380,7 @@ module.exports = {
         media.data,
         media.id,
         mimeType,
-        path.resolve(DIST, "media")
+        path.join(DIST, "media")
       );
 
       if (!result) {

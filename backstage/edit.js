@@ -11,7 +11,7 @@ const getPostId = () =>
 const { authed, sendToAuthProvider } = require("./auth.js");
 const { getJson: getMediaJson } = require("./media.js");
 const { generateAfterEdit } = require("../generate-post.js");
-const { render } = require("./templates/index.js");
+const { render } = require("./render.js");
 
 const SLUG_REGEX = /^[a-zA-Z0-9_-]+$/;
 

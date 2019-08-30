@@ -37,7 +37,7 @@ mockery.registerMock("request-promise-native", {
   }
 });
 
-const generate = require("../../index.js");
+const { generate } = require("../../generate.js");
 
 test.onFinish(() => {
   mockery.disable();

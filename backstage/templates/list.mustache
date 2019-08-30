@@ -197,6 +197,19 @@
         </article>
     {{/suggestion}}
 
+    {{#drafts.length}}
+      <nav class="panel">
+        <p class="panel-heading" style="font-size: 0.8em;">
+          drafts
+        </p>
+        {{#drafts}}
+          <a class="panel-block" href="{{urls.edit}}"
+            style="font-family: monospace; white-space: pre;"
+          >{{text}}</a>
+        {{/drafts}}
+      </nav>
+    {{/drafts.length}}
+
     {{#posts}}
         <div class="card">
             <div class="card-content">

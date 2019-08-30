@@ -69,6 +69,50 @@ module.exports = async (req, res) => {
   const offset = +query.offset || 0;
 
   let posts;
+  let drafts;
+
+  if (offset) {
+    drafts = [];
+  } else if (query.q) {
+    drafts = await db.all(
+      `
+        SELECT
+          id,
+          slug,
+          draft,
+          private,
+          (NOT draft AND NOT private) public,
+          text,
+          strftime('%s000', created) created,
+          strftime('%s000', modified) modified
+        FROM posts
+        WHERE (instr(id, ?3) OR instr(lower(text), ?3))
+          AND draft
+        ORDER BY datetime(created) DESC, id DESC
+      `,
+      {
+        3: decodeURIComponent(query.q).toLowerCase()
+      }
+    );
+  } else {
+    drafts = await db.all(
+      `
+        SELECT
+          id,
+          slug,
+          draft,
+          private,
+          (NOT draft AND NOT private) public,
+          text,
+          strftime('%s000', created) created,
+          strftime('%s000', modified) modified
+        FROM posts
+        WHERE draft
+        ORDER BY datetime(created) DESC, id DESC
+      `,
+      {}
+    );
+  }
 
   if (query.q) {
     posts = await db.all(
@@ -83,7 +127,8 @@ module.exports = async (req, res) => {
           strftime('%s000', created) created,
           strftime('%s000', modified) modified
         FROM posts
-        WHERE instr(id, ?3) OR instr(lower(text), ?3)
+        WHERE (instr(id, ?3) OR instr(lower(text), ?3))
+          AND NOT draft
         ORDER BY datetime(created) DESC, id DESC
         LIMIT ?2 OFFSET ?1
       `,
@@ -106,6 +151,7 @@ module.exports = async (req, res) => {
           strftime('%s000', created) created,
           strftime('%s000', modified) modified
         FROM posts
+        WHERE NOT draft
         ORDER BY datetime(created) DESC, id DESC
         LIMIT ?2 OFFSET ?1
       `,
@@ -120,6 +166,20 @@ module.exports = async (req, res) => {
   return render("list.mustache", {
     user: user,
     q: query.q || "",
+    drafts: await Promise.all(
+      drafts
+        .map(p =>
+          p.text.startsWith("#")
+            ? { ...p, text: p.text.trim().split("\n")[0] }
+            : p
+        )
+        .map(p =>
+          prepare(p, {
+            baseUrl: req.absolute,
+            embedsLoader: embedsLoader
+          })
+        )
+    ),
     posts: await Promise.all(
       posts.slice(0, PAGE_SIZE).map(p =>
         prepare(p, {

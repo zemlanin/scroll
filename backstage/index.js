@@ -201,12 +201,19 @@ module.exports = async (req, res) => {
     urls: {
       logout: url.resolve(req.absolute, "/backstage/?logout=1"),
       older: morePosts
-        ? url.resolve(req.absolute, `/backstage/?offset=${offset + PAGE_SIZE}`)
+        ? url.resolve(
+            req.absolute,
+            `/backstage/?offset=${offset + PAGE_SIZE}${
+              query.q ? "&q=" + query.q : ""
+            }`
+          )
         : null,
       newer: +offset
         ? url.resolve(
             req.absolute,
-            `/backstage/?offset=${Math.max(offset - PAGE_SIZE, 0)}`
+            `/backstage/?offset=${Math.max(offset - PAGE_SIZE, 0)}${
+              query.q ? "&q=" + query.q : ""
+            }`
           )
         : null
     }

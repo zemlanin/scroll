@@ -26,7 +26,7 @@ mockery.registerMock("request-promise-native", {
   },
   get: function({ transform }) {
     return fs.promises
-      .readFile(path.resolve(__dirname, "./yt-rickroll.html"), "utf8")
+      .readFile(path.resolve(__dirname, "yt-rickroll.html"), "utf8")
       .then(body =>
         transform(body, {
           headers: {

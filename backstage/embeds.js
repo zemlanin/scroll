@@ -1,10 +1,11 @@
 const url = require("url");
+const path = require("path");
 
 const mime = require("mime");
 const cheerio = require("cheerio");
 const rp = require("request-promise-native");
 
-const { render: commonRender } = require("../common.js");
+const { render: blogRender } = require("../templates/index.js");
 const { render } = require("./templates/index.js");
 
 const { authed, sendToAuthProvider } = require("./auth.js");
@@ -416,7 +417,7 @@ async function getSingleEmbed(req, _res) {
     cardHTML = await module.exports.renderCard(cardWithMetadata);
   }
 
-  return commonRender(`backstage/templates/embed.mustache`, {
+  return blogRender(path.resolve(__dirname, "templates", "embed.mustache"), {
     url: query.url,
     existingEmbed,
     mimetype,
@@ -772,7 +773,7 @@ module.exports = {
       return `<a href="${card.url}">${card.title || card.url}</a>`;
     }
 
-    return await commonRender(`templates/card.mustache`, {
+    return await blogRender("card.mustache", {
       card
     });
   },

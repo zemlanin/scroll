@@ -7,12 +7,8 @@ const { promisify } = require("util");
 const mime = require("mime");
 const marked = require("marked");
 const cheerio = require("cheerio");
-const mustache = require("mustache");
-const UglifyJS = require("uglify-js");
-const CleanCSS = require("clean-css");
 
 const fsPromises = {
-  readFile: promisify(fs.readFile),
   writeFile: promisify(fs.writeFile),
   unlink: promisify(fs.unlink),
   exists: promisify(fs.exists)
@@ -21,8 +17,6 @@ const fsPromises = {
 const zlibPromises = {
   gzip: promisify(zlib.gzip)
 };
-
-const { fas, far, fab } = require("./font-awesome-mustache.js");
 
 const PAGE_SIZE = 10;
 const MINIMUM_INDEX_PAGE_SIZE = 5;
@@ -445,27 +439,6 @@ async function prepare(post, embedsLoader) {
   };
 }
 
-async function loadTemplate(tmpl, processCallback) {
-  if (loadTemplate.cache[tmpl]) {
-    return loadTemplate.cache[tmpl];
-  }
-
-  if (processCallback) {
-    return (loadTemplate.cache[tmpl] = processCallback(
-      (await fsPromises.readFile(tmpl)).toString()
-    ));
-  }
-
-  return (loadTemplate.cache[tmpl] = (await fsPromises.readFile(
-    tmpl
-  )).toString());
-}
-loadTemplate.cache = {};
-
-const cleanCSS = new CleanCSS({
-  level: 2
-});
-
 async function getBlogObject(baseUrl) {
   if (!baseUrl) {
     baseUrl = BLOG_BASE_URL;
@@ -489,61 +462,6 @@ async function getBlogObject(baseUrl) {
       }
     }
   };
-}
-
-async function render(tmpl, data) {
-  return mustache.render(
-    await loadTemplate(path.resolve(__dirname, tmpl)),
-    {
-      fas,
-      far,
-      fab,
-      ...data
-    },
-    {
-      header: await loadTemplate(
-        path.resolve(__dirname, "templates", "header.mustache")
-      ),
-      footer: await loadTemplate(
-        path.resolve(__dirname, "templates", "footer.mustache")
-      ),
-      "header.js": await loadTemplate(
-        path.resolve(__dirname, "templates", "header.js"),
-        code => {
-          let c = UglifyJS.minify(code).code;
-          if (!c) {
-            throw new Error("Empty header.js");
-          }
-          return c;
-        }
-      ),
-      "header.css": await loadTemplate(
-        path.resolve(__dirname, "templates", "header.css"),
-        code => cleanCSS.minify(code).styles
-      ),
-      "highlight.css": await loadTemplate(
-        path.resolve(__dirname, "templates", "highlight.css"),
-        code => cleanCSS.minify(code).styles
-      ),
-      "settings.js": await loadTemplate(
-        path.resolve(__dirname, "templates", "settings.js"),
-        code => {
-          let c = UglifyJS.minify(code).code;
-          if (!c) {
-            throw new Error("Empty settings.js");
-          }
-          return c;
-        }
-      ),
-      "settings.css": await loadTemplate(
-        path.resolve(__dirname, "templates", "settings.css"),
-        code => cleanCSS.minify(code).styles
-      ),
-      gauges: await loadTemplate(
-        path.resolve(__dirname, "templates", "gauges.mustache")
-      )
-    }
-  );
 }
 
 async function writeFileWithGzip(path, content, flags) {
@@ -590,7 +508,6 @@ module.exports = {
   getMimeObj,
   getBlogObject,
   prepare,
-  render,
   loadIcu,
   embedCallback,
   writeFileWithGzip,

@@ -8,12 +8,12 @@ const {
   DIST,
   PAGE_SIZE,
   MINIMUM_INDEX_PAGE_SIZE,
-  render,
   prepare,
   getBlogObject,
   writeFileWithGzip,
   unlinkFileWithGzip
 } = require("./common.js");
+const { render } = require("./templates/index.js");
 const EmbedsLoader = require("./embeds-loader.js");
 
 function getPostsQuery(where, limit) {
@@ -74,7 +74,7 @@ async function removePostPage(post) {
 }
 
 async function generatePostPage(post, blog) {
-  return await render("./templates/post.mustache", {
+  return await render("post.mustache", {
     blog: blog,
     title: post.title,
     post,
@@ -101,7 +101,7 @@ async function generatePaginationPage(db, blog, pageNumber, postIds, isNewest) {
   const pageUrl = `page-${pageNumber}.html`;
   const title = `page-${pageNumber}`;
 
-  return await render("./templates/list.mustache", {
+  return await render("list.mustache", {
     blog,
     title: title,
     url: pageUrl,
@@ -138,7 +138,7 @@ async function generateIndexPage(db, blog, newestPage) {
     indexPostsLimit
   );
 
-  return await render("./templates/list.mustache", {
+  return await render("list.mustache", {
     blog,
     posts: posts,
     newer: null,
@@ -153,7 +153,7 @@ async function generateIndexPage(db, blog, newestPage) {
 }
 
 async function generateSettingsPage(db, blog) {
-  return await render("./templates/settings.mustache", {
+  return await render("settings.mustache", {
     blog,
     title: "Settings"
   });
@@ -190,7 +190,7 @@ async function generateArchivePage(db, blog) {
     return a > b ? -1 : 1;
   });
 
-  return await render("./templates/archive.mustache", {
+  return await render("archive.mustache", {
     blog,
     title: "archive",
     url: "./archive.html",
@@ -204,7 +204,7 @@ async function generateArchivePage(db, blog) {
 async function generateRSSPage(db, blog) {
   const posts = await getPosts(db, {}, "draft = 0 AND private = 0", PAGE_SIZE);
 
-  return await render("./templates/rss.mustache", {
+  return await render("rss.mustache", {
     blog,
     pubDate: new Date().toUTCString(),
     posts: posts

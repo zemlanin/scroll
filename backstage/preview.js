@@ -1,12 +1,8 @@
 const url = require("url");
-const path = require("path");
 
 const { authed } = require("./auth.js");
-const {
-  prepare: commonPrepare,
-  render,
-  getBlogObject
-} = require("../common.js");
+const { prepare: commonPrepare, getBlogObject } = require("../common.js");
+const { render } = require("../templates/index.js");
 const EmbedsLoader = require("../embeds-loader.js");
 
 async function prepare(post, options) {
@@ -82,7 +78,7 @@ module.exports = async (req, res) => {
   if (rss) {
     res.setHeader("content-type", "text/xml");
 
-    return render(path.resolve(__dirname, "..", "templates", "rss.mustache"), {
+    return render("rss.mustache", {
       blog: {
         ...blog,
         title: `${blog.title} / ${preparedPost.title}`,
@@ -107,7 +103,7 @@ module.exports = async (req, res) => {
   const showTeaser = (req.post && req.post.teaser) || query.teaser;
 
   if (showTeaser) {
-    return render(path.resolve(__dirname, "..", "templates", "list.mustache"), {
+    return render("list.mustache", {
       blog: blog,
       posts: [preparedPost],
       url: preparedPost.url,
@@ -116,7 +112,7 @@ module.exports = async (req, res) => {
     });
   }
 
-  return render(path.resolve(__dirname, "..", "templates", "post.mustache"), {
+  return render("post.mustache", {
     blog: blog,
     title: preparedPost.title,
     post: preparedPost,

@@ -93,7 +93,7 @@ async function copyStaticContent(destination, stdout) {
   }
 }
 
-async function generate(db, stdout, stderr) {
+async function generate(db, destination, stdout, stderr) {
   const tmpFolder = await fsPromises.mkdtemp(path.join(os.tmpdir(), "scroll-"));
   await fsPromises.mkdir(path.join(tmpFolder, "/media"));
 
@@ -271,7 +271,7 @@ async function generate(db, stdout, stderr) {
       .set("delete")
       .flags("Icru")
       .source(tmpFolder + path.sep)
-      .destination(DIST);
+      .destination(destination);
 
     rsync.execute(
       function(error) {
@@ -296,7 +296,7 @@ function start() {
     .then(db =>
       db
         .migrate({ migrationsPath: path.resolve(__dirname, "migrations") })
-        .then(() => generate(db, process.stdout, process.stderr))
+        .then(() => generate(db, DIST, process.stdout, process.stderr))
         .then(() => {
           console.log("done");
           return db.close().then(() => {

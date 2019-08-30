@@ -9,7 +9,7 @@ const { DIST } = require("../common.js");
 const { convertMedia, getConversionTags } = require("./convert.js");
 const { render } = require("./render.js");
 
-async function generateDefaultMedia(db, stdout, stderr) {
+async function generateDefaultMedia(db, destination, stdout, stderr) {
   const media = await db.all("SELECT id from media");
 
   stdout.write(`total media: ${media.length}\n`);
@@ -38,7 +38,7 @@ async function generateDefaultMedia(db, stdout, stderr) {
                     m.data,
                     m.id,
                     mimeType,
-                    path.join(DIST, "media")
+                    path.join(destination, "media")
                   );
                 }
                 stdout.write(`+`);
@@ -98,10 +98,11 @@ module.exports = {
 
     switch (req.post.generator) {
       case "default-media":
-        generator = async () => generateDefaultMedia(await req.db(), res, res);
+        generator = async () =>
+          generateDefaultMedia(await req.db(), DIST, res, res);
         break;
       case "pages":
-        generator = async () => generate(await req.db(), res, res);
+        generator = async () => generate(await req.db(), DIST, res, res);
         break;
       case "jwt":
         generator = async () =>

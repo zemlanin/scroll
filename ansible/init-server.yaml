@@ -3,7 +3,7 @@
   remote_user: root
   gather_facts: yes
   vars:
-    NODEJS_VERSION: "10"
+    NODEJS_VERSION: "12"
 
   tasks:
     - name: Install the gpg key for nodejs LTS
@@ -22,11 +22,6 @@
         name: nodejs
         state: present
 
-    - name: Install pm2
-      npm:
-        name: pm2
-        global: yes
-
     - name: synchronize source
       synchronize:
         src: .
@@ -41,22 +36,12 @@
           - "--exclude=.git/"
           - "--update"
 
+    - name: configure systemd
+      copy: src=./scroll.service dest=/lib/systemd/system/scroll.service
+
     - name: Install deps
       npm:
         path: /root/scroll
 
-    - name: delete old pm2 process
-      command: pm2 delete scroll-backstage
-      ignore_errors: yes
-
-    - name: Start pm2
-      command: env PORT=8080 BLOG_BASE_URL=https://zemlan.in DIST=/var/projects/scroll/dist pm2 start /root/scroll/server.js --name scroll-backstage
-
-    - name: save pm2
-      command: pm2 save
-
-    - name: remove pm2 startup
-      command: pm2 unstartup --service-name=scroll-backstage
-
-    - name: update pm2 startup
-      command: pm2 startup --service-name=scroll-backstage
+    - name: restart app
+      service: name=scroll.service state=restarted

@@ -94,6 +94,7 @@
     {{/embeds}}
 
     <nav class="field" style="margin-top: 0.5em">
+      {{#urls.newest}}<a class="button" href="{{{urls.newest}}}">&#x21E4; newest</a>{{/urls.newest}}
       {{#urls.newer}}<a class="button" href="{{{urls.newer}}}">&larr; newer</a>{{/urls.newer}}
       {{^urls.newer}}<button class="button" disabled>&larr; newer</button>{{/urls.newer}}
       {{#urls.older}}<a class="button" href="{{{urls.older}}}">older &rarr;</a>{{/urls.older}}

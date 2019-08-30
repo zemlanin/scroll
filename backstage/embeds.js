@@ -482,14 +482,24 @@ async function getEmbedsList(req, _res) {
       older: moreEmbeds
         ? url.resolve(
             req.absolute,
-            `/backstage/embeds?offset=${offset + PAGE_SIZE}`
+            `/backstage/embeds?offset=${offset + PAGE_SIZE}${
+              query.q ? "&q=" + query.q : ""
+            }`
           )
         : null,
-
+      newest:
+        offset > PAGE_SIZE
+          ? url.resolve(
+              req.absolute,
+              `/backstage/embeds/${query.q ? "?q=" + query.q : ""}`
+            )
+          : null,
       newer: +offset
         ? url.resolve(
             req.absolute,
-            `/backstage/embeds?offset=${Math.max(offset - PAGE_SIZE, 0)}`
+            `/backstage/embeds?offset=${Math.max(offset - PAGE_SIZE, 0)}${
+              query.q ? "&q=" + query.q : ""
+            }`
           )
         : null
     }

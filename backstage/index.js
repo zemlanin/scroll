@@ -208,6 +208,13 @@ module.exports = async (req, res) => {
             }`
           )
         : null,
+      newest:
+        offset > PAGE_SIZE
+          ? url.resolve(
+              req.absolute,
+              `/backstage/${query.q ? "?q=" + query.q : ""}`
+            )
+          : null,
       newer: +offset
         ? url.resolve(
             req.absolute,

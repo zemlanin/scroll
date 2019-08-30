@@ -6,6 +6,18 @@
     <style>
         {{> bulma.css}}
 
+        .drafts-panel .panel-heading {
+          font-size: 0.8em;
+        }
+
+        .drafts-panel .panel-block {
+          font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
+            "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
+            "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
+            "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+          white-space: pre;
+        }
+
         .card {
           overflow-wrap: break-word;
         }
@@ -198,14 +210,12 @@
     {{/suggestion}}
 
     {{#drafts.length}}
-      <nav class="panel">
-        <p class="panel-heading" style="font-size: 0.8em;">
+      <nav class="panel drafts-panel">
+        <p class="panel-heading">
           drafts
         </p>
         {{#drafts}}
-          <a class="panel-block" href="{{urls.edit}}"
-            style="font-family: monospace; white-space: pre;"
-          >{{text}}</a>
+          <a class="panel-block" href="{{urls.edit}}">{{text}}</a>
         {{/drafts}}
       </nav>
     {{/drafts.length}}

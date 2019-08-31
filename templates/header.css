@@ -293,10 +293,6 @@ nav span {
   display: none;
 }
 
-#settings-icon svg {
-  vertical-align: middle;
-}
-
 #night-mode {
   display: flex;
   flex-flow: row;
@@ -313,6 +309,7 @@ nav span {
   margin-right: 0;
 }
 
+#night-mode label svg,
 #night-mode label input {
   vertical-align: middle;
 }

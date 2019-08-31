@@ -46,7 +46,7 @@ const cssProcess = code => cleanCSS.minify(code).styles;
 
 async function blogRender(tmpl, data) {
   return mustache.render(
-    await loadTemplate(path.join(BLOG_TEMPLATES, tmpl)),
+    await loadTemplate(path.resolve(BLOG_TEMPLATES, tmpl)),
     {
       fas,
       far,

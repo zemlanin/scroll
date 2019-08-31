@@ -26,7 +26,7 @@ const BACKSTAGE_TEMPLATES = path.resolve(__dirname, "templates");
 
 async function backstageRender(tmpl, data) {
   return mustache.render(
-    await loadTemplate(path.join(BACKSTAGE_TEMPLATES, tmpl)),
+    await loadTemplate(path.resolve(BACKSTAGE_TEMPLATES, tmpl)),
     {
       fas,
       far,

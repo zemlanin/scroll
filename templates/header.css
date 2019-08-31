@@ -281,6 +281,8 @@ nav span {
   display: flex;
   flex-flow: row;
   justify-content: space-between;
+  margin-top: 0.2em;
+  font-size: 1.3em;
 }
 
 #night-mode label {
@@ -292,7 +294,7 @@ nav span {
 }
 
 #night-mode label input {
-  /*display: none;*/
+  vertical-align: middle;
 }
 
 #night-mode input[type="radio"]:checked ~ * {

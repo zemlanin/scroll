@@ -506,11 +506,24 @@ async function getEmbedsList(req, _res) {
   });
 }
 
+const ABSOLUTE_URL_REGEX = /^[a-z][a-z\d+-.]*:/;
+
 module.exports = {
   queryEmbed,
   loadMetadata: async ogPageURL => {
     if (!ogPageURL) {
       return null;
+    }
+
+    if (!ABSOLUTE_URL_REGEX.test(ogPageURL)) {
+      const expectedMimetype = getURLMimetype(ogPageURL);
+
+      return expectedMimetype
+        ? [
+            { name: "url", content: ogPageURL },
+            { name: "mimetype", content: expectedMimetype }
+          ]
+        : null;
     }
 
     if (ogPageURL.startsWith("https://mobile.twitter.com/")) {

@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "scripts": {
     "build": "rm -rf build; ncc build index.js -o build",
-    "test": "tape \"./tests/**/*.spec.js\"",
+    "test": "env BLOG_BASE_URL=\"https://example.com\" tape \"./tests/**/*.spec.js\"",
     "lint": "npm run eslint && npm run prettier -- -l",
     "fmt": "npm run prettier -- --write",
     "prettier": "prettier \"./*.js\" \"./{.github,ansible,src,backstage,static,migrations,templates,tests}/**/*.{js,json,css,yml,yaml}\"",

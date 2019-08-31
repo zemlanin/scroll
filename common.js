@@ -211,6 +211,10 @@ renderer.image = embedCallback;
 
 renderer.link = function(href, title, text) {
   if (text.startsWith("^")) {
+    if (!title) {
+      return text;
+    }
+
     const footnoteId = href;
     const footnoteText = text.slice(1);
     return `<sup><a href="#fn:${footnoteId}" id="rfn:${footnoteId}" rel="footnote">${footnoteText}</a></sup>`;
@@ -298,10 +302,14 @@ function generateFootnotes(tokens) {
       continue;
     }
 
+    if (!tokens.links[linkId].title) {
+      continue;
+    }
+
     const footnoteId = tokens.links[linkId].href;
     const text = marked(
-      tokens.links[linkId].title +
-        ` <a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`
+      tokens.links[linkId].title.trim() +
+        `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`
     );
     result += `<li id="fn:${footnoteId}">${text}</li>`;
   }

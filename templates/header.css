@@ -109,6 +109,26 @@ article figure.card figcaption i.truncated {
   max-width: 100%;
 }
 
+article .footnotes {
+  font-size: 0.8em;
+}
+
+article .footnotes hr {
+  width: 8em;
+  border-style: solid;
+  border-width: 1px 0 0 0;
+  margin: 3em auto 1.5em 0;
+}
+
+article .footnotes ol {
+  padding-left: 0.5em;
+  margin-left: 1em;
+}
+
+article .footnotes a[rev="footnote"] {
+  text-decoration: none;
+}
+
 @media (prefers-color-scheme: dark) {
   article figure.card {
     background: #414141;

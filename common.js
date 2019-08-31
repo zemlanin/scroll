@@ -210,8 +210,14 @@ function embedCallback(href, title, text) {
 renderer.image = embedCallback;
 
 renderer.link = function(href, title, text) {
-  if (href.startsWith("/media/")) {
-    href = process.env.BLOG_BASE_URL ? process.env.BLOG_BASE_URL + href : href;
+  if (text.startsWith("^")) {
+    const footnoteId = href;
+    const footnoteText = text.slice(1);
+    return `<sup><a href="#fn:${footnoteId}" id="rfn:${footnoteId}" rel="footnote">${footnoteText}</a></sup>`;
+  }
+
+  if (href.startsWith("/media/") && process.env.BLOG_BASE_URL) {
+    href = process.env.BLOG_BASE_URL + href;
   }
 
   return ogLink(href, title, text);
@@ -284,12 +290,44 @@ function getMarkedOptions() {
   };
 }
 
+function generateFootnotes(tokens) {
+  let result = `<div class="footnotes"><hr/><ol>`;
+
+  for (const linkId in tokens.links) {
+    if (!linkId.startsWith("^")) {
+      continue;
+    }
+
+    const footnoteId = tokens.links[linkId].href;
+    const text = marked(
+      tokens.links[linkId].title +
+        ` <a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`
+    );
+    result += `<li id="fn:${footnoteId}">${text}</li>`;
+  }
+
+  result += "</ol></div>";
+
+  return result;
+}
+
+function prepareFootnoteLinks(tokens, postId) {
+  for (const linkId in tokens.links) {
+    if (!linkId.startsWith("^")) {
+      continue;
+    }
+
+    tokens.links[linkId].href = `${postId}:${linkId.slice(1)}`;
+  }
+}
+
 async function prepare(post, embedsLoader) {
   post.text = escapeKaomoji(post.text);
 
   const markedOptions = getMarkedOptions();
 
   const tokens = marked.lexer(post.text, markedOptions);
+  prepareFootnoteLinks(tokens, post.id);
   const assignLinks = ts => {
     if (ts) {
       ts.links = tokens.links;
@@ -337,6 +375,14 @@ async function prepare(post, embedsLoader) {
 
     const tokensWithoutTitle = tokens.slice(1);
     html = marked.parser(assignLinks([...tokensWithoutTitle]), markedOptions);
+
+    if (
+      tokens.links &&
+      Object.keys(tokens.links).find(t => t.startsWith("^"))
+    ) {
+      html = html + generateFootnotes(tokens);
+    }
+
     html = await embedsLoader.load(html);
 
     let teaser = isTeaserToken(tokensWithoutTitle[0])
@@ -402,7 +448,13 @@ async function prepare(post, embedsLoader) {
         description || (longread && longread.more) || null;
     }
   } else {
-    html = marked.parse(post.text, markedOptions);
+    html = marked.parser(tokens, markedOptions);
+    if (
+      tokens.links &&
+      Object.keys(tokens.links).find(t => t.startsWith("^"))
+    ) {
+      html = html + generateFootnotes(tokens);
+    }
     rss.html = html = await embedsLoader.load(html);
   }
 

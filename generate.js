@@ -80,7 +80,11 @@ async function copyStaticContent(destination, stdout) {
     const mimeType = mime.getType(filename);
     stdout.write(`${filename} ${mimeType}\n`);
 
-    if (mimeType.startsWith("text/") || mimeType == "image/svg+xml") {
+    if (
+      mimeType.startsWith("text/") ||
+      mime === "application/javascript" ||
+      mimeType === "image/svg+xml"
+    ) {
       await writeFileWithGzip(
         path.resolve(destination, filename),
         await fsPromises.readFile(filepath),

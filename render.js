@@ -56,6 +56,10 @@ async function blogRender(tmpl, data) {
     {
       header: await loadTemplate(path.join(BLOG_TEMPLATES, "header.mustache")),
       footer: await loadTemplate(path.join(BLOG_TEMPLATES, "footer.mustache")),
+      "polyfills.js": await loadTemplate(
+        path.join(BLOG_TEMPLATES, "polyfills.js"),
+        jsProcess
+      ),
       "header.js": await loadTemplate(
         path.join(BLOG_TEMPLATES, "header.js"),
         jsProcess

@@ -143,6 +143,17 @@ const handlers = [
       );
     }
   ],
+  [
+    "GET",
+    "/details-element-polyfill.js",
+    async (req, res) => {
+      res.setHeader("content-type", "application/javascript");
+
+      return await fsPromises.readFile(
+        path.resolve(__dirname, "static", "details-element-polyfill.js")
+      );
+    }
+  ],
   ["GET", "/media/*", serveMedia],
   ["GET", "/backstage", require("./backstage/index.js")],
   ["GET", "/backstage/callback", require("./backstage/callback.js")],
@@ -238,6 +249,7 @@ const server = http.createServer((req, res) => {
           contentType === "text/html" ||
           contentType === "text/plain" ||
           contentType === "text/markdown" ||
+          contentType === "application/javascript" ||
           (contentType && contentType.startsWith("image/"))
         ) {
           res.writeHead(res.statusCode, {

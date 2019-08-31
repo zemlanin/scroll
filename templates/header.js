@@ -6,31 +6,21 @@ document.addEventListener("DOMContentLoaded", function() {
     document.cookie && document.cookie.match(/(^|; )night-mode=0(;|$)/);
 
   var classList = document.body.classList;
+
   if (enabledNightModeCookie) {
     classList.add("dark");
   } else if (disabledNightModeCookie) {
     classList.add("light");
   }
-});
 
-document.addEventListener("DOMContentLoaded", function() {
   var nightModeForm = document.getElementById("night-mode");
   if (!nightModeForm) {
     return;
   }
 
-  var enabledNightModeCookie =
-    document.cookie && document.cookie.match(/(^|; )night-mode=1(;|$)/);
-  var disabledNightModeCookie =
-    document.cookie && document.cookie.match(/(^|; )night-mode=0(;|$)/);
-
-  var classList = document.body.classList;
-
   if (enabledNightModeCookie) {
-    classList.add("dark");
     nightModeForm["night-mode"].value = "on";
   } else if (disabledNightModeCookie) {
-    classList.add("light");
     nightModeForm["night-mode"].value = "off";
   }
 

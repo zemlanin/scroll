@@ -10,8 +10,6 @@
   <link rel="apple-touch-icon-precomposed" href="{{ blog.static.favicon.png }}" />
   <link rel="mask-icon" href="{{ blog.static.mask-icon.svg }}" color="#00a500" />
 
-  <link rel="preload" as="fetch" href="/settings.html" />
-
   <link href="https://twitter.com/zemlanin" rel="me">
   <link href="https://github.com/zemlanin" rel="me">
   <meta name="twitter:card" content="summary" />
@@ -67,8 +65,25 @@
       {{/index}}
     {{/post}}
 
-    <a id="settings-icon" href="/settings.html" title="Settings" rel="nofollow,noindex">
-      <svg role='img' xmlns='http://www.w3.org/2000/svg' style="vertical-align: middle;" width="1em" height="1em" viewBox='{{fas.sliders-h.viewBox}}'><path fill='#888' d='{{fas.sliders-h}}'></path></svg>
-    </a>
+    <details id="settings-icon" class="print:hidden" title="Settings">
+      <summary style="text-align: right; color: #888;">
+        {{#fas}}sliders-h{{/fas}}
+      </summary>
+
+      <form id="night-mode" action="javascript:void(0)">
+        <label title="Night Mode: on">
+          <input type="radio" name="night-mode" value="on">
+          {{#fas}}moon{{/fas}}
+        </label>
+        <label title="Night Mode: default">
+          <input type="radio" name="night-mode" value="system" checked>
+          {{#fas}}adjust{{/fas}}
+        </label>
+        <label title="Night Mode: off">
+          <input type="radio" name="night-mode" value="off">
+          {{#fas}}sun{{/fas}}
+        </label>
+      </form>
+    </details>
   </header>
   <main>

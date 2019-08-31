@@ -28,7 +28,6 @@ const {
   generatePaginationPage,
   generateRSSPage,
   generateIndexPage,
-  generateSettingsPage,
   generateArchivePage
 } = require("./generate-post.js");
 
@@ -184,12 +183,6 @@ async function generate(db, destination, stdout, stderr) {
   await writeFileWithGzip(
     path.join(tmpFolder, "index.html"),
     await generateIndexPage(db, blog, newestPage),
-    { flag: "wx" }
-  );
-
-  await writeFileWithGzip(
-    path.join(tmpFolder, "settings.html"),
-    await generateSettingsPage(db, blog),
     { flag: "wx" }
   );
 

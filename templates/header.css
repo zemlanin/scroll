@@ -259,6 +259,46 @@ nav span {
   flex-grow: 1;
 }
 
+#settings-icon {
+  text-align: right;
+}
+
+#settings-icon > summary {
+  color: #888;
+  list-style: none;
+  display: inline-block;
+}
+
+#settings-icon > summary::-webkit-details-marker {
+  display: none;
+}
+
+#settings-icon svg {
+  vertical-align: middle;
+}
+
+#night-mode {
+  display: flex;
+  flex-flow: row;
+  justify-content: space-between;
+}
+
+#night-mode label {
+  margin: 0 0.3em;
+}
+
+#night-mode label:last-child {
+  margin-right: 0;
+}
+
+#night-mode label input {
+  /*display: none;*/
+}
+
+#night-mode input[type="radio"]:checked ~ * {
+  color: #00a500;
+}
+
 article code {
   border: solid 1px #dedede;
   padding: 0.1em 0.2em;
@@ -349,7 +389,7 @@ footer a {
 header {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: baseline;
   justify-content: flex-start;
 }
 

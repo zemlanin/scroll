@@ -68,14 +68,6 @@ async function blogRender(tmpl, data) {
         path.join(BLOG_TEMPLATES, "highlight.css"),
         cssProcess
       ),
-      "settings.js": await loadTemplate(
-        path.join(BLOG_TEMPLATES, "settings.js"),
-        jsProcess
-      ),
-      "settings.css": await loadTemplate(
-        path.join(BLOG_TEMPLATES, "settings.css"),
-        cssProcess
-      ),
       gauges: await loadTemplate(path.join(BLOG_TEMPLATES, "gauges.mustache"))
     }
   );

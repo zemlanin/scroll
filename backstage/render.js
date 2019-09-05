@@ -2,6 +2,8 @@ const fs = require("fs");
 const path = require("path");
 const { promisify } = require("util");
 
+const CleanCSS = require("clean-css");
+
 const fsPromises = {
   readFile: promisify(fs.readFile)
 };
@@ -10,19 +12,55 @@ const mustache = require("mustache");
 
 const { fas, far, fab } = require("../font-awesome-mustache.js");
 
-async function loadTemplate(tmpl) {
+async function loadTemplate(tmpl, processCallback) {
   if (process.env.NODE_ENV === "development") {
-    return (await fsPromises.readFile(tmpl)).toString();
+    const result = (await fsPromises.readFile(tmpl)).toString();
+
+    if (processCallback) {
+      return processCallback(result);
+    }
+
+    return result;
   }
 
-  return (
-    loadTemplate.cache[tmpl] ||
-    (loadTemplate.cache[tmpl] = (await fsPromises.readFile(tmpl)).toString())
-  );
+  if (loadTemplate.cache[tmpl]) {
+    return loadTemplate.cache[tmpl];
+  }
+
+  if (processCallback) {
+    return (loadTemplate.cache[tmpl] = processCallback(
+      (await fsPromises.readFile(tmpl)).toString()
+    ));
+  }
+
+  return (loadTemplate.cache[tmpl] = (await fsPromises.readFile(
+    tmpl
+  )).toString());
 }
 loadTemplate.cache = {};
 
 const BACKSTAGE_TEMPLATES = path.resolve(__dirname, "templates");
+const BLOG_TEMPLATES = path.resolve(__dirname, "..", "templates");
+
+const cleanCSS = new CleanCSS({
+  level: {
+    1: {
+      transform: function(propertyName, propertyValue, selector) {
+        if (
+          selector.indexOf("article") === -1 &&
+          selector !== "to" &&
+          selector !== "from"
+        ) {
+          return false;
+        }
+
+        if (selector === "article" && propertyName === "margin-bottom") {
+          return false;
+        }
+      }
+    }
+  }
+});
 
 async function backstageRender(tmpl, data) {
   return mustache.render(
@@ -40,6 +78,10 @@ async function backstageRender(tmpl, data) {
       ),
       "media-bar.mustache": await loadTemplate(
         path.join(BACKSTAGE_TEMPLATES, "media-bar.mustache")
+      ),
+      "post.css": await loadTemplate(
+        path.join(BLOG_TEMPLATES, "header.css"),
+        code => cleanCSS.minify(code).styles
       )
     }
   );

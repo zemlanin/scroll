@@ -18,98 +18,11 @@
           white-space: pre;
         }
 
-        .card {
-          overflow-wrap: break-word;
-        }
+        {{> post.css}}
 
-        .card-content {
-          max-width: 40em;
-          margin: auto;
-        }
-
-        .card-content h1 {
+        article h1 {
           font-size: 2em;
           font-weight: bold;
-        }
-
-        .card-content img,
-        .card-content video,
-        .card-content audio {
-          max-width: 100%;
-          width: auto;
-          max-height: 18em;
-          height: auto;
-          display: block;
-          margin: auto;
-        }
-
-        .card-content figure.card {
-          max-width: 30em;
-          margin: 1em auto;
-        }
-
-        .card-content figure.card figcaption a {
-          text-decoration: none;
-          display: block;
-        }
-
-        .card-content figure.card figcaption i {
-          color: #888;
-          font-size: 0.8em;
-          display: block;
-          white-space: pre-wrap;
-        }
-
-        .card-content figure.card figcaption i.truncated {
-          white-space: nowrap;
-          overflow-x: hidden;
-          text-overflow: ellipsis;
-          max-width: 100%;
-        }
-
-        .card-content iframe,
-        .card-content a.future-frame {
-          display: block;
-          margin: auto;
-          max-width: 100%;
-        }
-
-        .card-content a.future-frame {
-          position: relative;
-          text-decoration: none;
-        }
-
-        .card-content a.future-frame:after {
-          display: block;
-          width: 100%;
-          content: "▶ play";
-          text-align: center;
-          background: #eee;
-        }
-
-        .card-content a.future-frame:hover:after {
-          color: white;
-          background: #00a500;
-        }
-
-        @keyframes loadingopacity {
-          from {
-            opacity: 0.3;
-          }
-
-          to {
-            opacity: 1;
-          }
-        }
-
-        .card-content a.future-frame.loading:hover:after {
-          color: unset;
-          background: none;
-        }
-
-        .card-content a.future-frame.loading:after {
-          content: "•••";
-          animation: loadingopacity 0.4s ease-in-out infinite alternate-reverse;
         }
     </style>
     <script type="text/javascript">
@@ -229,7 +142,7 @@
 
     {{#posts}}
         <div class="card">
-            <div class="card-content">
+            <article class="card-content">
                 {{{htmlTitle}}}
 
                 {{#longread}}
@@ -239,7 +152,7 @@
                 {{^longread}}
                   {{{html}}}
                 {{/longread}}
-            </div>
+            </article>
             <footer class="card-footer">
                 {{#draft}}<div class="card-footer-item">draft</div>{{/draft}}
                 {{^draft}}

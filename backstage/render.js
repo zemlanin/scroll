@@ -79,9 +79,15 @@ async function backstageRender(tmpl, data) {
       "media-bar.mustache": await loadTemplate(
         path.join(BACKSTAGE_TEMPLATES, "media-bar.mustache")
       ),
-      "post.css": await loadTemplate(
+      "header.blog.css": await loadTemplate(
         path.join(BLOG_TEMPLATES, "header.css"),
-        code => cleanCSS.minify(code).styles
+        code =>
+          cleanCSS.minify(
+            code + `\narticle h1 { font-size: 2em; font-weight: bold; }`
+          ).styles
+      ),
+      "header.blog.js": await loadTemplate(
+        path.join(BLOG_TEMPLATES, "header.js")
       )
     }
   );

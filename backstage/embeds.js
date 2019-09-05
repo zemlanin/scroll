@@ -375,6 +375,12 @@ async function getSingleEmbed(req, _res) {
 
   const existingEmbed = await queryEmbed(db, query.url);
 
+  if (existingEmbed) {
+    existingEmbed.backstageUrl = `/backstage/embeds?url=${encodeURIComponent(
+      existingEmbed.original_url
+    )}`;
+  }
+
   let mimetype;
   let cardHTML;
   let rawMetadata;
@@ -417,7 +423,7 @@ async function getSingleEmbed(req, _res) {
     cardHTML = await module.exports.renderCard(cardWithMetadata);
   }
 
-  return blogRender(path.resolve(__dirname, "templates", "embed.mustache"), {
+  return render("embed.mustache", {
     url: query.url,
     existingEmbed,
     mimetype,

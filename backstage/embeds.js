@@ -1,5 +1,4 @@
 const url = require("url");
-const path = require("path");
 
 const mime = require("mime");
 const cheerio = require("cheerio");

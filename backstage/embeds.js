@@ -1,13 +1,26 @@
+const fs = require("fs");
 const url = require("url");
+const path = require("path");
+const { promisify } = require("util");
+
+const fsPromises = {
+  readFile: promisify(fs.readFile)
+};
 
 const mime = require("mime");
 const cheerio = require("cheerio");
+const mustache = require("mustache");
 const rp = require("request-promise-native");
 
-const { blogRender } = require("../render.js");
 const { render } = require("./render.js");
 
 const { authed, sendToAuthProvider } = require("./auth.js");
+
+const CARD_TEMPLATE_PATH = path.resolve(
+  __dirname,
+  "templates",
+  "card.mustache"
+);
 
 /*
   urls with opengraph data:
@@ -27,6 +40,21 @@ const { authed, sendToAuthProvider } = require("./auth.js");
     https://www.imdb.com/title/tt4154796/
     https://soundcloud.com/fairtomidland/the-greener-grass
 */
+
+async function loadCardTemplate() {
+  if (process.env.NODE_ENV === "development") {
+    return (await fsPromises.readFile(CARD_TEMPLATE_PATH)).toString();
+  }
+
+  if (loadCardTemplate.cache) {
+    return loadCardTemplate.cache;
+  }
+
+  return (loadCardTemplate.cache = (await fsPromises.readFile(
+    CARD_TEMPLATE_PATH
+  )).toString());
+}
+loadCardTemplate.cache = "";
 
 const hasContent = meta => meta.content;
 const metaInitial = meta =>
@@ -801,9 +829,7 @@ module.exports = {
       return `<a href="${card.url}">${card.title || card.url}</a>`;
     }
 
-    return await blogRender("card.mustache", {
-      card
-    });
+    return await mustache.render(await loadCardTemplate(), { card });
   },
 
   post: async (req, res) => {

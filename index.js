@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const generate = require("./generate.js");
 const server = require("./server.js");
 

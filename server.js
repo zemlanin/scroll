@@ -9,18 +9,11 @@ const fsPromises = {
 };
 
 const sqlite = require("sqlite");
-const static = require("node-static");
 const UrlPattern = require("url-pattern");
 
 require("dotenv").config();
 
 const { DIST, POSTS_DB, PORT, loadIcu } = require("./common.js");
-
-const fileServer = new static.Server(DIST, {
-  cache: false,
-  serverInfo: "scroll",
-  gzip: /^text\//
-});
 
 function write404(req, res) {
   if (!res.finished) {
@@ -29,47 +22,68 @@ function write404(req, res) {
   }
 }
 
-function serveHtml(req, res) {
-  return new Promise((resolve, reject) => {
-    fileServer
-      .serveFile((req.params.name || "index") + ".html", 200, {}, req, res)
-      .on("success", resolve)
-      .on("error", () => {
-        write404(req, res);
-        reject();
-      });
-  });
-}
-
-function serveRSS(req, res) {
-  return new Promise((resolve, reject) => {
-    fileServer
-      .serveFile("rss.xml", 200, {}, req, res)
-      .on("success", resolve)
-      .on("error", () => {
-        write404(req, res);
-        reject();
-      });
-  });
-}
-
-function serveMedia(req, res) {
-  return new Promise((resolve, reject) => {
-    fileServer
-      .serve(req, res)
-      .on("success", resolve)
-      .on("error", () => {
-        write404(req, res);
-        reject();
-      });
-  });
-}
-
 function write403(req, res) {
   if (!res.finished) {
     res.writeHead(403, { "Content-Type": "text/plain" });
     res.end("403");
   }
+}
+
+function writeStaticViaServer(req, res) {
+  if (!res.finished) {
+    res.writeHead(500, { "Content-Type": "text/plain" });
+    res.end(
+      "500: in `production` env, static should be served via separate server (for example, nginx)"
+    );
+  }
+}
+
+let serveHtml = writeStaticViaServer;
+let serveRSS = writeStaticViaServer;
+let serveMedia = writeStaticViaServer;
+
+if (process.env.NODE_ENV !== "production") {
+  const fileServer = new (require("node-static")).Server(DIST, {
+    cache: false,
+    serverInfo: "scroll",
+    gzip: /^text\//
+  });
+
+  serveHtml = function serveHtml(req, res) {
+    return new Promise((resolve, reject) => {
+      fileServer
+        .serveFile((req.params.name || "index") + ".html", 200, {}, req, res)
+        .on("success", resolve)
+        .on("error", () => {
+          write404(req, res);
+          reject();
+        });
+    });
+  };
+
+  serveRSS = function serveRSS(req, res) {
+    return new Promise((resolve, reject) => {
+      fileServer
+        .serveFile("rss.xml", 200, {}, req, res)
+        .on("success", resolve)
+        .on("error", () => {
+          write404(req, res);
+          reject();
+        });
+    });
+  };
+
+  serveMedia = function serveMedia(req, res) {
+    return new Promise((resolve, reject) => {
+      fileServer
+        .serve(req, res)
+        .on("success", resolve)
+        .on("error", () => {
+          write404(req, res);
+          reject();
+        });
+    });
+  };
 }
 
 const handlers = [

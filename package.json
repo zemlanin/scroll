@@ -5,6 +5,7 @@
   "main": "build/index.js",
   "scripts": {
     "build": "rm -rf build; ncc build index.js -o build",
+    "postinstall": "scripts/compile-libicu.sh",
     "test": "env BLOG_BASE_URL=\"https://example.com\" tape \"./tests/**/*.spec.js\"",
     "lint": "npm run eslint && npm run prettier -- -l",
     "fmt": "npm run prettier -- --write",

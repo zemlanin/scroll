@@ -544,15 +544,11 @@ async function unlinkFileWithGzip(path) {
   }
 }
 
+const SQLITE_ICU_PATH = path.resolve(__dirname, "sqlite-icu", "libicu.so");
 function loadIcu(db) {
   return new Promise((resolve, reject) => {
-    if (!process.env.SQLITE_ICU) {
-      return resolve(db);
-    }
-
-    return db.driver.loadExtension(
-      path.resolve(__dirname, process.env.SQLITE_ICU),
-      error => (error ? reject(error) : resolve(db))
+    return db.driver.loadExtension(SQLITE_ICU_PATH, error =>
+      error ? reject(error) : resolve(db)
     );
   });
 }

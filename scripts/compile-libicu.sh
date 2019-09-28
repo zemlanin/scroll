@@ -6,9 +6,8 @@ TAB=$'\t'
 
 if [[ "$OS" == "Linux" ]]; then
   gcc -shared sqlite-icu/icu.c \
-    `icu-config --cppflags-searchpath` \
-    `icu-config --ldflags` \
-    -o sqlite-icu/libicu.so || echo "${NEWLINE}${NEWLINE}${TAB}install icu4c and sqlite-dev with \`apt install libicu-dev icu-devtools libsqlite3-dev\` and then re-run \`npm install\`${NEWLINE}${NEWLINE}" && exit 1
+    `pkg-config --libs --cflags icu-uc icu-io` \
+    -o sqlite-icu/libicu.so -fPIC || echo "${NEWLINE}${NEWLINE}${TAB}install icu4c and sqlite-dev with \`apt install libicu-dev icu-devtools libsqlite3-dev\` and then re-run \`npm install\`${NEWLINE}${NEWLINE}" && exit 1
 elif [[ "$OS" == "Darwin" ]]; then
   gcc -shared sqlite-icu/icu.c \
     `/usr/local/opt/icu4c/bin/icu-config --cppflags-searchpath` \

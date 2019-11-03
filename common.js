@@ -311,7 +311,7 @@ function generateFootnotes(tokens) {
       tokens.links[linkId].title.trim() +
         `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`
     );
-    result += `<li id="fn:${footnoteId}">${text}</li>`;
+    result += `<li id="fn:${footnoteId}" tabindex="-1">${text}</li>`;
   }
 
   result += "</ol></div>";

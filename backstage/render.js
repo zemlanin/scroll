@@ -57,6 +57,10 @@ const cleanCSS = new CleanCSS({
         if (selector === "article" && propertyName === "margin-bottom") {
           return false;
         }
+
+        if (selector.indexOf(":not(.dark)") > -1) {
+          return false;
+        }
       }
     }
   }

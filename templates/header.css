@@ -19,7 +19,7 @@ body {
 }
 
 @media (prefers-color-scheme: dark) {
-  body {
+  body:not(.dark) {
     background-color: black;
     color: #e3e3e3;
   }
@@ -130,11 +130,11 @@ article .footnotes a[rev="footnote"] {
 }
 
 @media (prefers-color-scheme: dark) {
-  article figure.card {
+  body:not(.dark) article figure.card {
     background: #414141;
   }
 
-  article figure.card figcaption {
+  body:not(.dark) article figure.card figcaption {
     border-color: #414141;
     background-color: black;
   }
@@ -201,7 +201,7 @@ article a.future-frame:after {
 }
 
 @media (prefers-color-scheme: dark) {
-  article a.future-frame:after {
+  body:not(.dark) article a.future-frame:after {
     background: #414141;
   }
 }
@@ -344,8 +344,8 @@ article pre {
 }
 
 @media (prefers-color-scheme: dark) {
-  article code,
-  article pre {
+  body:not(.dark) article code,
+  body:not(.dark) article pre {
     border-color: #414141;
   }
 }
@@ -376,7 +376,7 @@ footer a:visited {
 }
 
 @media (prefers-color-scheme: dark) {
-  body a {
+  body:not(.dark) a {
     -webkit-text-decoration-color: rgba(0, 165, 0, 0.8);
     text-decoration-color: rgba(0, 165, 0, 0.8);
   }

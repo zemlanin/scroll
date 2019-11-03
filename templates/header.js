@@ -1,5 +1,10 @@
 /* eslint-env browser */
 document.addEventListener("DOMContentLoaded", function() {
+  var nightModeForm = document.getElementById("night-mode");
+  if (!nightModeForm) {
+    return;
+  }
+
   var enabledNightModeCookie =
     document.cookie && document.cookie.match(/(^|; )night-mode=1(;|$)/);
   var disabledNightModeCookie =
@@ -11,11 +16,6 @@ document.addEventListener("DOMContentLoaded", function() {
     classList.add("dark");
   } else if (disabledNightModeCookie) {
     classList.add("light");
-  }
-
-  var nightModeForm = document.getElementById("night-mode");
-  if (!nightModeForm) {
-    return;
   }
 
   if (enabledNightModeCookie) {

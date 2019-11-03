@@ -248,9 +248,18 @@ const server = http.createServer((req, res) => {
       return db || (db = await sqlite.open(POSTS_DB).then(loadIcu));
     };
 
-    const result = handler(req, res);
+    let result;
+    let resultPromise;
 
-    return (result instanceof Promise ? result : Promise.resolve(result))
+    try {
+      result = handler(req, res);
+      resultPromise =
+        result instanceof Promise ? result : Promise.resolve(result);
+    } catch (e) {
+      resultPromise = Promise.reject(e);
+    }
+
+    return resultPromise
       .then(body => {
         if (res.finished) {
           return;

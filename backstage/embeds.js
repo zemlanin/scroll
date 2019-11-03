@@ -9,8 +9,10 @@ const fsPromises = {
 
 const mime = require("mime");
 const cheerio = require("cheerio");
+const caseless = require("caseless");
 const mustache = require("mustache");
 const rp = require("request-promise-native");
+const { RequestError } = require("request-promise-native/errors");
 
 const { render } = require("./render.js");
 
@@ -30,7 +32,7 @@ const CARD_TEMPLATE_PATH = path.resolve(
     https://eidolamusic.bandcamp.com/album/to-speak-to-listen (iframe)
     https://m.imgur.com/t/cats/vSfGFEH (native video)
     http://dobyfriday.com/142 (twitter card player; audio)
-    https://overcast.fm/+FNoE1mS94 (twitter card player; audio)
+    https://overcast.fm/+R7DXHWA8I (twitter card player; audio)
     https://atp.fm/episodes/300 (no image -> no card)
     https://music.apple.com/ua/album/no-stopping-us-feat-jenny/1215204298?i=1215204497
     https://twitter.com/mikeyface/status/774823160852217856
@@ -419,7 +421,15 @@ async function getSingleEmbed(req, _res) {
         ? await module.exports.loadMetadata(query.url)
         : null;
     } catch (e) {
-      error = `${e.name}${e.statusCode ? ": " + e.statusCode : ""}`;
+      error = e.name;
+
+      if (e.statusCode) {
+        error = error + ": " + e.statusCode;
+      } else if (e instanceof RequestError) {
+        error = error + ": " + e.error.code;
+      } else {
+        console.error(e);
+      }
     }
 
     const cardWithMetadata = rawMetadata
@@ -574,6 +584,7 @@ module.exports = {
     const expectedMimetype = getURLMimetype(ogPageURL);
 
     let mimetypeFromURL = null;
+    const jar = rp.jar();
 
     if (
       expectedMimetype &&
@@ -583,17 +594,22 @@ module.exports = {
     ) {
       const headers = await rp.head({
         url: ogPageURL,
+        jar: jar,
+        resolveWithFullResponse: true,
         followRedirect: true,
+        timeout: 4000,
         headers: {
           Accept: mimetypeFromURL,
           "User-Agent": "request (+https://zemlan.in)"
         }
       });
 
+      const cHeaders = headers && caseless(headers);
+
       if (
-        headers &&
-        headers["content-type"] &&
-        mime.getType(mime.getExtension(headers["content-type"])) ===
+        cHeaders &&
+        cHeaders.get("content-type") &&
+        mime.getType(mime.getExtension(cHeaders.get("content-type"))) ===
           expectedMimetype
       ) {
         mimetypeFromURL = expectedMimetype;
@@ -602,17 +618,21 @@ module.exports = {
 
     const headers = await rp.head({
       url: ogPageURL,
+      jar: jar,
       followRedirect: true,
+      timeout: 4000,
       headers: {
         Accept: "text/html,*/*;q=0.8",
         "User-Agent": "request (+https://zemlan.in)"
       }
     });
 
+    const cHeaders = headers && caseless(headers);
+
     const mimetype =
-      headers &&
-      headers["content-type"] &&
-      mime.getType(mime.getExtension(headers["content-type"]));
+      cHeaders &&
+      cHeaders.get("content-type") &&
+      mime.getType(mime.getExtension(cHeaders.get("content-type")));
 
     if (mimetype !== "text/html") {
       return [
@@ -623,9 +643,11 @@ module.exports = {
 
     const $ = await rp.get({
       url: ogPageURL,
+      jar: jar,
       followRedirect: true,
+      timeout: 4000,
       headers: {
-        Accept: "text/html",
+        Accept: "text/html; charset=utf-8",
         "User-Agent": "request (+https://zemlan.in)"
       },
       transform: body => cheerio.load(body),

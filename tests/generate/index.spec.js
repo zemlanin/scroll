@@ -34,7 +34,8 @@ mockery.registerMock("request-promise-native", {
           }
         })
       );
-  }
+  },
+  jar: () => {}
 });
 
 const { generate } = require("../../generate.js");

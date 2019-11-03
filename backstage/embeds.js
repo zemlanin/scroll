@@ -425,8 +425,16 @@ async function getSingleEmbed(req, _res) {
 
       if (e.statusCode) {
         error = error + ": " + e.statusCode;
+        rawMetadata = [
+          { name: "url", content: query.url },
+          { name: "mimetype", content: "text/html" }
+        ];
       } else if (e instanceof RequestError) {
         error = error + ": " + e.error.code;
+        rawMetadata = [
+          { name: "url", content: query.url },
+          { name: "mimetype", content: "text/html" }
+        ];
       } else {
         console.error(e);
       }
@@ -827,7 +835,7 @@ module.exports = {
     return card;
   },
   renderCard: async card => {
-    if (!card || card.error) {
+    if (!card) {
       return "";
     }
 
@@ -849,6 +857,10 @@ module.exports = {
 
     if (!card.img && !card.audio && !card.video && !card.iframe) {
       return `<a href="${card.url}">${card.title || card.url}</a>`;
+    }
+
+    if (card.error) {
+      return "";
     }
 
     return await mustache.render(await loadCardTemplate(), { card });

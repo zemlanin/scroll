@@ -64,7 +64,11 @@ module.exports = class EmbedsLoader {
         raw_metadata = await loadMetadata(url);
       } catch (e) {
         console.error(e);
-        // `${e.name}${e.statusCode ? ": " + e.statusCode : ""}`;
+
+        raw_metadata = [
+          { name: "url", content: url },
+          { name: "mimetype", content: "text/html" }
+        ];
       }
 
       if (!raw_metadata) {

@@ -215,6 +215,11 @@ article a.future-frame:after {
   body:not(.dark) article a.future-frame:after {
     background: #414141;
   }
+
+  body:not(.dark) article a.future-frame:hover:after {
+    color: white;
+    background: #00a500;
+  }
 }
 
 body.dark article a.future-frame:after {

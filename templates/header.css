@@ -82,11 +82,42 @@ article figure.card {
   }
 }
 
+@media (prefers-color-scheme: dark) {
+  body:not(.dark) article figure.card {
+    background: #414141;
+  }
+}
+
+body.dark article figure.card {
+  background: #414141;
+}
+
+body.light article figure.card {
+  background: #dedede;
+}
+
 article figure.card figcaption {
   border: #dedede 1px solid;
   border-top: none;
   border-radius: 0 0 4px 4px;
   padding: 0.5em;
+  background-color: white;
+}
+
+@media (prefers-color-scheme: dark) {
+  body:not(.dark) article figure.card figcaption {
+    border-color: #414141;
+    background-color: black;
+  }
+}
+
+body.dark article figure.card figcaption {
+  border-color: #414141;
+  background-color: black;
+}
+
+body.light article figure.card figcaption {
+  border-color: #dedede;
   background-color: white;
 }
 
@@ -127,26 +158,6 @@ article .footnotes ol {
 
 article .footnotes a[rev="footnote"] {
   text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  body:not(.dark) article figure.card {
-    background: #414141;
-  }
-
-  body:not(.dark) article figure.card figcaption {
-    border-color: #414141;
-    background-color: black;
-  }
-}
-
-body.dark article figure.card {
-  background: #414141;
-}
-
-body.dark article figure.card figcaption {
-  border-color: #414141;
-  background-color: black;
 }
 
 article img,
@@ -210,7 +221,13 @@ body.dark article a.future-frame:after {
   background: #414141;
 }
 
-article a.future-frame:hover:after {
+body.light article a.future-frame:after {
+  background: #dedede;
+}
+
+article a.future-frame:hover:after,
+body.dark article a.future-frame:hover:after,
+body.light article a.future-frame:hover:after {
   color: white;
   background: #00a500;
 }

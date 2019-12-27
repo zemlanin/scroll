@@ -8,7 +8,7 @@
     "postinstall": "scripts/compile-libicu.sh",
     "test": "env BLOG_BASE_URL=\"https://example.com\" tape \"./tests/**/*.spec.js\"",
     "lint": "npm run eslint && npm run prettier -- -l",
-    "fmt": "npm run prettier -- --write",
+    "fmt": "npm run eslint -- --fix && npm run prettier -- --write",
     "prettier": "prettier \"./*.js\" \"./{.github,ansible,src,backstage,static,migrations,templates,tests}/**/*.{js,json,css,yml,yaml}\"",
     "eslint": "eslint \"./*.js\" \"./{src,backstage,static,migrations,templates,tests}/**/*.js\""
   },

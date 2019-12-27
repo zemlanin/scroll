@@ -161,7 +161,8 @@ test("opengraph", async t => {
       ("3", "2019-03-12T17:00:00+03:00", ?3),
       ("4", "2019-04-13T17:00:00+03:00", ?4),
       ("5", "2019-05-14T17:00:00+03:00", ?5),
-      ("6", "2019-06-15T17:00:00+03:00", ?6);
+      ("6", "2019-06-15T17:00:00+03:00", ?6),
+      ("7", "2019-07-15T17:00:00+03:00", ?7);
   `,
     {
       1: "lorem ipsum",
@@ -172,7 +173,11 @@ test("opengraph", async t => {
         "# with teaser\n\n_teaser text_\n\n" +
         ("lorem ".repeat(10) + "\n\n").repeat(20),
       6:
-        "# without teaser\n\nextra " + ("lorem ".repeat(10) + "\n\n").repeat(20)
+        "# without teaser\n\nextra " +
+        ("lorem ".repeat(10) + "\n\n").repeat(20),
+      7:
+        '# teaser with footnote\n\n![](/media/example.png)\n\n_post with title and footnote [^1][]_\n\n[^1]:. "[text](https://example.net)"\n\n' +
+        ("lorem ".repeat(10) + "\n\n").repeat(20)
     }
   );
 
@@ -227,5 +232,25 @@ test("opengraph", async t => {
   t.ok(post6.indexOf(`<meta property="og:image"`) === -1);
   t.ok(
     post6.indexOf(`<meta property="og:description" content="201 слово" />`) > -1
+  );
+
+  const post7 = (await fs.promises.readFile(
+    path.join(tmpFolder, "7.html")
+  )).toString();
+  t.ok(
+    post7.indexOf(
+      `<meta property="og:title" content="teaser with footnote" />`
+    ) > -1
+  );
+  t.ok(
+    post7.indexOf(
+      `<meta property="og:image" content="https://example.com/media/example.png" />`
+    ) > -1
+  );
+  t.ok(
+    post7.indexOf(
+      `<meta property="og:description" content="post with title and footnote" />`
+    ) > -1,
+    post7.split("\n").find(line => line.indexOf("og:description") > -1)
   );
 });

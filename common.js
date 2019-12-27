@@ -25,6 +25,7 @@ const PORT = process.env.PORT || 8000;
 const BLOG_BASE_URL = process.env.BLOG_BASE_URL || ".";
 const DIST = path.resolve(__dirname, process.env.DIST || "dist");
 const POSTS_DB = path.resolve(__dirname, process.env.POSTS_DB || "posts.db");
+const FOOTNOTE_MARKER = "^";
 
 function isOwnMedia(href) {
   return (
@@ -210,7 +211,7 @@ function embedCallback(href, title, text) {
 renderer.image = embedCallback;
 
 renderer.link = function(href, title, text) {
-  if (text.startsWith("^")) {
+  if (text.startsWith(FOOTNOTE_MARKER)) {
     if (!title) {
       return text;
     }
@@ -275,6 +276,18 @@ function isTeaserToken(token) {
   );
 }
 
+function removeFootnotes(token) {
+  if (token && token.type === "paragraph") {
+    return {
+      ...token,
+      // FOOTNOTE_MARKER
+      text: token.text.replace(/\s*\[\^[^\]]+\]\[\]\s*/g, "")
+    };
+  }
+
+  return token;
+}
+
 function escapeKaomoji(str) {
   return str.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯");
 }
@@ -298,7 +311,7 @@ function generateFootnotes(tokens) {
   let result = `<div class="footnotes"><hr/><ol>`;
 
   for (const linkId in tokens.links) {
-    if (!linkId.startsWith("^")) {
+    if (!linkId.startsWith(FOOTNOTE_MARKER)) {
       continue;
     }
 
@@ -321,7 +334,7 @@ function generateFootnotes(tokens) {
 
 function prepareFootnoteLinks(tokens, postId) {
   for (const linkId in tokens.links) {
-    if (!linkId.startsWith("^")) {
+    if (!linkId.startsWith(FOOTNOTE_MARKER)) {
       continue;
     }
 
@@ -386,7 +399,7 @@ async function prepare(post, embedsLoader) {
 
     if (
       tokens.links &&
-      Object.keys(tokens.links).find(t => t.startsWith("^"))
+      Object.keys(tokens.links).find(t => t.startsWith(FOOTNOTE_MARKER))
     ) {
       html = html + generateFootnotes(tokens);
     }
@@ -400,6 +413,7 @@ async function prepare(post, embedsLoader) {
               .slice(0, 3)
               .filter(isTeaserToken)
               .slice(0, 2)
+              .map(removeFootnotes)
           ]),
           markedOptions
         )
@@ -444,6 +458,7 @@ async function prepare(post, embedsLoader) {
                 .slice(0, 3)
                 .filter(isTeaserToken)
                 .slice(0, 2)
+                .map(removeFootnotes)
             ]),
             {
               ...markedOptions,

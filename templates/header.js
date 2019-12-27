@@ -119,3 +119,57 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   );
 });
+
+document.addEventListener("DOMContentLoaded", function() {
+  if (typeof matchMedia === "undefined" && !("connection" in navigator)) {
+    return;
+  }
+
+  function doAutoplay(v) {
+    v.removeAttribute("controls");
+    v.setAttribute("autoplay", "");
+
+    if (v.paused) {
+      v.play();
+    }
+  }
+
+  function doControls(v) {
+    v.removeAttribute("autoplay");
+    v.setAttribute("controls", "");
+    v.setAttribute("preload", "metadata");
+
+    if (!v.paused) {
+      v.pause();
+    }
+  }
+
+  var motionQuery =
+    typeof matchMedia === "undefined"
+      ? null
+      : matchMedia("(prefers-reduced-motion)");
+
+  function handleLoopedVideos() {
+    var prefersReducedMotion = motionQuery && motionQuery.matches;
+    var saveData =
+      "connection" in navigator &&
+      (navigator.connection.saveData === true ||
+        navigator.connection.effectiveType === "slow-2g" ||
+        navigator.connection.effectiveType === "2g");
+
+    Array.prototype.forEach.call(
+      document.querySelectorAll("video[loop][muted]"),
+      prefersReducedMotion || saveData ? doControls : doAutoplay
+    );
+  }
+
+  handleLoopedVideos();
+
+  if (motionQuery) {
+    motionQuery.addListener(handleLoopedVideos);
+  }
+
+  if ("connection" in navigator) {
+    navigator.connection.addEventListener("change", handleLoopedVideos);
+  }
+});

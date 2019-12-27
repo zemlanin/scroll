@@ -126,7 +126,6 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function doAutoplay(v) {
-    v.removeAttribute("controls");
     v.setAttribute("autoplay", "");
 
     if (v.paused) {

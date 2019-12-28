@@ -216,8 +216,7 @@ renderer.link = function(href, title, text) {
       return text;
     }
 
-    const footnoteId = href;
-    const footnoteText = text.slice(1);
+    const [footnoteText, footnoteId] = href.split("|");
     return `<sup><a href="#fn:${footnoteId}" id="rfn:${footnoteId}" rel="footnote">${footnoteText}</a></sup>`;
   }
 
@@ -319,7 +318,8 @@ function generateFootnotes(tokens) {
       continue;
     }
 
-    const footnoteId = tokens.links[linkId].href;
+    // eslint-disable-next-line no-unused-vars
+    const [_fn, footnoteId] = tokens.links[linkId].href.split("|");
     const text = marked(
       tokens.links[linkId].title.trim() +
         `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`
@@ -333,12 +333,17 @@ function generateFootnotes(tokens) {
 }
 
 function prepareFootnoteLinks(tokens, postId) {
+  let footnoteIndex = 1;
+
   for (const linkId in tokens.links) {
     if (!linkId.startsWith(FOOTNOTE_MARKER)) {
       continue;
     }
 
-    tokens.links[linkId].href = `${postId}:${linkId.slice(1)}`;
+    tokens.links[linkId].href = `${footnoteIndex}|${postId}:${linkId
+      .slice(1)
+      .replace(/\|/g, "-")}`;
+    footnoteIndex++;
   }
 }
 

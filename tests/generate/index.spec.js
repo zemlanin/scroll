@@ -75,11 +75,13 @@ test("database with posts and embeds", async t => {
       ("4", "![](/media/example.png)"),
       ("5", "![](https://www.youtube.com/watch?v=dQw4w9WgXcQ)"),
       ("6", ?6),
-      ("7", ?7);
+      ("7", ?7),
+      ("8", ?8);
   `,
     {
       6: 'post with footnote [^1][]\n\n[^1]:. "footnote _text_"',
-      7: '# titled\n\npost with title and footnote [^1][]\n\n[^1]:. "[text](https://example.net)"'
+      7: '# titled\n\npost with title and footnote [^1][]\n\n[^1]:. "[text](https://example.net)"',
+      8: 'post with named footnote [^na|me][]\n\n[^na|me]:. "**fn text**"'
     }
   );
 
@@ -127,7 +129,9 @@ test("database with posts and embeds", async t => {
     ) > -1
   );
 
-  const post7 = await fs.promises.readFile(path.join(tmpFolder, "7.html"));
+  const post7 = (await fs.promises.readFile(
+    path.join(tmpFolder, "7.html")
+  )).toString();
   t.ok(
     post7.indexOf(
       `<h1 id="titled"><a href="https://example.com/7.html">titled</a></h1>`
@@ -136,12 +140,33 @@ test("database with posts and embeds", async t => {
   t.ok(
     post7.indexOf(
       `<p>post with title and footnote <sup><a href="#fn:7:1" id="rfn:7:1" rel="footnote">1</a></sup></p>`
-    ) > -1
+    ) > -1,
+    post7.split("\n").find(line => line.indexOf("<sup>") > -1)
   );
   t.ok(
     post7.indexOf(
       `<div class="footnotes"><hr/><ol><li id="fn:7:1" tabindex="-1"><p><a href="https://example.net">text</a>&nbsp;<a href="#rfn:7:1" rev="footnote">&#8617;</a></p>`
     ) > -1
+  );
+
+  const post8 = (await fs.promises.readFile(
+    path.join(tmpFolder, "8.html")
+  )).toString();
+  t.ok(
+    post8.indexOf(`</h1>`) === -1,
+    post8.split("\n").find(line => line.indexOf("</h1>") > -1) || "no <h1>"
+  );
+  t.ok(
+    post8.indexOf(
+      `<p>post with named footnote <sup><a href="#fn:8:na-me" id="rfn:8:na-me" rel="footnote">1</a></sup></p>`
+    ) > -1,
+    post8.split("\n").find(line => line.indexOf("<sup>") > -1)
+  );
+  t.ok(
+    post8.indexOf(
+      `<div class="footnotes"><hr/><ol><li id="fn:8:na-me" tabindex="-1"><p><strong>fn text</strong>&nbsp;<a href="#rfn:8:na-me" rev="footnote">&#8617;</a></p>`
+    ) > -1,
+    post8.split("\n").find(line => line.indexOf('<div class="footnotes">') > -1)
   );
 
   t.end();

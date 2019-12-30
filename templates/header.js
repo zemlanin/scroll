@@ -271,6 +271,7 @@ document.addEventListener("DOMContentLoaded", function() {
       (function addFillers(node) {
         var filler = document.createElement("li");
         filler.setAttribute("data-filler", "first");
+        filler.setAttribute("aria-hidden", "true");
         node.insertBefore(filler.cloneNode(), node.querySelector("li"));
         filler.setAttribute("data-filler", "last");
         node.insertBefore(filler, null);

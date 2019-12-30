@@ -213,6 +213,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // assuming that items flow from left to right (= `index = 0` on the leftmost element)
     for (var i = 0; i < listItemsLength; i++) {
+      if (listItems[i].getAttribute("data-filler")) {
+        continue;
+      }
+
       itemCenter =
         Math.floor(
           listItems[i].offsetLeft -
@@ -235,18 +239,25 @@ document.addEventListener("DOMContentLoaded", function() {
         var BOUNDS_OFFSET = 40;
 
         var bounding = node.getBoundingClientRect();
+        var galleryTakesTheWholeScreen =
+          bounding.top - BOUNDS_OFFSET < 0 &&
+          bounding.bottom + BOUNDS_OFFSET >
+            (window.innerHeight || document.documentElement.clientHeight);
 
         if (
-          bounding.top + BOUNDS_OFFSET < 0 ||
-          bounding.bottom - BOUNDS_OFFSET >
-            (window.innerHeight || document.documentElement.clientHeight)
+          !galleryTakesTheWholeScreen &&
+          (bounding.top + BOUNDS_OFFSET < 0 ||
+            bounding.bottom - BOUNDS_OFFSET >
+              (window.innerHeight || document.documentElement.clientHeight))
         ) {
           return;
         }
 
         if (e.keyCode === LEFT) {
+          e.preventDefault();
           scrollToCenter(node, findFirstLeftOfCenter(node));
         } else if (e.keyCode === RIGHT) {
+          e.preventDefault();
           scrollToCenter(node, findFirstRightOfCenter(node));
         }
       });
@@ -257,14 +268,56 @@ document.addEventListener("DOMContentLoaded", function() {
         });
       });
 
-      node.querySelector("li > img").addEventListener("load", function(e) {
-        Array.prototype.forEach.call(
-          node.querySelectorAll("li > img"),
-          function(img) {
-            img.style.maxHeight = e.target.clientHeight + "px";
+      (function addFillers(node) {
+        var filler = document.createElement("li");
+        filler.setAttribute("data-filler", "first");
+        node.insertBefore(filler.cloneNode(), node.querySelector("li"));
+        filler.setAttribute("data-filler", "last");
+        node.insertBefore(filler, null);
+      })(node);
+
+      function fillTheFillers() {
+        var first = node.querySelector('li[data-filler="first"]');
+        var last = node.querySelector('li[data-filler="last"]');
+
+        first.style.width =
+          Math.floor(
+            Math.max(
+              node.clientWidth - first.nextElementSibling.clientWidth,
+              0
+            ) / 2
+          ) + "px";
+
+        last.style.width =
+          Math.floor(
+            Math.max(
+              node.clientWidth - last.previousElementSibling.clientWidth,
+              0
+            ) / 2
+          ) + "px";
+      }
+
+      node
+        .querySelector('li[data-filler="first"]')
+        .nextElementSibling.querySelector("img")
+        .addEventListener("load", fillTheFillers);
+
+      node
+        .querySelector('li[data-filler="last"]')
+        .previousElementSibling.querySelector("img")
+        .addEventListener("load", fillTheFillers);
+
+      var resizeTimeout;
+
+      if ("requestAnimationFrame" in window) {
+        window.addEventListener("resize", function() {
+          if (resizeTimeout) {
+            window.cancelAnimationFrame(resizeTimeout);
           }
-        );
-      });
+
+          resizeTimeout = window.requestAnimationFrame(fillTheFillers);
+        });
+      }
     }
   );
 });

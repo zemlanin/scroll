@@ -230,6 +230,15 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
+  function addFillers(node) {
+    var filler = document.createElement("li");
+    filler.setAttribute("data-filler", "first");
+    filler.setAttribute("aria-hidden", "true");
+    node.insertBefore(filler.cloneNode(), node.querySelector("li"));
+    filler.setAttribute("data-filler", "last");
+    node.insertBefore(filler, null);
+  }
+
   Array.prototype.forEach.call(
     document.querySelectorAll("ul[data-gallery]"),
     function initGallery(node) {
@@ -268,14 +277,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
       });
 
-      (function addFillers(node) {
-        var filler = document.createElement("li");
-        filler.setAttribute("data-filler", "first");
-        filler.setAttribute("aria-hidden", "true");
-        node.insertBefore(filler.cloneNode(), node.querySelector("li"));
-        filler.setAttribute("data-filler", "last");
-        node.insertBefore(filler, null);
-      })(node);
+      addFillers(node);
 
       function fillTheFillers() {
         var first = node.querySelector('li[data-filler="first"]');

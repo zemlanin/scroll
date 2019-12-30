@@ -198,7 +198,9 @@ test("opengraph", async t => {
       ("4", "2019-04-13T17:00:00+03:00", ?4),
       ("5", "2019-05-14T17:00:00+03:00", ?5),
       ("6", "2019-06-15T17:00:00+03:00", ?6),
-      ("7", "2019-07-15T17:00:00+03:00", ?7);
+      ("7", "2019-07-15T17:00:00+03:00", ?7),
+      ("8", "2019-08-15T17:00:00+03:00", ?8),
+      ("9", "2019-09-15T17:00:00+03:00", ?9);
   `,
     {
       1: "lorem ipsum",
@@ -213,7 +215,14 @@ test("opengraph", async t => {
         ("lorem ".repeat(10) + "\n\n").repeat(20),
       7:
         '# teaser with footnote\n\n![](/media/example.png)\n\n_post with title and footnote [^1][]_\n\n[^1]:. "[text](https://example.net)"\n\n' +
-        ("lorem ".repeat(10) + "\n\n").repeat(20)
+        ("lorem ".repeat(10) + "\n\n").repeat(20),
+      8:
+        "# teaser with gallery and description\n\n* ![](/media/one.png)\n* ![](/media/two.png)\n\n_some description_\n\n" +
+        ("lorem ".repeat(10) + "\n\n").repeat(20),
+      9:
+        "# teaser with gallery\n\n* ![](/media/uno.png)\n* ![](/media/dos.png)\n\n" +
+        ("lorem ".repeat(10) + "\n\n").repeat(20) +
+        "_italics in the end_"
     }
   );
 
@@ -288,5 +297,48 @@ test("opengraph", async t => {
       `<meta property="og:description" content="post with title and footnote" />`
     ) > -1,
     post7.split("\n").find(line => line.indexOf("og:description") > -1)
+  );
+
+  const post8 = (await fs.promises.readFile(
+    path.join(tmpFolder, "8.html")
+  )).toString();
+  t.ok(
+    post8.indexOf(
+      `<meta property="og:title" content="teaser with gallery and description" />`
+    ) > -1,
+    post8.split("\n").find(line => line.indexOf("og:title") > -1)
+  );
+  t.ok(
+    post8.indexOf(
+      `<meta property="og:image" content="https://example.com/media/one.png" />`
+    ) > -1,
+    post8.split("\n").find(line => line.indexOf("og:image") > -1)
+  );
+  t.ok(
+    post8.indexOf(
+      `<meta property="og:description" content="some description" />`
+    ) > -1,
+    post8.split("\n").find(line => line.indexOf("og:description") > -1)
+  );
+
+  const post9 = (await fs.promises.readFile(
+    path.join(tmpFolder, "9.html")
+  )).toString();
+  t.ok(
+    post9.indexOf(
+      `<meta property="og:title" content="teaser with gallery" />`
+    ) > -1,
+    post9.split("\n").find(line => line.indexOf("og:title") > -1)
+  );
+  t.ok(
+    post9.indexOf(
+      `<meta property="og:image" content="https://example.com/media/uno.png" />`
+    ) > -1,
+    post9.split("\n").find(line => line.indexOf("og:image") > -1)
+  );
+  t.ok(
+    post9.indexOf(`<meta property="og:description" content="204 слова" />`) >
+      -1,
+    post9.split("\n").find(line => line.indexOf("og:description") > -1)
   );
 });

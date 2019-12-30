@@ -284,12 +284,51 @@ function pluralize(n, ...forms) {
   }
 }
 
-function isTeaserToken(token) {
-  return Boolean(
-    token &&
-      token.type === "paragraph" &&
-      token.text.match(/^(_.+_|!\[.*\]\(.+\))$/)
-  );
+const ITALIC_REGEX = /^_.+_$/;
+const IMAGE_REGEX = /^!\[.*\]\(.+\)$/;
+
+function getTeaserTokens(tokens) {
+  const result = [];
+
+  for (let i = 0; i < tokens.length; i++) {
+    if (result.length >= 2) {
+      break;
+    }
+
+    const token = tokens[i];
+
+    if (!token) {
+      continue;
+    }
+
+    if (token.type === "paragraph") {
+      if (token.text.match(ITALIC_REGEX) || token.text.match(IMAGE_REGEX)) {
+        result.push(token);
+      } else {
+        break;
+      }
+    } else if (token.type === "list_start") {
+      /*
+         tokens[i]   [i+1]            [i+2]  [i+3]          [i+n]
+        [list_start, list_item_start, text,  list_item_end, list_end]
+      */
+      if (
+        tokens[i + 2] &&
+        tokens[i + 2].type === "text" &&
+        tokens[i + 2].text.match(IMAGE_REGEX)
+      ) {
+        result.push({ type: "paragraph", text: tokens[i + 2].text });
+
+        while (tokens[i].type !== "list_end") {
+          i++;
+        }
+      } else {
+        break;
+      }
+    }
+  }
+
+  return result.slice(0, 2).map(removeFootnotes);
 }
 
 function removeFootnotes(token) {
@@ -428,18 +467,10 @@ async function prepare(post, embedsLoader) {
 
     html = await embedsLoader.load(html);
 
-    let teaser = isTeaserToken(tokensWithoutTitle[0])
-      ? marked.parser(
-          assignLinks([
-            ...tokensWithoutTitle
-              .slice(0, 3)
-              .filter(isTeaserToken)
-              .slice(0, 2)
-              .map(removeFootnotes)
-          ]),
-          markedOptions
-        )
-      : "";
+    let teaser = marked.parser(
+      assignLinks([...getTeaserTokens(tokensWithoutTitle)]),
+      markedOptions
+    );
 
     teaser = await embedsLoader.load(teaser);
 
@@ -476,19 +507,10 @@ async function prepare(post, embedsLoader) {
       const description =
         teaser &&
         marked
-          .parser(
-            assignLinks([
-              ...tokensWithoutTitle
-                .slice(0, 3)
-                .filter(isTeaserToken)
-                .slice(0, 2)
-                .map(removeFootnotes)
-            ]),
-            {
-              ...markedOptions,
-              renderer: textRenderer
-            }
-          )
+          .parser(assignLinks([...getTeaserTokens(tokensWithoutTitle)]), {
+            ...markedOptions,
+            renderer: textRenderer
+          })
           .trim();
 
       opengraph.description =

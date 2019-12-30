@@ -229,17 +229,24 @@ document.addEventListener("DOMContentLoaded", function() {
   Array.prototype.forEach.call(
     document.querySelectorAll("ul[data-gallery]"),
     function initGallery(node) {
-      node.tabIndex = 0;
-
-      node.addEventListener("keydown", function(e) {
+      window.addEventListener("keydown", function(e) {
         var LEFT = 37;
         var RIGHT = 39;
+        var BOUNDS_OFFSET = 40;
+
+        var bounding = node.getBoundingClientRect();
+
+        if (
+          bounding.top + BOUNDS_OFFSET < 0 ||
+          bounding.bottom - BOUNDS_OFFSET >
+            (window.innerHeight || document.documentElement.clientHeight)
+        ) {
+          return;
+        }
 
         if (e.keyCode === LEFT) {
-          e.preventDefault();
           scrollToCenter(node, findFirstLeftOfCenter(node));
         } else if (e.keyCode === RIGHT) {
-          e.preventDefault();
           scrollToCenter(node, findFirstRightOfCenter(node));
         }
       });

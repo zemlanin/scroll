@@ -65,6 +65,7 @@ const ogImage = renderer.image.bind(renderer);
 const ogLink = renderer.link.bind(renderer);
 const ogHTML = renderer.html.bind(renderer);
 const ogParagraph = renderer.paragraph.bind(renderer);
+const ogList = renderer.list.bind(renderer);
 
 function embedCallback(href, title, text) {
   if (process.env.BLOG_BASE_URL && href.startsWith("/media/")) {
@@ -243,6 +244,22 @@ renderer.paragraph = function(text) {
   );
 
   return ogParagraph(text);
+};
+
+renderer.list = function(body, ordered, start) {
+  const isGalleryList =
+    !ordered &&
+    body &&
+    body
+      .replace(/^\s*<li>\s*|\s*<\/li>\s*$/gi, "") // remove first opening and last closing
+      .split(/\s*<\/li>\s*<li>\s*/gi) // split list on `</li><li>`
+      .every(listitem => listitem.match(/^<img [^>]+>$/i)); // check if every list item has only an `<img>` and nothing else
+
+  if (isGalleryList) {
+    return `<ul data-gallery style="list-style:none;padding:0">\n${body}</ul>\n`;
+  }
+
+  return ogList(body, ordered, start);
 };
 
 function getPostUrl(post) {
@@ -434,9 +451,11 @@ async function prepare(post, embedsLoader) {
     opengraph.title = title.trim();
 
     if (tokens.length > 5) {
-      const wordCount = cheerio(html)
+      const wordMatches = cheerio(html)
         .text()
-        .match(WORD_REGEX).length;
+        .match(WORD_REGEX);
+
+      const wordCount = wordMatches ? wordMatches.length : 0;
 
       if (wordCount > 200) {
         longread = {

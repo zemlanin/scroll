@@ -389,6 +389,24 @@ article a.more {
   text-decoration: none;
 }
 
+article ul[data-gallery] {
+  overflow: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
+  scroll-behavior: smooth;
+}
+
+article ul[data-gallery] li {
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 90%;
+  max-width: calc(100% - 4em);
+}
+
+article ul[data-gallery] li img {
+  display: inline-block;
+}
+
 a,
 header a:visited,
 footer a:visited {

@@ -172,3 +172,92 @@ document.addEventListener("DOMContentLoaded", function() {
     navigator.connection.addEventListener("change", handleLoopedVideos);
   }
 });
+
+document.addEventListener("DOMContentLoaded", function() {
+  function scrollToCenter(parent, child) {
+    if (!child) {
+      return;
+    }
+
+    var centering = Math.abs(parent.clientWidth - child.clientWidth) / 2;
+
+    parent.scrollTo(-centering + child.offsetLeft - parent.offsetLeft, 0);
+  }
+
+  function findFirstLeftOfCenter(node) {
+    var nodeViewportCenter = Math.floor(node.offsetLeft + node.clientWidth / 2);
+    var listItems = node.querySelectorAll("li");
+    var listItemsLength = listItemsLength;
+    var itemCenter;
+
+    // assuming that items flow from left to right (= `index = 0` on the leftmost element)
+    for (var i = listItems.length - 1; i >= 0; i--) {
+      itemCenter =
+        Math.floor(
+          listItems[i].offsetLeft -
+            node.scrollLeft +
+            listItems[i].clientWidth / 2
+        ) + 1;
+
+      if (itemCenter < nodeViewportCenter) {
+        return listItems[i];
+      }
+    }
+  }
+
+  function findFirstRightOfCenter(node) {
+    var nodeViewportCenter = Math.floor(node.offsetLeft + node.clientWidth / 2);
+    var listItems = node.querySelectorAll("li");
+    var listItemsLength = listItems.length;
+    var itemCenter;
+
+    // assuming that items flow from left to right (= `index = 0` on the leftmost element)
+    for (var i = 0; i < listItemsLength; i++) {
+      itemCenter =
+        Math.floor(
+          listItems[i].offsetLeft -
+            node.scrollLeft +
+            listItems[i].clientWidth / 2
+        ) - 1;
+
+      if (nodeViewportCenter < itemCenter) {
+        return listItems[i];
+      }
+    }
+  }
+
+  Array.prototype.forEach.call(
+    document.querySelectorAll("ul[data-gallery]"),
+    function initGallery(node) {
+      node.tabIndex = 0;
+
+      node.addEventListener("keydown", function(e) {
+        var LEFT = 37;
+        var RIGHT = 39;
+
+        if (e.keyCode === LEFT) {
+          e.preventDefault();
+          scrollToCenter(node, findFirstLeftOfCenter(node));
+        } else if (e.keyCode === RIGHT) {
+          e.preventDefault();
+          scrollToCenter(node, findFirstRightOfCenter(node));
+        }
+      });
+
+      Array.prototype.forEach.call(node.querySelectorAll("li"), function(li) {
+        li.addEventListener("click", function() {
+          scrollToCenter(node, li);
+        });
+      });
+
+      node.querySelector("li > img").addEventListener("load", function(e) {
+        Array.prototype.forEach.call(
+          node.querySelectorAll("li > img"),
+          function(img) {
+            img.style.maxHeight = e.target.clientHeight + "px";
+          }
+        );
+      });
+    }
+  );
+});

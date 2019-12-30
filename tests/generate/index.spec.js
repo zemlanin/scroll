@@ -76,12 +76,14 @@ test("database with posts and embeds", async t => {
       ("5", "![](https://www.youtube.com/watch?v=dQw4w9WgXcQ)"),
       ("6", ?6),
       ("7", ?7),
-      ("8", ?8);
+      ("8", ?8),
+      ("9", ?9);
   `,
     {
       6: 'post with footnote [^1][]\n\n[^1]:. "footnote _text_"',
       7: '# titled\n\npost with title and footnote [^1][]\n\n[^1]:. "[text](https://example.net)"',
-      8: 'post with named footnote [^na|me][]\n\n[^na|me]:. "**fn text**"'
+      8: 'post with named footnote [^na|me][]\n\n[^na|me]:. "**fn text**"',
+      9: "# gallery\n\n* ![](/media/1.jpg)\n* ![](/media/2.jpg)\n* ![](/media/3.jpg)"
     }
   );
 
@@ -167,6 +169,15 @@ test("database with posts and embeds", async t => {
       `<div class="footnotes"><hr/><ol><li id="fn:8:na-me" tabindex="-1"><p><strong>fn text</strong>&nbsp;<a href="#rfn:8:na-me" rev="footnote">&#8617;</a></p>`
     ) > -1,
     post8.split("\n").find(line => line.indexOf('<div class="footnotes">') > -1)
+  );
+
+  const post9 = (await fs.promises.readFile(
+    path.join(tmpFolder, "9.html")
+  )).toString();
+  t.ok(
+    post9.indexOf(`<ul data-gallery`) > -1,
+    post9.split("\n").find(line => line.indexOf("<ul data-gallery") > -1) ||
+      post9.match(/<article>([\s\S]+)<\/article>/i)[1].trim()
   );
 
   t.end();

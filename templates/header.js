@@ -342,39 +342,43 @@ document.addEventListener("DOMContentLoaded", function() {
             ) / 2
           ) + "px";
       }
+      
+      var supportsRAF = "requestAnimationFrame" in window;
+      
+      function refreshLayout() {
+        fillTheFillers();
+        if (supportsRAF) {
+          highlightCentermost();
+        }
+      }
 
       node
         .querySelector('li[data-filler="first"]')
         .nextElementSibling.querySelector("img")
-        .addEventListener("load", function() {
-          fillTheFillers();
-          highlightCentermost();
-        });
+        .addEventListener("load", refreshLayout);
 
       node
         .querySelector('li[data-filler="last"]')
         .previousElementSibling.querySelector("img")
-        .addEventListener("load", fillTheFillers);
+        .addEventListener("load", refreshLayout);
 
       var resizeTimeout, opacityTimeout;
 
-      if ("requestAnimationFrame" in window) {
+      if (supportsRAF) {
         window.addEventListener("resize", function() {
           if (resizeTimeout) {
             window.cancelAnimationFrame(resizeTimeout);
           }
 
-          resizeTimeout = window.requestAnimationFrame(fillTheFillers);
+          resizeTimeout = window.requestAnimationFrame(refreshLayout);
         });
-
-        highlightCentermost();
 
         node.addEventListener("scroll", function() {
           if (opacityTimeout) {
             window.cancelAnimationFrame(opacityTimeout);
           }
 
-          opacityTimeout = window.requestAnimationFrame(highlightCentermost);
+          opacityTimeout = window.requestAnimationFrame(refreshLayout);
         });
       }
     }

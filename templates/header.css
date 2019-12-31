@@ -401,10 +401,16 @@ article ul[data-gallery] li {
   vertical-align: middle;
   max-width: 90%;
   max-width: calc(100% - 4em);
+  transition: opacity 0.5s ease-in-out;
 }
 
 article ul[data-gallery] li img {
   display: inline-block;
+}
+
+article ul[data-gallery] li.dim {
+  opacity: 0.5;
+  transition: opacity 0.5s ease-in-out;
 }
 
 a,

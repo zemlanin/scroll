@@ -187,11 +187,14 @@ document.addEventListener("DOMContentLoaded", function() {
   function findFirstLeftOfCenter(node) {
     var nodeViewportCenter = Math.floor(node.offsetLeft + node.clientWidth / 2);
     var listItems = node.querySelectorAll("li");
-    var listItemsLength = listItemsLength;
     var itemCenter;
 
     // assuming that items flow from left to right (= `index = 0` on the leftmost element)
     for (var i = listItems.length - 1; i >= 0; i--) {
+      if (listItems[i].getAttribute("data-filler")) {
+        continue;
+      }
+
       itemCenter =
         Math.floor(
           listItems[i].offsetLeft -
@@ -225,6 +228,29 @@ document.addEventListener("DOMContentLoaded", function() {
         ) - 1;
 
       if (nodeViewportCenter < itemCenter) {
+        return listItems[i];
+      }
+    }
+  }
+
+  function findCentermost(node) {
+    var nodeViewportCenter = Math.floor(node.offsetLeft + node.clientWidth / 2);
+    var listItems = node.querySelectorAll("li");
+    var listItemsLength = listItems.length;
+    var itemLeftBorder;
+
+    // assuming that items flow from left to right (= `index = 0` on the leftmost element)
+    for (var i = 0; i < listItemsLength; i++) {
+      if (listItems[i].getAttribute("data-filler")) {
+        continue;
+      }
+
+      itemLeftBorder = listItems[i].offsetLeft - node.scrollLeft;
+
+      if (
+        itemLeftBorder < nodeViewportCenter &&
+        nodeViewportCenter < itemLeftBorder + listItems[i].clientWidth
+      ) {
         return listItems[i];
       }
     }
@@ -277,6 +303,23 @@ document.addEventListener("DOMContentLoaded", function() {
         });
       });
 
+      function highlightCentermost() {
+        var centermost = findCentermost(node);
+
+        if (centermost) {
+          centermost.classList.remove("dim");
+        }
+
+        var listItems = node.querySelectorAll("li:not(.dim)");
+        var listItemsLength = listItems.length;
+
+        for (var i = 0; i < listItemsLength; i++) {
+          if (listItems[i] !== centermost) {
+            listItems[i].classList.add("dim");
+          }
+        }
+      }
+
       addFillers(node);
 
       function fillTheFillers() {
@@ -303,14 +346,17 @@ document.addEventListener("DOMContentLoaded", function() {
       node
         .querySelector('li[data-filler="first"]')
         .nextElementSibling.querySelector("img")
-        .addEventListener("load", fillTheFillers);
+        .addEventListener("load", function() {
+          fillTheFillers();
+          highlightCentermost();
+        });
 
       node
         .querySelector('li[data-filler="last"]')
         .previousElementSibling.querySelector("img")
         .addEventListener("load", fillTheFillers);
 
-      var resizeTimeout;
+      var resizeTimeout, opacityTimeout;
 
       if ("requestAnimationFrame" in window) {
         window.addEventListener("resize", function() {
@@ -319,6 +365,16 @@ document.addEventListener("DOMContentLoaded", function() {
           }
 
           resizeTimeout = window.requestAnimationFrame(fillTheFillers);
+        });
+
+        highlightCentermost();
+
+        node.addEventListener("scroll", function() {
+          if (opacityTimeout) {
+            window.cancelAnimationFrame(opacityTimeout);
+          }
+
+          opacityTimeout = window.requestAnimationFrame(highlightCentermost);
         });
       }
     }

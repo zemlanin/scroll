@@ -291,15 +291,24 @@ document.addEventListener("DOMContentLoaded", function() {
         if (e.keyCode === LEFT) {
           e.preventDefault();
           scrollToCenter(node, findFirstLeftOfCenter(node));
+          if (supportsRAF) {
+            window.requestAnimationFrame(highlightCentermost);
+          }
         } else if (e.keyCode === RIGHT) {
           e.preventDefault();
           scrollToCenter(node, findFirstRightOfCenter(node));
+          if (supportsRAF) {
+            window.requestAnimationFrame(highlightCentermost);
+          }
         }
       });
 
       Array.prototype.forEach.call(node.querySelectorAll("li"), function(li) {
         li.addEventListener("click", function() {
           scrollToCenter(node, li);
+          if (supportsRAF) {
+            window.requestAnimationFrame(highlightCentermost);
+          }
         });
       });
 
@@ -392,8 +401,8 @@ document.addEventListener("DOMContentLoaded", function() {
       }
 
       if (supportsRAF) {
-        window.addEventListener("resize", onResize);
-        node.addEventListener("scroll", onScroll);
+        window.addEventListener("resize", onResize, false);
+        node.addEventListener("scroll", onScroll, false);
       }
     }
   );

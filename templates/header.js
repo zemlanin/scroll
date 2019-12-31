@@ -342,9 +342,9 @@ document.addEventListener("DOMContentLoaded", function() {
             ) / 2
           ) + "px";
       }
-      
+
       var supportsRAF = "requestAnimationFrame" in window;
-      
+
       function refreshLayout() {
         fillTheFillers();
         if (supportsRAF) {
@@ -364,13 +364,18 @@ document.addEventListener("DOMContentLoaded", function() {
 
       var resizeTimeout, opacityTimeout;
 
+      function onResize() {
+        fillTheFillers();
+        scrollToCenter(node, findCentermost(node));
+      }
+
       if (supportsRAF) {
         window.addEventListener("resize", function() {
           if (resizeTimeout) {
             window.cancelAnimationFrame(resizeTimeout);
           }
 
-          resizeTimeout = window.requestAnimationFrame(refreshLayout);
+          resizeTimeout = window.requestAnimationFrame(onResize);
         });
 
         node.addEventListener("scroll", function() {
@@ -378,7 +383,7 @@ document.addEventListener("DOMContentLoaded", function() {
             window.cancelAnimationFrame(opacityTimeout);
           }
 
-          opacityTimeout = window.requestAnimationFrame(refreshLayout);
+          opacityTimeout = window.requestAnimationFrame(highlightCentermost);
         });
       }
     }

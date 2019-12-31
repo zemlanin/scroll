@@ -90,7 +90,13 @@ async function removePotentialPagination(newestPage) {
   await unlinkFileWithGzip(pagePath);
 }
 
-async function generatePaginationPage(db, blog, pageNumber, postIds, isNewest) {
+async function generatePaginationPage(
+  db,
+  blog,
+  pageNumber,
+  postIds,
+  newestPage
+) {
   const posts = await getPosts(
     db,
     postIds,
@@ -101,12 +107,18 @@ async function generatePaginationPage(db, blog, pageNumber, postIds, isNewest) {
   const pageUrl = `page-${pageNumber}.html`;
   const title = `page-${pageNumber}`;
 
+  const indexPageAsNewer =
+    newestPage.index === pageNumber ||
+    newestPage.index === pageNumber + 1 ||
+    (newestPage.index === pageNumber + 2 &&
+      newestPage.posts.length < MINIMUM_INDEX_PAGE_SIZE);
+
   return await render("list.mustache", {
     blog,
     title: title,
     url: pageUrl,
     posts: posts,
-    newer: isNewest
+    newer: indexPageAsNewer
       ? { text: `index`, url: blog.url }
       : {
           text: `page-${pageNumber + 1}`,
@@ -300,36 +312,27 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
       );
     }
 
-    if (oldStatus === newStatus && +oldCreated === +new Date(newCreated)) {
-      const postPaginationPage = pages.slice(-1)[0];
-      const pageNumber = postPaginationPage.index;
+    const postsTimelineDidChange =
+      oldStatus !== newStatus || +oldCreated !== +new Date(newCreated);
+
+    const pagesToUpdate = postsTimelineDidChange ? pages : pages.slice(-1);
+
+    for (const page of pagesToUpdate) {
+      const pageNumber = page.index;
 
       await writeFileWithGzip(
         path.join(DIST, `page-${pageNumber}.html`),
         await generatePaginationPage(
           db,
           blog,
-          postPaginationPage.index,
-          postPaginationPage.posts,
-          newestPage.index === postPaginationPage.index
+          pageNumber,
+          page.posts,
+          newestPage
         )
       );
-    } else {
-      for (const page of pages) {
-        const pageNumber = page.index;
+    }
 
-        await writeFileWithGzip(
-          path.join(DIST, `page-${pageNumber}.html`),
-          await generatePaginationPage(
-            db,
-            blog,
-            pageNumber,
-            page.posts,
-            newestPage.index === pageNumber
-          )
-        );
-      }
-
+    if (postsTimelineDidChange) {
       await writeFileWithGzip(
         path.join(DIST, "archive.html"),
         await generateArchivePage(db, blog)

@@ -163,6 +163,7 @@ async function generate(db, destination, stdout, stderr) {
   stdout.write("posts done\n");
 
   let pagination = await getPagination(db, null);
+  let newestPage = pagination[0] || { index: 0, posts: [] };
 
   for (const page of pagination) {
     const pageNumber = page.index;
@@ -174,15 +175,13 @@ async function generate(db, destination, stdout, stderr) {
         blog,
         pageNumber,
         page.posts,
-        pagination.length === pageNumber
+        newestPage
       ),
       { flag: "wx" }
     );
   }
 
   stdout.write("pagination done\n");
-
-  let newestPage = pagination[0] || { index: 0, posts: [] };
 
   await writeFileWithGzip(
     path.join(tmpFolder, "index.html"),

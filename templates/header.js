@@ -174,6 +174,8 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 document.addEventListener("DOMContentLoaded", function() {
+  var supportsRAF = "requestAnimationFrame" in window;
+
   function scrollToCenter(parent, child) {
     if (!child) {
       return;
@@ -351,8 +353,6 @@ document.addEventListener("DOMContentLoaded", function() {
             ) / 2
           ) + "px";
       }
-
-      var supportsRAF = "requestAnimationFrame" in window;
 
       function refreshLayout() {
         fillTheFillers();

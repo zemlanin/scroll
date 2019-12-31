@@ -182,8 +182,11 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     var centering = Math.abs(parent.clientWidth - child.clientWidth) / 2;
+    var scrollPosition = -centering + child.offsetLeft - parent.offsetLeft;
 
-    parent.scrollTo(-centering + child.offsetLeft - parent.offsetLeft, 0);
+    if (scrollPosition !== parent.scrollLeft) {
+      parent.scrollTo(-centering + child.offsetLeft - parent.offsetLeft, 0);
+    }
   }
 
   function findFirstLeftOfCenter(node) {

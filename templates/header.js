@@ -348,7 +348,7 @@ document.addEventListener("DOMContentLoaded", function() {
       function refreshLayout() {
         fillTheFillers();
         if (supportsRAF) {
-          highlightCentermost();
+          window.requestAnimationFrame(highlightCentermost);
         }
       }
 
@@ -362,29 +362,38 @@ document.addEventListener("DOMContentLoaded", function() {
         .previousElementSibling.querySelector("img")
         .addEventListener("load", refreshLayout);
 
-      var resizeTimeout, opacityTimeout;
+      var resizeTimeout;
 
-      function onResize() {
+      function _onResizeInner() {
         fillTheFillers();
         scrollToCenter(node, findCentermost(node));
       }
 
+      function onResize() {
+        if (resizeTimeout) {
+          window.cancelAnimationFrame(resizeTimeout);
+        }
+
+        resizeTimeout = window.requestAnimationFrame(_onResizeInner);
+      }
+
+      var scrollTimeout;
+
+      function _onScrollInner() {
+        highlightCentermost();
+      }
+
+      function onScroll() {
+        if (scrollTimeout) {
+          window.cancelAnimationFrame(scrollTimeout);
+        }
+
+        scrollTimeout = window.requestAnimationFrame(_onScrollInner);
+      }
+
       if (supportsRAF) {
-        window.addEventListener("resize", function() {
-          if (resizeTimeout) {
-            window.cancelAnimationFrame(resizeTimeout);
-          }
-
-          resizeTimeout = window.requestAnimationFrame(onResize);
-        });
-
-        node.addEventListener("scroll", function() {
-          if (opacityTimeout) {
-            window.cancelAnimationFrame(opacityTimeout);
-          }
-
-          opacityTimeout = window.requestAnimationFrame(highlightCentermost);
-        });
+        window.addEventListener("resize", onResize);
+        node.addEventListener("scroll", onScroll);
       }
     }
   );

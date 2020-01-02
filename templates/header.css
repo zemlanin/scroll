@@ -401,12 +401,23 @@ article ul[data-gallery] li {
   vertical-align: middle;
   max-width: 90%;
   max-width: calc(100% - 4em);
+  opacity: 1;
+  will-change: opacity;
   transition: opacity 0.5s ease-in-out;
 }
 
 article ul[data-gallery] li.dim {
   opacity: 0.5;
-  transition: opacity 0.5s ease-in-out;
+}
+
+article ul[data-gallery] li.dim img,
+article ul[data-gallery] li.dim video,
+article ul[data-gallery] li.dim a[href] {
+  pointer-events: none;
+}
+
+article ul[data-gallery] li.dim figure.card a {
+  display: block;
 }
 
 a,

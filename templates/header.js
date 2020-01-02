@@ -265,6 +265,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var filler = document.createElement("li");
     filler.setAttribute("data-filler", "first");
     filler.setAttribute("aria-hidden", "true");
+    filler.setAttribute("role", "presentation");
     node.insertBefore(filler.cloneNode(), node.querySelector("li"));
     filler.setAttribute("data-filler", "last");
     node.insertBefore(filler, null);
@@ -364,15 +365,34 @@ document.addEventListener("DOMContentLoaded", function() {
         }
       }
 
-      node
-        .querySelector('li[data-filler="first"]')
-        .nextElementSibling.querySelector("img")
-        .addEventListener("load", refreshLayout);
+      function refreshLayoutOnChildrenLoad(parent) {
+        Array.prototype.forEach.call(parent.querySelectorAll("img"), function(
+          img
+        ) {
+          img.addEventListener("load", refreshLayout);
+        });
 
-      node
-        .querySelector('li[data-filler="last"]')
-        .previousElementSibling.querySelector("img")
-        .addEventListener("load", refreshLayout);
+        Array.prototype.forEach.call(parent.querySelectorAll("video"), function(
+          video
+        ) {
+          var img;
+
+          video.addEventListener("loadedmetadata", refreshLayout);
+          if (video.poster) {
+            img = new Image();
+            img.addEventListener("load", refreshLayout);
+            img.src = video.poster;
+          }
+        });
+      }
+
+      refreshLayoutOnChildrenLoad(
+        node.querySelector('li[data-filler="first"]').nextElementSibling
+      );
+
+      refreshLayoutOnChildrenLoad(
+        node.querySelector('li[data-filler="last"]').previousElementSibling
+      );
 
       var resizeTimeout;
 

@@ -253,7 +253,15 @@ renderer.list = function(body, ordered, start) {
     body
       .replace(/^\s*<li>\s*|\s*<\/li>\s*$/gi, "") // remove first opening and last closing
       .split(/\s*<\/li>\s*<li>\s*/gi) // split list on `</li><li>`
-      .every(listitem => listitem.match(/^<img [^>]+>$/i)); // check if every list item has only an `<img>` and nothing else
+      .every(
+        listitem =>
+          // check if every list item has only either an `<img>`,
+          listitem.match(/^<img [^>]+>$/i) ||
+          // a `<video>`,
+          listitem.match(/^<video [^>]+><\/video>$/i) ||
+          // or a `<x-embed>` and nothing else
+          listitem.match(/^<x-embed>(?!<\/?x-embed>)[\s\S]+<\/x-embed>$/i)
+      );
 
   if (isGalleryList) {
     return `<ul data-gallery style="list-style:none;padding:0">\n${body}</ul>\n`;

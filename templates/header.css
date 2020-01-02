@@ -396,6 +396,10 @@ article ul[data-gallery] {
   scroll-behavior: smooth;
 }
 
+article ul[data-gallery] figure.card {
+  white-space: normal;
+}
+
 article ul[data-gallery] li {
   display: inline-block;
   vertical-align: middle;

@@ -817,6 +817,10 @@ module.exports = {
     }
 
     if (card.title) {
+      if (card.img && !card.img.alt) {
+        card.img.alt = card.title;
+      }
+
       card.title = card.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 

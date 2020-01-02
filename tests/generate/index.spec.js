@@ -114,10 +114,17 @@ test("database with posts and embeds", async t => {
   );
 
   const YTEmbed = `<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.com/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
-          <img src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg">
+          <img alt="Rick Astley - Never Gonna Give You Up (Video)" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg">
       </a>`;
-  const post5 = await fs.promises.readFile(path.join(tmpFolder, "5.html"));
-  t.ok(post5.indexOf(YTEmbed) > -1);
+  const post5 = (await fs.promises.readFile(
+    path.join(tmpFolder, "5.html")
+  )).toString();
+  t.ok(
+    post5.indexOf(YTEmbed) > -1,
+    post5.indexOf(YTEmbed) > -1
+      ? YTEmbed.split("\n")[0]
+      : post5.match(/<article>([\s\S]+)<\/article>/i)[1].trim()
+  );
 
   const post6 = await fs.promises.readFile(path.join(tmpFolder, "6.html"));
   t.ok(

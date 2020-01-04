@@ -220,7 +220,7 @@ article a.future-frame:after {
     color: white;
     background: #00a500;
   }
-  
+
   body:not(.dark) article a.future-frame.loading:hover:after {
     color: unset;
     background: none;

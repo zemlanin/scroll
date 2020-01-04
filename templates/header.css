@@ -220,6 +220,11 @@ article a.future-frame:after {
     color: white;
     background: #00a500;
   }
+  
+  body:not(.dark) article a.future-frame.loading:hover:after {
+    color: unset;
+    background: none;
+  }
 }
 
 body.dark article a.future-frame:after {
@@ -247,7 +252,9 @@ body.light article a.future-frame:hover:after {
   }
 }
 
-article a.future-frame.loading:hover:after {
+article a.future-frame.loading:hover:after,
+body.dark article a.future-frame.loading:hover:after,
+body.light article a.future-frame.loading:hover:after {
   color: unset;
   background: none;
 }

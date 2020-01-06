@@ -77,7 +77,8 @@ test("database with posts and embeds", async t => {
       ("6", ?6),
       ("7", ?7),
       ("8", ?8),
-      ("9", ?9);
+      ("9", ?9),
+      ("10", "---\n# internal\n\nsomething something");
   `,
     {
       6: 'post with footnote [^1][]\n\n[^1]:. "footnote _text_"',
@@ -185,6 +186,29 @@ test("database with posts and embeds", async t => {
     post9.indexOf(`<ul data-gallery`) > -1,
     post9.split("\n").find(line => line.indexOf("<ul data-gallery") > -1) ||
       post9.match(/<article>([\s\S]+)<\/article>/i)[1].trim()
+  );
+
+  const post10 = (await fs.promises.readFile(
+    path.join(tmpFolder, "10.html")
+  )).toString();
+  t.ok(
+    post10.indexOf(`<h1>internal</h1>`) > -1,
+    post10.split("\n").find(line => line.indexOf("<h1") > -1) ||
+      post10.match(/<article>([\s\S]+)<\/article>/i)[1].trim()
+  );
+  t.ok(
+    post10.indexOf(`<time`) === -1,
+    post10.split("\n").find(line => line.indexOf("<time") > -1) || "no <time>"
+  );
+  t.ok(
+    post10.indexOf(`/10.html`) === -1,
+    post10.split("\n").find(line => line.indexOf("/10.html") > -1) ||
+      "no self urls"
+  );
+  t.ok(
+    post10.indexOf(`og:url`) === -1,
+    post10.split("\n").find(line => line.indexOf("og:url") > -1) ||
+      "no opengraph"
   );
 
   t.end();

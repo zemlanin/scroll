@@ -425,6 +425,11 @@ async function prepare(post, embedsLoader) {
     return ts;
   };
 
+  const internal = !!(tokens && tokens[0] && tokens[0].type === "hr");
+  if (internal) {
+    tokens.shift();
+  }
+
   const header1Token =
     tokens && tokens[0] && tokens[0].type === "heading" && tokens[0].text
       ? tokens[0]
@@ -546,6 +551,7 @@ async function prepare(post, embedsLoader) {
 
   return {
     id: post.id,
+    internal,
     slug: post.slug,
     draft: post.draft,
     private: post.private,

@@ -94,7 +94,15 @@
     {{#posts}}
         <div class="card">
             <article class="card-content">
+                {{#internal}}
+                  <div class="notification">
+                    {{title}} / <i>internal</i>
+                  </div>
+                {{/internal}}
+
+                {{^internal}}
                 {{{htmlTitle}}}
+                {{/internal}}
 
                 {{#longread}}
                   {{{teaser}}}

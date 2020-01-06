@@ -16,6 +16,7 @@
   <meta name="twitter:creator" content="@zemlanin" />
   <meta property="og:site_name" content="{{blog.title}}">
   {{#post}}
+    {{^internal}}
     {{#opengraph}}
       <meta property="og:url" content="{{{url}}}" />
       <meta property="og:title" content="{{title}}" />
@@ -27,6 +28,7 @@
         <meta property="twitter:card" content="summary_large_image" />
       {{/image}}
     {{/opengraph}}
+    {{/internal}}
   {{/post}}
   <title>
     {{#title}}{{title}} - {{/title}}

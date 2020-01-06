@@ -83,7 +83,7 @@ module.exports = async (req, res) => {
 
   if (qWhereValue) {
     if (!(qWhereValue === "private" || qWhereValue === "public")) {
-      qWhereCondition += ` AND (instr(id, $query) OR instr(lower(text), $query))`;
+      qWhereCondition += ` AND (instr(id, $query) OR instr(lower(slug), $query) OR instr(lower(text), $query))`;
     }
 
     if (qWhereValue === "private" || qWhereValue.startsWith("private ")) {

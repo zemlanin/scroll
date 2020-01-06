@@ -95,28 +95,27 @@ module.exports = async (req, res) => {
     }
   }
 
-  const draft = offset
+  const drafts = offset
     ? []
     : await db.all(
-      `
-        SELECT
-          id,
-          slug,
-          draft,
-          private,
-          (NOT draft AND NOT private) public,
-          text,
-          strftime('%s000', created) created,
-          strftime('%s000', modified) modified
-        FROM posts
-        WHERE draft ${qWhereCondition}
-        ORDER BY datetime(created) DESC, id DESC
-      `,
-      {
-        ...(qWhereValue ? { $query: qWhereValue } : {})
-      }
-    );
-  }
+        `
+          SELECT
+            id,
+            slug,
+            draft,
+            private,
+            (NOT draft AND NOT private) public,
+            text,
+            strftime('%s000', created) created,
+            strftime('%s000', modified) modified
+          FROM posts
+          WHERE draft ${qWhereCondition}
+          ORDER BY datetime(created) DESC, id DESC
+        `,
+        {
+          ...(qWhereValue ? { $query: qWhereValue } : {})
+        }
+      );
 
   const posts = await db.all(
     `

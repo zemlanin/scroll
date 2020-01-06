@@ -68,54 +68,36 @@ module.exports = async (req, res) => {
   const db = await req.db();
   const offset = +query.offset || 0;
 
-  let posts;
-  let drafts;
-
-  if (offset) {
-    drafts = [];
-  } else if (query.q) {
-    drafts = await db.all(
-      `
-        SELECT
-          id,
-          slug,
-          draft,
-          private,
-          (NOT draft AND NOT private) public,
-          text,
-          strftime('%s000', created) created,
-          strftime('%s000', modified) modified
-        FROM posts
-        WHERE (instr(id, ?3) OR instr(lower(text), ?3))
-          AND draft
-        ORDER BY datetime(created) DESC, id DESC
-      `,
-      {
-        3: decodeURIComponent(query.q).toLowerCase()
-      }
-    );
-  } else {
-    drafts = await db.all(
-      `
-        SELECT
-          id,
-          slug,
-          draft,
-          private,
-          (NOT draft AND NOT private) public,
-          text,
-          strftime('%s000', created) created,
-          strftime('%s000', modified) modified
-        FROM posts
-        WHERE draft
-        ORDER BY datetime(created) DESC, id DESC
-      `,
-      {}
-    );
-  }
-
+  let qWhereValue = "";
   if (query.q) {
-    posts = await db.all(
+    try {
+      qWhereValue = decodeURIComponent(query.q)
+        .trim()
+        .toLowerCase();
+    } catch (e) {
+      //
+    }
+  }
+
+  let qWhereCondition = ``;
+
+  if (qWhereValue) {
+    if (!(qWhereValue === "private" || qWhereValue === "public")) {
+      qWhereCondition += ` AND (instr(id, $query) OR instr(lower(text), $query))`;
+    }
+
+    if (qWhereValue === "private" || qWhereValue.startsWith("private ")) {
+      qWhereCondition += ` AND private`;
+      qWhereValue = qWhereValue.slice("private".length).trim();
+    } else if (qWhereValue === "public" || qWhereValue.startsWith("public ")) {
+      qWhereCondition += ` AND (NOT draft AND NOT private)`;
+      qWhereValue = qWhereValue.slice("public".length).trim();
+    }
+  }
+
+  const draft = offset
+    ? []
+    : await db.all(
       `
         SELECT
           id,
@@ -127,37 +109,37 @@ module.exports = async (req, res) => {
           strftime('%s000', created) created,
           strftime('%s000', modified) modified
         FROM posts
-        WHERE (instr(id, ?3) OR instr(lower(text), ?3))
-          AND NOT draft
+        WHERE draft ${qWhereCondition}
         ORDER BY datetime(created) DESC, id DESC
-        LIMIT ?2 OFFSET ?1
       `,
       {
-        1: offset,
-        2: PAGE_SIZE + 1,
-        3: decodeURIComponent(query.q).toLowerCase()
+        ...(qWhereValue ? { $query: qWhereValue } : {})
       }
     );
-  } else {
-    posts = await db.all(
-      `
-        SELECT
-          id,
-          slug,
-          draft,
-          private,
-          (NOT draft AND NOT private) public,
-          text,
-          strftime('%s000', created) created,
-          strftime('%s000', modified) modified
-        FROM posts
-        WHERE NOT draft
-        ORDER BY datetime(created) DESC, id DESC
-        LIMIT ?2 OFFSET ?1
-      `,
-      { 1: offset, 2: PAGE_SIZE + 1 }
-    );
   }
+
+  const posts = await db.all(
+    `
+      SELECT
+        id,
+        slug,
+        draft,
+        private,
+        (NOT draft AND NOT private) public,
+        text,
+        strftime('%s000', created) created,
+        strftime('%s000', modified) modified
+      FROM posts
+      WHERE NOT draft ${qWhereCondition}
+      ORDER BY datetime(created) DESC, id DESC
+      LIMIT $limit OFFSET $offset
+    `,
+    {
+      $offset: offset,
+      $limit: PAGE_SIZE + 1,
+      ...(qWhereValue ? { $query: qWhereValue } : {})
+    }
+  );
 
   const morePosts = posts.length > PAGE_SIZE;
   const suggestion = await getSuggestion(db, req);

@@ -46,7 +46,7 @@
           --ignore-status=301
           --ignore-status=302
           --log-format=COMBINED
-          --output /var/projects/goaccess/scroll/month.html"
+          --output /var/projects/goaccess/scroll/month.html 2>&1"
 
     - cron:
         name: "generate goaccess json"
@@ -60,7 +60,7 @@
           --ignore-status=404
           --log-format=COMBINED
           --enable-panel=VISITORS
-          --output /var/projects/goaccess/scroll/access.json"
+          --output /var/projects/goaccess/scroll/access.json 2>&1"
 
     - cron:
         name: "cleanup last month's access logs"
@@ -68,7 +68,7 @@
         hour: "4"
         day: "25"
         job: |
-          awk -i inplace "/"$(date +%b)"/ { print }" /var/log/scroll/nginx_access.log
+          awk -i inplace "/"$(date +%b)"/ { print }" /var/log/scroll/nginx_access.log 2>&1
 
     - cron:
         name: "cleanup last month's rss logs"
@@ -76,4 +76,4 @@
         hour: "4"
         day: "25"
         job: |
-          awk -i inplace "/"$(date +%b)"/ { print }" /var/log/scroll/nginx_access_rss.log
+          awk -i inplace "/"$(date +%b)"/ { print }" /var/log/scroll/nginx_access_rss.log 2>&1

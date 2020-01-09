@@ -37,12 +37,12 @@
         <div class="control"><a href="/backstage/generate" class="button">generate</a></div>
       </div>
       <div class="field has-addons">
-        {{#gauges.id}}
-          <div class="control"><a href="https://secure.gaug.es/dashboard#/gauges/{{gauges.id}}/overview"
-            class="button"
-            title="gauges"
-          ><img src="/backstage/gauges.svg" style="height:1em; width: 3em"></a></div>
-        {{/gauges.id}}
+        {{#goaccess}}
+          <div class="control"><a href="/backstage/analytics" class="button" title="goaccess"><img
+            src="/backstage/goaccess.svg"
+            style="height:1em; width: 3em"
+          ></a></div>
+        {{/goaccess}}
         {{# devMode.canEnter }}
           <div class="control"><a href="/enter_dev" class="button" title="enter dev mode">&#128679;</a></div>
         {{/ devMode.canEnter }}

@@ -170,9 +170,7 @@ module.exports = async (req, res) => {
       )
     ),
     suggestion: suggestion,
-    gauges: {
-      id: process.env.GAUGES_ID
-    },
+    goaccess: !!process.env.GOACCESS_JSON,
     devMode: {
       canEnter: process.env.NODE_ENV === "production",
       canExit:

@@ -71,8 +71,7 @@ async function blogRender(tmpl, data) {
       "highlight.css": await loadTemplate(
         path.join(BLOG_TEMPLATES, "highlight.css"),
         cssProcess
-      ),
-      gauges: await loadTemplate(path.join(BLOG_TEMPLATES, "gauges.mustache"))
+      )
     }
   );
 }

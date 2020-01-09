@@ -181,7 +181,7 @@ const handlers = [
   ["GET", "/backstage/media", require("./backstage/media.js").get],
   ["POST", "/backstage/media", require("./backstage/media.js").post],
   ["POST", "/backstage/convert", require("./backstage/convert.js").post],
-  ["GET", "/backstage/gauges.svg", require("./backstage/gauges-graph.js")],
+  ["GET", "/backstage/goaccess.svg", require("./backstage/goaccess-graph.js")],
   ["GET", "/backstage/embeds", require("./backstage/embeds.js").get],
   ["POST", "/backstage/embeds", require("./backstage/embeds.js").post],
   ["GET", "/:name(.html)", serveHtml]

@@ -19,6 +19,12 @@ async function getTraffic(days = 31) {
 }
 
 async function goaccessGraph(req, res) {
+  if (!process.env.GOACCESS_JSON) {
+    res.writeHead(404, { "Content-Type": "text/plain" });
+    res.end("404");
+    return;
+  }
+
   const user = authed(req, res);
 
   if (!user) {
@@ -26,6 +32,12 @@ async function goaccessGraph(req, res) {
   }
 
   const traffic = await getTraffic();
+
+  if (!traffic) {
+    res.writeHead(404, { "Content-Type": "text/plain" });
+    res.end("404");
+    return;
+  }
 
   const width = traffic.length * 3;
   const aspectRatio = 3;
@@ -64,9 +76,4 @@ async function goaccessGraph(req, res) {
   `;
 }
 
-module.exports = process.env.GOACCESS_JSON
-  ? goaccessGraph
-  : (req, res) => {
-      res.writeHead(404, { "Content-Type": "text/plain" });
-      res.end("404");
-    };
+module.exports = goaccessGraph;

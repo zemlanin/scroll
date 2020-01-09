@@ -25,24 +25,24 @@
     - cron:
         name: "generate goaccess report"
         minute: "*"
-        job: |
-          goaccess -f /var/log/scroll/nginx_access.log \
-            --ignore-crawlers \
-            --ignore-status=301 \
-            --ignore-status=302 \
-            --log-format=COMBINED \
-            --output /var/projects/goaccess/scroll/index.html
+        job:
+          'goaccess -f /var/log/scroll/nginx_access.log
+            --ignore-crawlers
+            --ignore-status=301
+            --ignore-status=302
+            --log-format=COMBINED
+            --output /var/projects/goaccess/scroll/index.html'
 
     - cron:
         name: "generate goaccess json"
         minute: "*"
-        job: |
-          goaccess -f /var/log/scroll/nginx_access.log \
-            --ignore-crawlers \
-            --ignore-status=301 \
-            --ignore-status=302 \
-            --log-format=COMBINED \
-            --output /var/projects/goaccess/scroll/access.json
+        job:
+          'goaccess -f /var/log/scroll/nginx_access.log
+            --ignore-crawlers
+            --ignore-status=301
+            --ignore-status=302
+            --log-format=COMBINED
+            --output /var/projects/goaccess/scroll/access.json'
 
     - cron:
         name: "cleanup last month's access logs"

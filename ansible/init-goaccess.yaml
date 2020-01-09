@@ -41,7 +41,7 @@
         name: "generate goaccess monthly report"
         minute: "*"
         job:
-          "sed -n '/'$(date '+%d/%b/%Y' -d '31 day ago')'/,$ p' /var/log/scroll/nginx_access.log | goaccess -
+          "sed -n '/'$(date '+%d\\/%b\\/%Y' -d '31 day ago')'/,$ p' /var/log/scroll/nginx_access.log | goaccess -
           --ignore-crawlers
           --ignore-status=301
           --ignore-status=302
@@ -52,7 +52,7 @@
         name: "generate goaccess json"
         minute: "*"
         job:
-          "sed -n '/'$(date '+%d/%b/%Y' -d '31 day ago')'/,$ p' /var/log/scroll/nginx_access.log | goaccess -
+          "sed -n '/'$(date '+%d\\/%b\\/%Y' -d '31 day ago')'/,$ p' /var/log/scroll/nginx_access.log | goaccess -
           --ignore-statics
           --ignore-crawlers
           --ignore-status=301

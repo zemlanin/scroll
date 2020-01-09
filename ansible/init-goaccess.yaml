@@ -39,20 +39,13 @@
 
     - cron:
         name: "generate goaccess monthly report"
-        minute: "*"
-        job:
-          "sed -n '/'$(date +%d\\/%b\\/%Y -d '31 day ago')'/,$ p' /var/log/scroll/nginx_access.log | goaccess -
-          --ignore-crawlers
-          --ignore-status=301
-          --ignore-status=302
-          --log-format=COMBINED
-          --output /var/projects/goaccess/scroll/month.html 2>&1"
+        state: absent
 
     - cron:
         name: "generate goaccess json"
         minute: "*"
         job:
-          "sed -n '/'$(date +%d\\/%b\\/%Y -d '31 day ago')'/,$ p' /var/log/scroll/nginx_access.log | goaccess -
+          "goaccess -f /var/log/scroll/nginx_access.log
           --ignore-statics
           --ignore-crawlers
           --ignore-status=301
@@ -60,7 +53,7 @@
           --ignore-status=404
           --log-format=COMBINED
           --enable-panel=VISITORS
-          --output /var/projects/goaccess/scroll/access.json 2>&1"
+          --output /var/projects/goaccess/scroll/access.json"
 
     - cron:
         name: "cleanup access logs older than 2 months"

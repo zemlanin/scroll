@@ -33,9 +33,21 @@
           --output /var/projects/goaccess/scroll/index.html"
 
     - cron:
+        name: "generate goaccess monthly report"
+        minute: "*"
+        job:
+          "sed -n '/'$(date '+%d\\/%b\\/%Y' -d '31 day ago')'/,$ p' /var/log/scroll/nginx_access.log | goaccess -
+          --ignore-crawlers
+          --ignore-status=301
+          --ignore-status=302
+          --log-format=COMBINED
+          --output /var/projects/goaccess/scroll/month.html"
+
+    - cron:
         name: "generate goaccess json"
         minute: "*"
-        job: "goaccess -f /var/log/scroll/nginx_access.log
+        job:
+          "sed -n '/'$(date '+%d\\/%b\\/%Y' -d '31 day ago')'/,$ p' /var/log/scroll/nginx_access.log | goaccess -
           --ignore-statics
           --ignore-crawlers
           --ignore-status=301

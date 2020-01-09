@@ -63,17 +63,17 @@
           --output /var/projects/goaccess/scroll/access.json 2>&1"
 
     - cron:
-        name: "cleanup last month's access logs"
+        name: "cleanup access logs older than 2 months"
         minute: "16"
         hour: "4"
         day: "25"
         job: |
-          awk -i inplace "/"$(date +%b)"/ { print }" /var/log/scroll/nginx_access.log 2>&1
+          awk -i inplace "/"$(date +%b)"|"$(date +%b -d '31 day ago')"/ { print }" /var/log/scroll/nginx_access.log 2>&1
 
     - cron:
-        name: "cleanup last month's rss logs"
+        name: "cleanup rss logs older than 2 months"
         minute: "16"
         hour: "4"
         day: "25"
         job: |
-          awk -i inplace "/"$(date +%b)"/ { print }" /var/log/scroll/nginx_access_rss.log 2>&1
+          awk -i inplace "/"$(date +%b)"|"$(date +%b -d '31 day ago')"/ { print }" /var/log/scroll/nginx_access_rss.log 2>&1

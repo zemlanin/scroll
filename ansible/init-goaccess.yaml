@@ -44,8 +44,7 @@
     - cron:
         name: "generate goaccess json"
         minute: "*"
-        job:
-          "goaccess -f /var/log/scroll/nginx_access.log
+        job: "goaccess -f /var/log/scroll/nginx_access.log
           --ignore-statics
           --ignore-crawlers
           --ignore-status=301

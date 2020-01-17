@@ -59,6 +59,31 @@
       "es6": true,
       "node": true
     },
+    "overrides": [
+      {
+        "files": [
+          "./static/*.js",
+          "./templates/*.js",
+          "./backstage/templates/*.js"
+        ],
+        "env": {
+          "browser": true,
+          "es6": false,
+          "node": false
+        },
+        "parserOptions": {
+          "ecmaVersion": 3
+        }
+      },
+      {
+        "files": [
+          "./backstage/templates/*.js"
+        ],
+        "parserOptions": {
+          "ecmaVersion": 9
+        }
+      }
+    ],
     "parserOptions": {
       "ecmaVersion": 9
     },

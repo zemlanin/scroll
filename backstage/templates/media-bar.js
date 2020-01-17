@@ -1,4 +1,3 @@
-/* eslint-env browser */
 document.addEventListener("DOMContentLoaded", function() {
   const mediaBar = document.getElementById("media-bar");
   mediaBar.scrollLeft = 0;

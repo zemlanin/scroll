@@ -1,4 +1,3 @@
-/* eslint-env browser */
 var script;
 var head = document.getElementsByTagName("head")[0];
 var element = document.createElement("details");

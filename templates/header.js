@@ -1,4 +1,3 @@
-/* eslint-env browser */
 document.addEventListener("DOMContentLoaded", function() {
   var nightModeForm = document.getElementById("night-mode");
   if (!nightModeForm) {

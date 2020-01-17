@@ -2,7 +2,6 @@
 Details Element Polyfill 2.4.0
 Copyright © 2019 Javan Makhmali
  */
-/* eslint-env browser */
 (function() {
   "use strict";
   var element = document.createElement("details");

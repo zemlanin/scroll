@@ -175,6 +175,18 @@ document.addEventListener("DOMContentLoaded", function() {
 document.addEventListener("DOMContentLoaded", function() {
   var supportsRAF = "requestAnimationFrame" in window;
 
+  function wrapInRAF(f) {
+    var timeout;
+
+    return function() {
+      if (timeout) {
+        window.cancelAnimationFrame(timeout);
+      }
+
+      timeout = window.requestAnimationFrame(f);
+    };
+  }
+
   function scrollToCenter(parent, child) {
     if (!child) {
       return;
@@ -184,7 +196,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var scrollPosition = -centering + child.offsetLeft - parent.offsetLeft;
 
     if (scrollPosition !== parent.scrollLeft) {
-      parent.scrollTo(-centering + child.offsetLeft - parent.offsetLeft, 0);
+      parent.scrollTo(scrollPosition, 0);
     }
   }
 
@@ -393,38 +405,19 @@ document.addEventListener("DOMContentLoaded", function() {
         node.querySelector('li[data-filler="last"]').previousElementSibling
       );
 
-      var resizeTimeout;
-
-      function _onResizeInner() {
+      function onResize() {
         fillTheFillers();
         scrollToCenter(node, findCentermost(node));
       }
 
-      function onResize() {
-        if (resizeTimeout) {
-          window.cancelAnimationFrame(resizeTimeout);
-        }
 
-        resizeTimeout = window.requestAnimationFrame(_onResizeInner);
-      }
-
-      var scrollTimeout;
-
-      function _onScrollInner() {
+      function onScroll() {
         highlightCentermost();
       }
 
-      function onScroll() {
-        if (scrollTimeout) {
-          window.cancelAnimationFrame(scrollTimeout);
-        }
-
-        scrollTimeout = window.requestAnimationFrame(_onScrollInner);
-      }
-
       if (supportsRAF) {
-        window.addEventListener("resize", onResize, false);
-        node.addEventListener("scroll", onScroll, false);
+        window.addEventListener("resize", wrapInRAF(onResize), false);
+        node.addEventListener("scroll", wrapInRAF(onScroll), false);
       }
     }
   );

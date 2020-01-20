@@ -318,6 +318,7 @@ nav span {
 
 #settings-icon > summary {
   color: #888;
+  cursor: pointer;
   list-style: none;
   display: inline-block;
 }

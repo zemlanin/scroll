@@ -91,18 +91,19 @@
         <a href="/backstage" class="button">&larr; backstage</a>
         {{#post}}
             <div class="field has-addons">
-                {{#draft}}
-                    <div class="control">
-                        <button type="submit"
-                            formaction="/backstage/delete/"
-                            class="control button"
-                            onclick="return confirm('delete {{id}}?')"
-                            form="main-form"
-                        >
-                            {{#fas}}trash{{/fas}}
-                        </button>
-                    </div>
-                {{/draft}}
+                <div class="control">
+                    <button type="submit"
+                        formaction="/backstage/delete/"
+                        class="control button"
+                        onclick="return confirm('delete {{id}}?')"
+                        form="main-form"
+                        {{^draft}}
+                            disabled
+                        {{/draft}}
+                    >
+                        {{#fas}}trash{{/fas}}
+                    </button>
+                </div>
                 <div class="control">
                     <button type="submit"
                         name="draft"
@@ -114,6 +115,19 @@
                         {{^draft}}
                             {{#fas}}eye-slash{{/fas}}
                         {{/draft}}
+                    </button>
+                </div>
+                <div class="control">
+                    <button type="submit"
+                        name="internal"
+                        value="1"
+                        class="button"
+                        form="main-form"
+                    >
+                        {{#internal}}internal{{/internal}}
+                        {{^internal}}
+                            {{#fas}}tools{{/fas}}
+                        {{/internal}}
                     </button>
                 </div>
                 <div class="control">
@@ -135,6 +149,7 @@
                         value="1"
                         class="button"
                         form="main-form"
+                        {{#internal}}disabled{{/internal}}
                     >
                         {{#public}}public{{/public}}
                         {{^public}}
@@ -148,37 +163,45 @@
     <form method="POST" id="main-form">
         <input type="hidden" name="id" value="{{post.id}}">
         <div class="field is-horizontal has-addons">
+            <div class="control">
+                {{#post.slug}}
+                    <a href="/{{post.slug}}.html" target="_blank" class="button">/</a>
+                {{/post.slug}}
+                {{^post.slug}}
+                    <span class="button is-static">/</span>
+                {{/post.slug}}
+            </div>
             <div class="control" style="width: 100%; flex-grow: 1;">
                 <input
                     name="slug"
                     pattern="[a-zA-Z0-9_-]+"
                     value="{{post.slug}}"
-                    placeholder="/slug"
+                    placeholder="slug"
                     class="input"
                     style="width: 100%; flex-grow: 1;"
+                    {{#post.internal}}
+                        required
+                    {{/post.internal}}
                 >
-                <p class="help has-text-right">
-                    <a href="/{{post.id}}.html" target="_blank" class="has-text-grey-light is-size-7">
-                        /{{post.id}}.html
-                    </a>
-                </p>
+                {{^post.internal}}
+                  <p class="help has-text-right">
+                      <a href="/{{post.id}}.html" target="_blank" class="has-text-grey-light is-size-7">
+                          /{{post.id}}.html
+                      </a>
+                  </p>
+                {{/post.internal}}
             </div>
-            {{#post.slug}}
+            {{^post.internal}}
                 <div class="control">
-                    <a href="/{{post.slug}}.html" target="_blank" class="button">
-                        {{#fas}}link{{/fas}}
+                    <a
+                        href="/backstage/preview/?id={{post.id}}&rss=1"
+                        target="_blank"
+                        class="button"
+                    >
+                      {{#fas}}rss{{/fas}}
                     </a>
                 </div>
-            {{/post.slug}}
-            <div class="control">
-                <a
-                    href="/backstage/preview/?id={{post.id}}&rss=1"
-                    target="_blank"
-                    class="button"
-                >
-                  {{#fas}}rss{{/fas}}
-                </a>
-            </div>
+            {{/post.internal}}
         </div>
         <textarea
             name="text"
@@ -221,18 +244,20 @@
             </div>
             <div class="tabs">
                 <ul>
-                    <li>
-                        <button type="submit"
-                            formtarget="preview"
-                            formaction="/backstage/preview/"
-                            style="border: none; background: none;"
-                            onclick="window.tabClick(event)"
-                            name="teaser"
-                            value="1"
-                        >
-                            <a>teaser</a>
-                        </button>
-                    </li>
+                    {{^post.internal}}
+                        <li>
+                            <button type="submit"
+                                formtarget="preview"
+                                formaction="/backstage/preview/"
+                                style="border: none; background: none;"
+                                onclick="window.tabClick(event)"
+                                name="teaser"
+                                value="1"
+                            >
+                                <a>teaser</a>
+                            </button>
+                        </li>
+                    {{/post.internal}}
                     <li>
                         <button type="submit"
                             formtarget="preview"

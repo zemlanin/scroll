@@ -425,11 +425,6 @@ async function prepare(post, embedsLoader) {
     return ts;
   };
 
-  const internal = !!(tokens && tokens[0] && tokens[0].type === "hr");
-  if (internal) {
-    tokens.shift();
-  }
-
   const header1Token =
     tokens && tokens[0] && tokens[0].type === "heading" && tokens[0].text
       ? tokens[0]
@@ -543,6 +538,8 @@ async function prepare(post, embedsLoader) {
   let status;
   if (post.draft) {
     status = "draft";
+  } else if (post.internal) {
+    status = "internal";
   } else if (post.private) {
     status = "private";
   } else if (post.public) {
@@ -551,9 +548,9 @@ async function prepare(post, embedsLoader) {
 
   return {
     id: post.id,
-    internal,
     slug: post.slug,
     draft: post.draft,
+    internal: post.internal,
     private: post.private,
     public: post.public,
     url: post.url,
@@ -639,6 +636,7 @@ module.exports = {
   getMimeObj,
   getBlogObject,
   prepare,
+  getPostUrl,
   loadIcu,
   embedCallback,
   writeFileWithGzip,

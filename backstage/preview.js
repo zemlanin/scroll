@@ -32,6 +32,7 @@ module.exports = async (req, res) => {
     id: existingPostId || `id-${Math.random()}`,
     slug: null,
     draft: true,
+    internal: false,
     private: false,
     public: false,
     created: +new Date()
@@ -45,8 +46,9 @@ module.exports = async (req, res) => {
           id,
           slug,
           draft,
+          internal,
           private,
-          (NOT draft AND NOT private) public,
+          (NOT draft AND NOT internal AND NOT private) public,
           text,
           strftime('%s000', created) created,
           strftime('%s000', modified) modified

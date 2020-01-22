@@ -60,6 +60,63 @@ test("empty database", async t => {
   t.end();
 });
 
+test("internal page", async t => {
+  const db = await sqlite.open(":memory:");
+  await db.migrate();
+
+  await db.run(
+    `
+    INSERT INTO posts
+      (id, slug, internal, text)
+    VALUES
+      ("1", "internal", 1, "# internal\n\nsomething something");
+  `
+  );
+
+  const tmpFolder = await fs.promises.mkdtemp(
+    path.join(os.tmpdir(), "scroll-tests-")
+  );
+
+  await generate(db, tmpFolder, noopStream, noopStream);
+
+  t.notOk(
+    await fs.promises.access(path.join(tmpFolder, "1.html")),
+    "should not create {id}.html"
+  );
+
+  const internalPage = (await fs.promises.readFile(
+    path.join(tmpFolder, "internal.html")
+  )).toString();
+
+  t.ok(
+    internalPage.indexOf(`<h1>internal</h1>`) > -1,
+    internalPage.split("\n").find(line => line.indexOf("<h1") > -1) ||
+      internalPage.match(/<article>([\s\S]+)<\/article>/i)[1].trim()
+  );
+  t.ok(
+    internalPage.indexOf(`<time`) === -1,
+    internalPage.split("\n").find(line => line.indexOf("<time") > -1) ||
+      "no <time>"
+  );
+  t.ok(
+    internalPage.indexOf(`/1.html`) === -1,
+    internalPage.split("\n").find(line => line.indexOf("/1.html") > -1) ||
+      "no self urls (id)"
+  );
+  t.ok(
+    internalPage.indexOf(`/internal.html`) === -1,
+    internalPage
+      .split("\n")
+      .find(line => line.indexOf("/internal.html") > -1) ||
+      "no self urls (slug)"
+  );
+  t.ok(
+    internalPage.indexOf(`og:url`) === -1,
+    internalPage.split("\n").find(line => line.indexOf("og:url") > -1) ||
+      "no opengraph"
+  );
+});
+
 test("database with posts and embeds", async t => {
   const db = await sqlite.open(":memory:");
   await db.migrate();
@@ -77,8 +134,7 @@ test("database with posts and embeds", async t => {
       ("6", ?6),
       ("7", ?7),
       ("8", ?8),
-      ("9", ?9),
-      ("10", "---\n# internal\n\nsomething something");
+      ("9", ?9);
   `,
     {
       6: 'post with footnote [^1][]\n\n[^1]:. "footnote _text_"',
@@ -186,29 +242,6 @@ test("database with posts and embeds", async t => {
     post9.indexOf(`<ul data-gallery`) > -1,
     post9.split("\n").find(line => line.indexOf("<ul data-gallery") > -1) ||
       post9.match(/<article>([\s\S]+)<\/article>/i)[1].trim()
-  );
-
-  const post10 = (await fs.promises.readFile(
-    path.join(tmpFolder, "10.html")
-  )).toString();
-  t.ok(
-    post10.indexOf(`<h1>internal</h1>`) > -1,
-    post10.split("\n").find(line => line.indexOf("<h1") > -1) ||
-      post10.match(/<article>([\s\S]+)<\/article>/i)[1].trim()
-  );
-  t.ok(
-    post10.indexOf(`<time`) === -1,
-    post10.split("\n").find(line => line.indexOf("<time") > -1) || "no <time>"
-  );
-  t.ok(
-    post10.indexOf(`/10.html`) === -1,
-    post10.split("\n").find(line => line.indexOf("/10.html") > -1) ||
-      "no self urls"
-  );
-  t.ok(
-    post10.indexOf(`og:url`) === -1,
-    post10.split("\n").find(line => line.indexOf("og:url") > -1) ||
-      "no opengraph"
   );
 
   t.end();

@@ -56,6 +56,7 @@ module.exports = {
       id: existingPostId || getPostId(),
       slug: null,
       draft: true,
+      internal: false,
       private: false,
       public: false,
       created: new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, ""),
@@ -69,8 +70,9 @@ module.exports = {
             id,
             slug,
             draft,
+            internal,
             private,
-            (NOT draft AND NOT private) public,
+            (NOT draft AND NOT internal AND NOT private) public,
             text,
             strftime('%s000', created) created,
             strftime('%s000', modified) modified
@@ -148,6 +150,7 @@ module.exports = {
       id: existingPostId || getPostId(),
       slug: null,
       draft: true,
+      internal: false,
       private: false,
       public: false,
       created: new Date()
@@ -156,6 +159,7 @@ module.exports = {
     const db = await req.db();
 
     let postExists = false;
+    let oldSlug = null;
     let oldStatus = null;
     if (existingPostId) {
       const dbPost = await db.get(
@@ -164,8 +168,9 @@ module.exports = {
             id,
             slug,
             draft,
+            internal,
             private,
-            (NOT draft AND NOT private) public,
+            (NOT draft AND NOT internal AND NOT private) public,
             text,
             strftime('%s000', created) created,
             strftime('%s000', modified) modified
@@ -180,8 +185,12 @@ module.exports = {
         post = dbPost;
         postExists = true;
 
+        oldSlug = post.slug;
+
         if (post.draft) {
           oldStatus = "draft";
+        } else if (post.internal) {
+          oldStatus = "internal";
         } else if (post.private) {
           oldStatus = "private";
         } else if (post.public) {
@@ -192,20 +201,26 @@ module.exports = {
 
     post.text = req.post.text;
 
-    if (
-      req.post.draft != null ||
-      req.post.private != null ||
-      req.post.public != null
-    ) {
-      post.draft = Boolean(+req.post.draft);
-      post.private = Boolean(+req.post.private);
-      post.public = Boolean(+req.post.public);
-    }
-
     if (req.post.slug) {
       post.slug = req.post.slug;
     } else if (post.slug) {
       post.slug = null;
+    }
+
+    if (
+      req.post.draft != null ||
+      req.post.internal != null ||
+      req.post.private != null ||
+      req.post.public != null
+    ) {
+      post.draft = Boolean(+req.post.draft);
+      post.internal = Boolean(+req.post.internal);
+      post.private = Boolean(+req.post.private);
+      post.public = Boolean(+req.post.public);
+    }
+
+    if (!post.slug && post.internal) {
+      post.slug = post.id;
     }
 
     let oldCreated = null;
@@ -219,6 +234,7 @@ module.exports = {
         `UPDATE posts SET
           slug = ?2,
           draft = ?3,
+          internal = ?6,
           private = ?4,
           text = ?5,
           created = ?7,
@@ -230,6 +246,7 @@ module.exports = {
           3: post.draft,
           4: post.private,
           5: post.text,
+          6: post.internal,
           7: post.created.toISOString().replace(/\.\d{3}Z$/, "Z"),
           8: new Date().toISOString().replace(/\.\d{3}Z$/, "Z")
         }
@@ -237,20 +254,21 @@ module.exports = {
     } else {
       await db.run(
         `INSERT INTO posts
-          (id, slug, draft, private, text, created)
-          VALUES (?1, ?2, ?3, ?4, ?5, ?7)`,
+          (id, slug, draft, internal, private, text, created)
+          VALUES (?1, ?2, ?3, ?6, ?4, ?5, ?7)`,
         {
           1: post.id,
           2: post.slug,
           3: post.draft,
           4: post.private,
           5: post.text,
+          6: post.internal,
           7: post.created.toISOString().replace(/\.\d{3}Z$/, "Z")
         }
       );
     }
 
-    await generateAfterEdit(db, post.id, oldStatus, oldCreated);
+    await generateAfterEdit(db, post.id, oldStatus, oldCreated, oldSlug);
 
     if (!existingPostId) {
       res.writeHead(303, {

@@ -410,7 +410,6 @@ document.addEventListener("DOMContentLoaded", function() {
         scrollToCenter(node, findCentermost(node));
       }
 
-
       function onScroll() {
         highlightCentermost();
       }

@@ -95,9 +95,7 @@
         <div class="card">
             <article class="card-content">
                 {{#internal}}
-                  <div class="notification">
-                    {{title}} / <i>internal</i>
-                  </div>
+                  <h1>{{title}}</h1>
                 {{/internal}}
 
                 {{^internal}}
@@ -116,8 +114,7 @@
                 {{#draft}}<div class="card-footer-item">draft</div>{{/draft}}
                 {{^draft}}
                     <a class="card-footer-item" href="{{urls.permalink}}">
-                        {{#private}}private{{/private}}
-                        {{#public}}public{{/public}}
+                        {{status}}
                     </a>
                 {{/draft}}
                 <a class="card-footer-item" href="{{urls.edit}}">edit</a>

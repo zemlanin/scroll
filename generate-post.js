@@ -22,8 +22,9 @@ function getPostsQuery(where, limit) {
       id,
       slug,
       draft,
+      internal,
       private,
-      (NOT draft AND NOT private) public,
+      (NOT draft AND NOT internal AND NOT private) public,
       text,
       strftime('%s000', created) created,
       strftime('%s000', modified) modified
@@ -59,18 +60,6 @@ async function getPost(db, postId) {
     await db.get(getPostsQuery(`id = ?1`), { 1: postId }),
     embedsLoader
   );
-}
-
-async function removePostPage(post) {
-  const postIdPagePath = path.join(DIST, `${post.id}.html`);
-
-  await unlinkFileWithGzip(postIdPagePath);
-
-  if (post.slug) {
-    const postSlugPagePath = path.join(DIST, `${post.slug}.html`);
-
-    await unlinkFileWithGzip(postSlugPagePath);
-  }
 }
 
 async function generatePostPage(post, blog) {
@@ -146,7 +135,7 @@ async function generateIndexPage(db, blog, newestPage) {
   const posts = await getPosts(
     db,
     {},
-    "draft = 0 AND private = 0",
+    "draft = 0 AND internal = 0 AND private = 0",
     indexPostsLimit
   );
 
@@ -168,7 +157,7 @@ async function generateArchivePage(db, blog) {
   let postMonths = await db.all(`
     SELECT strftime('%Y-%m', created) month
     FROM posts
-    WHERE draft = 0 AND private = 0
+    WHERE draft = 0 AND internal = 0 AND private = 0
     ORDER BY datetime(created) DESC, id DESC
   `);
 
@@ -207,7 +196,12 @@ async function generateArchivePage(db, blog) {
 }
 
 async function generateRSSPage(db, blog) {
-  const posts = await getPosts(db, {}, "draft = 0 AND private = 0", PAGE_SIZE);
+  const posts = await getPosts(
+    db,
+    {},
+    "draft = 0 AND internal = 0 AND private = 0",
+    PAGE_SIZE
+  );
 
   return await render("rss.mustache", {
     blog,
@@ -220,7 +214,7 @@ async function getPagination(db, postsCreatedAfter) {
   let query = `
     SELECT id
     FROM posts
-    WHERE draft = 0 AND private = 0
+    WHERE draft = 0 AND internal = 0 AND private = 0
     ORDER BY datetime(created) DESC, id DESC
   `;
   let params = [];
@@ -228,14 +222,14 @@ async function getPagination(db, postsCreatedAfter) {
 
   if (postsCreatedAfter) {
     const totalPostCount = (await db.get(
-      `SELECT count(*) as c FROM posts WHERE draft = 0 AND private = 0`
+      `SELECT count(*) as c FROM posts WHERE draft = 0 AND internal = 0 AND private = 0`
     )).c;
 
     const postsAfterCurrentCount =
       (await db.get(
         `
           SELECT count(*) as c FROM posts
-          WHERE draft = 0 AND private = 0 AND datetime(created) >= datetime(?1)
+          WHERE draft = 0 AND internal = 0 AND private = 0 AND datetime(created) >= datetime(?1)
         `,
         { 1: postsCreatedAfter }
       )).c || 1;
@@ -265,14 +259,29 @@ async function getPagination(db, postsCreatedAfter) {
   return pagination;
 }
 
-async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
+async function generateAfterEdit(db, postId, oldStatus, oldCreated, oldSlug) {
   const blog = await getBlogObject();
   const post = await getPost(db, postId);
+  const newSlug = post.slug;
   const newStatus = post.status;
   const newCreated = post.created;
 
+  if (oldSlug && newSlug !== oldSlug) {
+    await unlinkFileWithGzip(path.join(DIST, `${oldSlug}.html`));
+  }
+
+  if (newStatus === "draft" || newStatus === "internal") {
+    await unlinkFileWithGzip(path.join(DIST, `${post.id}.html`));
+  }
+
   if (newStatus === "draft") {
-    await removePostPage(post);
+    if (post.slug) {
+      await unlinkFileWithGzip(path.join(DIST, `${post.slug}.html`));
+    }
+  } else if (newStatus === "internal") {
+    const renderedPage = await generatePostPage(post, blog);
+
+    await writeFileWithGzip(path.join(DIST, `${post.slug}.html`), renderedPage);
   } else {
     const renderedPage = await generatePostPage(post, blog);
 
@@ -286,7 +295,9 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated) {
     await writeFileWithGzip(path.join(DIST, `${post.id}.html`), renderedPage);
   }
 
-  if (oldStatus === "public" || newStatus === "public") {
+  const becameOrWasPublic = oldStatus === "public" || newStatus === "public";
+
+  if (becameOrWasPublic) {
     const pages = await getPagination(
       db,
       oldCreated

@@ -82,15 +82,27 @@ module.exports = async (req, res) => {
   let qWhereCondition = ``;
 
   if (qWhereValue) {
-    if (!(qWhereValue === "private" || qWhereValue === "public")) {
+    if (
+      !(
+        qWhereValue === "private" ||
+        qWhereValue === "public" ||
+        qWhereValue === "internal"
+      )
+    ) {
       qWhereCondition += ` AND (instr(id, $query) OR instr(lower(slug), $query) OR instr(lower(text), $query))`;
     }
 
     if (qWhereValue === "private" || qWhereValue.startsWith("private ")) {
       qWhereCondition += ` AND private`;
       qWhereValue = qWhereValue.slice("private".length).trim();
+    } else if (
+      qWhereValue === "internal" ||
+      qWhereValue.startsWith("internal ")
+    ) {
+      qWhereCondition += ` AND internal`;
+      qWhereValue = qWhereValue.slice("internal".length).trim();
     } else if (qWhereValue === "public" || qWhereValue.startsWith("public ")) {
-      qWhereCondition += ` AND (NOT draft AND NOT private)`;
+      qWhereCondition += ` AND (NOT draft AND NOT internal AND NOT private)`;
       qWhereValue = qWhereValue.slice("public".length).trim();
     }
   }
@@ -103,8 +115,9 @@ module.exports = async (req, res) => {
             id,
             slug,
             draft,
+            internal,
             private,
-            (NOT draft AND NOT private) public,
+            (NOT draft AND NOT internal AND NOT private) public,
             text,
             strftime('%s000', created) created,
             strftime('%s000', modified) modified
@@ -123,8 +136,9 @@ module.exports = async (req, res) => {
         id,
         slug,
         draft,
+        internal,
         private,
-        (NOT draft AND NOT private) public,
+        (NOT draft AND NOT internal AND NOT private) public,
         text,
         strftime('%s000', created) created,
         strftime('%s000', modified) modified

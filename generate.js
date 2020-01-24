@@ -57,11 +57,7 @@ function uniq(arr) {
   return [...new Set(arr)];
 }
 
-async function mkdirP(p) {
-  if (!(await fsPromises.exists(p))) {
-    return fsPromises.mkdir(p);
-  }
-}
+const mkdirP = p => fsPromises.mkdir(p, { recursive: true });
 
 async function copyStaticContent(destination, stdout) {
   const staticPath = path.resolve(__dirname, "static");

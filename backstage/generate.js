@@ -59,6 +59,14 @@ async function generateDefaultMedia(db, destination, stdout, stderr) {
   }
 }
 
+const TEN_BYTES = "\n\n\n\n\n\n\n\n\n\n";
+const writePadding = out => {
+  // Browsers wait for a few KB before displaying long-polling/server-sent content
+  for (let i = 0; i < 800; i++) {
+    out.write(TEN_BYTES);
+  }
+};
+
 module.exports = {
   get: async (req, res) => {
     const user = authed(req, res);
@@ -80,6 +88,8 @@ module.exports = {
       "Content-Type": "text/html",
       "Cache-Control": "no-cache"
     });
+
+    writePadding(res);
 
     res.write(
       `

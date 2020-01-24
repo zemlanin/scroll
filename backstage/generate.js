@@ -86,6 +86,7 @@ module.exports = {
 
     res.writeHead(200, {
       "Content-Type": "text/html",
+      "X-Accel-Buffering": "no",
       "Cache-Control": "no-cache"
     });
 

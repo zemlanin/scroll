@@ -175,16 +175,57 @@ document.addEventListener("DOMContentLoaded", function() {
 document.addEventListener("DOMContentLoaded", function() {
   var supportsRAF = "requestAnimationFrame" in window;
 
-  function wrapInRAF(f) {
+  function noop() {}
+
+  function wrapInRAF(f, arg) {
     var timeout;
+
+    var _f =
+      arg === undefined
+        ? f
+        : function() {
+            return f(arg);
+          };
 
     return function() {
       if (timeout) {
         window.cancelAnimationFrame(timeout);
       }
 
-      timeout = window.requestAnimationFrame(f);
+      timeout = window.requestAnimationFrame(_f);
     };
+  }
+
+  function onResize(node) {
+    fillTheFillers(node);
+    scrollToCenter(node, findCentermost(node));
+  }
+
+  var resizeObserver =
+    "ResizeObserver" in window
+      ? new ResizeObserver(function(entries) {
+          for (var i = 0; i < entries.length; i++) {
+            onResize(entries[i].target);
+          }
+        })
+      : null;
+
+  function fillTheFillers(node) {
+    var first = node.querySelector('li[data-filler="first"]');
+    var last = node.querySelector('li[data-filler="last"]');
+
+    first.style.width =
+      Math.floor(
+        Math.max(node.clientWidth - first.nextElementSibling.clientWidth, 0) / 2
+      ) + "px";
+
+    last.style.width =
+      Math.floor(
+        Math.max(
+          node.clientWidth - last.previousElementSibling.clientWidth,
+          0
+        ) / 2
+      ) + "px";
   }
 
   function scrollToCenter(parent, child) {
@@ -282,9 +323,30 @@ document.addEventListener("DOMContentLoaded", function() {
     node.insertBefore(filler, null);
   }
 
+  function highlightCentermost(node) {
+    var centermost = findCentermost(node);
+
+    if (centermost) {
+      centermost.classList.remove("dim");
+    }
+
+    var listItems = node.querySelectorAll("li:not(.dim)");
+    var listItemsLength = listItems.length;
+
+    for (var i = 0; i < listItemsLength; i++) {
+      if (listItems[i] !== centermost) {
+        listItems[i].classList.add("dim");
+      }
+    }
+  }
+
   Array.prototype.forEach.call(
     document.querySelectorAll("ul[data-gallery]"),
     function initGallery(node) {
+      var wrappedHighlightCentermost = supportsRAF
+        ? wrapInRAF(highlightCentermost, node)
+        : noop;
+
       window.addEventListener("keydown", function(e) {
         var LEFT = 37;
         var RIGHT = 39;
@@ -308,72 +370,26 @@ document.addEventListener("DOMContentLoaded", function() {
         if (e.keyCode === LEFT) {
           e.preventDefault();
           scrollToCenter(node, findFirstLeftOfCenter(node));
-          if (supportsRAF) {
-            window.requestAnimationFrame(highlightCentermost);
-          }
+          wrappedHighlightCentermost();
         } else if (e.keyCode === RIGHT) {
           e.preventDefault();
           scrollToCenter(node, findFirstRightOfCenter(node));
-          if (supportsRAF) {
-            window.requestAnimationFrame(highlightCentermost);
-          }
+          wrappedHighlightCentermost();
         }
       });
 
       Array.prototype.forEach.call(node.querySelectorAll("li"), function(li) {
         li.addEventListener("click", function() {
           scrollToCenter(node, li);
-          if (supportsRAF) {
-            window.requestAnimationFrame(highlightCentermost);
-          }
+          wrappedHighlightCentermost();
         });
       });
 
-      function highlightCentermost() {
-        var centermost = findCentermost(node);
-
-        if (centermost) {
-          centermost.classList.remove("dim");
-        }
-
-        var listItems = node.querySelectorAll("li:not(.dim)");
-        var listItemsLength = listItems.length;
-
-        for (var i = 0; i < listItemsLength; i++) {
-          if (listItems[i] !== centermost) {
-            listItems[i].classList.add("dim");
-          }
-        }
-      }
-
       addFillers(node);
 
-      function fillTheFillers() {
-        var first = node.querySelector('li[data-filler="first"]');
-        var last = node.querySelector('li[data-filler="last"]');
-
-        first.style.width =
-          Math.floor(
-            Math.max(
-              node.clientWidth - first.nextElementSibling.clientWidth,
-              0
-            ) / 2
-          ) + "px";
-
-        last.style.width =
-          Math.floor(
-            Math.max(
-              node.clientWidth - last.previousElementSibling.clientWidth,
-              0
-            ) / 2
-          ) + "px";
-      }
-
       function refreshLayout() {
-        fillTheFillers();
-        if (supportsRAF) {
-          window.requestAnimationFrame(highlightCentermost);
-        }
+        fillTheFillers(node);
+        wrappedHighlightCentermost();
       }
 
       function refreshLayoutOnChildrenLoad(parent) {
@@ -405,18 +421,20 @@ document.addEventListener("DOMContentLoaded", function() {
         node.querySelector('li[data-filler="last"]').previousElementSibling
       );
 
-      function onResize() {
-        fillTheFillers();
-        scrollToCenter(node, findCentermost(node));
-      }
-
-      function onScroll() {
-        highlightCentermost();
-      }
-
-      if (supportsRAF) {
-        window.addEventListener("resize", wrapInRAF(onResize), false);
-        node.addEventListener("scroll", wrapInRAF(onScroll), false);
+      if (resizeObserver /* && supportsRAF */) {
+        resizeObserver.observe(node);
+        node.addEventListener(
+          "scroll",
+          wrappedHighlightCentermost,
+          false
+        );
+      } else if (supportsRAF) {
+        window.addEventListener("resize", wrapInRAF(onResize, node), false);
+        node.addEventListener(
+          "scroll",
+          wrappedHighlightCentermost,
+          false
+        );
       }
     }
   );

@@ -431,18 +431,10 @@ document.addEventListener("DOMContentLoaded", function() {
 
       if (resizeObserver /* && supportsRAF */) {
         resizeObserver.observe(node);
-        node.addEventListener(
-          "scroll",
-          wrappedHighlightCentermost,
-          false
-        );
+        node.addEventListener("scroll", wrappedHighlightCentermost, false);
       } else if (supportsRAF) {
         window.addEventListener("resize", wrapInRAF(onResize, node), false);
-        node.addEventListener(
-          "scroll",
-          wrappedHighlightCentermost,
-          false
-        );
+        node.addEventListener("scroll", wrappedHighlightCentermost, false);
       }
     }
   );

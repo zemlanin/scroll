@@ -52,9 +52,9 @@ async function loadCardTemplate() {
     return loadCardTemplate.cache;
   }
 
-  return (loadCardTemplate.cache = (await fsPromises.readFile(
-    CARD_TEMPLATE_PATH
-  )).toString());
+  return (loadCardTemplate.cache = (
+    await fsPromises.readFile(CARD_TEMPLATE_PATH)
+  ).toString());
 }
 loadCardTemplate.cache = "";
 
@@ -494,8 +494,9 @@ async function getEmbedsList(req, _res) {
   let embeds;
 
   if (query.q) {
-    embeds = (await db.all(
-      `
+    embeds = (
+      await db.all(
+        `
       SELECT
         original_url,
         strftime('%s000', created) created,
@@ -506,11 +507,17 @@ async function getEmbedsList(req, _res) {
       ORDER BY datetime(created) DESC, original_url DESC
       LIMIT ?2 OFFSET ?1
     `,
-      { 1: offset, 2: PAGE_SIZE + 1, 3: query.q && decodeURIComponent(query.q) }
-    )).map(prepareEmbed);
+        {
+          1: offset,
+          2: PAGE_SIZE + 1,
+          3: query.q && decodeURIComponent(query.q)
+        }
+      )
+    ).map(prepareEmbed);
   } else {
-    embeds = (await db.all(
-      `
+    embeds = (
+      await db.all(
+        `
       SELECT
         original_url,
         strftime('%s000', created) created,
@@ -520,8 +527,9 @@ async function getEmbedsList(req, _res) {
       ORDER BY datetime(created) DESC, original_url DESC
       LIMIT ?2 OFFSET ?1
     `,
-      { 1: offset, 2: PAGE_SIZE + 1 }
-    )).map(prepareEmbed);
+        { 1: offset, 2: PAGE_SIZE + 1 }
+      )
+    ).map(prepareEmbed);
   }
 
   const moreEmbeds = embeds.length > PAGE_SIZE;

@@ -23,9 +23,9 @@ async function loadTemplate(tmpl, processCallback) {
     ));
   }
 
-  return (loadTemplate.cache[tmpl] = (await fsPromises.readFile(
-    tmpl
-  )).toString());
+  return (loadTemplate.cache[tmpl] = (
+    await fsPromises.readFile(tmpl)
+  ).toString());
 }
 loadTemplate.cache = {};
 

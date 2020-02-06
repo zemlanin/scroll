@@ -221,18 +221,22 @@ async function getPagination(db, postsCreatedAfter) {
   let paginationOffset = 0;
 
   if (postsCreatedAfter) {
-    const totalPostCount = (await db.get(
-      `SELECT count(*) as c FROM posts WHERE draft = 0 AND internal = 0 AND private = 0`
-    )).c;
+    const totalPostCount = (
+      await db.get(
+        `SELECT count(*) as c FROM posts WHERE draft = 0 AND internal = 0 AND private = 0`
+      )
+    ).c;
 
     const postsAfterCurrentCount =
-      (await db.get(
-        `
+      (
+        await db.get(
+          `
           SELECT count(*) as c FROM posts
           WHERE draft = 0 AND internal = 0 AND private = 0 AND datetime(created) >= datetime(?1)
         `,
-        { 1: postsCreatedAfter }
-      )).c || 1;
+          { 1: postsCreatedAfter }
+        )
+      ).c || 1;
 
     const postsCountOnAffectedPages =
       postsAfterCurrentCount +

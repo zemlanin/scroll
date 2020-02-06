@@ -84,9 +84,9 @@ test("internal page", async t => {
     "should not create {id}.html"
   );
 
-  const internalPage = (await fs.promises.readFile(
-    path.join(tmpFolder, "internal.html")
-  )).toString();
+  const internalPage = (
+    await fs.promises.readFile(path.join(tmpFolder, "internal.html"))
+  ).toString();
 
   t.ok(
     internalPage.indexOf(`<h1>internal</h1>`) > -1,
@@ -173,9 +173,9 @@ test("database with posts and embeds", async t => {
   const YTEmbed = `<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.com/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
           <img alt="Rick Astley - Never Gonna Give You Up (Video)" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg">
       </a>`;
-  const post5 = (await fs.promises.readFile(
-    path.join(tmpFolder, "5.html")
-  )).toString();
+  const post5 = (
+    await fs.promises.readFile(path.join(tmpFolder, "5.html"))
+  ).toString();
   t.ok(
     post5.indexOf(YTEmbed) > -1,
     post5.indexOf(YTEmbed) > -1
@@ -195,9 +195,9 @@ test("database with posts and embeds", async t => {
     ) > -1
   );
 
-  const post7 = (await fs.promises.readFile(
-    path.join(tmpFolder, "7.html")
-  )).toString();
+  const post7 = (
+    await fs.promises.readFile(path.join(tmpFolder, "7.html"))
+  ).toString();
   t.ok(
     post7.indexOf(
       `<h1 id="titled"><a href="https://example.com/7.html">titled</a></h1>`
@@ -215,9 +215,9 @@ test("database with posts and embeds", async t => {
     ) > -1
   );
 
-  const post8 = (await fs.promises.readFile(
-    path.join(tmpFolder, "8.html")
-  )).toString();
+  const post8 = (
+    await fs.promises.readFile(path.join(tmpFolder, "8.html"))
+  ).toString();
   t.ok(
     post8.indexOf(`</h1>`) === -1,
     post8.split("\n").find(line => line.indexOf("</h1>") > -1) || "no <h1>"
@@ -235,9 +235,9 @@ test("database with posts and embeds", async t => {
     post8.split("\n").find(line => line.indexOf('<div class="footnotes">') > -1)
   );
 
-  const post9 = (await fs.promises.readFile(
-    path.join(tmpFolder, "9.html")
-  )).toString();
+  const post9 = (
+    await fs.promises.readFile(path.join(tmpFolder, "9.html"))
+  ).toString();
   t.ok(
     post9.indexOf(`<ul data-gallery`) > -1,
     post9.split("\n").find(line => line.indexOf("<ul data-gallery") > -1) ||
@@ -343,9 +343,9 @@ test("opengraph", async t => {
     post6.indexOf(`<meta property="og:description" content="201 слово" />`) > -1
   );
 
-  const post7 = (await fs.promises.readFile(
-    path.join(tmpFolder, "7.html")
-  )).toString();
+  const post7 = (
+    await fs.promises.readFile(path.join(tmpFolder, "7.html"))
+  ).toString();
   t.ok(
     post7.indexOf(
       `<meta property="og:title" content="teaser with footnote" />`
@@ -363,9 +363,9 @@ test("opengraph", async t => {
     post7.split("\n").find(line => line.indexOf("og:description") > -1)
   );
 
-  const post8 = (await fs.promises.readFile(
-    path.join(tmpFolder, "8.html")
-  )).toString();
+  const post8 = (
+    await fs.promises.readFile(path.join(tmpFolder, "8.html"))
+  ).toString();
   t.ok(
     post8.indexOf(
       `<meta property="og:title" content="teaser with gallery and description" />`
@@ -385,9 +385,9 @@ test("opengraph", async t => {
     post8.split("\n").find(line => line.indexOf("og:description") > -1)
   );
 
-  const post9 = (await fs.promises.readFile(
-    path.join(tmpFolder, "9.html")
-  )).toString();
+  const post9 = (
+    await fs.promises.readFile(path.join(tmpFolder, "9.html"))
+  ).toString();
   t.ok(
     post9.indexOf(
       `<meta property="og:title" content="teaser with gallery" />`

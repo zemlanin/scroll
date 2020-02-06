@@ -43,7 +43,7 @@ let serveRSS = writeStaticViaServer;
 let serveMedia = writeStaticViaServer;
 
 if (process.env.NODE_ENV !== "production") {
-  const fileServer = new (require("node-static")).Server(DIST, {
+  const fileServer = new (require("node-static").Server)(DIST, {
     cache: false,
     serverInfo: "scroll",
     gzip: /^text\//

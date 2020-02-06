@@ -124,11 +124,19 @@ document.addEventListener("DOMContentLoaded", function() {
     return;
   }
 
+  function ignoreAbortError(e) {
+    if (e && e.name === "AbortError") {
+      return;
+    }
+
+    throw e;
+  }
+
   function doAutoplay(v) {
     v.setAttribute("autoplay", "");
 
     if (v.paused) {
-      v.play();
+      v.play().catch(ignoreAbortError);
     }
   }
 

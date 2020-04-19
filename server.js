@@ -38,50 +38,21 @@ function writeStaticViaServer(req, res) {
   }
 }
 
-let serveHtml = writeStaticViaServer;
-let serveRSS = writeStaticViaServer;
-let serveMedia = writeStaticViaServer;
+let staticHandler = writeStaticViaServer;
 
 if (process.env.NODE_ENV !== "production") {
-  const fileServer = new (require("node-static").Server)(DIST, {
-    cache: false,
-    serverInfo: "scroll",
-    gzip: /^text\//
+  const serveStatic = require("serve-static");
+  const staticMiddleware = serveStatic(path.resolve(DIST), {
+    index: ["index.html"],
+    extensions: ["html"]
   });
 
-  serveHtml = function serveHtml(req, res) {
-    return new Promise((resolve, reject) => {
-      fileServer
-        .serveFile((req.params.name || "index") + ".html", 200, {}, req, res)
-        .on("success", resolve)
-        .on("error", () => {
-          write404(req, res);
-          reject();
-        });
-    });
-  };
-
-  serveRSS = function serveRSS(req, res) {
-    return new Promise((resolve, reject) => {
-      fileServer
-        .serveFile("rss.xml", 200, {}, req, res)
-        .on("success", resolve)
-        .on("error", () => {
-          write404(req, res);
-          reject();
-        });
-    });
-  };
-
-  serveMedia = function serveMedia(req, res) {
-    return new Promise((resolve, reject) => {
-      fileServer
-        .serve(req, res)
-        .on("success", resolve)
-        .on("error", () => {
-          write404(req, res);
-          reject();
-        });
+  staticHandler = function(req, res) {
+    return new Promise(resolve => {
+      return staticMiddleware(req, res, () => {
+        res.writeHead(404);
+        resolve("404");
+      });
     });
   };
 }
@@ -89,13 +60,13 @@ if (process.env.NODE_ENV !== "production") {
 const handlers = [
   ["GET", "/*.php", write403],
   ["GET", /^\/(cgi|cgi-bin|phpmyadmin|myadmin|pma|sql|mysql)/i, write403],
-  ["GET", "/", serveHtml],
+  ["GET", "/", staticHandler],
   [
     "GET",
     "/rss",
     async (req, res) => res.writeHead(302, { Location: "/rss.xml" })
   ],
-  ["GET", "/rss.xml", serveRSS],
+  ["GET", "/rss.xml", staticHandler],
   [
     "GET",
     /^\/post\/(\d+)/,
@@ -168,7 +139,7 @@ const handlers = [
       );
     }
   ],
-  ["GET", "/media/*", serveMedia],
+  ["GET", "/media/*", staticHandler],
   ["GET", "/backstage", require("./backstage/index.js")],
   ["GET", "/backstage/callback", require("./backstage/callback.js")],
   ["GET", "/backstage/edit", require("./backstage/edit.js").get],
@@ -184,7 +155,7 @@ const handlers = [
   ["GET", "/backstage/goaccess.svg", require("./backstage/goaccess-graph.js")],
   ["GET", "/backstage/embeds", require("./backstage/embeds.js").get],
   ["POST", "/backstage/embeds", require("./backstage/embeds.js").post],
-  ["GET", "/:name(.html)", serveHtml]
+  ["GET", "/:name(.html)", staticHandler]
 ].map(([m, p, h]) => [m, new UrlPattern(p), h]);
 
 async function processPost(request, response) {

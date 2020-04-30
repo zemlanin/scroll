@@ -1,3 +1,60 @@
+:root {
+  --color-braaand: #00a500;
+  --color-background: initial;
+  --color-text: initial;
+  --color-text-decoration-color: rgba(0, 165, 0, 0.6);
+  --color-card-border: #dedede;
+  --color-card-hover: white;
+  --color-card-caption-background: white;
+  --color-deemphasis: #888;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: black;
+    --color-text: #e3e3e3;
+    --color-text-decoration-color: rgba(0, 165, 0, 0.8);
+    --color-card-border: #414141;
+    --color-card-caption-background: black;
+  }
+}
+
+body.dark {
+  --color-background: black;
+  --color-text: #e3e3e3;
+  --color-text-decoration-color: rgba(0, 165, 0, 0.8);
+  --color-card-border: #414141;
+  --color-card-caption-background: black;
+}
+
+body.light {
+  --color-background: white;
+  --color-text: black;
+  --color-text-decoration-color: rgba(0, 165, 0, 0.6);
+  --color-card-border: #dedede;
+  --color-card-caption-background: white;
+}
+
+@media print {
+  body.dark {
+    --color-background: initial;
+    --color-text: initial;
+    --color-text-decoration-color: rgba(0, 165, 0, 0.6);
+    --color-card-border: #dedede;
+    --color-card-caption-background: white;
+  }
+}
+
+@media print and (prefers-color-scheme: dark) {
+  :root {
+    --color-background: initial;
+    --color-text: initial;
+    --color-text-decoration-color: rgba(0, 165, 0, 0.6);
+    --color-card-border: #dedede;
+    --color-card-caption-background: white;
+  }
+}
+
 body {
   max-width: 40em;
   margin: auto;
@@ -9,6 +66,9 @@ body {
   line-height: 1.5;
   padding-left: 1.25em;
   padding-right: 1.25em;
+
+  background-color: var(--color-background);
+  color: var(--color-text);
 }
 
 @supports (padding: max(0px)) {
@@ -16,23 +76,6 @@ body {
     padding-left: max(1.25em, env(safe-area-inset-left));
     padding-right: max(1.25em, env(safe-area-inset-right));
   }
-}
-
-@media (prefers-color-scheme: dark) {
-  body:not(.dark) {
-    background-color: black;
-    color: #e3e3e3;
-  }
-}
-
-body.dark {
-  background-color: black;
-  color: #e3e3e3;
-}
-
-body.light {
-  background-color: white;
-  color: black;
 }
 
 @media (max-width: 40em) {
@@ -71,6 +114,7 @@ article {
 
 article figure.card {
   background: #dedede;
+  background: var(--color-card-border);
   border-radius: 0 0 4px 4px;
   max-width: 30em;
   margin: 1em auto;
@@ -87,43 +131,13 @@ article figure.card a {
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  body:not(.dark) article figure.card {
-    background: #414141;
-  }
-}
-
-body.dark article figure.card {
-  background: #414141;
-}
-
-body.light article figure.card {
-  background: #dedede;
-}
-
 article figure.card figcaption {
   border: #dedede 1px solid;
+  border-color: var(--color-card-border);
   border-top: none;
   border-radius: 0 0 4px 4px;
   padding: 0.5em;
-  background-color: white;
-}
-
-@media (prefers-color-scheme: dark) {
-  body:not(.dark) article figure.card figcaption {
-    border-color: #414141;
-    background-color: black;
-  }
-}
-
-body.dark article figure.card figcaption {
-  border-color: #414141;
-  background-color: black;
-}
-
-body.light article figure.card figcaption {
-  border-color: #dedede;
-  background-color: white;
+  background-color: var(--color-card-caption-background);
 }
 
 article figure.card figcaption a {
@@ -132,6 +146,7 @@ article figure.card figcaption a {
 
 article figure.card figcaption i {
   color: #888;
+  color: var(--color-deemphasis);
   font-size: 0.8em;
   display: block;
   white-space: pre-wrap;
@@ -213,37 +228,14 @@ article a.future-frame:after {
   content: "▶ play";
   text-align: center;
   background: #dedede;
+  background: var(--color-card-border);
 }
 
-@media (prefers-color-scheme: dark) {
-  body:not(.dark) article a.future-frame:after {
-    background: #414141;
-  }
-
-  body:not(.dark) article a.future-frame:hover:after {
-    color: white;
-    background: #00a500;
-  }
-
-  body:not(.dark) article a.future-frame.loading:hover:after {
-    color: unset;
-    background: none;
-  }
-}
-
-body.dark article a.future-frame:after {
-  background: #414141;
-}
-
-body.light article a.future-frame:after {
-  background: #dedede;
-}
-
-article a.future-frame:hover:after,
-body.dark article a.future-frame:hover:after,
-body.light article a.future-frame:hover:after {
+article a.future-frame:hover:after {
   color: white;
+  color: var(--color-card-hover);
   background: #00a500;
+  background: var(--color-braaand);
 }
 
 @keyframes loadingopacity {
@@ -256,9 +248,7 @@ body.light article a.future-frame:hover:after {
   }
 }
 
-article a.future-frame.loading:hover:after,
-body.dark article a.future-frame.loading:hover:after,
-body.light article a.future-frame.loading:hover:after {
+article a.future-frame.loading:hover:after {
   color: unset;
   background: none;
 }
@@ -275,7 +265,8 @@ article time {
 }
 
 article time a {
-  color: gray;
+  color: #888;
+  color: var(--color-deemphasis);
   text-decoration: none;
 }
 
@@ -318,9 +309,16 @@ nav span {
 
 #settings-icon > summary {
   color: #888;
+  color: var(--color-deemphasis);
   cursor: pointer;
   list-style: none;
-  display: inline-block;
+  display: none;
+}
+
+@supports (color: var(--color-deemphasis)) {
+  #settings-icon > summary {
+    display: inline-block;
+  }
 }
 
 #settings-icon > summary::-webkit-details-marker {
@@ -350,10 +348,12 @@ nav span {
 
 #night-mode input[type="radio"]:checked ~ * {
   color: #00a500;
+  color: var(--color-braaand);
 }
 
 article code {
   border: solid 1px #dedede;
+  border-color: var(--color-card-border);
   padding: 0.1em 0.2em;
   font-size: 0.9em;
   font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
@@ -372,26 +372,10 @@ article pre code {
 
 article pre {
   border: solid 1px #dedede;
+  border-color: var(--color-card-border);
   padding: 0.2em 0.4em;
   overflow-x: scroll;
   line-height: 1.5;
-}
-
-@media (prefers-color-scheme: dark) {
-  body:not(.dark) article code,
-  body:not(.dark) article pre {
-    border-color: #414141;
-  }
-}
-
-body.dark article code,
-body.dark article pre {
-  border-color: #414141;
-}
-
-body.light article code,
-body.light article pre {
-  border-color: #dedede;
 }
 
 article h1 a,
@@ -440,25 +424,11 @@ a,
 header a:visited,
 footer a:visited {
   color: #00a500;
+  color: var(--color-braaand);
   -webkit-text-decoration-color: rgba(0, 165, 0, 0.6);
+  -webkit-text-decoration-color: var(--color-text-decoration-color);
   text-decoration-color: rgba(0, 165, 0, 0.6);
-}
-
-@media (prefers-color-scheme: dark) {
-  body:not(.dark) a {
-    -webkit-text-decoration-color: rgba(0, 165, 0, 0.8);
-    text-decoration-color: rgba(0, 165, 0, 0.8);
-  }
-}
-
-body.dark a {
-  -webkit-text-decoration-color: rgba(0, 165, 0, 0.8);
-  text-decoration-color: rgba(0, 165, 0, 0.8);
-}
-
-body.light a {
-  -webkit-text-decoration-color: rgba(0, 165, 0, 0.6);
-  text-decoration-color: rgba(0, 165, 0, 0.6);
+  text-decoration-color: var(--color-text-decoration-color);
 }
 
 header a,
@@ -505,19 +475,6 @@ header h2 {
     padding: 0;
   }
 
-  body.dark {
-    color: black;
-    background-color: white;
-  }
-
-  body.dark article figure.card {
-    background-color: #dedede;
-  }
-
-  body.dark article figure.card figcaption {
-    background-color: white;
-  }
-
   article p {
     page-break-inside: avoid;
   }
@@ -529,17 +486,12 @@ header h2 {
     display: none;
   }
 
-  article figure.card {
-    border: #dedede 1px solid;
-  }
-
   article a.future-frame:after,
   article figure.card > a:after {
     display: block;
     width: 100%;
     text-align: center;
     content: attr(href);
-    background-color: #dedede;
   }
 
   article figure.card figcaption {
@@ -558,20 +510,5 @@ header h2 {
 
   article ul[data-gallery] li.dim {
     opacity: 1;
-  }
-}
-
-@media print and (prefers-color-scheme: dark) {
-  body:not(.dark) {
-    color: black;
-    background-color: white;
-  }
-
-  body:not(.dark) article figure.card {
-    background-color: #dedede;
-  }
-
-  body:not(.dark) article figure.card figcaption {
-    background-color: white;
   }
 }

@@ -2,7 +2,7 @@
   --color-braaand: #00a500;
   --color-background: initial;
   --color-text: initial;
-  --color-text-decoration-color: rgba(0, 165, 0, 0.6);
+  --color-text-decoration: rgba(0, 165, 0, 0.6);
   --color-card-border: #dedede;
   --color-card-hover: white;
   --color-card-caption-background: white;
@@ -13,7 +13,7 @@
   :root {
     --color-background: black;
     --color-text: #e3e3e3;
-    --color-text-decoration-color: rgba(0, 165, 0, 0.8);
+    --color-text-decoration: rgba(0, 165, 0, 0.8);
     --color-card-border: #414141;
     --color-card-caption-background: black;
   }
@@ -22,7 +22,7 @@
 body.dark {
   --color-background: black;
   --color-text: #e3e3e3;
-  --color-text-decoration-color: rgba(0, 165, 0, 0.8);
+  --color-text-decoration: rgba(0, 165, 0, 0.8);
   --color-card-border: #414141;
   --color-card-caption-background: black;
 }
@@ -30,7 +30,7 @@ body.dark {
 body.light {
   --color-background: white;
   --color-text: black;
-  --color-text-decoration-color: rgba(0, 165, 0, 0.6);
+  --color-text-decoration: rgba(0, 165, 0, 0.6);
   --color-card-border: #dedede;
   --color-card-caption-background: white;
 }
@@ -42,7 +42,7 @@ body.light {
     --color-braaand: black;
     --color-background: white;
     --color-text: black;
-    --color-text-decoration-color: #414141;
+    --color-text-decoration: #414141;
     --color-card-border: #dedede;
     --color-card-caption-background: white;
   }
@@ -53,7 +53,7 @@ body.light {
     --color-braaand: black;
     --color-background: white;
     --color-text: black;
-    --color-text-decoration-color: #414141;
+    --color-text-decoration: #414141;
     --color-card-border: #dedede;
     --color-card-caption-background: white;
   }
@@ -283,7 +283,8 @@ article blockquote {
   margin-left: 0;
   margin-right: 0;
   padding-left: 0.7em;
-  border-left: 2px solid rgba(0, 165, 0, 0.7);
+  border-left: 2px solid rgba(0, 165, 0, 0.6);
+  border-left-color: var(--color-text-decoration);
 }
 
 nav,
@@ -430,9 +431,9 @@ footer a:visited {
   color: #00a500;
   color: var(--color-braaand);
   -webkit-text-decoration-color: rgba(0, 165, 0, 0.6);
-  -webkit-text-decoration-color: var(--color-text-decoration-color);
+  -webkit-text-decoration-color: var(--color-text-decoration);
   text-decoration-color: rgba(0, 165, 0, 0.6);
-  text-decoration-color: var(--color-text-decoration-color);
+  text-decoration-color: var(--color-text-decoration);
 }
 
 header a,

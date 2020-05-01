@@ -36,10 +36,13 @@ body.light {
 }
 
 @media print {
+  :root,
+  body.light,
   body.dark {
-    --color-background: initial;
-    --color-text: initial;
-    --color-text-decoration-color: rgba(0, 165, 0, 0.6);
+    --color-braaand: black;
+    --color-background: white;
+    --color-text: black;
+    --color-text-decoration-color: #414141;
     --color-card-border: #dedede;
     --color-card-caption-background: white;
   }
@@ -47,9 +50,10 @@ body.light {
 
 @media print and (prefers-color-scheme: dark) {
   :root {
-    --color-background: initial;
-    --color-text: initial;
-    --color-text-decoration-color: rgba(0, 165, 0, 0.6);
+    --color-braaand: black;
+    --color-background: white;
+    --color-text: black;
+    --color-text-decoration-color: #414141;
     --color-card-border: #dedede;
     --color-card-caption-background: white;
   }

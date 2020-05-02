@@ -485,10 +485,21 @@ header h2 {
   }
 
   header label,
+  article .footnotes a[rev="footnote"],
+  article a.future-frame[href^="data:text"]:after,
   nav,
-  footer,
+  footer a,
+  footer br,
   .print\:hidden {
     display: none;
+  }
+
+  footer a[rel="me"] {
+    display: inline;
+  }
+
+  article a.future-frame {
+    max-width: 40em;
   }
 
   article a.future-frame:after,
@@ -500,8 +511,7 @@ header h2 {
   }
 
   article figure.card figcaption {
-    border: none;
-    border-radius: none;
+    border-radius: 0;
   }
 
   article ul[data-gallery] {

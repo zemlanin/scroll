@@ -25,11 +25,11 @@ module.exports = async (req, res) => {
   }
 
   await db.run(`DELETE FROM posts WHERE id = ?1`, {
-    1: existingPostId
+    1: existingPostId,
   });
 
   res.writeHead(303, {
-    Location: url.resolve(req.absolute, `/backstage`)
+    Location: url.resolve(req.absolute, `/backstage`),
   });
 
   return;

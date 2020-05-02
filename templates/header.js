@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   var nightModeForm = document.getElementById("night-mode");
   if (!nightModeForm) {
     return;
@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", function() {
     nightModeForm["night-mode"].value = "off";
   }
 
-  nightModeForm.addEventListener("change", function() {
+  nightModeForm.addEventListener("change", function () {
     if (nightModeForm["night-mode"].value === "on") {
       classList.add("dark");
       classList.remove("light");
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", function() {
   });
 });
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   function handleFutureFrame(e) {
     if (e.ctrlKey || e.metaKey) {
       return true;
@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function() {
       i.style.background = background;
     }
     target.parentNode.insertBefore(i, target);
-    i.addEventListener("load", function() {
+    i.addEventListener("load", function () {
       i.setAttribute("height", height);
       target.style.display = "none";
     });
@@ -79,13 +79,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
   Array.prototype.forEach.call(
     document.querySelectorAll("a.future-frame[data-src]"),
-    function(ff) {
+    function (ff) {
       ff.addEventListener("click", handleFutureFrame);
     }
   );
 });
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   function handleAudioControl(e) {
     if (e.ctrlKey || e.metaKey) {
       return true;
@@ -113,13 +113,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
   Array.prototype.forEach.call(
     document.querySelectorAll("figure.card img.audio-control"),
-    function(ac) {
+    function (ac) {
       ac.addEventListener("click", handleAudioControl);
     }
   );
 });
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   if (typeof matchMedia === "undefined" && !("connection" in navigator)) {
     return;
   }
@@ -180,7 +180,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   var supportsRAF = "requestAnimationFrame" in window;
 
   function noop() {}
@@ -191,11 +191,11 @@ document.addEventListener("DOMContentLoaded", function() {
     var _f =
       arg === undefined
         ? f
-        : function() {
+        : function () {
             return f(arg);
           };
 
-    return function() {
+    return function () {
       if (timeout) {
         window.cancelAnimationFrame(timeout);
       }
@@ -211,7 +211,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   var resizeObserver =
     "ResizeObserver" in window
-      ? new ResizeObserver(function(entries) {
+      ? new ResizeObserver(function (entries) {
           for (var i = 0; i < entries.length; i++) {
             onResize(entries[i].target);
           }
@@ -355,7 +355,7 @@ document.addEventListener("DOMContentLoaded", function() {
         ? wrapInRAF(highlightCentermost, node)
         : noop;
 
-      window.addEventListener("keydown", function(e) {
+      window.addEventListener("keydown", function (e) {
         var LEFT = 37;
         var RIGHT = 39;
         var BOUNDS_OFFSET = 40;
@@ -386,8 +386,8 @@ document.addEventListener("DOMContentLoaded", function() {
         }
       });
 
-      Array.prototype.forEach.call(node.querySelectorAll("li"), function(li) {
-        li.addEventListener("click", function() {
+      Array.prototype.forEach.call(node.querySelectorAll("li"), function (li) {
+        li.addEventListener("click", function () {
           scrollToCenter(node, li);
           wrappedHighlightCentermost();
         });
@@ -401,24 +401,25 @@ document.addEventListener("DOMContentLoaded", function() {
       }
 
       function refreshLayoutOnChildrenLoad(parent) {
-        Array.prototype.forEach.call(parent.querySelectorAll("img"), function(
+        Array.prototype.forEach.call(parent.querySelectorAll("img"), function (
           img
         ) {
           img.addEventListener("load", refreshLayout);
         });
 
-        Array.prototype.forEach.call(parent.querySelectorAll("video"), function(
-          video
-        ) {
-          var img;
+        Array.prototype.forEach.call(
+          parent.querySelectorAll("video"),
+          function (video) {
+            var img;
 
-          video.addEventListener("loadedmetadata", refreshLayout);
-          if (video.poster) {
-            img = new Image();
-            img.addEventListener("load", refreshLayout);
-            img.src = video.poster;
+            video.addEventListener("loadedmetadata", refreshLayout);
+            if (video.poster) {
+              img = new Image();
+              img.addEventListener("load", refreshLayout);
+              img.src = video.poster;
+            }
           }
-        });
+        );
       }
 
       refreshLayoutOnChildrenLoad(

@@ -18,12 +18,12 @@ async function generateDefaultMedia(db, destination, stdout, stderr) {
     await db
       .all(
         `SELECT * from media WHERE id IN (${mediaChunk
-          .map(s => `"${s.id}"`)
+          .map((s) => `"${s.id}"`)
           .join(",")})`
       )
-      .then(loaded =>
+      .then((loaded) =>
         Promise.all(
-          loaded.map(async m => {
+          loaded.map(async (m) => {
             const mimeType = mime.getType(m.ext);
             const ctags = await getConversionTags(mimeType);
 
@@ -47,9 +47,9 @@ async function generateDefaultMedia(db, destination, stdout, stderr) {
               }
             } catch (e) {
               stderr.write(
-                `\nfailed converting ${m.id}.${
-                  m.ext
-                } [${defaultConversionTags && defaultConversionTags.join(",")}]`
+                `\nfailed converting ${m.id}.${m.ext} [${
+                  defaultConversionTags && defaultConversionTags.join(",")
+                }]`
               );
               throw e;
             }
@@ -60,7 +60,7 @@ async function generateDefaultMedia(db, destination, stdout, stderr) {
 }
 
 const TEN_BYTES = "\n\n\n\n\n\n\n\n\n\n";
-const writePadding = out => {
+const writePadding = (out) => {
   // Browsers wait for a few KB before displaying long-polling/server-sent content
   for (let i = 0; i < 800; i++) {
     out.write(TEN_BYTES);
@@ -87,7 +87,7 @@ module.exports = {
     res.writeHead(200, {
       "Content-Type": "text/html",
       "X-Accel-Buffering": "no",
-      "Cache-Control": "no-cache"
+      "Cache-Control": "no-cache",
     });
 
     writePadding(res);
@@ -125,9 +125,9 @@ module.exports = {
       .then(() => {
         res.end("\ndone");
       })
-      .catch(e => {
+      .catch((e) => {
         res.write(e.toString());
         res.end("\nfail");
       });
-  }
+  },
 };

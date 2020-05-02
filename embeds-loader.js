@@ -14,13 +14,13 @@ function decode(string) {
 }
 
 function wrapHtml(fn) {
-  return function() {
+  return function () {
     const result = fn.apply(this, arguments);
     return typeof result === "string" ? decode(result) : result;
   };
 }
 
-cheerio.load = function() {
+cheerio.load = function () {
   const instance = load.apply(this, arguments);
 
   instance.html = wrapHtml(instance.html);
@@ -33,7 +33,7 @@ const {
   loadMetadata,
   generateCardJSON,
   renderCard,
-  queryEmbed
+  queryEmbed,
 } = require("./backstage/embeds.js");
 
 module.exports = class EmbedsLoader {
@@ -45,7 +45,7 @@ module.exports = class EmbedsLoader {
   }
 
   async query(urls) {
-    const urlsToQuery = urls.filter(u => !this.cache[u]);
+    const urlsToQuery = urls.filter((u) => !this.cache[u]);
 
     for (const url of urlsToQuery) {
       const embedFromDB = await queryEmbed(this.db, url);
@@ -56,7 +56,7 @@ module.exports = class EmbedsLoader {
       }
     }
 
-    const urlsToRequest = urlsToQuery.filter(u => !this.cache[u]);
+    const urlsToRequest = urlsToQuery.filter((u) => !this.cache[u]);
     for (const url of urlsToRequest) {
       let raw_metadata;
 
@@ -67,7 +67,7 @@ module.exports = class EmbedsLoader {
 
         raw_metadata = [
           { name: "url", content: url },
-          { name: "mimetype", content: "text/html" }
+          { name: "mimetype", content: "text/html" },
         ];
       }
 
@@ -92,7 +92,7 @@ module.exports = class EmbedsLoader {
             1: url,
             2: JSON.stringify(raw_metadata),
             4: cardWithMetadata.mimetype,
-            5: new Date().toISOString().replace(/\.\d{3}Z$/, "Z")
+            5: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
           }
         );
       }
@@ -106,7 +106,7 @@ module.exports = class EmbedsLoader {
 
     const urlsToLoad = [];
 
-    $("x-embed").each(function() {
+    $("x-embed").each(function () {
       const { href } = JSON.parse($(this).text());
       urlsToLoad.push(href);
     });
@@ -119,7 +119,7 @@ module.exports = class EmbedsLoader {
 
     const cache = this.cache;
 
-    $("x-embed").each(function() {
+    $("x-embed").each(function () {
       const $this = $(this);
       const { href, text } = JSON.parse($this.text());
       $this.replaceWith(cache[href] || `<a href="${href}">${text || href}</a>`);

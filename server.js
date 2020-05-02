@@ -5,7 +5,7 @@ const path = require("path");
 const querystring = require("querystring");
 const { promisify } = require("util");
 const fsPromises = {
-  readFile: promisify(fs.readFile)
+  readFile: promisify(fs.readFile),
 };
 
 const sqlite = require("sqlite");
@@ -45,11 +45,11 @@ if (process.env.NODE_ENV !== "production") {
   const serveStatic = require("serve-static");
   const staticMiddleware = serveStatic(path.resolve(DIST), {
     index: ["index.html"],
-    extensions: ["html"]
+    extensions: ["html"],
   });
 
-  staticHandler = function(req, res) {
-    return new Promise(resolve => {
+  staticHandler = function (req, res) {
+    return new Promise((resolve) => {
       return staticMiddleware(req, res, () => {
         res.writeHead(404);
         resolve("404");
@@ -65,14 +65,14 @@ const handlers = [
   [
     "GET",
     "/rss",
-    async (req, res) => res.writeHead(302, { Location: "/rss.xml" })
+    async (req, res) => res.writeHead(302, { Location: "/rss.xml" }),
   ],
   ["GET", "/rss.xml", staticHandler],
   [
     "GET",
     /^\/post\/(\d+)/,
     async (req, res) =>
-      res.writeHead(302, { Location: `/tumblr-zem-${req.params[0]}.html` })
+      res.writeHead(302, { Location: `/tumblr-zem-${req.params[0]}.html` }),
   ],
   [
     "GET",
@@ -83,7 +83,7 @@ const handlers = [
       return await fsPromises.readFile(
         path.resolve(__dirname, "static", "robots.txt")
       );
-    }
+    },
   ],
   [
     "GET",
@@ -94,7 +94,7 @@ const handlers = [
       return await fsPromises.readFile(
         path.resolve(__dirname, "static", "favicon.ico")
       );
-    }
+    },
   ],
   [
     "GET",
@@ -105,7 +105,7 @@ const handlers = [
       return await fsPromises.readFile(
         path.resolve(__dirname, "static", "favicon.png")
       );
-    }
+    },
   ],
   [
     "GET",
@@ -116,7 +116,7 @@ const handlers = [
       return await fsPromises.readFile(
         path.resolve(__dirname, "static", "favicon.svg")
       );
-    }
+    },
   ],
   [
     "GET",
@@ -127,7 +127,7 @@ const handlers = [
       return await fsPromises.readFile(
         path.resolve(__dirname, "static", "mask-icon.svg")
       );
-    }
+    },
   ],
   [
     "GET",
@@ -138,7 +138,7 @@ const handlers = [
       return await fsPromises.readFile(
         path.resolve(__dirname, "static", "details-element-polyfill.js")
       );
-    }
+    },
   ],
   ["GET", "/media/*", staticHandler],
   ["GET", "/backstage", require("./backstage/index.js")],
@@ -156,13 +156,13 @@ const handlers = [
   ["GET", "/backstage/goaccess.svg", require("./backstage/goaccess-graph.js")],
   ["GET", "/backstage/embeds", require("./backstage/embeds.js").get],
   ["POST", "/backstage/embeds", require("./backstage/embeds.js").post],
-  ["GET", "/:name(.html)", staticHandler]
+  ["GET", "/:name(.html)", staticHandler],
 ].map(([m, p, h]) => [m, new UrlPattern(p), h]);
 
 async function processPost(request, response) {
   var queryData = "";
   return new Promise((resolve, reject) => {
-    request.on("data", function(data) {
+    request.on("data", function (data) {
       queryData += data;
       if (queryData.length > 1e6) {
         queryData = "";
@@ -172,7 +172,7 @@ async function processPost(request, response) {
       }
     });
 
-    request.on("end", function() {
+    request.on("end", function () {
       request.post = querystring.parse(queryData);
       resolve(request.post);
     });
@@ -201,7 +201,7 @@ const server = http.createServer((req, res) => {
     req.absolute = url.format({
       protocol,
       host,
-      port
+      port,
     });
 
     if (
@@ -237,7 +237,7 @@ const server = http.createServer((req, res) => {
     }
 
     return resultPromise
-      .then(body => {
+      .then((body) => {
         if (res.finished) {
           return;
         }
@@ -253,7 +253,7 @@ const server = http.createServer((req, res) => {
           (contentType && contentType.startsWith("image/"))
         ) {
           res.writeHead(res.statusCode, {
-            "Content-Type": contentType || "text/html"
+            "Content-Type": contentType || "text/html",
           });
           res.end(body);
         } else if (body || contentType === "application/json") {
@@ -264,7 +264,7 @@ const server = http.createServer((req, res) => {
         }
       })
       .then(() => db && db.close())
-      .catch(err => {
+      .catch((err) => {
         if (!res.finished) {
           console.error(err);
 
@@ -280,8 +280,8 @@ const server = http.createServer((req, res) => {
 function start() {
   sqlite
     .open({ filename: POSTS_DB, driver: sqlite3.Database })
-    .then(db => loadIcu(db))
-    .then(db =>
+    .then((db) => loadIcu(db))
+    .then((db) =>
       db.migrate({ migrationsPath: path.resolve(__dirname, "migrations") })
     )
     .then(() => {
@@ -293,7 +293,7 @@ function start() {
 
       console.log(`running on ${PORT}`);
     })
-    .catch(err => {
+    .catch((err) => {
       console.error(err);
       process.exit(1);
     });
@@ -304,6 +304,6 @@ if (require.main === module) {
 } else {
   module.exports = {
     server,
-    start
+    start,
   };
 }

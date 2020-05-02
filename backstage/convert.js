@@ -9,7 +9,7 @@ const fsPromises = {
   unlink: promisify(fs.unlink),
   mkdir: promisify(fs.mkdir),
   mkdtemp: promisify(fs.mkdtemp),
-  exists: promisify(fs.exists)
+  exists: promisify(fs.exists),
 };
 
 const mime = require("mime");
@@ -28,7 +28,7 @@ const SHARP_SUPPORTED_INPUT_MIMETYPES = new Set([
   "image/gif",
   "image/png",
   "image/jpeg",
-  "image/webp"
+  "image/webp",
 ]);
 
 function getSharpConversionTags(mimeType) {
@@ -47,11 +47,11 @@ function getSharpConversionTags(mimeType) {
             height: 128,
             fit: "cover",
             strategy: "attention",
-            withoutEnlargement: true
+            withoutEnlargement: true,
           })
           .toFormat(iconExt)
           .toBuffer();
-      }
+      },
     },
     fit200: {
       ext: fitExt,
@@ -62,11 +62,11 @@ function getSharpConversionTags(mimeType) {
             width: 200,
             height: 200,
             fit: "inside",
-            withoutEnlargement: true
+            withoutEnlargement: true,
           })
           .toFormat(fitExt)
           .toBuffer();
-      }
+      },
     },
     fit1000: {
       ext: fitExt,
@@ -77,11 +77,11 @@ function getSharpConversionTags(mimeType) {
             width: 1000,
             height: 1000,
             fit: "inside",
-            withoutEnlargement: true
+            withoutEnlargement: true,
           })
           .toFormat(fitExt)
           .toBuffer();
-      }
+      },
     },
     fit1600: {
       ext: fitExt,
@@ -92,17 +92,17 @@ function getSharpConversionTags(mimeType) {
             width: 1600,
             height: 1600,
             fit: "inside",
-            withoutEnlargement: true
+            withoutEnlargement: true,
           })
           .toFormat(fitExt)
           .toBuffer();
-      }
-    }
+      },
+    },
   };
 }
 
-const isFfmpegInstalled = new Promise(resolve => {
-  ffmpeg.getAvailableFormats(function(err, formats) {
+const isFfmpegInstalled = new Promise((resolve) => {
+  ffmpeg.getAvailableFormats(function (err, formats) {
     return resolve(Boolean(!err && formats));
   });
 });
@@ -133,21 +133,21 @@ function getGifToMP4Buffer(input) {
             "-movflags +faststart+frag_keyframe+empty_moov",
             "-pix_fmt yuv420p",
             "-vf",
-            "scale=trunc(iw/2)*2:trunc(ih/2)*2"
+            "scale=trunc(iw/2)*2:trunc(ih/2)*2",
           ])
           .videoCodec("libx264")
           .noAudio()
           .videoBitrate(1000)
           .toFormat("mp4")
           .save(outputFile)
-          .on("end", function() {
-            fsPromises.readFile(outputFile).then(blob =>
+          .on("end", function () {
+            fsPromises.readFile(outputFile).then((blob) =>
               cleanup().then(() => {
                 resolve(blob);
               })
             );
           })
-          .on("error", function(err) {
+          .on("error", function (err) {
             cleanup()
               .catch(() => {})
               .then(() => {
@@ -155,7 +155,7 @@ function getGifToMP4Buffer(input) {
               });
           });
       })
-      .catch(err => {
+      .catch((err) => {
         reject(err);
       });
   });
@@ -187,16 +187,16 @@ function getFirstFrameBuffer(input, crop = null) {
         if (crop) {
           ffmpegArgs = ffmpegArgs.videoFilter([
             "crop=min(iw\\, ih):min(iw\\, ih)",
-            `scale=${crop}:${crop}`
+            `scale=${crop}:${crop}`,
           ]);
         }
 
         ffmpegArgs
-          .on("end", function() {
+          .on("end", function () {
             resolve(Buffer.concat(chunks));
             cleanup().catch(() => {});
           })
-          .on("error", function(err) {
+          .on("error", function (err) {
             cleanup()
               .catch(() => {})
               .then(() => {
@@ -204,11 +204,11 @@ function getFirstFrameBuffer(input, crop = null) {
               });
           })
           .pipe()
-          .on("data", function(chunk) {
+          .on("data", function (chunk) {
             chunks.push(chunk);
           });
       })
-      .catch(err => {
+      .catch((err) => {
         reject(err);
       });
   });
@@ -223,8 +223,8 @@ async function getConversionTags(mimeType) {
       _default: sharpTags._default.concat("gifv"),
       gifv: {
         ext: "mp4",
-        convert: getGifToMP4Buffer
-      }
+        convert: getGifToMP4Buffer,
+      },
     };
   }
 
@@ -239,12 +239,12 @@ async function getConversionTags(mimeType) {
         ext: "jpeg",
         async convert(input) {
           return await getFirstFrameBuffer(input, 128);
-        }
+        },
       },
       firstframe: {
         ext: "jpeg",
-        convert: getFirstFrameBuffer
-      }
+        convert: getFirstFrameBuffer,
+      },
     };
   }
 }
@@ -260,7 +260,7 @@ async function convertMedia(db, tag, blob, mediaId, mimeType, destination) {
       id: alreadyConverted.id,
       ext: alreadyConverted.ext,
       tag: alreadyConverted.tag,
-      media_id: alreadyConverted.media_id
+      media_id: alreadyConverted.media_id,
     };
   }
 
@@ -281,7 +281,7 @@ async function convertMedia(db, tag, blob, mediaId, mimeType, destination) {
     id: getMediaId(),
     media_id: mediaId,
     tag: tag,
-    ext: ext
+    ext: ext,
   };
 
   await db.run(
@@ -295,7 +295,7 @@ async function convertMedia(db, tag, blob, mediaId, mimeType, destination) {
       3: result.tag,
       4: result.ext,
       5: converted,
-      6: new Date().toISOString()
+      6: new Date().toISOString(),
     }
   );
 
@@ -344,14 +344,14 @@ module.exports = {
       "SELECT id, ext from converted_media WHERE media_id = ?1 AND tag = ?2",
       {
         1: media.id,
-        2: tag
+        2: tag,
       }
     );
 
     if (req.post.delete) {
       if (existing) {
         await db.run(`DELETE FROM converted_media WHERE id = ?1`, {
-          1: existing.id
+          1: existing.id,
         });
 
         const fpath = path.join(
@@ -392,5 +392,5 @@ module.exports = {
     res.writeHead(303, { Location: `/backstage/media/?id=${media.id}` });
     res.end();
     return;
-  }
+  },
 };

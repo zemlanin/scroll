@@ -4,7 +4,7 @@ const path = require("path");
 const { promisify } = require("util");
 
 const fsPromises = {
-  readFile: promisify(fs.readFile)
+  readFile: promisify(fs.readFile),
 };
 
 const mime = require("mime");
@@ -58,38 +58,39 @@ async function loadCardTemplate() {
 }
 loadCardTemplate.cache = "";
 
-const hasContent = meta => meta.content;
-const metaInitial = meta =>
+const hasContent = (meta) => meta.content;
+const metaInitial = (meta) =>
   meta.name === "url" || meta.name === "title" || meta.name === "mimetype";
-const tupleInitial = meta => [meta.name, meta.content];
-const metaNameOG = meta => meta.name && meta.name.startsWith("og:");
-const tupleNameOG = meta => [meta.name.slice(3), meta.content];
-const metaPropertyOG = meta => meta.property && meta.property.startsWith("og:");
-const tuplePropertyOG = meta => [meta.property.slice(3), meta.content];
-const metaNameTwitter = meta => meta.name && meta.name.startsWith("twitter:");
-const tupleNameTwitter = meta => [meta.name.slice(8), meta.content];
+const tupleInitial = (meta) => [meta.name, meta.content];
+const metaNameOG = (meta) => meta.name && meta.name.startsWith("og:");
+const tupleNameOG = (meta) => [meta.name.slice(3), meta.content];
+const metaPropertyOG = (meta) =>
+  meta.property && meta.property.startsWith("og:");
+const tuplePropertyOG = (meta) => [meta.property.slice(3), meta.content];
+const metaNameTwitter = (meta) => meta.name && meta.name.startsWith("twitter:");
+const tupleNameTwitter = (meta) => [meta.name.slice(8), meta.content];
 
 const cheerioAttrs = (i, el) => el.attribs;
 
-const isSimpleProp = prop =>
+const isSimpleProp = (prop) =>
   prop === "url" ||
   prop === "title" ||
   prop === "mimetype" ||
   prop === "site_name" ||
   prop === "description";
 
-const isBasicMediaProp = prop =>
+const isBasicMediaProp = (prop) =>
   prop === "image" || prop === "video" || prop === "audio";
 
-const isInitialMediaProp = prop =>
+const isInitialMediaProp = (prop) =>
   prop === "image:url" || prop === "video:url" || prop === "audio:url";
 
-const isSecureUrlMediaProp = prop =>
+const isSecureUrlMediaProp = (prop) =>
   prop === "image:secure_url" ||
   prop === "video:secure_url" ||
   prop === "audio:secure_url";
 
-const isMediaProp = prop =>
+const isMediaProp = (prop) =>
   prop === "image:type" ||
   prop === "image:width" ||
   prop === "image:height" ||
@@ -99,7 +100,7 @@ const isMediaProp = prop =>
   prop === "video:height" ||
   prop === "audio:type";
 
-const isNumericProp = prop =>
+const isNumericProp = (prop) =>
   prop === "image:width" ||
   prop === "image:height" ||
   prop === "video:width" ||
@@ -109,7 +110,7 @@ const isNumericProp = prop =>
 
 // https://developer.twitter.com/en/docs/tweets/optimize-with-cards/overview/markup
 // https://developer.twitter.com/en/docs/tweets/optimize-with-cards/overview/player-card
-const isPlayerProp = prop =>
+const isPlayerProp = (prop) =>
   prop === "player" ||
   prop === "player:width" ||
   prop === "player:height" ||
@@ -119,7 +120,7 @@ const isPlayerProp = prop =>
 const numericIfNeeded = ([prop, value]) =>
   !isNumericProp(prop) || value.match(/^[0-9]+$/);
 
-const getURLMimetype = href => {
+const getURLMimetype = (href) => {
   const pathname = new URL(href).pathname;
   return (pathname && mime.getType(pathname)) || null;
 };
@@ -143,7 +144,7 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
 
       if (!prevObj.url) {
         patch = {
-          [prop]: [...acc[prop], { ...prevObj, url: value }]
+          [prop]: [...acc[prop], { ...prevObj, url: value }],
         };
       } else {
         patch = { [prop]: [...acc[prop], prevObj, { url: value }] };
@@ -159,7 +160,7 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
 
       if (!prevObj.url) {
         patch = {
-          [prop0]: [...acc[prop0], { ...prevObj, url: value }]
+          [prop0]: [...acc[prop0], { ...prevObj, url: value }],
         };
       } else {
         patch = { [prop0]: [...acc[prop0], prevObj, { url: value }] };
@@ -178,7 +179,7 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
       const prevObj = acc[prop0].pop();
 
       patch = {
-        [prop0]: [...acc[prop0], { ...prevObj, [prop1]: value }]
+        [prop0]: [...acc[prop0], { ...prevObj, [prop1]: value }],
       };
     } else {
       patch = { [prop0]: [{ [prop1]: value }] };
@@ -193,15 +194,15 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
       patch = {
         player: {
           url: value,
-          ...(acc.player || {})
-        }
+          ...(acc.player || {}),
+        },
       };
     } else if (prop1 !== "stream") {
       patch = {
         player: {
           [prop1]: value,
-          ...(acc.player || {})
-        }
+          ...(acc.player || {}),
+        },
       };
     } else {
       // else if (prop1 === "stream")
@@ -214,29 +215,29 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
           ...(acc.player || {}),
           stream: {
             [prop2]: value,
-            ...((acc.player && acc.player.stream) || {})
-          }
-        }
+            ...((acc.player && acc.player.stream) || {}),
+          },
+        },
       };
     }
   }
 
   return {
     ...acc,
-    ...patch
+    ...patch,
   };
 };
 
-const getVideoIframe = graph =>
+const getVideoIframe = (graph) =>
   graph &&
-  ((graph.video && graph.video.find(v => v.url && v.type === "text/html")) ||
+  ((graph.video && graph.video.find((v) => v.url && v.type === "text/html")) ||
     (graph.player && {
       url: graph.player.url,
       width: graph.player.width,
-      height: graph.player.height
+      height: graph.player.height,
     }));
 
-const getVideoNative = graph => {
+const getVideoNative = (graph) => {
   if (!graph) {
     return null;
   }
@@ -244,7 +245,7 @@ const getVideoNative = graph => {
   let video = null;
 
   if (!video && graph.video) {
-    video = graph.video.find(v => v.url && v.type === "video/mp4");
+    video = graph.video.find((v) => v.url && v.type === "video/mp4");
   }
 
   if (
@@ -258,7 +259,7 @@ const getVideoNative = graph => {
       url: graph.player.stream.url,
       width: graph.player.width,
       height: graph.player.height,
-      type: graph.player.stream.content_type
+      type: graph.player.stream.content_type,
     };
   }
 
@@ -269,7 +270,7 @@ const getVideoNative = graph => {
   return video;
 };
 
-const getAudioNative = graph => {
+const getAudioNative = (graph) => {
   if (!graph) {
     return null;
   }
@@ -284,7 +285,7 @@ const getAudioNative = graph => {
     graph.player.stream.content_type === "audio/mpeg"
   ) {
     audio = {
-      url: graph.player.stream.url
+      url: graph.player.stream.url,
     };
   }
 
@@ -302,17 +303,17 @@ const getImageNative = (graph, options) => {
 
   if (options && options.static) {
     return graph.image.find(
-      v => v.url && "image/gif" !== (v.type ? v.type : getURLMimetype(v.url))
+      (v) => v.url && "image/gif" !== (v.type ? v.type : getURLMimetype(v.url))
     );
   }
 
-  return graph.image.find(v => v.url);
+  return graph.image.find((v) => v.url);
 };
 
 //                                    ($1          )              ($2)
 const APPLE_MUSIC_REGEX = /^https:\/\/(itunes|music)\.apple\.com\/(.+)/;
 
-const getFrameFallback = graphUrl => {
+const getFrameFallback = (graphUrl) => {
   const funnyOrDieId = graphUrl.match(
     /\/\/www\.funnyordie\.com\/videos\/([0-9a-f]+)/
   );
@@ -321,9 +322,9 @@ const getFrameFallback = graphUrl => {
       video: [
         {
           url: `https://www.funnyordie.com/embed/${funnyOrDieId[1]}`,
-          type: "text/html"
-        }
-      ]
+          type: "text/html",
+        },
+      ],
     };
   }
 
@@ -333,9 +334,9 @@ const getFrameFallback = graphUrl => {
       video: [
         {
           url: `https://player.vimeo.com/video/${vimeoId[2]}`,
-          type: "text/html"
-        }
-      ]
+          type: "text/html",
+        },
+      ],
     };
   }
 
@@ -345,16 +346,16 @@ const getFrameFallback = graphUrl => {
       video: [
         {
           url: `https://embed.music.apple.com/${appleMusicPath[2]}`,
-          type: "text/html"
-        }
-      ]
+          type: "text/html",
+        },
+      ],
     };
   }
 
   return {};
 };
 
-const shouldDescriptionBeTruncated = cardURL => {
+const shouldDescriptionBeTruncated = (cardURL) => {
   if (cardURL && cardURL.startsWith("https://twitter.com/")) {
     return false;
   }
@@ -362,7 +363,7 @@ const shouldDescriptionBeTruncated = cardURL => {
   return true;
 };
 
-const prepareEmbed = embed => {
+const prepareEmbed = (embed) => {
   embed.original_url_encoded = encodeURIComponent(embed.original_url);
   embed.raw_metadata = JSON.parse(embed.raw_metadata);
   embed.created = new Date(parseInt(embed.created))
@@ -427,13 +428,13 @@ async function getSingleEmbed(req, _res) {
         error = error + ": " + e.statusCode;
         rawMetadata = [
           { name: "url", content: query.url },
-          { name: "mimetype", content: "text/html" }
+          { name: "mimetype", content: "text/html" },
         ];
       } else if (e instanceof RequestError) {
         error = error + ": " + e.error.code;
         rawMetadata = [
           { name: "url", content: query.url },
-          { name: "mimetype", content: "text/html" }
+          { name: "mimetype", content: "text/html" },
         ];
       } else {
         console.error(e);
@@ -459,7 +460,7 @@ async function getSingleEmbed(req, _res) {
     requested = {
       cardJSON: JSON.stringify(error || card, null, 2),
       parsedMetadataJSON:
-        parsedMetadata && JSON.stringify(parsedMetadata, null, 2)
+        parsedMetadata && JSON.stringify(parsedMetadata, null, 2),
     };
   } else if (existingEmbed) {
     mimetype = existingEmbed.mimetype;
@@ -478,8 +479,8 @@ async function getSingleEmbed(req, _res) {
     rawMetadataJSON: rawMetadata && JSON.stringify(rawMetadata),
     status: {
       saved: !query.request && Boolean(existingEmbed),
-      requested: cardHTML && (!existingEmbed || Boolean(query.request))
-    }
+      requested: cardHTML && (!existingEmbed || Boolean(query.request)),
+    },
   });
 }
 
@@ -510,7 +511,7 @@ async function getEmbedsList(req, _res) {
         {
           1: offset,
           2: PAGE_SIZE + 1,
-          3: query.q && decodeURIComponent(query.q)
+          3: query.q && decodeURIComponent(query.q),
         }
       )
     ).map(prepareEmbed);
@@ -560,8 +561,8 @@ async function getEmbedsList(req, _res) {
               query.q ? "&q=" + query.q : ""
             }`
           )
-        : null
-    }
+        : null,
+    },
   });
 }
 
@@ -569,7 +570,7 @@ const ABSOLUTE_URL_REGEX = /^[a-z][a-z\d+-.]*:/;
 
 module.exports = {
   queryEmbed,
-  loadMetadata: async ogPageURL => {
+  loadMetadata: async (ogPageURL) => {
     if (!ogPageURL) {
       return null;
     }
@@ -580,7 +581,7 @@ module.exports = {
       return expectedMimetype
         ? [
             { name: "url", content: ogPageURL },
-            { name: "mimetype", content: expectedMimetype }
+            { name: "mimetype", content: expectedMimetype },
           ]
         : null;
     }
@@ -616,8 +617,8 @@ module.exports = {
         timeout: 4000,
         headers: {
           Accept: mimetypeFromURL,
-          "User-Agent": "request (+https://zemlan.in)"
-        }
+          "User-Agent": "request (+https://zemlan.in)",
+        },
       });
 
       const cHeaders = headers && caseless(headers);
@@ -639,8 +640,8 @@ module.exports = {
       timeout: 4000,
       headers: {
         Accept: "text/html,*/*;q=0.8",
-        "User-Agent": "request (+https://zemlan.in)"
-      }
+        "User-Agent": "request (+https://zemlan.in)",
+      },
     });
 
     const cHeaders = headers && caseless(headers);
@@ -653,7 +654,7 @@ module.exports = {
     if (mimetype !== "text/html") {
       return [
         { name: "url", content: ogPageURL },
-        { name: "mimetype", content: mimetype }
+        { name: "mimetype", content: mimetype },
       ];
     }
 
@@ -664,21 +665,18 @@ module.exports = {
       timeout: 4000,
       headers: {
         Accept: "text/html; charset=utf-8",
-        "User-Agent": "request (+https://zemlan.in)"
+        "User-Agent": "request (+https://zemlan.in)",
       },
-      transform: body => cheerio.load(body),
-      transform2xxOnly: true
+      transform: (body) => cheerio.load(body),
+      transform2xxOnly: true,
     });
 
-    const htmlTitle = $(`head title`)
-      .text()
-      .trim()
-      .replace(`\n`, ` `);
+    const htmlTitle = $(`head title`).text().trim().replace(`\n`, ` `);
 
     const initialMeta = [
       { name: "url", content: ogPageURL },
       htmlTitle && { name: "title", content: htmlTitle },
-      { name: "mimetype", content: mimetypeFromURL || mimetype }
+      { name: "mimetype", content: mimetypeFromURL || mimetype },
     ].filter(Boolean);
 
     const rawMeta = $(
@@ -691,7 +689,7 @@ module.exports = {
 
     return rawMeta;
   },
-  generateCardJSON: rawMeta => {
+  generateCardJSON: (rawMeta) => {
     const rawInitial = rawMeta
       .filter(metaInitial)
       .map(tupleInitial)
@@ -728,7 +726,7 @@ module.exports = {
       _parsedMetadata: {
         _: rawInitial,
         og: rawOpengraph,
-        twitter: rawTwitter
+        twitter: rawTwitter,
       },
       mimetype: rawInitial.mimetype || "text/html",
       title: rawOpengraph.title || rawTwitter.title || rawInitial.title,
@@ -742,7 +740,7 @@ module.exports = {
       img: null,
       video: null,
       audio: null,
-      iframe: null
+      iframe: null,
     };
 
     if (shouldDescriptionBeTruncated(card.url)) {
@@ -758,7 +756,7 @@ module.exports = {
         src: videoNative.url,
         width: videoNative.width || 640,
         height: videoNative.height || 360,
-        loop: getURLMimetype(card.url) === "image/gif"
+        loop: getURLMimetype(card.url) === "image/gif",
       };
 
       if (videoNative.poster) {
@@ -766,7 +764,7 @@ module.exports = {
           src: videoNative.poster.url,
           alt: videoNative.poster.alt,
           width: videoNative.poster.width,
-          height: videoNative.poster.height
+          height: videoNative.poster.height,
         };
       }
     }
@@ -777,7 +775,7 @@ module.exports = {
       getAudioNative(rawInitial);
     if (audioNative) {
       card.audio = {
-        src: audioNative.url
+        src: audioNative.url,
       };
 
       if (audioNative.poster) {
@@ -785,7 +783,7 @@ module.exports = {
           src: audioNative.poster.url,
           alt: audioNative.poster.alt,
           width: audioNative.poster.width,
-          height: audioNative.poster.height
+          height: audioNative.poster.height,
         };
       }
     }
@@ -799,7 +797,7 @@ module.exports = {
         card.iframe = {
           src: videoIframe.url,
           width: videoIframe.width || 640,
-          height: videoIframe.height || 360
+          height: videoIframe.height || 360,
         };
       }
     }
@@ -819,7 +817,7 @@ module.exports = {
           src: image.url,
           alt: image.alt,
           width: image.width,
-          height: image.height
+          height: image.height,
         };
       }
     }
@@ -846,7 +844,7 @@ module.exports = {
 
     return card;
   },
-  renderCard: async card => {
+  renderCard: async (card) => {
     if (!card) {
       return "";
     }
@@ -899,11 +897,11 @@ module.exports = {
     if (req.post.delete === "1") {
       if (existingEmbed) {
         await db.run(`DELETE FROM embeds WHERE original_url = ?1`, {
-          1: original_url
+          1: original_url,
         });
 
         res.writeHead(303, {
-          Location: url.resolve(req.absolute, `/backstage/embeds`)
+          Location: url.resolve(req.absolute, `/backstage/embeds`),
         });
 
         return;
@@ -941,7 +939,7 @@ module.exports = {
           1: original_url,
           2: req.post.raw_metadata,
           4: req.post.mimetype,
-          5: new Date().toISOString().replace(/\.\d{3}Z$/, "Z")
+          5: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
         }
       );
     } else {
@@ -953,7 +951,7 @@ module.exports = {
           1: original_url,
           2: req.post.raw_metadata,
           4: req.post.mimetype,
-          5: new Date().toISOString().replace(/\.\d{3}Z$/, "Z")
+          5: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
         }
       );
     }
@@ -962,7 +960,7 @@ module.exports = {
       Location: url.resolve(
         req.absolute,
         `/backstage/embeds?url=${encodeURIComponent(original_url)}`
-      )
+      ),
     });
 
     return;
@@ -982,5 +980,5 @@ module.exports = {
     }
 
     return await getEmbedsList(req, res);
-  }
+  },
 };

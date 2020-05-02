@@ -12,12 +12,12 @@ async function prepare(post, options) {
   const urls = {
     edit: url.resolve(options.baseUrl, `/backstage/edit/?id=${post.id}`),
     preview: url.resolve(options.baseUrl, `/backstage/preview/?id=${post.id}`),
-    permalink: url.resolve(options.baseUrl, `/${post.slug || post.id}.html`)
+    permalink: url.resolve(options.baseUrl, `/${post.slug || post.id}.html`),
   };
 
   return {
     ...(await commonPrepare(post, options.embedsLoader)),
-    urls: urls
+    urls: urls,
   };
 }
 
@@ -44,7 +44,7 @@ async function getSuggestion(db, req) {
 
     return {
       text: `edit ${idOrSlug}`,
-      url: `/backstage/edit/?id=${suggestionPost.id}`
+      url: `/backstage/edit/?id=${suggestionPost.id}`,
     };
   }
 }
@@ -71,9 +71,7 @@ module.exports = async (req, res) => {
   let qWhereValue = "";
   if (query.q) {
     try {
-      qWhereValue = decodeURIComponent(query.q)
-        .trim()
-        .toLowerCase();
+      qWhereValue = decodeURIComponent(query.q).trim().toLowerCase();
     } catch (e) {
       //
     }
@@ -126,7 +124,7 @@ module.exports = async (req, res) => {
           ORDER BY datetime(created) DESC, id DESC
         `,
         {
-          ...(qWhereValue ? { $query: qWhereValue } : {})
+          ...(qWhereValue ? { $query: qWhereValue } : {}),
         }
       );
 
@@ -150,7 +148,7 @@ module.exports = async (req, res) => {
     {
       $offset: offset,
       $limit: PAGE_SIZE + 1,
-      ...(qWhereValue ? { $query: qWhereValue } : {})
+      ...(qWhereValue ? { $query: qWhereValue } : {}),
     }
   );
 
@@ -163,23 +161,23 @@ module.exports = async (req, res) => {
     q: query.q || "",
     drafts: await Promise.all(
       drafts
-        .map(p =>
+        .map((p) =>
           p.text.startsWith("#")
             ? { ...p, text: p.text.trim().split("\n")[0] }
             : p
         )
-        .map(p =>
+        .map((p) =>
           prepare(p, {
             baseUrl: req.absolute,
-            embedsLoader: embedsLoader
+            embedsLoader: embedsLoader,
           })
         )
     ),
     posts: await Promise.all(
-      posts.slice(0, PAGE_SIZE).map(p =>
+      posts.slice(0, PAGE_SIZE).map((p) =>
         prepare(p, {
           baseUrl: req.absolute,
-          embedsLoader: embedsLoader
+          embedsLoader: embedsLoader,
         })
       )
     ),
@@ -189,7 +187,7 @@ module.exports = async (req, res) => {
       canEnter: process.env.NODE_ENV === "production",
       canExit:
         process.env.NODE_ENV === "development" &&
-        cookie.parse(req.headers.cookie || "").dev
+        cookie.parse(req.headers.cookie || "").dev,
     },
     urls: {
       logout: url.resolve(req.absolute, "/backstage/?logout=1"),
@@ -215,7 +213,7 @@ module.exports = async (req, res) => {
               query.q ? "&q=" + query.q : ""
             }`
           )
-        : null
-    }
+        : null,
+    },
   });
 };

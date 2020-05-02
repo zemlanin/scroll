@@ -12,7 +12,7 @@ const fsPromises = {
   rmdir: promisify(fs.rmdir),
   readdir: promisify(fs.readdir),
   readFile: promisify(fs.readFile),
-  copyFile: promisify(fs.copyFile)
+  copyFile: promisify(fs.copyFile),
 };
 const { authed, sendToAuthProvider } = require("./auth.js");
 const { convertMedia, getConversionTags } = require("./convert.js");
@@ -42,14 +42,14 @@ async function rmrf(filepath) {
 
 async function openFileMedia(src, filePath, db) {
   const alreadyLoaded = await db.get("SELECT * from media WHERE src = ?1", [
-    src
+    src,
   ]);
 
   if (alreadyLoaded) {
     return {
       id: alreadyLoaded.id,
       ext: alreadyLoaded.ext,
-      src: alreadyLoaded.src
+      src: alreadyLoaded.src,
     };
   }
 
@@ -61,7 +61,7 @@ async function openFileMedia(src, filePath, db) {
     ext: mimeType
       ? mime.getExtension(mimeType)
       : src.match(/\.([a-z0-9]+)$/i)[1].toLowerCase(),
-    src: src
+    src: src,
   };
 
   await db.run(
@@ -70,7 +70,7 @@ async function openFileMedia(src, filePath, db) {
       1: result.id,
       2: result.ext,
       3: resp,
-      4: new Date().toISOString()
+      4: new Date().toISOString(),
     }
   );
 
@@ -150,15 +150,15 @@ const mediaId = {
       { 1: m.id }
     );
 
-    const existingConversionsTags = existingConversions.map(r => r.tag);
+    const existingConversionsTags = existingConversions.map((r) => r.tag);
 
     const ctags = await getConversionTags(mime.getType(m.ext));
 
     const possibleConversions = Object.keys(ctags || {})
       .filter(
-        tag => tag != "_default" && !existingConversionsTags.includes(tag)
+        (tag) => tag != "_default" && !existingConversionsTags.includes(tag)
       )
-      .map(tag => ({ tag, media_id: m.id, ext: ctags[tag].ext }));
+      .map((tag) => ({ tag, media_id: m.id, ext: ctags[tag].ext }));
 
     const posts = await db.all(
       `
@@ -178,7 +178,7 @@ const mediaId = {
     );
 
     let poster, ffc;
-    if ((ffc = existingConversions.find(c => c.tag === "firstframe"))) {
+    if ((ffc = existingConversions.find((c) => c.tag === "firstframe"))) {
       poster = `/media/${m.id}/${ffc.tag}.${ffc.ext}`;
     }
 
@@ -194,8 +194,8 @@ const mediaId = {
           "",
           poster ? `poster="${poster}"` : ""
         ),
-        type: getMimeObj(m.ext)
-      }
+        type: getMimeObj(m.ext),
+      },
     });
   },
   post: async (req, res) => {
@@ -225,12 +225,12 @@ const mediaId = {
 
     if (req.post && req.post.delete) {
       await db.run(`DELETE FROM converted_media WHERE media_id = ?1`, {
-        1: m.id
+        1: m.id,
       });
       await rmrf(path.join(DIST, "media", m.id));
 
       await db.run(`DELETE FROM media WHERE id = ?1`, {
-        1: m.id
+        1: m.id,
       });
       await fsPromises.unlink(path.join(DIST, "media", `${m.id}.${m.ext}`));
 
@@ -238,7 +238,7 @@ const mediaId = {
       res.end();
       return;
     }
-  }
+  },
 };
 
 module.exports = {
@@ -257,7 +257,7 @@ module.exports = {
       `
         SELECT media_id, tag, ext
         FROM converted_media
-        WHERE media_id IN (${media.map(m => `"${m.id}"`).join(",")})
+        WHERE media_id IN (${media.map((m) => `"${m.id}"`).join(",")})
         ORDER BY tag ASC
       `
     );
@@ -267,7 +267,7 @@ module.exports = {
       conversionsMap[m.id] = {
         existingConversions: [],
         possibleConversions: [],
-        possibleCtags: (await getConversionTags(mime.getType(m.ext))) || {}
+        possibleCtags: (await getConversionTags(mime.getType(m.ext))) || {},
       };
       if (conversionsMap[m.id].possibleCtags._default) {
         delete conversionsMap[m.id].possibleCtags._default;
@@ -287,7 +287,7 @@ module.exports = {
           conversionsMap[m.id].possibleConversions.push({
             tag,
             media_id: m.id,
-            ext: ctag.ext
+            ext: ctag.ext,
           });
         }
       }
@@ -296,11 +296,11 @@ module.exports = {
     }
 
     const iconsMap = conversions
-      .filter(c => c.tag === "icon128")
+      .filter((c) => c.tag === "icon128")
       .reduce(
         (acc, c) => ({
           ...acc,
-          [c.media_id]: `/media/${c.media_id}/${c.tag}.${c.ext}`
+          [c.media_id]: `/media/${c.media_id}/${c.tag}.${c.ext}`,
         }),
         {}
       );
@@ -308,20 +308,20 @@ module.exports = {
     const moreMedia = media.length > PAGE_SIZE;
 
     return {
-      media: media.slice(0, PAGE_SIZE).map(m => {
+      media: media.slice(0, PAGE_SIZE).map((m) => {
         return {
           ...m,
           ...conversionsMap[m.id],
           icon: iconsMap[m.id],
-          type: getMimeObj(m.ext)
+          type: getMimeObj(m.ext),
         };
       }),
       urls: {
         moreMedia:
           moreMedia && `/backstage/media/?offset=${offset + PAGE_SIZE}`,
         moreMediaBar:
-          moreMedia && `/backstage/media/?offset=${offset + PAGE_SIZE}&bar=1`
-      }
+          moreMedia && `/backstage/media/?offset=${offset + PAGE_SIZE}&bar=1`,
+      },
     };
   },
   get: async (req, res) => {
@@ -343,7 +343,7 @@ module.exports = {
 
     return render(template, {
       user: user,
-      ...(await module.exports.getJson(db, { offset }))
+      ...(await module.exports.getJson(db, { offset })),
     });
   },
   post: async (req, res) => {
@@ -387,9 +387,9 @@ module.exports = {
     }
 
     res.writeHead(303, {
-      Location: location
+      Location: location,
     });
     res.end();
     return;
-  }
+  },
 };

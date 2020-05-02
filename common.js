@@ -11,11 +11,11 @@ const cheerio = require("cheerio");
 const fsPromises = {
   writeFile: promisify(fs.writeFile),
   unlink: promisify(fs.unlink),
-  exists: promisify(fs.exists)
+  exists: promisify(fs.exists),
 };
 
 const zlibPromises = {
-  gzip: promisify(zlib.gzip)
+  gzip: promisify(zlib.gzip),
 };
 
 const PAGE_SIZE = 10;
@@ -48,15 +48,15 @@ function getMimeObj(href, fullMimeType) {
       type === "text" ||
       fullMimeType === "application/javascript" ||
       fullMimeType === "application/json",
-    pdf: fullMimeType === "application/pdf"
+    pdf: fullMimeType === "application/pdf",
   };
 }
 
 const textRenderer = new marked.TextRenderer();
-textRenderer.paragraph = function(text) {
+textRenderer.paragraph = function (text) {
   return text + "\n\n";
 };
-textRenderer.image = function() {
+textRenderer.image = function () {
   return "";
 };
 
@@ -102,8 +102,9 @@ function embedCallback(href, title, text) {
       return `<video playsinline autoplay muted loop src="${href}" ${attrs}></video>`;
     }
 
-    return `<video playsinline controls preload="none" src="${href}" ${attrs ||
-      ""}></video>`;
+    return `<video playsinline controls preload="none" src="${href}" ${
+      attrs || ""
+    }></video>`;
   }
 
   if (hrefIsOwnMedia && mimeObj.pdf) {
@@ -161,14 +162,14 @@ function embedCallback(href, title, text) {
           .split(/(.{25})/)
           .filter(Boolean)
           .slice(0, 6)
-          .map(line => `<tspan x="0" dy="12">${line}</tspan>`)
+          .map((line) => `<tspan x="0" dy="12">${line}</tspan>`)
       );
 
       if (text) {
         lines = [
           ...lines.slice(0, 3),
           `<tspan x="80" dy="12" fill="#00a500" text-anchor="middle">${text}</tspan>`,
-          ...lines.slice(3, 6)
+          ...lines.slice(3, 6),
         ];
       }
 
@@ -211,7 +212,7 @@ function embedCallback(href, title, text) {
 
 renderer.image = embedCallback;
 
-renderer.link = function(href, title, text) {
+renderer.link = function (href, title, text) {
   if (text.startsWith(FOOTNOTE_MARKER)) {
     if (!title) {
       return text;
@@ -228,7 +229,7 @@ renderer.link = function(href, title, text) {
   return ogLink(href, title, text);
 };
 
-renderer.html = function(html) {
+renderer.html = function (html) {
   html = html.replace(
     /((src|href|poster)=['"]?)\/?media\//g,
     `$1${process.env.BLOG_BASE_URL || ""}/media/`
@@ -237,7 +238,7 @@ renderer.html = function(html) {
   return ogHTML(html);
 };
 
-renderer.paragraph = function(text) {
+renderer.paragraph = function (text) {
   text = text.replace(
     /((src|href|poster)=['"]?)\/?media\//g,
     `$1${process.env.BLOG_BASE_URL || ""}/media/`
@@ -246,7 +247,7 @@ renderer.paragraph = function(text) {
   return ogParagraph(text);
 };
 
-renderer.list = function(body, ordered, start) {
+renderer.list = function (body, ordered, start) {
   const isGalleryList =
     !ordered &&
     body &&
@@ -254,7 +255,7 @@ renderer.list = function(body, ordered, start) {
       .replace(/^\s*<li>\s*|\s*<\/li>\s*$/gi, "") // remove first opening and last closing
       .split(/\s*<\/li>\s*<li>\s*/gi) // split list on `</li><li>`
       .every(
-        listitem =>
+        (listitem) =>
           // check if every list item has only either an `<img>`,
           listitem.match(/^<img [^>]+>$/i) ||
           // a `<video>`,
@@ -344,7 +345,7 @@ function removeFootnotes(token) {
     return {
       ...token,
       // FOOTNOTE_MARKER
-      text: token.text.replace(/\s*\[\^[^\]]+\]\[\]\s*/g, "")
+      text: token.text.replace(/\s*\[\^[^\]]+\]\[\]\s*/g, ""),
     };
   }
 
@@ -360,13 +361,13 @@ function getMarkedOptions() {
     gfm: true,
     smartypants: false,
     renderer: renderer,
-    highlight: function(code, lang) {
+    highlight: function (code, lang) {
       return require("highlight.js").highlightAuto(
         code,
         lang ? [lang] : undefined
       ).value;
     },
-    baseUrl: process.env.BLOG_BASE_URL || null
+    baseUrl: process.env.BLOG_BASE_URL || null,
   };
 }
 
@@ -418,7 +419,7 @@ async function prepare(post, embedsLoader) {
 
   const tokens = marked.lexer(post.text, markedOptions);
   prepareFootnoteLinks(tokens, post.id);
-  const assignLinks = ts => {
+  const assignLinks = (ts) => {
     if (ts) {
       ts.links = tokens.links;
     }
@@ -439,14 +440,14 @@ async function prepare(post, embedsLoader) {
 
   post.url = getPostUrl(post);
   const rss = {
-    title: null
+    title: null,
   };
 
   const opengraph = {
     url: post.url,
     title: title,
     description: null,
-    image: null
+    image: null,
   };
 
   if (header1Token) {
@@ -458,17 +459,14 @@ async function prepare(post, embedsLoader) {
 
     htmlTitle = await embedsLoader.load(htmlTitle);
 
-    rss.title = title = cheerio
-      .load(htmlTitle)
-      .text()
-      .trim();
+    rss.title = title = cheerio.load(htmlTitle).text().trim();
 
     const tokensWithoutTitle = tokens.slice(1);
     html = marked.parser(assignLinks([...tokensWithoutTitle]), markedOptions);
 
     if (
       tokens.links &&
-      Object.keys(tokens.links).find(t => t.startsWith(FOOTNOTE_MARKER))
+      Object.keys(tokens.links).find((t) => t.startsWith(FOOTNOTE_MARKER))
     ) {
       html = html + generateFootnotes(tokens);
     }
@@ -490,9 +488,7 @@ async function prepare(post, embedsLoader) {
     opengraph.title = title.trim();
 
     if (tokens.length > 5) {
-      const wordMatches = cheerio(html)
-        .text()
-        .match(WORD_REGEX);
+      const wordMatches = cheerio(html).text().match(WORD_REGEX);
 
       const wordCount = wordMatches ? wordMatches.length : 0;
 
@@ -504,7 +500,7 @@ async function prepare(post, embedsLoader) {
             `${wordCount} слово`,
             `${wordCount} слова`,
             `${wordCount} слов`
-          )
+          ),
         };
 
         longread.teaser =
@@ -517,7 +513,7 @@ async function prepare(post, embedsLoader) {
         marked
           .parser(assignLinks([...getTeaserTokens(tokensWithoutTitle)]), {
             ...markedOptions,
-            renderer: textRenderer
+            renderer: textRenderer,
           })
           .trim();
 
@@ -528,7 +524,7 @@ async function prepare(post, embedsLoader) {
     html = marked.parser(tokens, markedOptions);
     if (
       tokens.links &&
-      Object.keys(tokens.links).find(t => t.startsWith("^"))
+      Object.keys(tokens.links).find((t) => t.startsWith("^"))
     ) {
       html = html + generateFootnotes(tokens);
     }
@@ -567,7 +563,7 @@ async function prepare(post, embedsLoader) {
     createdUTC: created.toUTCString(),
     modified: post.modified
       ? new Date(parseInt(post.modified)).toISOString()
-      : null
+      : null,
   };
 }
 
@@ -581,18 +577,18 @@ async function getBlogObject(baseUrl) {
     url: url.resolve(baseUrl, "/"),
     feed: {
       description: `Everything feed - ${BLOG_TITLE}`,
-      url: url.resolve(baseUrl, "/rss.xml")
+      url: url.resolve(baseUrl, "/rss.xml"),
     },
     static: {
       favicon: {
         ico: url.resolve(baseUrl, "/favicon.ico"),
         png: url.resolve(baseUrl, "/favicon.png"),
-        svg: url.resolve(baseUrl, "/favicon.svg")
+        svg: url.resolve(baseUrl, "/favicon.svg"),
       },
       "mask-icon": {
-        svg: url.resolve(baseUrl, "/mask-icon.svg")
-      }
-    }
+        svg: url.resolve(baseUrl, "/mask-icon.svg"),
+      },
+    },
   };
 }
 
@@ -637,5 +633,5 @@ module.exports = {
   loadIcu,
   embedCallback,
   writeFileWithGzip,
-  unlinkFileWithGzip
+  unlinkFileWithGzip,
 };

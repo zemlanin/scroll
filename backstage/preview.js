@@ -8,7 +8,7 @@ const EmbedsLoader = require("../embeds-loader.js");
 async function prepare(post, options) {
   return {
     ...(await commonPrepare(post, options.embedsLoader)),
-    url: options.url
+    url: options.url,
   };
 }
 
@@ -35,7 +35,7 @@ module.exports = async (req, res) => {
     internal: false,
     private: false,
     public: false,
-    created: +new Date()
+    created: +new Date(),
   };
 
   const db = await req.db();
@@ -71,7 +71,7 @@ module.exports = async (req, res) => {
   const preparedPost = await prepare(post, {
     url: url.resolve(req.absolute, `/backstage/preview/?id=${post.id}`),
     baseUrl: url.resolve(req.absolute, "/"),
-    embedsLoader: new EmbedsLoader(db, false)
+    embedsLoader: new EmbedsLoader(db, false),
   });
 
   const blog = await getBlogObject(req.absolute);
@@ -88,11 +88,11 @@ module.exports = async (req, res) => {
           ...blog.feed,
           url: rssEscape(
             url.resolve(req.absolute, `/backstage/preview/?id=${post.id}&rss=1`)
-          )
-        }
+          ),
+        },
       },
       posts: [preparedPost],
-      pubDate: new Date().toUTCString()
+      pubDate: new Date().toUTCString(),
     });
   }
 
@@ -110,7 +110,7 @@ module.exports = async (req, res) => {
       posts: [preparedPost],
       url: preparedPost.url,
       older: null,
-      newer: null
+      newer: null,
     });
   }
 
@@ -120,6 +120,6 @@ module.exports = async (req, res) => {
     post: preparedPost,
     url: preparedPost.url,
     older: null,
-    newer: null
+    newer: null,
   });
 };

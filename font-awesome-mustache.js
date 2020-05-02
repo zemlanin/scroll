@@ -6,16 +6,16 @@ const fontAwesomeSVGReducer = (acc, icon) => {
     acc[icon.iconName] = {
       viewBox: `0 0 ${width} ${height}`,
       path: svgPathData,
-      toString: () => svgPathData
+      toString: () => svgPathData,
     };
   }
 
   return acc;
 };
 
-const renderFontAwesome = fontAwesomeModule => {
-  const blockFunction = function() {
-    return function(text, render) {
+const renderFontAwesome = (fontAwesomeModule) => {
+  const blockFunction = function () {
+    return function (text, render) {
       const iconName = render(text).trim();
       const icon = blockFunction[iconName];
 

@@ -46,7 +46,7 @@ module.exports = {
         Location: url.resolve(
           req.absolute,
           `/backstage/edit/?id=${latestPost.id}`
-        )
+        ),
       });
 
       return;
@@ -60,7 +60,7 @@ module.exports = {
       private: false,
       public: false,
       created: new Date().toISOString().replace(/:\d{2}\.\d{3}Z$/, ""),
-      text: ""
+      text: "",
     };
 
     if (query.id) {
@@ -130,9 +130,9 @@ module.exports = {
       user: user,
       post: post,
       urls: {
-        logout: url.resolve(req.absolute, "/backstage/?logout=1")
+        logout: url.resolve(req.absolute, "/backstage/?logout=1"),
       },
-      mediaJson: mediaJson
+      mediaJson: mediaJson,
     });
   },
   post: async (req, res) => {
@@ -153,7 +153,7 @@ module.exports = {
       internal: false,
       private: false,
       public: false,
-      created: new Date()
+      created: new Date(),
     };
 
     const db = await req.db();
@@ -248,7 +248,7 @@ module.exports = {
           5: post.text,
           6: post.internal,
           7: post.created.toISOString().replace(/\.\d{3}Z$/, "Z"),
-          8: new Date().toISOString().replace(/\.\d{3}Z$/, "Z")
+          8: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
         }
       );
     } else {
@@ -263,7 +263,7 @@ module.exports = {
           4: post.private,
           5: post.text,
           6: post.internal,
-          7: post.created.toISOString().replace(/\.\d{3}Z$/, "Z")
+          7: post.created.toISOString().replace(/\.\d{3}Z$/, "Z"),
         }
       );
     }
@@ -272,7 +272,7 @@ module.exports = {
 
     if (!existingPostId) {
       res.writeHead(303, {
-        Location: url.resolve(req.absolute, `/backstage/edit/?id=${post.id}`)
+        Location: url.resolve(req.absolute, `/backstage/edit/?id=${post.id}`),
       });
 
       return;
@@ -285,9 +285,9 @@ module.exports = {
       user: user,
       post: post,
       urls: {
-        logout: url.resolve(req.absolute, "/backstage/?logout=1")
+        logout: url.resolve(req.absolute, "/backstage/?logout=1"),
       },
-      mediaJson: mediaJson
+      mediaJson: mediaJson,
     });
-  }
+  },
 };

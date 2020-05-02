@@ -4,10 +4,7 @@ const jwt = require("jsonwebtoken");
 
 const SECRET = (() => {
   return (
-    process.env.JWT_SECRET ||
-    require("crypto")
-      .randomBytes(256)
-      .toString("hex")
+    process.env.JWT_SECRET || require("crypto").randomBytes(256).toString("hex")
   );
 })();
 
@@ -48,8 +45,8 @@ module.exports = {
       port: parsedUrl.port,
       pathname: "/backstage/callback",
       query: {
-        next: req.url
-      }
+        next: req.url,
+      },
     });
 
     const githubAuthUrl = url.format({
@@ -59,8 +56,8 @@ module.exports = {
       query: {
         scope: "user:email",
         client_id: process.env.GITHUB_APP_ID,
-        redirect_uri: redirectURL
-      }
+        redirect_uri: redirectURL,
+      },
     });
 
     res.statusCode = 303;
@@ -71,7 +68,7 @@ module.exports = {
     return jwt.sign(
       {
         me: payload.me,
-        github: payload.github
+        github: payload.github,
       },
       SECRET,
       { expiresIn }
@@ -86,7 +83,7 @@ module.exports = {
       cookie.serialize("jwt", jwtToken, {
         httpOnly: true,
         maxAge: 60 * 60 * 24 * 7,
-        path: "/"
+        path: "/",
       })
     );
   },
@@ -96,5 +93,5 @@ module.exports = {
       "Set-Cookie",
       cookie.serialize("jwt", "", { maxAge: 0, path: "/" })
     );
-  }
+  },
 };

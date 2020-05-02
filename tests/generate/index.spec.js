@@ -10,33 +10,33 @@ const mockery = require("mockery");
 const noopStream = new require("stream").Writable({
   write(chunk, encoding, callback) {
     setImmediate(callback);
-  }
+  },
 });
 
 mockery.enable({
   warnOnReplace: false,
   warnOnUnregistered: false,
-  useCleanCache: true
+  useCleanCache: true,
 });
 
 mockery.registerMock("request-promise-native", {
-  head: function() {
+  head: function () {
     return {
-      "content-type": "text/html; charset=utf-8"
+      "content-type": "text/html; charset=utf-8",
     };
   },
-  get: function({ transform }) {
+  get: function ({ transform }) {
     return fs.promises
       .readFile(path.resolve(__dirname, "yt-rickroll.html"), "utf8")
-      .then(body =>
+      .then((body) =>
         transform(body, {
           headers: {
-            "content-type": "text/html; charset=utf-8"
-          }
+            "content-type": "text/html; charset=utf-8",
+          },
         })
       );
   },
-  jar: () => {}
+  jar: () => {},
 });
 
 const { generate } = require("../../generate.js");
@@ -46,10 +46,10 @@ test.onFinish(() => {
   mockery.deregisterAll();
 });
 
-test("empty database", async t => {
+test("empty database", async (t) => {
   const db = await sqlite.open({
     filename: ":memory:",
-    driver: sqlite3.Database
+    driver: sqlite3.Database,
   });
   await db.migrate();
 
@@ -64,10 +64,10 @@ test("empty database", async t => {
   t.end();
 });
 
-test("internal page", async t => {
+test("internal page", async (t) => {
   const db = await sqlite.open({
     filename: ":memory:",
-    driver: sqlite3.Database
+    driver: sqlite3.Database,
   });
   await db.migrate();
 
@@ -97,37 +97,37 @@ test("internal page", async t => {
 
   t.ok(
     internalPage.indexOf(`<h1>internal</h1>`) > -1,
-    internalPage.split("\n").find(line => line.indexOf("<h1") > -1) ||
+    internalPage.split("\n").find((line) => line.indexOf("<h1") > -1) ||
       internalPage.match(/<article>([\s\S]+)<\/article>/i)[1].trim()
   );
   t.ok(
     internalPage.indexOf(`<time`) === -1,
-    internalPage.split("\n").find(line => line.indexOf("<time") > -1) ||
+    internalPage.split("\n").find((line) => line.indexOf("<time") > -1) ||
       "no <time>"
   );
   t.ok(
     internalPage.indexOf(`/1.html`) === -1,
-    internalPage.split("\n").find(line => line.indexOf("/1.html") > -1) ||
+    internalPage.split("\n").find((line) => line.indexOf("/1.html") > -1) ||
       "no self urls (id)"
   );
   t.ok(
     internalPage.indexOf(`/internal.html`) === -1,
     internalPage
       .split("\n")
-      .find(line => line.indexOf("/internal.html") > -1) ||
+      .find((line) => line.indexOf("/internal.html") > -1) ||
       "no self urls (slug)"
   );
   t.ok(
     internalPage.indexOf(`og:url`) === -1,
-    internalPage.split("\n").find(line => line.indexOf("og:url") > -1) ||
+    internalPage.split("\n").find((line) => line.indexOf("og:url") > -1) ||
       "no opengraph"
   );
 });
 
-test("database with posts and embeds", async t => {
+test("database with posts and embeds", async (t) => {
   const db = await sqlite.open({
     filename: ":memory:",
-    driver: sqlite3.Database
+    driver: sqlite3.Database,
   });
   await db.migrate();
 
@@ -150,7 +150,7 @@ test("database with posts and embeds", async t => {
       6: 'post with footnote [^1][]\n\n[^1]:. "footnote _text_"',
       7: '# titled\n\npost with title and footnote [^1][]\n\n[^1]:. "[text](https://example.net)"',
       8: 'post with named footnote [^na|me][]\n\n[^na|me]:. "**fn text**"',
-      9: "# gallery\n\n* ![](/media/1.jpg)\n* ![](/media/2.jpg)\n* ![](/media/3.jpg)"
+      9: "# gallery\n\n* ![](/media/1.jpg)\n* ![](/media/2.jpg)\n* ![](/media/3.jpg)",
     }
   );
 
@@ -217,7 +217,7 @@ test("database with posts and embeds", async t => {
     post7.indexOf(
       `<p>post with title and footnote <sup><a href="#fn:7:1" id="rfn:7:1" rel="footnote">1</a></sup></p>`
     ) > -1,
-    post7.split("\n").find(line => line.indexOf("<sup>") > -1)
+    post7.split("\n").find((line) => line.indexOf("<sup>") > -1)
   );
   t.ok(
     post7.indexOf(
@@ -230,19 +230,21 @@ test("database with posts and embeds", async t => {
   ).toString();
   t.ok(
     post8.indexOf(`</h1>`) === -1,
-    post8.split("\n").find(line => line.indexOf("</h1>") > -1) || "no <h1>"
+    post8.split("\n").find((line) => line.indexOf("</h1>") > -1) || "no <h1>"
   );
   t.ok(
     post8.indexOf(
       `<p>post with named footnote <sup><a href="#fn:8:na-me" id="rfn:8:na-me" rel="footnote">1</a></sup></p>`
     ) > -1,
-    post8.split("\n").find(line => line.indexOf("<sup>") > -1)
+    post8.split("\n").find((line) => line.indexOf("<sup>") > -1)
   );
   t.ok(
     post8.indexOf(
       `<div class="footnotes"><hr/><ol><li id="fn:8:na-me" tabindex="-1"><p><strong>fn text</strong>&nbsp;<a href="#rfn:8:na-me" rev="footnote">&#8617;</a></p>`
     ) > -1,
-    post8.split("\n").find(line => line.indexOf('<div class="footnotes">') > -1)
+    post8
+      .split("\n")
+      .find((line) => line.indexOf('<div class="footnotes">') > -1)
   );
 
   const post9 = (
@@ -250,17 +252,17 @@ test("database with posts and embeds", async t => {
   ).toString();
   t.ok(
     post9.indexOf(`<ul data-gallery`) > -1,
-    post9.split("\n").find(line => line.indexOf("<ul data-gallery") > -1) ||
+    post9.split("\n").find((line) => line.indexOf("<ul data-gallery") > -1) ||
       post9.match(/<article>([\s\S]+)<\/article>/i)[1].trim()
   );
 
   t.end();
 });
 
-test("opengraph", async t => {
+test("opengraph", async (t) => {
   const db = await sqlite.open({
     filename: ":memory:",
-    driver: sqlite3.Database
+    driver: sqlite3.Database,
   });
   await db.migrate();
 
@@ -299,7 +301,7 @@ test("opengraph", async t => {
       9:
         "# teaser with gallery\n\n* ![](/media/uno.png)\n* ![](/media/dos.png)\n\n" +
         ("lorem ".repeat(10) + "\n\n").repeat(20) +
-        "_italics in the end_"
+        "_italics in the end_",
     }
   );
 
@@ -373,7 +375,7 @@ test("opengraph", async t => {
     post7.indexOf(
       `<meta property="og:description" content="post with title and footnote" />`
     ) > -1,
-    post7.split("\n").find(line => line.indexOf("og:description") > -1)
+    post7.split("\n").find((line) => line.indexOf("og:description") > -1)
   );
 
   const post8 = (
@@ -383,19 +385,19 @@ test("opengraph", async t => {
     post8.indexOf(
       `<meta property="og:title" content="teaser with gallery and description" />`
     ) > -1,
-    post8.split("\n").find(line => line.indexOf("og:title") > -1)
+    post8.split("\n").find((line) => line.indexOf("og:title") > -1)
   );
   t.ok(
     post8.indexOf(
       `<meta property="og:image" content="https://example.com/media/one.png" />`
     ) > -1,
-    post8.split("\n").find(line => line.indexOf("og:image") > -1)
+    post8.split("\n").find((line) => line.indexOf("og:image") > -1)
   );
   t.ok(
     post8.indexOf(
       `<meta property="og:description" content="some description" />`
     ) > -1,
-    post8.split("\n").find(line => line.indexOf("og:description") > -1)
+    post8.split("\n").find((line) => line.indexOf("og:description") > -1)
   );
 
   const post9 = (
@@ -405,17 +407,17 @@ test("opengraph", async t => {
     post9.indexOf(
       `<meta property="og:title" content="teaser with gallery" />`
     ) > -1,
-    post9.split("\n").find(line => line.indexOf("og:title") > -1)
+    post9.split("\n").find((line) => line.indexOf("og:title") > -1)
   );
   t.ok(
     post9.indexOf(
       `<meta property="og:image" content="https://example.com/media/uno.png" />`
     ) > -1,
-    post9.split("\n").find(line => line.indexOf("og:image") > -1)
+    post9.split("\n").find((line) => line.indexOf("og:image") > -1)
   );
   t.ok(
     post9.indexOf(`<meta property="og:description" content="204 слова" />`) >
       -1,
-    post9.split("\n").find(line => line.indexOf("og:description") > -1)
+    post9.split("\n").find((line) => line.indexOf("og:description") > -1)
   );
 });

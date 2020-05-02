@@ -15,10 +15,10 @@ module.exports = async (req, res) => {
   const postData = querystring.stringify({
     code: query.code,
     client_id: process.env.GITHUB_APP_ID,
-    client_secret: process.env.GITHUB_APP_SECRET
+    client_secret: process.env.GITHUB_APP_SECRET,
   });
 
-  const verification = await new Promise(resolve => {
+  const verification = await new Promise((resolve) => {
     const req = https.request(
       {
         host: "github.com",
@@ -27,25 +27,25 @@ module.exports = async (req, res) => {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           "Content-Length": postData.length,
-          Accept: "application/json"
-        }
+          Accept: "application/json",
+        },
       },
-      authRes => {
+      (authRes) => {
         let result = "";
 
-        authRes.on("data", function(chunk) {
+        authRes.on("data", function (chunk) {
           result += chunk;
         });
-        authRes.on("end", function() {
+        authRes.on("end", function () {
           resolve(JSON.parse(result));
         });
-        authRes.on("error", function(err) {
+        authRes.on("error", function (err) {
           resolve(err);
         });
       }
     );
 
-    req.on("error", function(err) {
+    req.on("error", function (err) {
       resolve(err);
     });
 
@@ -54,37 +54,37 @@ module.exports = async (req, res) => {
   });
 
   if (verification.access_token) {
-    const authed_user = await new Promise(resolve => {
+    const authed_user = await new Promise((resolve) => {
       const req = https.request(
         {
           host: "api.github.com",
           path: "/user",
           method: "get",
           query: {
-            access_token: verification.access_token
+            access_token: verification.access_token,
           },
           headers: {
             Accept: "application/json",
             Authorization: `token ${verification.access_token}`,
-            "User-Agent": "scroll-auth"
-          }
+            "User-Agent": "scroll-auth",
+          },
         },
-        authRes => {
+        (authRes) => {
           let result = "";
 
-          authRes.on("data", function(chunk) {
+          authRes.on("data", function (chunk) {
             result += chunk;
           });
-          authRes.on("end", function() {
+          authRes.on("end", function () {
             resolve(JSON.parse(result));
           });
-          authRes.on("error", function(err) {
+          authRes.on("error", function (err) {
             resolve(err);
           });
         }
       );
 
-      req.on("error", function(err) {
+      req.on("error", function (err) {
         resolve(err);
       });
 

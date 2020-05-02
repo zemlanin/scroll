@@ -2,7 +2,7 @@
 Details Element Polyfill 2.4.0
 Copyright © 2019 Javan Makhmali
  */
-(function() {
+(function () {
   "use strict";
   var element = document.createElement("details");
   var elementIsNative =
@@ -10,7 +10,7 @@ Copyright © 2019 Javan Makhmali
     element instanceof HTMLDetailsElement;
   var support = {
     open: "open" in element || elementIsNative,
-    toggle: "ontoggle" in element
+    toggle: "ontoggle" in element,
   };
   var styles =
     '\ndetails, summary {\n  display: block;\n}\ndetails:not([open]) > *:not(summary) {\n  display: none;\n}\nsummary::before {\n  content: "►";\n  padding-right: 0.3rem;\n  font-size: 0.6rem;\n  cursor: default;\n}\n[open] > summary::before {\n  content: "▼";\n}\n';
@@ -59,7 +59,7 @@ Copyright © 2019 Javan Makhmali
               return open.set.call(this, value);
             }
           }
-        }
+        },
       },
       setAttribute: {
         value: function value(name, _value) {
@@ -78,7 +78,7 @@ Copyright © 2019 Javan Makhmali
             return result;
           }
           return call();
-        }
+        },
       },
       removeAttribute: {
         value: function value(name) {
@@ -97,12 +97,12 @@ Copyright © 2019 Javan Makhmali
             return result;
           }
           return call();
-        }
-      }
+        },
+      },
     });
   }
   function polyfillToggle() {
-    onTogglingTrigger(function(element) {
+    onTogglingTrigger(function (element) {
       element.hasAttribute("open")
         ? element.removeAttribute("open")
         : element.setAttribute("open", "");
@@ -110,8 +110,8 @@ Copyright © 2019 Javan Makhmali
   }
   function polyfillToggleEvent() {
     if (window.MutationObserver) {
-      new MutationObserver(function(mutations) {
-        forEach.call(mutations, function(mutation) {
+      new MutationObserver(function (mutations) {
+        forEach.call(mutations, function (mutation) {
           var target = mutation.target,
             attributeName = mutation.attributeName;
           if (target.tagName == "DETAILS" && attributeName == "open") {
@@ -120,12 +120,12 @@ Copyright © 2019 Javan Makhmali
         });
       }).observe(document.documentElement, {
         attributes: true,
-        subtree: true
+        subtree: true,
       });
     } else {
-      onTogglingTrigger(function(element) {
+      onTogglingTrigger(function (element) {
         var wasOpen = element.getAttribute("open");
-        setTimeout(function() {
+        setTimeout(function () {
           var isOpen = element.getAttribute("open");
           if (wasOpen != isOpen) {
             triggerToggle(element);
@@ -137,22 +137,22 @@ Copyright © 2019 Javan Makhmali
   function polyfillAccessibility() {
     setAccessibilityAttributes(document);
     if (window.MutationObserver) {
-      new MutationObserver(function(mutations) {
-        forEach.call(mutations, function(mutation) {
+      new MutationObserver(function (mutations) {
+        forEach.call(mutations, function (mutation) {
           forEach.call(mutation.addedNodes, setAccessibilityAttributes);
         });
       }).observe(document.documentElement, {
         subtree: true,
-        childList: true
+        childList: true,
       });
     } else {
-      document.addEventListener("DOMNodeInserted", function(event) {
+      document.addEventListener("DOMNodeInserted", function (event) {
         setAccessibilityAttributes(event.target);
       });
     }
   }
   function setAccessibilityAttributes(root) {
-    findElementsWithTagName(root, "SUMMARY").forEach(function(summary) {
+    findElementsWithTagName(root, "SUMMARY").forEach(function (summary) {
       var details = findClosestElementWithTagName(summary, "DETAILS");
       summary.setAttribute("aria-expanded", details.hasAttribute("open"));
       if (!summary.hasAttribute("tabindex"))
@@ -172,7 +172,7 @@ Copyright © 2019 Javan Makhmali
   function onTogglingTrigger(callback) {
     addEventListener(
       "click",
-      function(event) {
+      function (event) {
         if (eventIsSignificant(event)) {
           if (event.which <= 1) {
             var element = findClosestElementWithTagName(
@@ -193,7 +193,7 @@ Copyright © 2019 Javan Makhmali
     );
     addEventListener(
       "keydown",
-      function(event) {
+      function (event) {
         if (eventIsSignificant(event)) {
           if (event.keyCode == 13 || event.keyCode == 32) {
             var element = findClosestElementWithTagName(

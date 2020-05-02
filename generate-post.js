@@ -11,7 +11,7 @@ const {
   prepare,
   getBlogObject,
   writeFileWithGzip,
-  unlinkFileWithGzip
+  unlinkFileWithGzip,
 } = require("./common.js");
 const { render } = require("./render.js");
 const EmbedsLoader = require("./embeds-loader.js");
@@ -48,7 +48,7 @@ async function getPosts(db, params, where, limit) {
   const embedsLoader = new EmbedsLoader(db);
 
   return Promise.all(
-    (await db.all(getPostsQuery(where, limit), params)).map(row =>
+    (await db.all(getPostsQuery(where, limit), params)).map((row) =>
       prepare(row, embedsLoader)
     )
   );
@@ -69,7 +69,7 @@ async function generatePostPage(post, blog) {
     post,
     url: post.url,
     older: null,
-    newer: null
+    newer: null,
   });
 }
 
@@ -111,15 +111,15 @@ async function generatePaginationPage(
       ? { text: `index`, url: blog.url }
       : {
           text: `page-${pageNumber + 1}`,
-          url: url.resolve(blog.url, `page-${pageNumber + 1}.html`)
+          url: url.resolve(blog.url, `page-${pageNumber + 1}.html`),
         },
     older:
       pageNumber > 1
         ? {
             text: `page-${pageNumber - 1}`,
-            url: url.resolve(blog.url, `page-${pageNumber - 1}.html`)
+            url: url.resolve(blog.url, `page-${pageNumber - 1}.html`),
           }
-        : null
+        : null,
   });
 }
 
@@ -146,10 +146,10 @@ async function generateIndexPage(db, blog, newestPage) {
     older: olderPageIndex
       ? {
           text: `page-${olderPageIndex}`,
-          url: url.resolve(blog.url, `page-${olderPageIndex}.html`)
+          url: url.resolve(blog.url, `page-${olderPageIndex}.html`),
         }
       : null,
-    index: true
+    index: true,
   });
 }
 
@@ -176,9 +176,9 @@ async function generateArchivePage(db, blog) {
     pages.map((v, i) => ({
       month: v[0].month,
       text: pages.length - i,
-      url: `./page-${pages.length - i}.html`
+      url: `./page-${pages.length - i}.html`,
     })),
-    v => v.month
+    (v) => v.month
   );
   const monthGroups = Object.keys(groupByMonth).sort((a, b) => {
     return a > b ? -1 : 1;
@@ -188,10 +188,10 @@ async function generateArchivePage(db, blog) {
     blog,
     title: "archive",
     url: "./archive.html",
-    months: monthGroups.map(month => ({
+    months: monthGroups.map((month) => ({
       month,
-      pages: groupByMonth[month]
-    }))
+      pages: groupByMonth[month],
+    })),
   });
 }
 
@@ -206,7 +206,7 @@ async function generateRSSPage(db, blog) {
   return await render("rss.mustache", {
     blog,
     pubDate: new Date().toUTCString(),
-    posts: posts
+    posts: posts,
   });
 }
 
@@ -256,8 +256,8 @@ async function getPagination(db, postsCreatedAfter) {
   }
 
   const pagination = chunk(posts, PAGE_SIZE).map((page, i, arr) => ({
-    posts: page.filter(Boolean).map(p => p.id),
-    index: arr.length - i + paginationOffset
+    posts: page.filter(Boolean).map((p) => p.id),
+    index: arr.length - i + paginationOffset,
   }));
 
   return pagination;
@@ -364,5 +364,5 @@ module.exports = {
   generatePaginationPage,
   generateArchivePage,
   generateIndexPage,
-  generateRSSPage
+  generateRSSPage,
 };

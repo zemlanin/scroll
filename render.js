@@ -7,7 +7,7 @@ const terser = require("terser");
 const CleanCSS = require("clean-css");
 
 const fsPromises = {
-  readFile: promisify(fs.readFile)
+  readFile: promisify(fs.readFile),
 };
 
 const { fas, far, fab } = require("./font-awesome-mustache.js");
@@ -30,11 +30,11 @@ async function loadTemplate(tmpl, processCallback) {
 loadTemplate.cache = {};
 
 const cleanCSS = new CleanCSS({
-  level: 2
+  level: 2,
 });
 
 const BLOG_TEMPLATES = path.resolve(__dirname, "templates");
-const jsProcess = code => {
+const jsProcess = (code) => {
   const m = terser.minify(code);
   if (m.error) {
     throw m.error;
@@ -42,7 +42,7 @@ const jsProcess = code => {
   return m.code;
 };
 
-const cssProcess = code => cleanCSS.minify(code).styles;
+const cssProcess = (code) => cleanCSS.minify(code).styles;
 
 async function blogRender(tmpl, data) {
   return mustache.render(
@@ -51,7 +51,7 @@ async function blogRender(tmpl, data) {
       fas,
       far,
       fab,
-      ...data
+      ...data,
     },
     {
       header: await loadTemplate(path.join(BLOG_TEMPLATES, "header.mustache")),
@@ -71,7 +71,7 @@ async function blogRender(tmpl, data) {
       "highlight.css": await loadTemplate(
         path.join(BLOG_TEMPLATES, "highlight.css"),
         cssProcess
-      )
+      ),
     }
   );
 }

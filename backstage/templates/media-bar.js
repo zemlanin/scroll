@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   const mediaBar = document.getElementById("media-bar");
   mediaBar.scrollLeft = 0;
   let moreMediaIntersectionObserver = null;
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const parent = moreMediaButton.closest("ul");
     const url = moreMediaButton.getAttribute("data-more-media-url");
     fetch(url, { credentials: "include" })
-      .then(async r => {
+      .then(async (r) => {
         const htmlTag = document.createElement("html");
         htmlTag.innerHTML = await r.text();
 
@@ -76,7 +76,7 @@ document.addEventListener("DOMContentLoaded", function() {
           parent.removeChild(moreMediaButtonLi);
         }
       })
-      .catch(e => {
+      .catch((e) => {
         moreMediaButton.innerText = e.toString();
       })
       .then(() => {
@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function() {
             mediaBar.clientWidth +
             1
         ),
-        behavior: "smooth"
+        behavior: "smooth",
       });
     }
   }
@@ -146,10 +146,10 @@ document.addEventListener("DOMContentLoaded", function() {
       method: "POST",
       body: `id=${id}&tag=${tag}`,
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded"
-      }
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
     })
-      .then(resp => {
+      .then((resp) => {
         if (200 <= resp.status && resp.status < 300) {
           for (const insertButton of mediaBar.querySelectorAll(
             `button[data-media-path*="/${id}/${tag}"]`
@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function() {
   const moreMediaButton = mediaBar.querySelector("[data-more-media-url]");
   if (moreMediaButton) {
     if (typeof IntersectionObserver != "undefined") {
-      const observerCallback = entries => {
+      const observerCallback = (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting && entry.intersectionRatio >= 0.1) {
             loadMore();
@@ -212,7 +212,7 @@ document.addEventListener("DOMContentLoaded", function() {
         observerCallback,
         {
           root: mediaBar,
-          threshold: [0, 0.1]
+          threshold: [0, 0.1],
         }
       );
       moreMediaIntersectionObserver.observe(moreMediaButton);
@@ -220,13 +220,13 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   const uploadForm = document.getElementById("upload-form");
-  uploadForm.addEventListener("change", function() {
+  uploadForm.addEventListener("change", function () {
     const data = new FormData(uploadForm);
 
     fetch(uploadForm.action, {
       method: uploadForm.method,
       body: data,
-      credentials: "include"
+      credentials: "include",
     }).then(replaceMediaBarHTML);
   });
 
@@ -234,19 +234,19 @@ document.addEventListener("DOMContentLoaded", function() {
     "[data-new-media-upload]"
   );
   if (newMediaUploadButton) {
-    newMediaUploadButton.addEventListener("click", function() {
+    newMediaUploadButton.addEventListener("click", function () {
       uploadForm.querySelector("input").click();
     });
   }
 
   let dndCounter = 0;
 
-  window.addEventListener("dragover", event => {
+  window.addEventListener("dragover", (event) => {
     event.stopPropagation();
     event.preventDefault();
     return false;
   });
-  window.addEventListener("dragenter", event => {
+  window.addEventListener("dragenter", (event) => {
     dndCounter++;
     event.dataTransfer.dropEffect = "copy";
 
@@ -259,7 +259,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     return false;
   });
-  window.addEventListener("dragleave", event => {
+  window.addEventListener("dragleave", (event) => {
     dndCounter--;
 
     event.stopPropagation();
@@ -271,7 +271,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     return false;
   });
-  window.addEventListener("drop", event => {
+  window.addEventListener("drop", (event) => {
     dndCounter = 0;
 
     event.stopPropagation();
@@ -298,7 +298,7 @@ document.addEventListener("DOMContentLoaded", function() {
     fetch(uploadForm.action, {
       method: uploadForm.method,
       body: data,
-      credentials: "include"
+      credentials: "include",
     }).then(replaceMediaBarHTML);
   });
 });

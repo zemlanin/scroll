@@ -11,10 +11,10 @@ async function getTraffic(days = 31) {
 
   return require(goaccessPath)
     .visitors.data.slice(0, days)
-    .map(d => ({
+    .map((d) => ({
       date: d.data,
       hits: d.hits.count,
-      visitors: d.visitors.count
+      visitors: d.visitors.count,
     }));
 }
 
@@ -43,19 +43,20 @@ async function goaccessGraph(req, res) {
   const aspectRatio = 3;
   const height = width / aspectRatio;
 
-  const maxH = Math.max(...traffic.map(d => Math.max(d.hits, d.visitors)));
+  const maxH = Math.max(...traffic.map((d) => Math.max(d.hits, d.visitors)));
   const hK = maxH ? height / maxH : 0;
 
   res.setHeader("Content-Type", "image/svg+xml");
 
   return `<?xml version="1.0" standalone="no"?>
     <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-    <svg viewBox="0 0 ${width} ${height +
-    2}" preserveAspectRatio="xMinYMin meet" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 ${width} ${
+    height + 2
+  }" preserveAspectRatio="xMinYMin meet" version="1.1" xmlns="http://www.w3.org/2000/svg">
       <g transform="translate(0, ${height + 2}) scale(1,-1)">
         <polyline
           points="${traffic
-            .map(d => d.hits * hK)
+            .map((d) => d.hits * hK)
             .map((h, i) => `${i * 3},${h} ${(i + 1) * 3},${h}`)
             .join(" ")}"
           fill="none"
@@ -64,7 +65,7 @@ async function goaccessGraph(req, res) {
         />
         <polyline
           points="${traffic
-            .map(d => d.visitors * hK)
+            .map((d) => d.visitors * hK)
             .map((h, i) => `${i * 3},${h} ${(i + 1) * 3},${h}`)
             .join(" ")}"
           fill="none"

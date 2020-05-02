@@ -11,7 +11,7 @@ const fsPromises = {
   readdir: promisify(fs.readdir),
   lstat: promisify(fs.lstat),
   copyFile: promisify(fs.copyFile),
-  readFile: promisify(fs.readFile)
+  readFile: promisify(fs.readFile),
 };
 
 const sqlite = require("sqlite");
@@ -29,7 +29,7 @@ const {
   generatePaginationPage,
   generateRSSPage,
   generateIndexPage,
-  generateArchivePage
+  generateArchivePage,
 } = require("./generate-post.js");
 
 const {
@@ -37,12 +37,12 @@ const {
   POSTS_DB,
   loadIcu,
   writeFileWithGzip,
-  getBlogObject
+  getBlogObject,
 } = require("./common.js");
 
 function rmrf(filepath) {
   if (fs.existsSync(filepath)) {
-    fs.readdirSync(filepath).forEach(function(file) {
+    fs.readdirSync(filepath).forEach(function (file) {
       var curPath = filepath + "/" + file;
       if (fs.lstatSync(curPath).isDirectory()) {
         rmrf(curPath);
@@ -58,7 +58,7 @@ function uniq(arr) {
   return [...new Set(arr)];
 }
 
-const mkdirP = p => fsPromises.mkdir(p, { recursive: true });
+const mkdirP = (p) => fsPromises.mkdir(p, { recursive: true });
 
 async function copyStaticContent(destination, stdout) {
   const staticPath = path.resolve(__dirname, "static");
@@ -136,7 +136,7 @@ async function generate(db, destination, stdout, stderr) {
     }
 
     await Promise.all(
-      postsChunk.map(async post => {
+      postsChunk.map(async (post) => {
         const renderedPage = await generatePostPage(post, blog);
 
         if (post.slug && post.id !== post.slug) {
@@ -211,12 +211,12 @@ async function generate(db, destination, stdout, stderr) {
     await db
       .all(
         `SELECT * from media WHERE id IN (${mediaChunk
-          .map(s => `"${s.id}"`)
+          .map((s) => `"${s.id}"`)
           .join(",")})`
       )
-      .then(loaded =>
+      .then((loaded) =>
         Promise.all(
-          loaded.map(async m =>
+          loaded.map(async (m) =>
             fsPromises.writeFile(
               path.join(tmpFolder, "media", `${m.id}.${m.ext}`),
               m.data
@@ -234,19 +234,19 @@ async function generate(db, destination, stdout, stderr) {
     await db
       .all(
         `SELECT * from converted_media WHERE id IN (${convertedMediaChunk
-          .map(c => `"${c.id}"`)
+          .map((c) => `"${c.id}"`)
           .join(",")})`
       )
-      .then(loaded =>
+      .then((loaded) =>
         Promise.all(
-          uniq(loaded.map(c => path.join(tmpFolder, "media", c.media_id))).map(
-            mkdirP
-          )
+          uniq(
+            loaded.map((c) => path.join(tmpFolder, "media", c.media_id))
+          ).map(mkdirP)
         ).then(() => loaded)
       )
-      .then(loaded =>
+      .then((loaded) =>
         Promise.all(
-          loaded.map(async c =>
+          loaded.map(async (c) =>
             fsPromises.writeFile(
               path.join(tmpFolder, "media", c.media_id, `${c.tag}.${c.ext}`),
               c.data
@@ -267,15 +267,15 @@ async function generate(db, destination, stdout, stderr) {
       .destination(destination);
 
     rsync.execute(
-      function(error) {
+      function (error) {
         if (error) {
           return reject(error);
         }
 
         return resolve();
       },
-      d => stdout.write(d.toString() + "\n"),
-      d => stderr.write(d.toString() + "\n")
+      (d) => stdout.write(d.toString() + "\n"),
+      (d) => stderr.write(d.toString() + "\n")
     );
   });
 
@@ -285,8 +285,8 @@ async function generate(db, destination, stdout, stderr) {
 function start() {
   sqlite
     .open({ filename: POSTS_DB, driver: sqlite3.Database })
-    .then(db => loadIcu(db))
-    .then(db =>
+    .then((db) => loadIcu(db))
+    .then((db) =>
       db
         .migrate({ migrationsPath: path.resolve(__dirname, "migrations") })
         .then(() => generate(db, DIST, process.stdout, process.stderr))
@@ -296,7 +296,7 @@ function start() {
             process.exit(0);
           });
         })
-        .catch(err => {
+        .catch((err) => {
           console.error(err);
           return db.close().then(() => {
             process.exit(1);
@@ -310,6 +310,6 @@ if (require.main === module) {
 } else {
   module.exports = {
     generate,
-    start
+    start,
   };
 }

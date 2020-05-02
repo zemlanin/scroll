@@ -5,7 +5,7 @@ const { promisify } = require("util");
 const CleanCSS = require("clean-css");
 
 const fsPromises = {
-  readFile: promisify(fs.readFile)
+  readFile: promisify(fs.readFile),
 };
 
 const mustache = require("mustache");
@@ -45,7 +45,7 @@ const BLOG_TEMPLATES = path.resolve(__dirname, "..", "templates");
 const cleanCSS = new CleanCSS({
   level: {
     1: {
-      transform: function(propertyName, propertyValue, selector) {
+      transform: function (propertyName, propertyValue, selector) {
         if (
           selector.indexOf("article") === -1 &&
           selector !== "to" &&
@@ -57,9 +57,9 @@ const cleanCSS = new CleanCSS({
         if (selector === "article" && propertyName === "margin-bottom") {
           return false;
         }
-      }
-    }
-  }
+      },
+    },
+  },
 });
 
 async function backstageRender(tmpl, data) {
@@ -69,7 +69,7 @@ async function backstageRender(tmpl, data) {
       fas,
       far,
       fab,
-      ...data
+      ...data,
     },
     {
       "bulma.css": await loadTemplate(require.resolve("bulma/css/bulma.css")),
@@ -81,14 +81,14 @@ async function backstageRender(tmpl, data) {
       ),
       "header.blog.css": await loadTemplate(
         path.join(BLOG_TEMPLATES, "header.css"),
-        code =>
+        (code) =>
           cleanCSS.minify(
             code + `\narticle h1 { font-size: 2em; font-weight: bold; }`
           ).styles
       ),
       "header.blog.js": await loadTemplate(
         path.join(BLOG_TEMPLATES, "header.js")
-      )
+      ),
     }
   );
 }
@@ -96,5 +96,5 @@ async function backstageRender(tmpl, data) {
 module.exports = {
   backstageRender,
   render: backstageRender,
-  backstage: backstageRender
+  backstage: backstageRender,
 };

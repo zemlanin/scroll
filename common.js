@@ -617,12 +617,9 @@ async function unlinkFileWithGzip(path) {
 }
 
 const SQLITE_ICU_PATH = path.resolve(__dirname, "sqlite-icu", "libicu.so");
-function loadIcu(db) {
-  return new Promise((resolve, reject) => {
-    return db.driver.loadExtension(SQLITE_ICU_PATH, error =>
-      error ? reject(error) : resolve(db)
-    );
-  });
+async function loadIcu(db) {
+  await db.loadExtension(SQLITE_ICU_PATH);
+  return db;
 }
 
 module.exports = {

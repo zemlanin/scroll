@@ -15,6 +15,7 @@ const fsPromises = {
 };
 
 const sqlite = require("sqlite");
+const sqlite3 = require("sqlite3");
 const chunk = require("lodash.chunk");
 const Rsync = require("rsync");
 const mime = require("mime");
@@ -283,7 +284,7 @@ async function generate(db, destination, stdout, stderr) {
 
 function start() {
   sqlite
-    .open(POSTS_DB)
+    .open({ filename: POSTS_DB, driver: sqlite3.Database })
     .then(db => loadIcu(db))
     .then(db =>
       db

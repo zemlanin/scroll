@@ -4,6 +4,7 @@ const path = require("path");
 
 const test = require("tape-promise/tape");
 const sqlite = require("sqlite");
+const sqlite3 = require("sqlite3");
 const mockery = require("mockery");
 
 const noopStream = new require("stream").Writable({
@@ -46,7 +47,10 @@ test.onFinish(() => {
 });
 
 test("empty database", async t => {
-  const db = await sqlite.open(":memory:");
+  const db = await sqlite.open({
+    filename: ":memory:",
+    driver: sqlite3.Database
+  });
   await db.migrate();
 
   const tmpFolder = await fs.promises.mkdtemp(
@@ -61,7 +65,10 @@ test("empty database", async t => {
 });
 
 test("internal page", async t => {
-  const db = await sqlite.open(":memory:");
+  const db = await sqlite.open({
+    filename: ":memory:",
+    driver: sqlite3.Database
+  });
   await db.migrate();
 
   await db.run(
@@ -118,7 +125,10 @@ test("internal page", async t => {
 });
 
 test("database with posts and embeds", async t => {
-  const db = await sqlite.open(":memory:");
+  const db = await sqlite.open({
+    filename: ":memory:",
+    driver: sqlite3.Database
+  });
   await db.migrate();
 
   await db.run(
@@ -248,7 +258,10 @@ test("database with posts and embeds", async t => {
 });
 
 test("opengraph", async t => {
-  const db = await sqlite.open(":memory:");
+  const db = await sqlite.open({
+    filename: ":memory:",
+    driver: sqlite3.Database
+  });
   await db.migrate();
 
   await db.run(

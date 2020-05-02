@@ -9,6 +9,7 @@ const fsPromises = {
 };
 
 const sqlite = require("sqlite");
+const sqlite3 = require("sqlite3");
 const UrlPattern = require("url-pattern");
 
 require("dotenv").config();
@@ -216,7 +217,12 @@ const server = http.createServer((req, res) => {
 
     let db;
     req.db = async () => {
-      return db || (db = await sqlite.open(POSTS_DB).then(loadIcu));
+      return (
+        db ||
+        (db = await sqlite
+          .open({ filename: POSTS_DB, driver: sqlite3.Database })
+          .then(loadIcu))
+      );
     };
 
     let result;
@@ -257,7 +263,7 @@ const server = http.createServer((req, res) => {
           res.end();
         }
       })
-      .then(() => db && db.driver.open && db.close())
+      .then(() => db && db.close())
       .catch(err => {
         if (!res.finished) {
           console.error(err);
@@ -266,14 +272,14 @@ const server = http.createServer((req, res) => {
           res.end("500");
         }
 
-        return db && db.driver.open && db.close();
+        return db && db.close();
       });
   }
 });
 
 function start() {
   sqlite
-    .open(POSTS_DB)
+    .open({ filename: POSTS_DB, driver: sqlite3.Database })
     .then(db => loadIcu(db))
     .then(db =>
       db.migrate({ migrationsPath: path.resolve(__dirname, "migrations") })

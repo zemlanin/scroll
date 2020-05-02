@@ -274,11 +274,6 @@ article time a {
   text-decoration: none;
 }
 
-article time svg {
-  width: 1em;
-  height: 1em;
-}
-
 article blockquote {
   margin-left: 0;
   margin-right: 0;

@@ -312,6 +312,13 @@ function getTeaserTokens(tokens) {
 
       if (paragraphContent.type === "image") {
         result.push(token);
+      } else if (
+        paragraphContent.type === "link" &&
+        paragraphContent.tokens &&
+        paragraphContent.tokens.length === 1 &&
+        paragraphContent.tokens[0].type === "image"
+      ) {
+        result.push(token);
       } else if (paragraphContent.type === "em") {
         result.push({
           ...token,

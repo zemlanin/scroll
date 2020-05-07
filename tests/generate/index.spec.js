@@ -279,7 +279,8 @@ test("opengraph", async (t) => {
       ("6", "2019-06-15T17:00:00+03:00", ?6),
       ("7", "2019-07-15T17:00:00+03:00", ?7),
       ("8", "2019-08-15T17:00:00+03:00", ?8),
-      ("9", "2019-09-15T17:00:00+03:00", ?9);
+      ("9", "2019-09-15T17:00:00+03:00", ?9),
+      ("10", "2019-10-01T17:00:00+03:00", ?10);
   `,
     {
       1: "lorem ipsum",
@@ -302,6 +303,9 @@ test("opengraph", async (t) => {
         "# teaser with gallery\n\n* ![](/media/uno.png)\n* ![](/media/dos.png)\n\n" +
         ("lorem ".repeat(10) + "\n\n").repeat(20) +
         "_italics in the end_",
+      10:
+        "# teaser with anchored image\n\n[![](/media/one.png)](https://example.com)\n\n" +
+        ("lorem ".repeat(10) + "\n\n").repeat(20),
     }
   );
 
@@ -419,5 +423,18 @@ test("opengraph", async (t) => {
     post9.indexOf(`<meta property="og:description" content="204 слова" />`) >
       -1,
     post9.split("\n").find((line) => line.indexOf("og:description") > -1)
+  );
+
+  const post10 = await fs.promises.readFile(path.join(tmpFolder, "10.html"));
+  t.ok(
+    post10.indexOf(
+      `<meta property="og:title" content="teaser with anchored image" />`
+    ) > -1
+  );
+  t.ok(post10.indexOf(`<meta property="og:description"`) === -1);
+  t.ok(
+    post10.indexOf(
+      `<meta property="og:image" content="https://example.com/media/one.png" />`
+    ) > -1
   );
 });

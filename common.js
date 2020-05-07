@@ -293,7 +293,7 @@ function pluralize(n, ...forms) {
   }
 }
 
-function getTeaserTokens(tokens) {
+function getTeaserTokens(tokens, post) {
   const result = [];
 
   for (const token of tokens) {
@@ -309,7 +309,21 @@ function getTeaserTokens(tokens) {
       const paragraphContent = token.tokens[0];
 
       if (paragraphContent.type === "image") {
-        result.push(token);
+        result.push({
+          ...token,
+          raw: `![${paragraphContent.raw}](${post.url})`,
+          text: `![${paragraphContent.raw}](${post.url})`,
+          tokens: [
+            {
+              type: "link",
+              raw: `![${paragraphContent.raw}](${post.url})`,
+              href: post.url,
+              title: null,
+              text: paragraphContent.raw,
+              tokens: token.tokens,
+            },
+          ],
+        });
       } else if (
         paragraphContent.type === "link" &&
         paragraphContent.tokens &&
@@ -481,7 +495,9 @@ async function prepare(post, embedsLoader) {
 
     html = await embedsLoader.load(html);
 
-    const teaserTokens = assignLinks([...getTeaserTokens(tokensWithoutTitle)]);
+    const teaserTokens = assignLinks([
+      ...getTeaserTokens(tokensWithoutTitle, { url: post.url }),
+    ]);
 
     let teaser = marked.parser(teaserTokens, markedOptions);
 

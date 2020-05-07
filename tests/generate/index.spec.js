@@ -280,7 +280,8 @@ test("opengraph", async (t) => {
       ("7", "2019-07-15T17:00:00+03:00", ?7),
       ("8", "2019-08-15T17:00:00+03:00", ?8),
       ("9", "2019-09-15T17:00:00+03:00", ?9),
-      ("10", "2019-10-01T17:00:00+03:00", ?10);
+      ("10", "2019-10-01T17:00:00+03:00", ?10),
+      ("11", "2019-10-11T17:00:00+03:00", ?11);
   `,
     {
       1: "lorem ipsum",
@@ -305,6 +306,10 @@ test("opengraph", async (t) => {
         "_italics in the end_",
       10:
         "# teaser with anchored image\n\n[![](/media/one.png)](https://example.com)\n\n" +
+        ("lorem ".repeat(10) + "\n\n").repeat(20),
+      11:
+        "# teaser with image after second heading\n\n_text text [link](http://example.com)_\n\n" +
+        "## TASBot\n\n![](/media/Lo0W4v7P9xFrZPblds6psIWMWb.jpg)\n\n" +
         ("lorem ".repeat(10) + "\n\n").repeat(20),
     }
   );
@@ -435,6 +440,26 @@ test("opengraph", async (t) => {
   t.ok(
     post10.indexOf(
       `<meta property="og:image" content="https://example.com/media/one.png" />`
+    ) > -1
+  );
+
+  const post11 = (
+    await fs.promises.readFile(path.join(tmpFolder, "11.html"))
+  ).toString();
+  t.ok(
+    post11.indexOf(
+      `<meta property="og:title" content="teaser with image after second heading" />`
+    ) > -1
+  );
+  t.ok(
+    post11.indexOf(
+      `<meta property="og:description" content="text text link" />`
+    ) > -1,
+    post11.split("\n").find((line) => line.indexOf("og:description") > -1)
+  );
+  t.ok(
+    post11.indexOf(
+      `<meta property="og:image" content="https://example.com/media/Lo0W4v7P9xFrZPblds6psIWMWb.jpg" />`
     ) > -1
   );
 });

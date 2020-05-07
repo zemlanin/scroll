@@ -296,18 +296,16 @@ function pluralize(n, ...forms) {
 function getTeaserTokens(tokens) {
   const result = [];
 
-  for (let i = 0; i < tokens.length; i++) {
+  for (const token of tokens) {
     if (result.length >= 2) {
       break;
     }
 
-    const token = tokens[i];
-
-    if (!token) {
+    if (token.type === "space") {
       continue;
-    }
-
-    if (token.type === "paragraph" && token.tokens.length === 1) {
+    } else if (token.type === "heading") {
+      continue;
+    } else if (token.type === "paragraph" && token.tokens.length === 1) {
       const paragraphContent = token.tokens[0];
 
       if (paragraphContent.type === "image") {
@@ -349,6 +347,8 @@ function getTeaserTokens(tokens) {
       } else {
         break;
       }
+    } else {
+      break;
     }
   }
 
@@ -514,19 +514,18 @@ async function prepare(post, embedsLoader) {
           teaser +
           `\n<a href="${post.url}" class="more">${longread.more} &rarr;</a>`;
       }
-
-      const description =
-        teaser &&
-        marked
-          .parser(teaserTokens, {
-            ...markedOptions,
-            renderer: textRenderer,
-          })
-          .trim();
-
-      opengraph.description =
-        description || (longread && longread.more) || null;
     }
+
+    const description =
+      teaser &&
+      marked
+        .parser(teaserTokens, {
+          ...markedOptions,
+          renderer: textRenderer,
+        })
+        .trim();
+
+    opengraph.description = description || (longread && longread.more) || null;
   } else {
     html = marked.parser(tokens, markedOptions);
     if (Object.values(tokens.links).some((t) => t.isFootnote)) {

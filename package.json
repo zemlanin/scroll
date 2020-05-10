@@ -46,7 +46,7 @@
     "url-pattern": "1.0.3"
   },
   "devDependencies": {
-    "eslint": "6.8.0",
+    "eslint": "^7.0.0",
     "mockery": "2.1.0",
     "prettier": "2.0.5",
     "serve-static": "1.14.1",

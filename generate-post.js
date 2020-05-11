@@ -153,24 +153,34 @@ async function generateIndexPage(db, blog, newestPage) {
   });
 }
 
+function chunkForPagination(posts) {
+  const postsForPaginationChunks = [...posts];
+
+  while (postsForPaginationChunks.length % PAGE_SIZE) {
+    postsForPaginationChunks.unshift(null);
+  }
+
+  const pages = chunk(postsForPaginationChunks, PAGE_SIZE);
+  if (pages.length) {
+    pages[0] = pages[0].filter(Boolean);
+  }
+
+  return pages;
+}
+
+function reverseAlphabetical(a, b) {
+  return a > b ? -1 : 1;
+}
+
 async function generateArchivePage(db, blog) {
-  let postMonths = await db.all(`
-    SELECT strftime('%Y-%m', created) month, id
+  const posts = await db.all(`
+    SELECT id, strftime('%Y', created) year, strftime('%Y-%m', created) month
     FROM posts
     WHERE draft = 0 AND internal = 0 AND private = 0
     ORDER BY datetime(created) DESC, id DESC
   `);
 
-  if (postMonths.length % PAGE_SIZE) {
-    for (let i = 0; i < postMonths.length % PAGE_SIZE; i++) {
-      postMonths.unshift(null);
-    }
-  }
-
-  const pages = chunk(postMonths, PAGE_SIZE);
-  if (pages.length) {
-    pages[0] = pages[0].filter(Boolean);
-  }
+  const pages = chunkForPagination(posts);
 
   const postToPageMapping = pages.reduce((acc, page, i) => {
     for (const post of page) {
@@ -180,32 +190,29 @@ async function generateArchivePage(db, blog) {
     return acc;
   }, {});
 
-  const months = groupBy(
-    postMonths.filter(Boolean).map((post) => ({
-      text: post.month,
-      url: `./page-${postToPageMapping[post.id]}.html#${post.id}`,
-    })),
-    (v) => v.text
-  );
+  const yearsMap = groupBy(posts, (post) => post.year);
 
-  const years = Object.keys(months)
-    .sort((a, b) => (a > b ? -1 : 1))
-    .reduce((acc, key) => {
-      const month = months[key][0];
+  const years = Object.keys(yearsMap)
+    .sort(reverseAlphabetical)
+    .map((year) => {
+      const yearPosts = yearsMap[year];
+      const monthsMap = groupBy(yearPosts, (post) => post.month);
 
-      const year = month.text.slice(0, month.text.indexOf("-"));
+      return {
+        year,
+        months: Object.keys(monthsMap)
+          .sort(reverseAlphabetical)
+          .map((month) => {
+            const firstPost = monthsMap[month][0];
+            const pageNumber = postToPageMapping[firstPost.id];
 
-      if (!acc.length || acc[acc.length - 1].year !== year) {
-        acc.push({
-          year,
-          months: [],
-        });
-      }
-
-      acc[acc.length - 1].months.push(month);
-
-      return acc;
-    }, []);
+            return {
+              text: firstPost.month,
+              url: `./page-${pageNumber}.html#${firstPost.id}`,
+            };
+          }),
+      };
+    });
 
   return await render("archive.mustache", {
     blog,
@@ -269,14 +276,8 @@ async function getPagination(db, postsCreatedAfter) {
 
   const posts = await db.all(query, params);
 
-  if (posts.length % PAGE_SIZE) {
-    for (let i = 0; i < posts.length % PAGE_SIZE; i++) {
-      posts.unshift(null);
-    }
-  }
-
-  const pagination = chunk(posts, PAGE_SIZE).map((page, i, arr) => ({
-    posts: page.filter(Boolean).map((p) => p.id),
+  const pagination = chunkForPagination(posts).map((page, i, arr) => ({
+    posts: page.map((p) => p.id),
     index: arr.length - i + paginationOffset,
   }));
 

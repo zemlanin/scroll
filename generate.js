@@ -93,7 +93,7 @@ async function copyStaticContent(destination, stdout) {
   }
 }
 
-async function generate(db, destination, stdout, stderr) {
+async function generate(db, destination, stdout, stderr, { only } = {}) {
   const tmpFolder = await fsPromises.mkdtemp(path.join(os.tmpdir(), "scroll-"));
   await fsPromises.mkdir(path.join(tmpFolder, "/media"));
 
@@ -103,168 +103,178 @@ async function generate(db, destination, stdout, stderr) {
 
   const blog = await getBlogObject();
 
-  let preparedPosts = await getPosts(db, {}, `draft = 0`, null);
+  if (!only || only.has("posts")) {
+    const preparedPosts = await getPosts(db, {}, `draft = 0`, null);
 
-  stdout.write(`loaded posts from db\n`);
+    stdout.write(`loaded posts from db\n`);
 
-  const postsCount = preparedPosts.length;
+    const postsCount = preparedPosts.length;
 
-  const progressPadding = Math.log10(postsCount) + 1;
-  let i = 0;
-
-  if (stdout.clearLine && stdout.cursorTo) {
-    stdout.write("");
-  } else {
-    stdout.write(`${postsCount} => `);
-  }
-
-  for (const postsChunk of chunk(preparedPosts, 16)) {
-    i = i + postsChunk.length;
+    const progressPadding = Math.log10(postsCount) + 1;
+    let i = 0;
 
     if (stdout.clearLine && stdout.cursorTo) {
-      stdout.clearLine();
-      stdout.cursorTo(0);
-      stdout.write(
-        `${postsChunk[0].created.slice(0, 4)} ${i
-          .toString()
-          .padStart(progressPadding)}/${postsCount} ${"#".repeat(
-          parseInt((i * 50) / postsCount)
-        )}${".".repeat(parseInt(((postsCount - i) * 50) / postsCount))}`
-      );
+      stdout.write("");
     } else {
-      stdout.write(postsChunk[0].created.slice(3, 4));
+      stdout.write(`${postsCount} => `);
     }
 
-    await Promise.all(
-      postsChunk.map(async (post) => {
-        const renderedPage = await generatePostPage(post, blog);
+    for (const postsChunk of chunk(preparedPosts, 16)) {
+      i = i + postsChunk.length;
 
-        if (post.slug && post.id !== post.slug) {
+      if (stdout.clearLine && stdout.cursorTo) {
+        stdout.clearLine();
+        stdout.cursorTo(0);
+        stdout.write(
+          `${postsChunk[0].created.slice(0, 4)} ${i
+            .toString()
+            .padStart(progressPadding)}/${postsCount} ${"#".repeat(
+            parseInt((i * 50) / postsCount)
+          )}${".".repeat(parseInt(((postsCount - i) * 50) / postsCount))}`
+        );
+      } else {
+        stdout.write(postsChunk[0].created.slice(3, 4));
+      }
+
+      await Promise.all(
+        postsChunk.map(async (post) => {
+          const renderedPage = await generatePostPage(post, blog);
+
+          if (post.slug && post.id !== post.slug) {
+            await writeFileWithGzip(
+              path.join(tmpFolder, `${post.slug}.html`),
+              renderedPage,
+              { flag: "wx" }
+            );
+          }
+
           await writeFileWithGzip(
-            path.join(tmpFolder, `${post.slug}.html`),
+            path.join(tmpFolder, `${post.id}.html`),
             renderedPage,
             { flag: "wx" }
           );
-        }
+        })
+      );
+    }
 
-        await writeFileWithGzip(
-          path.join(tmpFolder, `${post.id}.html`),
-          renderedPage,
-          { flag: "wx" }
-        );
-      })
-    );
+    stdout.write("\n");
+    stdout.write("posts done\n");
   }
 
-  stdout.write("\n");
-  stdout.write("posts done\n");
+  if (!only || only.has("pagination")) {
+    const pagination = await getPagination(db, null);
+    const newestPage = pagination[0] || { index: 0, posts: [] };
 
-  let pagination = await getPagination(db, null);
-  let newestPage = pagination[0] || { index: 0, posts: [] };
+    for (const page of pagination) {
+      const pageNumber = page.index;
 
-  for (const page of pagination) {
-    const pageNumber = page.index;
+      await writeFileWithGzip(
+        path.join(tmpFolder, `page-${pageNumber}.html`),
+        await generatePaginationPage(
+          db,
+          blog,
+          pageNumber,
+          page.posts,
+          newestPage
+        ),
+        { flag: "wx" }
+      );
+    }
 
     await writeFileWithGzip(
-      path.join(tmpFolder, `page-${pageNumber}.html`),
-      await generatePaginationPage(
-        db,
-        blog,
-        pageNumber,
-        page.posts,
-        newestPage
-      ),
+      path.join(tmpFolder, "index.html"),
+      await generateIndexPage(db, blog, newestPage),
       { flag: "wx" }
     );
+
+    stdout.write("pagination done\n");
   }
 
-  stdout.write("pagination done\n");
+  if (!only || only.has("rss")) {
+    await writeFileWithGzip(
+      path.join(tmpFolder, "rss.xml"),
+      await generateRSSPage(db, blog),
+      { flag: "wx" }
+    );
 
-  await writeFileWithGzip(
-    path.join(tmpFolder, "index.html"),
-    await generateIndexPage(db, blog, newestPage),
-    { flag: "wx" }
-  );
+    stdout.write("rss done\n");
+  }
 
-  newestPage = null;
+  if (!only || only.has("archive")) {
+    await writeFileWithGzip(
+      path.join(tmpFolder, "archive.html"),
+      await generateArchivePage(db, blog),
+      { flag: "wx" }
+    );
 
-  await writeFileWithGzip(
-    path.join(tmpFolder, "rss.xml"),
-    await generateRSSPage(db, blog),
-    { flag: "wx" }
-  );
+    stdout.write("archive done\n");
+  }
 
-  await writeFileWithGzip(
-    path.join(tmpFolder, "archive.html"),
-    await generateArchivePage(db, blog),
-    { flag: "wx" }
-  );
+  if (!only || only.has("media")) {
+    const media = await db.all("SELECT id from media");
 
-  stdout.write("archive done\n");
-
-  preparedPosts = null;
-  pagination = null;
-
-  const media = await db.all("SELECT id from media");
-
-  for (const mediaChunk of chunk(media, 16)) {
-    await db
-      .all(
-        `SELECT * from media WHERE id IN (${mediaChunk
-          .map((s) => `"${s.id}"`)
-          .join(",")})`
-      )
-      .then((loaded) =>
-        Promise.all(
-          loaded.map(async (m) =>
-            fsPromises.writeFile(
-              path.join(tmpFolder, "media", `${m.id}.${m.ext}`),
-              m.data
+    for (const mediaChunk of chunk(media, 16)) {
+      await db
+        .all(
+          `SELECT * from media WHERE id IN (${mediaChunk
+            .map((s) => `"${s.id}"`)
+            .join(",")})`
+        )
+        .then((loaded) =>
+          Promise.all(
+            loaded.map(async (m) =>
+              fsPromises.writeFile(
+                path.join(tmpFolder, "media", `${m.id}.${m.ext}`),
+                m.data
+              )
             )
           )
+        );
+    }
+
+    stdout.write("media done\n");
+
+    const convertedMedia = await db.all("SELECT id from converted_media");
+
+    for (const convertedMediaChunk of chunk(convertedMedia, 16)) {
+      await db
+        .all(
+          `SELECT * from converted_media WHERE id IN (${convertedMediaChunk
+            .map((c) => `"${c.id}"`)
+            .join(",")})`
         )
-      );
-  }
-
-  stdout.write("media done\n");
-
-  const convertedMedia = await db.all("SELECT id from converted_media");
-
-  for (const convertedMediaChunk of chunk(convertedMedia, 16)) {
-    await db
-      .all(
-        `SELECT * from converted_media WHERE id IN (${convertedMediaChunk
-          .map((c) => `"${c.id}"`)
-          .join(",")})`
-      )
-      .then((loaded) =>
-        Promise.all(
-          uniq(
-            loaded.map((c) => path.join(tmpFolder, "media", c.media_id))
-          ).map(mkdirP)
-        ).then(() => loaded)
-      )
-      .then((loaded) =>
-        Promise.all(
-          loaded.map(async (c) =>
-            fsPromises.writeFile(
-              path.join(tmpFolder, "media", c.media_id, `${c.tag}.${c.ext}`),
-              c.data
+        .then((loaded) =>
+          Promise.all(
+            uniq(
+              loaded.map((c) => path.join(tmpFolder, "media", c.media_id))
+            ).map(mkdirP)
+          ).then(() => loaded)
+        )
+        .then((loaded) =>
+          Promise.all(
+            loaded.map(async (c) =>
+              fsPromises.writeFile(
+                path.join(tmpFolder, "media", c.media_id, `${c.tag}.${c.ext}`),
+                c.data
+              )
             )
           )
-        )
-      );
-  }
+        );
+    }
 
-  stdout.write("converted_media done\n");
+    stdout.write("converted_media done\n");
+  }
 
   await new Promise((resolve, reject) => {
     const rsync = new Rsync()
       .set("progress")
-      .set("delete")
       .flags("Icru")
       .source(tmpFolder + path.sep)
       .destination(destination);
+
+    if (!only) {
+      rsync.set("delete");
+    }
 
     rsync.execute(
       function (error) {
@@ -282,14 +292,16 @@ async function generate(db, destination, stdout, stderr) {
   rmrf(tmpFolder);
 }
 
-function start() {
+function start({ only } = {}) {
   sqlite
     .open({ filename: POSTS_DB, driver: sqlite3.Database })
     .then((db) => loadIcu(db))
     .then((db) =>
       db
         .migrate({ migrationsPath: path.resolve(__dirname, "migrations") })
-        .then(() => generate(db, DIST, process.stdout, process.stderr))
+        .then(() =>
+          generate(db, DIST, process.stdout, process.stderr, { only })
+        )
         .then(() => {
           console.log("done");
           return db.close().then(() => {

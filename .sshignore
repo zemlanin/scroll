@@ -1,1 +1,7 @@
-node_modules/**/*
+dist/
+node_modules/
+*.db
+.DS_Store
+ansible/*.retry
+.env
+/sqlite-icu/libicu.so

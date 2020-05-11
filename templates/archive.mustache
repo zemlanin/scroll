@@ -1,10 +1,16 @@
 {{> header}}
 
+<style type="text/css">
+  ul.archive time {
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+
 {{#years}}
   <h3>{{year}}</h3>
-  <ul>
+  <ul class="archive">
     {{#months}}
-      <li><a href="{{{url}}}">{{text}}</a></li>
+      <li><time datetime="{{text}}"><a href="{{{url}}}">{{text}}</a></time></li>
     {{/months}}
   </ul>
 {{/years}}

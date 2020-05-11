@@ -1,12 +1,12 @@
 {{> header}}
 
-{{#months}}
-<h3>{{month}}</h3>
-<div>
-    {{#pages}}
-        <a href="{{{url}}}">{{text}}</a>
-    {{/pages}}
-</div>
-{{/months}}
+{{#years}}
+  <h3>{{year}}</h3>
+  <ul>
+    {{#months}}
+      <li><a href="{{{url}}}">{{text}}</a></li>
+    {{/months}}
+  </ul>
+{{/years}}
 
 {{> footer}}

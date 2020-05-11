@@ -155,7 +155,7 @@ async function generateIndexPage(db, blog, newestPage) {
 
 async function generateArchivePage(db, blog) {
   let postMonths = await db.all(`
-    SELECT strftime('%Y-%m', created) month
+    SELECT strftime('%Y-%m', created) month, id
     FROM posts
     WHERE draft = 0 AND internal = 0 AND private = 0
     ORDER BY datetime(created) DESC, id DESC
@@ -172,26 +172,46 @@ async function generateArchivePage(db, blog) {
     pages[0] = pages[0].filter(Boolean);
   }
 
-  const groupByMonth = groupBy(
-    pages.map((v, i) => ({
-      month: v[0].month,
-      text: pages.length - i,
-      url: `./page-${pages.length - i}.html`,
+  const postToPageMapping = pages.reduce((acc, page, i) => {
+    for (const post of page) {
+      acc[post.id] = pages.length - i;
+    }
+
+    return acc;
+  }, {});
+
+  const months = groupBy(
+    postMonths.filter(Boolean).map((post) => ({
+      text: post.month,
+      url: `./page-${postToPageMapping[post.id]}.html#${post.id}`,
     })),
-    (v) => v.month
+    (v) => v.text
   );
-  const monthGroups = Object.keys(groupByMonth).sort((a, b) => {
-    return a > b ? -1 : 1;
-  });
+
+  const years = Object.keys(months)
+    .sort((a, b) => (a > b ? -1 : 1))
+    .reduce((acc, key) => {
+      const month = months[key][0];
+
+      const year = month.text.slice(0, month.text.indexOf("-"));
+
+      if (!acc.length || acc[acc.length - 1].year !== year) {
+        acc.push({
+          year,
+          months: [],
+        });
+      }
+
+      acc[acc.length - 1].months.push(month);
+
+      return acc;
+    }, []);
 
   return await render("archive.mustache", {
     blog,
     title: "archive",
     url: "./archive.html",
-    months: monthGroups.map((month) => ({
-      month,
-      pages: groupByMonth[month],
-    })),
+    years,
   });
 }
 

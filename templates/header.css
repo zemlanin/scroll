@@ -350,6 +350,7 @@ nav span {
   color: var(--color-braaand);
 }
 
+article kbd,
 article code {
   border: solid 1px #dedede;
   border-color: var(--color-card-border);
@@ -375,6 +376,16 @@ article pre {
   padding: 0.2em 0.4em;
   overflow-x: scroll;
   line-height: 1.5;
+}
+
+article kbd {
+  display: inline-block;
+  font-size: 0.8em;
+  line-height: 1em;
+  vertical-align: middle;
+  border-radius: 3px;
+  box-shadow: inset 0 -2px 0 #dedede;
+  box-shadow: inset 0 -2px 0 var(--color-card-border);
 }
 
 article h1 a,

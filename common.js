@@ -407,6 +407,7 @@ function getMarkedOptions(postId) {
     smartypants: false,
     renderer: renderer,
     tokenizer: tokenizer,
+    langPrefix: 'language-',
     highlight: function (code, lang) {
       return require("highlight.js").highlightAuto(
         code,

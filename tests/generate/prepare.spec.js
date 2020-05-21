@@ -8,6 +8,9 @@ const mockEmbedsLoader = {
 };
 
 function dedent(text) {
+  // doesn't handle tabs,
+  // doesn't handle multiple newlines at the beginning of a string,
+  // etc.
   if (!text) {
     return text;
   }
@@ -16,7 +19,7 @@ function dedent(text) {
     text = text.slice(1);
   }
 
-  const spaceMatches = text.match(/^(\s*)/);
+  const spaceMatches = text.match(/^([ ]+)/);
 
   if (!spaceMatches) {
     return text;
@@ -25,14 +28,23 @@ function dedent(text) {
   const spaces = spaceMatches[1].length;
 
   if (spaces) {
-    return text
-      .split("\n")
-      .map((line) => line.slice(spaces))
-      .join("\n");
+    return text.replace(new RegExp(`^[ ]{1,${spaces}}`, "gm"), "");
   }
 
   return text;
 }
+
+test.only("dedent", (t) => {
+  t.equal(dedent("\nx\n"), "x\n");
+  t.equal(dedent("x\ny"), "x\ny");
+  t.equal(dedent("x\n  y"), "x\n  y");
+  t.equal(dedent(" x\n  y"), "x\n y");
+  t.equal(dedent("\n  x\n  y"), "x\ny");
+  t.equal(dedent("  lorem\n    ipsum\n"), "lorem\n  ipsum\n");
+  t.equal(dedent("  lorem\n\n  \n    ipsum\n"), "lorem\n\n\n  ipsum\n");
+
+  t.end();
+});
 
 test("general", async (t) => {
   const result = await prepare(

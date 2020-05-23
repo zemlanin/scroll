@@ -54,6 +54,8 @@ test("general", async (t) => {
 
         hello[^1]
 
+        ## should have id
+
         [^1]: . "world"
       `),
       id: "f69cd51a",
@@ -83,6 +85,7 @@ test("general", async (t) => {
     result.html,
     dedent(`
       <p>hello<sup><a href="#fn:f69cd51a:1" id="rfn:f69cd51a:1" rel="footnote">1</a></sup></p>
+      <h2 id="should-have-id">should have id</h2>
       <div class="footnotes"><hr/><ol><li id="fn:f69cd51a:1" tabindex="-1"><p>world&nbsp;<a href="#rfn:f69cd51a:1" rev="footnote">&#8617;</a></p>
       </li></ol></div>`)
   );

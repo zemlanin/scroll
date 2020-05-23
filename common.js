@@ -67,6 +67,19 @@ const ogHTML = renderer.html.bind(renderer);
 const ogParagraph = renderer.paragraph.bind(renderer);
 const ogList = renderer.list.bind(renderer);
 
+function decodeAttrs(text) {
+  return (
+    text &&
+    text
+      .replace(/&apos;/g, `'`)
+      .replace(/&quot;/g, `"`)
+      .replace(
+        /((src|href|poster)=['"]?)\/?media\//g,
+        `$1${process.env.BLOG_BASE_URL || ""}/media/`
+      )
+  );
+}
+
 function embedCallback(href, title, text) {
   if (process.env.BLOG_BASE_URL && href.startsWith("/media/")) {
     href = process.env.BLOG_BASE_URL + href;
@@ -84,15 +97,7 @@ function embedCallback(href, title, text) {
     (hrefIsOwnMedia || (text && text.indexOf("poster=") > -1)) &&
     mimeObj.video
   ) {
-    let attrs =
-      text &&
-      text
-        .replace(/&apos;/g, `'`)
-        .replace(/&quot;/g, `"`)
-        .replace(
-          /((src|href|poster)=['"]?)\/?media\//g,
-          `$1${process.env.BLOG_BASE_URL || ""}/media/`
-        );
+    let attrs = decodeAttrs(text);
 
     const isGIFVattr = attrs.match(/(^|\s+)gifv($|\s+)/g);
     const isOwnGIFV = hrefIsOwnMedia && href.indexOf("/gifv.mp4") > -1;
@@ -113,15 +118,7 @@ function embedCallback(href, title, text) {
     )}`;
 
     if (text && text.indexOf("poster=") > -1) {
-      const attrs =
-        text &&
-        text
-          .replace(/&apos;/g, `'`)
-          .replace(/&quot;/g, `"`)
-          .replace(
-            /((src|href|poster)=['"]?)\/media\//g,
-            `$1${process.env.BLOG_BASE_URL || ""}/media/`
-          );
+      const attrs = decodeAttrs(text);
 
       const imgSrc = attrs.match(/poster=['"]?([^'" ]+)['"]?/)[1];
       return `<a class="future-frame" href="${href}" data-src="${frameSrc}">
@@ -144,15 +141,7 @@ function embedCallback(href, title, text) {
     let imgSrc = null;
 
     if (text && text.indexOf("poster=") > -1) {
-      const attrs =
-        text &&
-        text
-          .replace(/&apos;/g, `'`)
-          .replace(/&quot;/g, `"`)
-          .replace(
-            /((src|href|poster)=['"]?)\/media\//g,
-            `$1${process.env.BLOG_BASE_URL || ""}/media/`
-          );
+      const attrs = decodeAttrs(text);
 
       imgSrc = attrs.match(/poster=['"]?([^'" ]+)['"]?/)[1];
     } else {

@@ -16,7 +16,6 @@ const noopStream = new require("stream").Writable({
 mockery.enable({
   warnOnReplace: false,
   warnOnUnregistered: false,
-  useCleanCache: true,
 });
 
 mockery.registerMock("request-promise-native", {
@@ -60,8 +59,6 @@ test("empty database", async (t) => {
   await generate(db, tmpFolder, noopStream, noopStream);
 
   t.ok(true);
-
-  t.end();
 });
 
 test("internal page", async (t) => {
@@ -255,8 +252,6 @@ test("database with posts and embeds", async (t) => {
     post9.split("\n").find((line) => line.indexOf("<ul data-gallery") > -1) ||
       post9.match(/<article>([\s\S]+)<\/article>/i)[1].trim()
   );
-
-  t.end();
 });
 
 test("opengraph", async (t) => {
@@ -373,12 +368,14 @@ test("opengraph", async (t) => {
   t.ok(
     post7.indexOf(
       `<meta property="og:title" content="teaser with footnote" />`
-    ) > -1
+    ) > -1,
+    post7.split("\n").find((line) => line.indexOf("og:title") > -1)
   );
   t.ok(
     post7.indexOf(
       `<meta property="og:image" content="https://example.com/media/example.png" />`
-    ) > -1
+    ) > -1,
+    post7.split("\n").find((line) => line.indexOf("og:image") > -1)
   );
   t.ok(
     post7.indexOf(
@@ -430,17 +427,21 @@ test("opengraph", async (t) => {
     post9.split("\n").find((line) => line.indexOf("og:description") > -1)
   );
 
-  const post10 = await fs.promises.readFile(path.join(tmpFolder, "10.html"));
+  const post10 = (
+    await fs.promises.readFile(path.join(tmpFolder, "10.html"))
+  ).toString();
   t.ok(
     post10.indexOf(
       `<meta property="og:title" content="teaser with anchored image" />`
-    ) > -1
+    ) > -1,
+    post10.split("\n").find((line) => line.indexOf("og:title") > -1)
   );
   t.ok(post10.indexOf(`<meta property="og:description"`) === -1);
   t.ok(
     post10.indexOf(
       `<meta property="og:image" content="https://example.com/media/one.png" />`
-    ) > -1
+    ) > -1,
+    post10.split("\n").find((line) => line.indexOf("og:image") > -1)
   );
 
   const post11 = (
@@ -449,7 +450,8 @@ test("opengraph", async (t) => {
   t.ok(
     post11.indexOf(
       `<meta property="og:title" content="teaser with image after second heading" />`
-    ) > -1
+    ) > -1,
+    post11.split("\n").find((line) => line.indexOf("og:title") > -1)
   );
   t.ok(
     post11.indexOf(

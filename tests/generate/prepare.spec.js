@@ -34,7 +34,7 @@ function dedent(text) {
   return text;
 }
 
-test("dedent", (t) => {
+test("dedent", async (t) => {
   t.equal(dedent("\nx\n"), "x\n");
   t.equal(dedent("x\ny"), "x\ny");
   t.equal(dedent("x\n  y"), "x\n  y");
@@ -42,8 +42,6 @@ test("dedent", (t) => {
   t.equal(dedent("\n  x\n  y"), "x\ny");
   t.equal(dedent("  lorem\n    ipsum\n"), "lorem\n  ipsum\n");
   t.equal(dedent("  lorem\n\n  \n    ipsum\n"), "lorem\n\n\n  ipsum\n");
-
-  t.end();
 });
 
 test("general", async (t) => {
@@ -89,8 +87,6 @@ test("general", async (t) => {
       <div class="footnotes"><hr/><ol><li id="fn:f69cd51a:1" tabindex="-1"><p>world&nbsp;<a href="#rfn:f69cd51a:1" rev="footnote">&#8617;</a></p>
       </li></ol></div>`)
   );
-
-  t.end();
 });
 
 test("footnotes", async (t) => {
@@ -143,8 +139,6 @@ test("footnotes", async (t) => {
       <li id="fn:a22749bc:spec2" tabindex="-1"><p>whatever&nbsp;<a href="#rfn:a22749bc:spec2" rev="footnote">&#8617;</a></p>
       </li></ol></div>`)
   );
-
-  t.end();
 });
 
 test("footnote inside non-paragraph blocks", async (t) => {

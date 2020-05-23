@@ -309,25 +309,7 @@ function walkWithTeaser(token, postUrl, teaserParagraphs) {
     const paragraphContent = token.tokens[0];
 
     if (paragraphContent.type === "image") {
-      teaserParagraphs.push(
-        marked.parser(
-          [
-            {
-              type: "paragraph",
-              text: "",
-              raw: "",
-              tokens: [
-                {
-                  type: "link",
-                  href: postUrl,
-                  tokens: token.tokens,
-                },
-              ],
-            },
-          ],
-          markedOptions
-        )
-      );
+      teaserParagraphs.push(marked.parser([token], markedOptions));
       return;
     }
 
@@ -359,23 +341,7 @@ function walkWithTeaser(token, postUrl, teaserParagraphs) {
       firstItemToken.tokens.length === 1 &&
       firstItemToken.tokens[0].type === "image"
     ) {
-      teaserParagraphs.push(
-        marked.parser(
-          [
-            {
-              type: "paragraph",
-              tokens: [
-                {
-                  type: "link",
-                  href: postUrl,
-                  tokens: firstItemToken.tokens,
-                },
-              ],
-            },
-          ],
-          markedOptions
-        )
-      );
+      teaserParagraphs.push(marked.parser([token], markedOptions));
       return;
     }
 

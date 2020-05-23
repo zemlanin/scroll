@@ -207,13 +207,13 @@ test("description after gallery", async (t) => {
     {
       text:
         dedent(`
-        # description after gallery
+          # description after gallery
 
-        * ![](/media/one.png)
-        * ![](/media/two.png)
+          * ![](/media/one.png)
+          * ![](/media/two.png)
 
-        _some description_
-      `) +
+          _some description_
+        `) +
         "\n\n" +
         ("lorem ".repeat(10) + "\n\n").repeat(20),
       id: "ff077d25",
@@ -222,5 +222,49 @@ test("description after gallery", async (t) => {
     mockEmbedsLoader
   );
 
+  t.equal(result.opengraph.image, "https://example.com/media/one.png");
   t.equal(result.opengraph.description, "some description");
+  t.equal(
+    result.longread.teaser,
+    dedent(`
+      <ul data-gallery style="list-style:none;padding:0">
+      <li><img src="https://example.com/media/one.png" alt="" loading="lazy" ></li>
+      <li><img src="https://example.com/media/two.png" alt="" loading="lazy" ></li>
+      </ul>
+
+      <p><em>some description</em></p>
+
+      <a href="https://example.com/ff077d25.html" class="more">202 слова &rarr;</a>`)
+  );
+});
+
+test("poster as a opengraph image", async (t) => {
+  const result = await prepare(
+    {
+      text:
+        dedent(`
+          # poster as a opengraph image
+
+          ![poster="/media/x/fit1000.png"](/media/x/gifv.mp4)
+
+          _some description_
+        `) +
+        "\n\n" +
+        ("lorem ".repeat(10) + "\n\n").repeat(20),
+      id: "1871cf2d",
+      created: +new Date(),
+    },
+    mockEmbedsLoader
+  );
+
+  t.equal(result.opengraph.image, "https://example.com/media/x/fit1000.png");
+  t.equal(
+    result.longread.teaser,
+    dedent(`
+      <p><video playsinline autoplay muted loop src="https://example.com/media/x/gifv.mp4" poster="https://example.com/media/x/fit1000.png"></video></p>
+
+      <p><em>some description</em></p>
+
+      <a href="https://example.com/1871cf2d.html" class="more">202 слова &rarr;</a>`)
+  );
 });

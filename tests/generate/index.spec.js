@@ -149,7 +149,7 @@ test("database with posts and embeds", async (t) => {
     {
       6: 'post with footnote [^1][]\n\n[^1]:. "footnote _text_"',
       7: '# titled\n\npost with title and footnote [^1][]\n\n[^1]:. "[text](https://example.net)"',
-      8: 'post with named footnote [^na|me][]\n\n[^na|me]:. "**fn text**"',
+      8: 'post with named footnote [^name][]\n\n[^name]:. "**fn text**"',
       9: "# gallery\n\n* ![](/media/1.jpg)\n* ![](/media/2.jpg)\n* ![](/media/3.jpg)",
     }
   );
@@ -234,13 +234,13 @@ test("database with posts and embeds", async (t) => {
   );
   t.ok(
     post8.indexOf(
-      `<p>post with named footnote <sup><a href="#fn:8:na-me" id="rfn:8:na-me" rel="footnote">1</a></sup></p>`
+      `<p>post with named footnote <sup><a href="#fn:8:name" id="rfn:8:name" rel="footnote">1</a></sup></p>`
     ) > -1,
     post8.split("\n").find((line) => line.indexOf("<sup>") > -1)
   );
   t.ok(
     post8.indexOf(
-      `<div class="footnotes"><hr/><ol><li id="fn:8:na-me" tabindex="-1"><p><strong>fn text</strong>&nbsp;<a href="#rfn:8:na-me" rev="footnote">&#8617;</a></p>`
+      `<div class="footnotes"><hr/><ol><li id="fn:8:name" tabindex="-1"><p><strong>fn text</strong>&nbsp;<a href="#rfn:8:name" rev="footnote">&#8617;</a></p>`
     ) > -1,
     post8
       .split("\n")

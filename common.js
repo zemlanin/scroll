@@ -213,15 +213,6 @@ function embedCallback(href, title, text) {
 renderer.image = embedCallback;
 
 renderer.link = function (href, title, text) {
-  if (text.startsWith(FOOTNOTE_MARKER)) {
-    if (!title) {
-      return text;
-    }
-
-    const [footnoteText, footnoteId] = href.split("|");
-    return `<sup><a href="#fn:${footnoteId}" id="rfn:${footnoteId}" rel="footnote">${footnoteText}</a></sup>`;
-  }
-
   if (href.startsWith("/media/") && process.env.BLOG_BASE_URL) {
     href = process.env.BLOG_BASE_URL + href;
   }
@@ -373,40 +364,11 @@ function escapeKaomoji(str) {
   return str.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯");
 }
 
-const tokenizer = new marked.Tokenizer();
-const ogRefLinkTokenizer = tokenizer.reflink.bind(tokenizer);
-
-function getMarkedOptions(postId) {
-  tokenizer.reflink = function (src, links) {
-    let footnoteIndex = 1;
-
-    for (const linkId in links) {
-      if (!linkId.startsWith(FOOTNOTE_MARKER)) {
-        continue;
-      }
-
-      if (links[linkId].isFootnote) {
-        continue;
-      }
-
-      const footnoteText = footnoteIndex + "";
-      const footnoteId = `${postId}:${linkId.slice(1).replace(/\|/g, "-")}`;
-
-      links[linkId].isFootnote = true;
-      links[linkId].href = `${footnoteText}|${footnoteId}`; // encoded for renderer.link
-      links[linkId].footnoteId = footnoteId;
-      links[linkId].footnoteText = footnoteText;
-      footnoteIndex++;
-    }
-
-    return ogRefLinkTokenizer(src, links);
-  };
-
+function getMarkedOptions() {
   return {
     gfm: true,
     smartypants: false,
     renderer: renderer,
-    tokenizer: tokenizer,
     langPrefix: "language-",
     highlight: function (code, lang) {
       return require("highlight.js").highlightAuto(
@@ -418,44 +380,153 @@ function getMarkedOptions(postId) {
   };
 }
 
-function generateFootnotes(links) {
-  let result = `<div class="footnotes"><hr/><ol>`;
+function walkWithoutFootnotes(token) {
+  if (token.type === "paragraph") {
+    token.tokens = token.tokens.reduce((acc, t) => {
+      if (t.type === "link" && t.text.startsWith(FOOTNOTE_MARKER)) {
+        return acc;
+      }
 
-  for (const linkId in links) {
-    if (!links[linkId].footnoteId) {
-      continue;
-    }
+      acc.push(t);
+      return acc;
+    }, []);
+  }
+}
 
-    const footnoteId = links[linkId].footnoteId;
-    const text = marked(
-      links[linkId].title.trim() +
-        `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`
+function hideToken(token) {
+  token.type = "space";
+  token.text = "";
+  token.raw = "";
+  token.tokens = null;
+}
+
+function walkWithFootnotes(token, postId, footnotes) {
+  if (token.type === "code" && footnotes.checkForMultilineFootnote) {
+    const footnoteId = footnotes.checkForMultilineFootnote;
+    const footnoteToUpdate = footnotes.find((fn) => fn.id === footnoteId);
+
+    const text = footnoteToUpdate.multilineStart + "\n\n" + token.text.trim();
+
+    const footnoteHTML = marked(
+      text + `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`
     );
-    result += `<li id="fn:${footnoteId}" tabindex="-1">${text}</li>`;
+
+    footnoteToUpdate.multilineStart = "";
+    footnoteToUpdate.html = `<li id="fn:${footnoteId}" tabindex="-1">${footnoteHTML}</li>`;
+
+    hideToken(token);
+
+    footnotes.checkForMultilineFootnote = null;
+  } else if (token.type !== "space") {
+    footnotes.checkForMultilineFootnote = null;
   }
 
-  result += "</ol></div>";
+  if (
+    token.type === "paragraph" &&
+    token.raw
+      .split("\n")
+      .every((line) => line.startsWith("[" + FOOTNOTE_MARKER))
+  ) {
+    for (const line of token.raw.split("\n").filter(Boolean)) {
+      const [match, incompleteId] = line.match(/\[\^([^\]]+)\]: /);
+      const footnoteId = `${postId}:${incompleteId}`;
+      const footnoteToUpdate = footnotes.find((fn) => fn.id === footnoteId);
 
-  return result;
+      const text = line.slice(match.length).trim();
+
+      const footnoteHTML = marked(
+        text + `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`
+      );
+
+      footnoteToUpdate.multilineStart = text;
+      footnoteToUpdate.html = `<li id="fn:${footnoteId}" tabindex="-1">${footnoteHTML}</li>`;
+      footnotes.checkForMultilineFootnote = footnoteId;
+    }
+
+    hideToken(token);
+  } else if (token.type === "paragraph") {
+    token.tokens = token.tokens.reduce((acc, t, i) => {
+      if (t.type === "link" && t.text.startsWith(FOOTNOTE_MARKER)) {
+        const footnoteId = `${postId}:${t.text.slice(1)}`;
+        const footnoteHTML = marked(
+          (t.title || t.href).trim() +
+            `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`
+        );
+        footnotes.push({
+          index: footnotes.length,
+          id: footnoteId,
+          html: `<li id="fn:${footnoteId}" tabindex="-1">${footnoteHTML}</li>`,
+        });
+
+        const anchor = `<sup><a href="#fn:${footnoteId}" id="rfn:${footnoteId}" rel="footnote">${footnotes.length}</a></sup>`;
+
+        acc.push({
+          type: "html",
+          raw: anchor,
+          inLink: true,
+          inRawBlock: false,
+          text: anchor,
+        });
+      } else if (
+        t.type === "text" &&
+        t.text === "[" &&
+        token.tokens[i + 1].text.startsWith(FOOTNOTE_MARKER)
+      ) {
+        const nextToken = token.tokens[i + 1];
+        const restOfFootnote = nextToken.text.slice(
+          1,
+          nextToken.text.indexOf("]")
+        );
+
+        let footnoteId;
+        let footnoteHTML;
+
+        if (restOfFootnote.match(/^[a-zA-Z0-9_-]+$/i)) {
+          footnoteId = `${postId}:${restOfFootnote}`;
+          footnoteHTML = "";
+        } else {
+          footnoteId = `${postId}:${footnotes.length + 1}`;
+          footnoteHTML = marked(
+            restOfFootnote.trim() +
+              `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`
+          );
+        }
+
+        footnotes.push({
+          index: footnotes.length,
+          id: footnoteId,
+          html: `<li id="fn:${footnoteId}" tabindex="-1">${footnoteHTML}</li>`,
+        });
+
+        const anchor = `<sup><a href="#fn:${footnoteId}" id="rfn:${footnoteId}" rel="footnote">${footnotes.length}</a></sup>`;
+
+        acc.push({
+          type: "html",
+          raw: anchor,
+          inLink: true,
+          inRawBlock: false,
+          text: anchor,
+        });
+
+        nextToken.text = nextToken.text.slice(restOfFootnote.length + 2); // `"] ".length === 2`
+        nextToken.raw = nextToken.raw.slice(restOfFootnote.length + 2); // `"] ".length === 2`
+      } else {
+        acc.push(t);
+      }
+
+      return acc;
+    }, []);
+  }
+}
+
+function byIndex(a, b) {
+  return a.index - b.index;
 }
 
 async function prepare(post, embedsLoader) {
   post.text = escapeKaomoji(post.text);
 
-  const markedOptions = getMarkedOptions(post.id);
-
-  const tokens = marked.lexer(post.text, markedOptions);
-  const assignLinks = (ts) => {
-    if (ts) {
-      ts.links = tokens.links;
-    }
-    return ts;
-  };
-
-  const header1Token =
-    tokens && tokens[0] && tokens[0].type === "heading" && tokens[0].text
-      ? tokens[0]
-      : null;
+  const markedOptions = getMarkedOptions();
 
   const created = new Date(parseInt(post.created));
 
@@ -476,31 +547,70 @@ async function prepare(post, embedsLoader) {
     image: null,
   };
 
-  if (header1Token) {
-    const headerPrefix = "#".repeat(header1Token.depth);
+  const startsWithHeading = post.text && post.text.match(/^#{1,} [^\r\n]+/);
+
+  if (startsWithHeading) {
+    const headingLength = startsWithHeading[0].length;
+
     htmlTitle = marked.parse(
-      `${headerPrefix} [${header1Token.text}](${post.url})`,
-      markedOptions
+      post.text
+        .slice(0, headingLength)
+        .replace(/(#+) (.*)/, `$1 [$2](${post.url})`),
+      {
+        ...markedOptions,
+        walkTokens: walkWithoutFootnotes,
+      }
     );
 
     htmlTitle = await embedsLoader.load(htmlTitle);
 
     rss.title = title = cheerio.load(htmlTitle).text().trim();
 
-    const tokensWithoutTitle = tokens.slice(1);
-    html = marked.parser(assignLinks([...tokensWithoutTitle]), markedOptions);
+    const textWithoutTitle = post.text.slice(headingLength);
+    let numberOfParagraphs = 0;
+    let footnotes = [];
+    html = marked.parse(textWithoutTitle, {
+      ...markedOptions,
+      walkTokens(token) {
+        if (token.type === "paragraph") {
+          numberOfParagraphs++;
+        }
 
-    if (Object.values(tokens.links).some((t) => t.isFootnote)) {
-      html = html + generateFootnotes(tokens.links);
+        walkWithFootnotes(token, post.id, footnotes);
+      },
+    });
+
+    if (footnotes.length) {
+      footnotes.sort(byIndex);
+      html =
+        html +
+        `<div class="footnotes"><hr/><ol>${footnotes
+          .map((f) => f.html)
+          .join("\n")}</ol></div>`;
     }
 
     html = await embedsLoader.load(html);
+
+    const tokensWithoutTitle = marked.lexer(textWithoutTitle, {
+      ...markedOptions,
+      walkTokens: walkWithoutFootnotes,
+    });
+
+    const assignLinks = (ts) => {
+      if (ts) {
+        ts.links = tokensWithoutTitle.links;
+      }
+      return ts;
+    };
 
     const teaserTokens = assignLinks([
       ...getTeaserTokens(tokensWithoutTitle, { url: post.url }),
     ]);
 
-    let teaser = marked.parser(teaserTokens, markedOptions);
+    let teaser = marked.parser(teaserTokens, {
+      ...markedOptions,
+      walkTokens: walkWithoutFootnotes,
+    });
 
     teaser = await embedsLoader.load(teaser);
 
@@ -511,7 +621,7 @@ async function prepare(post, embedsLoader) {
         parsedTeaser("[poster]").attr("poster"));
     opengraph.title = title.trim();
 
-    if (tokens.length > 5) {
+    if (numberOfParagraphs > 3) {
       const wordMatches = cheerio(html).text().match(WORD_REGEX);
 
       const wordCount = wordMatches ? wordMatches.length : 0;
@@ -538,15 +648,26 @@ async function prepare(post, embedsLoader) {
       marked
         .parser(teaserTokens, {
           ...markedOptions,
+          walkTokens: walkWithoutFootnotes,
           renderer: textRenderer,
         })
         .trim();
 
     opengraph.description = description || (longread && longread.more) || null;
   } else {
-    html = marked.parser(tokens, markedOptions);
-    if (Object.values(tokens.links).some((t) => t.isFootnote)) {
-      html = html + generateFootnotes(tokens.links);
+    let footnotes = [];
+    html = marked.parse(post.text, {
+      ...markedOptions,
+      walkTokens(token) {
+        walkWithFootnotes(token, post.id, footnotes);
+      },
+    });
+    if (footnotes.length) {
+      html =
+        html +
+        `<div class="footnotes"><hr/><ol>${footnotes
+          .map((f) => f.html)
+          .join("\n")}</ol></div>`;
     }
     rss.html = html = await embedsLoader.load(html);
   }

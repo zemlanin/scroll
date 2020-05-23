@@ -34,7 +34,7 @@ function dedent(text) {
   return text;
 }
 
-test.only("dedent", (t) => {
+test("dedent", (t) => {
   t.equal(dedent("\nx\n"), "x\n");
   t.equal(dedent("x\ny"), "x\ny");
   t.equal(dedent("x\n  y"), "x\n  y");
@@ -84,6 +84,60 @@ test("general", async (t) => {
     dedent(`
       <p>hello<sup><a href="#fn:f69cd51a:1" id="rfn:f69cd51a:1" rel="footnote">1</a></sup></p>
       <div class="footnotes"><hr/><ol><li id="fn:f69cd51a:1" tabindex="-1"><p>world&nbsp;<a href="#rfn:f69cd51a:1" rev="footnote">&#8617;</a></p>
+      </li></ol></div>`)
+  );
+
+  t.end();
+});
+
+test("footnotes", async (t) => {
+  const result = await prepare(
+    {
+      text: dedent(`
+        hello[^hacky]
+
+        yep[^inline footnote] [^bignote]
+
+        lorem[^spec] xyz [^spec2]
+
+        [^hacky]: . "world ender"
+
+        [^spec2]: whatever
+
+        [^spec]: ipsum ode [something](https://example.com)
+
+        [^bignote]: Here's one with multiple paragraphs and code.
+
+            Indent paragraphs to include them in the footnote.
+
+            \`{ my code }\`
+
+            Add as many paragraphs as you like.
+      `),
+      id: "a22749bc",
+      created: +new Date(),
+    },
+    mockEmbedsLoader
+  );
+
+  t.equal(
+    result.html,
+    dedent(`
+      <p>hello<sup><a href="#fn:a22749bc:hacky" id="rfn:a22749bc:hacky" rel="footnote">1</a></sup></p>
+      <p>yep<sup><a href="#fn:a22749bc:2" id="rfn:a22749bc:2" rel="footnote">2</a></sup> <sup><a href="#fn:a22749bc:bignote" id="rfn:a22749bc:bignote" rel="footnote">3</a></sup></p>
+      <p>lorem<sup><a href="#fn:a22749bc:spec" id="rfn:a22749bc:spec" rel="footnote">4</a></sup> xyz <sup><a href="#fn:a22749bc:spec2" id="rfn:a22749bc:spec2" rel="footnote">5</a></sup></p>
+      <div class="footnotes"><hr/><ol><li id="fn:a22749bc:hacky" tabindex="-1"><p>world ender&nbsp;<a href="#rfn:a22749bc:hacky" rev="footnote">&#8617;</a></p>
+      </li>
+      <li id="fn:a22749bc:2" tabindex="-1"><p>inline footnote&nbsp;<a href="#rfn:a22749bc:2" rev="footnote">&#8617;</a></p>
+      </li>
+      <li id="fn:a22749bc:bignote" tabindex="-1"><p>Here&#39;s one with multiple paragraphs and code.</p>
+      <p>Indent paragraphs to include them in the footnote.</p>
+      <p><code>{ my code }</code></p>
+      <p>Add as many paragraphs as you like.&nbsp;<a href="#rfn:a22749bc:bignote" rev="footnote">&#8617;</a></p>
+      </li>
+      <li id="fn:a22749bc:spec" tabindex="-1"><p>ipsum ode <a href="https://example.com">something</a>&nbsp;<a href="#rfn:a22749bc:spec" rev="footnote">&#8617;</a></p>
+      </li>
+      <li id="fn:a22749bc:spec2" tabindex="-1"><p>whatever&nbsp;<a href="#rfn:a22749bc:spec2" rev="footnote">&#8617;</a></p>
       </li></ol></div>`)
   );
 

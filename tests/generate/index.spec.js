@@ -459,9 +459,5 @@ test("opengraph", async (t) => {
     ) > -1,
     post11.split("\n").find((line) => line.indexOf("og:description") > -1)
   );
-  t.ok(
-    post11.indexOf(
-      `<meta property="og:image" content="https://example.com/media/Lo0W4v7P9xFrZPblds6psIWMWb.jpg" />`
-    ) > -1
-  );
+  t.ok(post11.indexOf(`<meta property="og:image"`) === -1);
 });

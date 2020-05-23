@@ -213,6 +213,10 @@ function embedCallback(href, title, text) {
 renderer.image = embedCallback;
 
 renderer.link = function (href, title, text) {
+  if (text && text.startsWith(FOOTNOTE_MARKER)) {
+    return "";
+  }
+
   if (href.startsWith("/media/") && process.env.BLOG_BASE_URL) {
     href = process.env.BLOG_BASE_URL + href;
   }
@@ -284,104 +288,119 @@ function pluralize(n, ...forms) {
   }
 }
 
-function getTeaserTokens(tokens, post) {
-  const result = [];
+const markedOptions = {
+  gfm: true,
+  smartypants: false,
+  renderer: renderer,
+  langPrefix: "language-",
+  highlight: function (code, lang) {
+    return require("highlight.js").highlightAuto(
+      code,
+      lang ? [lang] : undefined
+    ).value;
+  },
+  baseUrl: process.env.BLOG_BASE_URL || null,
+};
 
-  for (const token of tokens) {
-    if (result.length >= 2) {
-      break;
-    }
+function sealTeaser(teaserParagraphs) {
+  teaserParagraphs.push("", "");
+}
 
-    if (token.type === "space") {
-      continue;
-    } else if (token.type === "heading") {
-      continue;
-    } else if (token.type === "paragraph" && token.tokens.length === 1) {
-      const paragraphContent = token.tokens[0];
-
-      if (paragraphContent.type === "image") {
-        result.push({
-          ...token,
-          raw: `![${paragraphContent.raw}](${post.url})`,
-          text: `![${paragraphContent.raw}](${post.url})`,
-          tokens: [
-            {
-              type: "link",
-              raw: `![${paragraphContent.raw}](${post.url})`,
-              href: post.url,
-              title: null,
-              text: paragraphContent.raw,
-              tokens: token.tokens,
-            },
-          ],
-        });
-      } else if (
-        paragraphContent.type === "link" &&
-        paragraphContent.tokens &&
-        paragraphContent.tokens.length === 1 &&
-        paragraphContent.tokens[0].type === "image"
-      ) {
-        result.push(token);
-      } else if (paragraphContent.type === "em") {
-        result.push({
-          ...token,
-          tokens: [
-            {
-              ...paragraphContent,
-              tokens: paragraphContent.tokens.filter(
-                (t) =>
-                  !(t.type === "link" && t.text.startsWith(FOOTNOTE_MARKER))
-              ),
-            },
-          ],
-        });
-      } else {
-        break;
-      }
-    } else if (token.type === "list") {
-      const firstItemToken = token.items[0].tokens[0];
-
-      if (
-        firstItemToken &&
-        firstItemToken.type === "text" &&
-        firstItemToken.tokens.length === 1 &&
-        firstItemToken.tokens[0].type === "image"
-      ) {
-        const { raw, text, tokens } = firstItemToken;
-        result.push({ type: "paragraph", raw, text, tokens });
-      } else {
-        break;
-      }
-    } else {
-      break;
-    }
+function walkWithTeaser(token, postUrl, teaserParagraphs) {
+  if (token.type === "heading") {
+    sealTeaser(teaserParagraphs);
+    return;
   }
 
-  return result.slice(0, 2);
+  if (token.type === "paragraph") {
+    if (token.tokens.length !== 1) {
+      return;
+    }
+
+    const paragraphContent = token.tokens[0];
+
+    if (paragraphContent.type === "image") {
+      teaserParagraphs.push(
+        marked.parser(
+          [
+            {
+              type: "paragraph",
+              text: "",
+              raw: "",
+              tokens: [
+                {
+                  type: "link",
+                  href: postUrl,
+                  tokens: token.tokens,
+                },
+              ],
+            },
+          ],
+          markedOptions
+        )
+      );
+      return;
+    }
+
+    if (
+      paragraphContent.type === "link" &&
+      paragraphContent.tokens &&
+      paragraphContent.tokens.length === 1 &&
+      paragraphContent.tokens[0].type === "image"
+    ) {
+      teaserParagraphs.push(marked.parser([token], markedOptions));
+      return;
+    }
+
+    if (paragraphContent.type === "em") {
+      teaserParagraphs.push(marked.parser([token], markedOptions));
+      return;
+    }
+
+    sealTeaser(teaserParagraphs);
+    return;
+  }
+
+  if (token.type === "list") {
+    const firstItemToken = token.items[0].tokens[0];
+
+    if (
+      firstItemToken &&
+      firstItemToken.type === "text" &&
+      firstItemToken.tokens.length === 1 &&
+      firstItemToken.tokens[0].type === "image"
+    ) {
+      teaserParagraphs.push(
+        marked.parser(
+          [
+            {
+              type: "paragraph",
+              tokens: [
+                {
+                  type: "link",
+                  href: postUrl,
+                  tokens: firstItemToken.tokens,
+                },
+              ],
+            },
+          ],
+          markedOptions
+        )
+      );
+      return;
+    }
+
+    sealTeaser(teaserParagraphs);
+    return;
+  }
 }
 
 function escapeKaomoji(str) {
   return str.replace(/¯\\_\(ツ\)_\/¯/g, "¯\\\\\\_(ツ)\\_/¯");
 }
 
-function getMarkedOptions() {
-  return {
-    gfm: true,
-    smartypants: false,
-    renderer: renderer,
-    langPrefix: "language-",
-    highlight: function (code, lang) {
-      return require("highlight.js").highlightAuto(
-        code,
-        lang ? [lang] : undefined
-      ).value;
-    },
-    baseUrl: process.env.BLOG_BASE_URL || null,
-  };
-}
-
 function walkWithoutFootnotes(token) {
-  if (token.type === "paragraph") {
+  if (token.tokens && token.tokens.length) {
     token.tokens = token.tokens.reduce((acc, t) => {
       if (t.type === "link" && t.text.startsWith(FOOTNOTE_MARKER)) {
         return acc;
@@ -526,8 +545,6 @@ function byIndex(a, b) {
 async function prepare(post, embedsLoader) {
   post.text = escapeKaomoji(post.text);
 
-  const markedOptions = getMarkedOptions();
-
   const created = new Date(parseInt(post.created));
 
   let title = post.slug || created.toISOString().split("T")[0];
@@ -547,7 +564,7 @@ async function prepare(post, embedsLoader) {
     image: null,
   };
 
-  const startsWithHeading = post.text && post.text.match(/^#{1,} [^\r\n]+/);
+  const startsWithHeading = post.text && post.text.match(/^#+ [^\r\n]+/);
 
   if (startsWithHeading) {
     const headingLength = startsWithHeading[0].length;
@@ -555,7 +572,7 @@ async function prepare(post, embedsLoader) {
     htmlTitle = marked.parse(
       post.text
         .slice(0, headingLength)
-        .replace(/(#+) (.*)/, `$1 [$2](${post.url})`),
+        .replace(/^(#+) (.*)$/, `$1 [$2](${post.url})`),
       {
         ...markedOptions,
         walkTokens: walkWithoutFootnotes,
@@ -568,15 +585,21 @@ async function prepare(post, embedsLoader) {
 
     const textWithoutTitle = post.text.slice(headingLength);
     let numberOfParagraphs = 0;
-    let footnotes = [];
+    const footnotes = [];
+    const teaserParagraphs = [];
+
     html = marked.parse(textWithoutTitle, {
       ...markedOptions,
       walkTokens(token) {
+        walkWithFootnotes(token, post.id, footnotes);
+
+        if (numberOfParagraphs < 2 && teaserParagraphs.length < 2) {
+          walkWithTeaser(token, post.url, teaserParagraphs);
+        }
+
         if (token.type === "paragraph") {
           numberOfParagraphs++;
         }
-
-        walkWithFootnotes(token, post.id, footnotes);
       },
     });
 
@@ -591,34 +614,14 @@ async function prepare(post, embedsLoader) {
 
     html = await embedsLoader.load(html);
 
-    const tokensWithoutTitle = marked.lexer(textWithoutTitle, {
-      ...markedOptions,
-      walkTokens: walkWithoutFootnotes,
-    });
-
-    const assignLinks = (ts) => {
-      if (ts) {
-        ts.links = tokensWithoutTitle.links;
-      }
-      return ts;
-    };
-
-    const teaserTokens = assignLinks([
-      ...getTeaserTokens(tokensWithoutTitle, { url: post.url }),
-    ]);
-
-    let teaser = marked.parser(teaserTokens, {
-      ...markedOptions,
-      walkTokens: walkWithoutFootnotes,
-    });
-
-    teaser = await embedsLoader.load(teaser);
+    const teaser = await embedsLoader.load(teaserParagraphs.join("\n"));
 
     const parsedTeaser = teaser && cheerio.load(teaser);
-    opengraph.image =
-      parsedTeaser &&
-      (parsedTeaser("img").attr("src") ||
-        parsedTeaser("[poster]").attr("poster"));
+    opengraph.image = parsedTeaser
+      ? parsedTeaser("img").attr("src") ||
+        parsedTeaser("[poster]").attr("poster") ||
+        null
+      : null;
     opengraph.title = title.trim();
 
     if (numberOfParagraphs > 3) {
@@ -644,18 +647,14 @@ async function prepare(post, embedsLoader) {
     }
 
     const description =
-      teaser &&
-      marked
-        .parser(teaserTokens, {
-          ...markedOptions,
-          walkTokens: walkWithoutFootnotes,
-          renderer: textRenderer,
-        })
-        .trim();
+      (parsedTeaser &&
+        parsedTeaser("em").text() &&
+        parsedTeaser("em").text().trim()) ||
+      (longread && longread.more);
 
     opengraph.description = description || (longread && longread.more) || null;
   } else {
-    let footnotes = [];
+    const footnotes = [];
     html = marked.parse(post.text, {
       ...markedOptions,
       walkTokens(token) {

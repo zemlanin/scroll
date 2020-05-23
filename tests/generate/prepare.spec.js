@@ -67,7 +67,7 @@ test("general", async (t) => {
   t.equal(result.opengraph.url, "https://example.com/f69cd51a.html");
   t.equal(result.opengraph.title, "title");
   t.equal(result.opengraph.description, null);
-  t.equal(result.opengraph.image, "");
+  t.equal(result.opengraph.image, null);
   t.equal(result.rss.title, "title");
   t.equal(result.longread, null);
   t.equal(result.created, "2020-05-21T18:49:46Z");
@@ -177,6 +177,50 @@ test("footnote inside non-paragraph blocks", async (t) => {
       <li id="fn:a22749bc:3" tabindex="-1"><p><a href="/media/c.pdf">c</a>&nbsp;<a href="#rfn:a22749bc:3" rev="footnote">&#8617;</a></p>
       </li></ol></div>`)
   );
+});
 
-  t.end();
+test("footnote with double squares", async (t) => {
+  const result = await prepare(
+    {
+      text: dedent(`
+        double squares[^xx][]
+
+        [^xx]:. "[x](/media/x.pdf)"
+      `),
+      id: "96289b5d",
+      created: +new Date(),
+    },
+    mockEmbedsLoader
+  );
+
+  t.equal(
+    result.html,
+    dedent(`
+      <p>double squares<sup><a href="#fn:96289b5d:xx" id="rfn:96289b5d:xx" rel="footnote">1</a></sup></p>
+      <div class="footnotes"><hr/><ol><li id="fn:96289b5d:xx" tabindex="-1"><p><a href="/media/x.pdf">x</a>&nbsp;<a href="#rfn:96289b5d:xx" rev="footnote">&#8617;</a></p>
+      </li></ol></div>`)
+  );
+});
+
+test("description after gallery", async (t) => {
+  const result = await prepare(
+    {
+      text:
+        dedent(`
+        # description after gallery
+
+        * ![](/media/one.png)
+        * ![](/media/two.png)
+
+        _some description_
+      `) +
+        "\n\n" +
+        ("lorem ".repeat(10) + "\n\n").repeat(20),
+      id: "ff077d25",
+      created: +new Date(),
+    },
+    mockEmbedsLoader
+  );
+
+  t.equal(result.opengraph.description, "some description");
 });

@@ -146,3 +146,43 @@ test("footnotes", async (t) => {
 
   t.end();
 });
+
+test("footnote inside non-paragraph blocks", async (t) => {
+  const result = await prepare(
+    {
+      text: dedent(`
+        _italic text[^1]_
+
+        [^1]: . "[a](/media/a.pdf)"
+
+        **strong text[^2]**
+
+        [^2]: [b](/media/b.pdf)
+
+        *italic text[^3]*
+
+        [^3]:
+            [c](/media/c.pdf)
+      `),
+      id: "a22749bc",
+      created: +new Date(),
+    },
+    mockEmbedsLoader
+  );
+
+  t.equal(
+    result.html,
+    dedent(`
+      <p><em>italic text<sup><a href="#fn:a22749bc:1" id="rfn:a22749bc:1" rel="footnote">1</a></sup></em></p>
+      <p><strong>strong text<sup><a href="#fn:a22749bc:2" id="rfn:a22749bc:2" rel="footnote">2</a></sup></strong></p>
+      <p><em>italic text<sup><a href="#fn:a22749bc:3" id="rfn:a22749bc:3" rel="footnote">3</a></sup></em></p>
+      <div class="footnotes"><hr/><ol><li id="fn:a22749bc:1" tabindex="-1"><p><a href="/media/a.pdf">a</a>&nbsp;<a href="#rfn:a22749bc:1" rev="footnote">&#8617;</a></p>
+      </li>
+      <li id="fn:a22749bc:2" tabindex="-1"><p><a href="/media/b.pdf">b</a>&nbsp;<a href="#rfn:a22749bc:2" rev="footnote">&#8617;</a></p>
+      </li>
+      <li id="fn:a22749bc:3" tabindex="-1"><p><a href="/media/c.pdf">c</a>&nbsp;<a href="#rfn:a22749bc:3" rev="footnote">&#8617;</a></p>
+      </li></ol></div>`)
+  );
+
+  t.end();
+});

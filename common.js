@@ -444,7 +444,7 @@ function walkWithFootnotes(token, postId, footnotes) {
     }
 
     hideToken(token);
-  } else if (token.type === "paragraph") {
+  } else if (token.tokens && token.tokens.length) {
     token.tokens = token.tokens.reduce((acc, t, i) => {
       if (t.type === "link" && t.text.startsWith(FOOTNOTE_MARKER)) {
         const footnoteId = `${postId}:${t.text.slice(1)}`;

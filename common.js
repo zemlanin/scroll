@@ -452,19 +452,14 @@ function walkWithFootnotes(token, postId, footnotes) {
           nextToken.text.indexOf("]")
         );
 
-        let footnoteId;
-        let footnoteHTML;
+        const footnoteId = restOfFootnote.match(/^[a-zA-Z0-9_-]+$/i)
+          ? `${postId}:${restOfFootnote}`
+          : `${postId}:${footnotes.length + 1}`;
 
-        if (restOfFootnote.match(/^[a-zA-Z0-9_-]+$/i)) {
-          footnoteId = `${postId}:${restOfFootnote}`;
-          footnoteHTML = "";
-        } else {
-          footnoteId = `${postId}:${footnotes.length + 1}`;
-          footnoteHTML = marked(
-            restOfFootnote.trim() +
-              `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`
-          );
-        }
+        const footnoteHTML = marked(
+          restOfFootnote.trim() +
+            `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`
+        );
 
         footnotes.push({
           index: footnotes.length,

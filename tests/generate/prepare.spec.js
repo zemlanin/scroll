@@ -97,7 +97,7 @@ test("footnotes", async (t) => {
 
         yep[^inline footnote] [^bignote]
 
-        lorem[^spec] xyz [^spec2]
+        lorem[^spec] xyz [^spec2] [^word] [^слово]
 
         [^hacky]: . "world ender"
 
@@ -124,7 +124,7 @@ test("footnotes", async (t) => {
     dedent(`
       <p>hello<sup><a href="#fn:a22749bc:hacky" id="rfn:a22749bc:hacky" rel="footnote">1</a></sup></p>
       <p>yep<sup><a href="#fn:a22749bc:2" id="rfn:a22749bc:2" rel="footnote">2</a></sup> <sup><a href="#fn:a22749bc:bignote" id="rfn:a22749bc:bignote" rel="footnote">3</a></sup></p>
-      <p>lorem<sup><a href="#fn:a22749bc:spec" id="rfn:a22749bc:spec" rel="footnote">4</a></sup> xyz <sup><a href="#fn:a22749bc:spec2" id="rfn:a22749bc:spec2" rel="footnote">5</a></sup></p>
+      <p>lorem<sup><a href="#fn:a22749bc:spec" id="rfn:a22749bc:spec" rel="footnote">4</a></sup> xyz <sup><a href="#fn:a22749bc:spec2" id="rfn:a22749bc:spec2" rel="footnote">5</a></sup> <sup><a href="#fn:a22749bc:word" id="rfn:a22749bc:word" rel="footnote">6</a></sup> <sup><a href="#fn:a22749bc:7" id="rfn:a22749bc:7" rel="footnote">7</a></sup></p>
       <div class="footnotes"><hr/><ol><li id="fn:a22749bc:hacky" tabindex="-1"><p>world ender&nbsp;<a href="#rfn:a22749bc:hacky" rev="footnote">&#8617;</a></p>
       </li>
       <li id="fn:a22749bc:2" tabindex="-1"><p>inline footnote&nbsp;<a href="#rfn:a22749bc:2" rev="footnote">&#8617;</a></p>
@@ -137,6 +137,10 @@ test("footnotes", async (t) => {
       <li id="fn:a22749bc:spec" tabindex="-1"><p>ipsum ode <a href="https://example.com">something</a>&nbsp;<a href="#rfn:a22749bc:spec" rev="footnote">&#8617;</a></p>
       </li>
       <li id="fn:a22749bc:spec2" tabindex="-1"><p>whatever&nbsp;<a href="#rfn:a22749bc:spec2" rev="footnote">&#8617;</a></p>
+      </li>
+      <li id="fn:a22749bc:word" tabindex="-1"><p>word&nbsp;<a href="#rfn:a22749bc:word" rev="footnote">&#8617;</a></p>
+      </li>
+      <li id="fn:a22749bc:7" tabindex="-1"><p>слово&nbsp;<a href="#rfn:a22749bc:7" rev="footnote">&#8617;</a></p>
       </li></ol></div>`)
   );
 });

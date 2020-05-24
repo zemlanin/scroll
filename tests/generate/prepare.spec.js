@@ -1,4 +1,8 @@
 const test = require("tape-promise/tape");
+const inspectSymbol = require("util").inspect.custom;
+const { HtmlDiffer } = require("html-differ");
+const htmlDiffer = new HtmlDiffer();
+
 const { prepare } = require("../../common.js");
 
 const mockEmbedsLoader = {
@@ -33,6 +37,37 @@ function dedent(text) {
 
   return text;
 }
+
+test.Test.prototype.equalHtml = function equalHtml(a, b, msg, extra) {
+  if (arguments.length < 2) {
+    throw new TypeError("two arguments must be provided to compare");
+  }
+
+  const diff = htmlDiffer.diffHtml(a, b);
+
+  this._assert(
+    diff.every((chunk) => !chunk.added && !chunk.removed),
+    {
+      message: typeof msg !== "undefined" ? msg : "should be equal as html",
+      operator: "equalHtml",
+      actual: {
+        [inspectSymbol]: () =>
+          diff
+            .filter((chunk) => !chunk.added)
+            .map((chunk) => chunk.value)
+            .join("\t"),
+      },
+      expected: {
+        [inspectSymbol]: () =>
+          diff
+            .filter((chunk) => !chunk.removed)
+            .map((chunk) => chunk.value)
+            .join("\t"),
+      },
+      extra: extra,
+    }
+  );
+};
 
 test("dedent", async (t) => {
   t.equal(dedent("\nx\n"), "x\n");
@@ -74,18 +109,41 @@ test("general", async (t) => {
   t.equal(result.createdDate, "2020-05-21");
   t.equal(result.createdUTC, "Thu, 21 May 2020 18:49:46 GMT");
 
-  t.equal(
+  t.equalHtml(
     result.htmlTitle,
-    '<h1 id="title"><a href="https://example.com/f69cd51a.html">title</a></h1>\n'
+    '<h1 id="title"><a href="https://example.com/f69cd51a.html">title</a></h1>'
   );
 
-  t.equal(
+  t.equalHtml(
     result.html,
-    dedent(`
+    `
       <p>hello<sup><a href="#fn:f69cd51a:1" id="rfn:f69cd51a:1" rel="footnote">1</a></sup></p>
       <h2 id="should-have-id">should have id</h2>
-      <div class="footnotes"><hr/><ol><li id="fn:f69cd51a:1" tabindex="-1"><p>world&nbsp;<a href="#rfn:f69cd51a:1" rev="footnote">&#8617;</a></p>
-      </li></ol></div>`)
+      <div class="footnotes">
+        <hr/>
+        <ol>
+          <li id="fn:f69cd51a:1" tabindex="-1">
+            <p>world&nbsp;<a href="#rfn:f69cd51a:1" rev="footnote">&#8617;</a></p>
+          </li>
+        </ol>
+      </div>
+    `
+  );
+
+  t.equalHtml(
+    result.html,
+    `
+      <p>hello<sup><a href="#fn:f69cd51a:1" id="rfn:f69cd51a:1" rel="footnote">1</a></sup></p>
+      <h2 id="should-have-id">should have id</h2>
+      <div class="footnotes">
+        <hr/>
+        <ol>
+          <li id="fn:f69cd51a:1" tabindex="-1">
+            <p>world&nbsp;<a href="#rfn:f69cd51a:1" rev="footnote">&#8617;</a></p>
+          </li>
+        </ol>
+      </div>
+    `
   );
 });
 
@@ -119,29 +177,42 @@ test("footnotes", async (t) => {
     mockEmbedsLoader
   );
 
-  t.equal(
+  t.equalHtml(
     result.html,
-    dedent(`
+    `
       <p>hello<sup><a href="#fn:a22749bc:hacky" id="rfn:a22749bc:hacky" rel="footnote">1</a></sup></p>
       <p>yep<sup><a href="#fn:a22749bc:2" id="rfn:a22749bc:2" rel="footnote">2</a></sup> <sup><a href="#fn:a22749bc:bignote" id="rfn:a22749bc:bignote" rel="footnote">3</a></sup></p>
       <p>lorem<sup><a href="#fn:a22749bc:spec" id="rfn:a22749bc:spec" rel="footnote">4</a></sup> xyz <sup><a href="#fn:a22749bc:spec2" id="rfn:a22749bc:spec2" rel="footnote">5</a></sup> <sup><a href="#fn:a22749bc:word" id="rfn:a22749bc:word" rel="footnote">6</a></sup> <sup><a href="#fn:a22749bc:7" id="rfn:a22749bc:7" rel="footnote">7</a></sup></p>
-      <div class="footnotes"><hr/><ol><li id="fn:a22749bc:hacky" tabindex="-1"><p>world ender&nbsp;<a href="#rfn:a22749bc:hacky" rev="footnote">&#8617;</a></p>
-      </li>
-      <li id="fn:a22749bc:2" tabindex="-1"><p>inline footnote&nbsp;<a href="#rfn:a22749bc:2" rev="footnote">&#8617;</a></p>
-      </li>
-      <li id="fn:a22749bc:bignote" tabindex="-1"><p>Here&#39;s one with multiple paragraphs and code.</p>
-      <p>Indent paragraphs to include them in the footnote.</p>
-      <p><code>{ my code }</code></p>
-      <p>Add as many paragraphs as you like.&nbsp;<a href="#rfn:a22749bc:bignote" rev="footnote">&#8617;</a></p>
-      </li>
-      <li id="fn:a22749bc:spec" tabindex="-1"><p>ipsum ode <a href="https://example.com">something</a>&nbsp;<a href="#rfn:a22749bc:spec" rev="footnote">&#8617;</a></p>
-      </li>
-      <li id="fn:a22749bc:spec2" tabindex="-1"><p>whatever&nbsp;<a href="#rfn:a22749bc:spec2" rev="footnote">&#8617;</a></p>
-      </li>
-      <li id="fn:a22749bc:word" tabindex="-1"><p>word&nbsp;<a href="#rfn:a22749bc:word" rev="footnote">&#8617;</a></p>
-      </li>
-      <li id="fn:a22749bc:7" tabindex="-1"><p>слово&nbsp;<a href="#rfn:a22749bc:7" rev="footnote">&#8617;</a></p>
-      </li></ol></div>`)
+      <div class="footnotes">
+        <hr/>
+        <ol>
+          <li id="fn:a22749bc:hacky" tabindex="-1">
+            <p>world ender&nbsp;<a href="#rfn:a22749bc:hacky" rev="footnote">&#8617;</a></p>
+          </li>
+          <li id="fn:a22749bc:2" tabindex="-1">
+            <p>inline footnote&nbsp;<a href="#rfn:a22749bc:2" rev="footnote">&#8617;</a></p>
+          </li>
+          <li id="fn:a22749bc:bignote" tabindex="-1">
+            <p>Here&#39;s one with multiple paragraphs and code.</p>
+            <p>Indent paragraphs to include them in the footnote.</p>
+            <p><code>{ my code }</code></p>
+            <p>Add as many paragraphs as you like.&nbsp;<a href="#rfn:a22749bc:bignote" rev="footnote">&#8617;</a></p>
+          </li>
+          <li id="fn:a22749bc:spec" tabindex="-1">
+            <p>ipsum ode <a href="https://example.com">something</a>&nbsp;<a href="#rfn:a22749bc:spec" rev="footnote">&#8617;</a></p>
+          </li>
+          <li id="fn:a22749bc:spec2" tabindex="-1">
+            <p>whatever&nbsp;<a href="#rfn:a22749bc:spec2" rev="footnote">&#8617;</a></p>
+          </li>
+          <li id="fn:a22749bc:word" tabindex="-1">
+            <p>word&nbsp;<a href="#rfn:a22749bc:word" rev="footnote">&#8617;</a></p>
+          </li>
+          <li id="fn:a22749bc:7" tabindex="-1">
+            <p>слово&nbsp;<a href="#rfn:a22749bc:7" rev="footnote">&#8617;</a></p>
+          </li>
+        </ol>
+      </div>
+    `
   );
 });
 
@@ -168,18 +239,27 @@ test("footnote inside non-paragraph blocks", async (t) => {
     mockEmbedsLoader
   );
 
-  t.equal(
+  t.equalHtml(
     result.html,
-    dedent(`
+    `
       <p><em>italic text<sup><a href="#fn:a22749bc:1" id="rfn:a22749bc:1" rel="footnote">1</a></sup></em></p>
       <p><strong>strong text<sup><a href="#fn:a22749bc:2" id="rfn:a22749bc:2" rel="footnote">2</a></sup></strong></p>
       <p><em>italic text<sup><a href="#fn:a22749bc:3" id="rfn:a22749bc:3" rel="footnote">3</a></sup></em></p>
-      <div class="footnotes"><hr/><ol><li id="fn:a22749bc:1" tabindex="-1"><p><a href="/media/a.pdf">a</a>&nbsp;<a href="#rfn:a22749bc:1" rev="footnote">&#8617;</a></p>
-      </li>
-      <li id="fn:a22749bc:2" tabindex="-1"><p><a href="/media/b.pdf">b</a>&nbsp;<a href="#rfn:a22749bc:2" rev="footnote">&#8617;</a></p>
-      </li>
-      <li id="fn:a22749bc:3" tabindex="-1"><p><a href="/media/c.pdf">c</a>&nbsp;<a href="#rfn:a22749bc:3" rev="footnote">&#8617;</a></p>
-      </li></ol></div>`)
+      <div class="footnotes">
+        <hr/>
+        <ol>
+          <li id="fn:a22749bc:1" tabindex="-1">
+            <p><a href="/media/a.pdf">a</a>&nbsp;<a href="#rfn:a22749bc:1" rev="footnote">&#8617;</a></p>
+          </li>
+          <li id="fn:a22749bc:2" tabindex="-1">
+            <p><a href="/media/b.pdf">b</a>&nbsp;<a href="#rfn:a22749bc:2" rev="footnote">&#8617;</a></p>
+          </li>
+          <li id="fn:a22749bc:3" tabindex="-1">
+            <p><a href="/media/c.pdf">c</a>&nbsp;<a href="#rfn:a22749bc:3" rev="footnote">&#8617;</a></p>
+          </li>
+        </ol>
+      </div>
+    `
   );
 });
 
@@ -197,12 +277,19 @@ test("footnote with double squares", async (t) => {
     mockEmbedsLoader
   );
 
-  t.equal(
+  t.equalHtml(
     result.html,
-    dedent(`
+    `
       <p>double squares<sup><a href="#fn:96289b5d:xx" id="rfn:96289b5d:xx" rel="footnote">1</a></sup></p>
-      <div class="footnotes"><hr/><ol><li id="fn:96289b5d:xx" tabindex="-1"><p><a href="/media/x.pdf">x</a>&nbsp;<a href="#rfn:96289b5d:xx" rev="footnote">&#8617;</a></p>
-      </li></ol></div>`)
+      <div class="footnotes">
+        <hr/>
+        <ol>
+          <li id="fn:96289b5d:xx" tabindex="-1">
+            <p><a href="/media/x.pdf">x</a>&nbsp;<a href="#rfn:96289b5d:xx" rev="footnote">&#8617;</a></p>
+          </li>
+        </ol>
+      </div>
+    `
   );
 });
 
@@ -228,17 +315,18 @@ test("description after gallery", async (t) => {
 
   t.equal(result.opengraph.image, "https://example.com/media/one.png");
   t.equal(result.opengraph.description, "some description");
-  t.equal(
+  t.equalHtml(
     result.longread.teaser,
-    dedent(`
+    `
       <ul data-gallery style="list-style:none;padding:0">
-      <li><img src="https://example.com/media/one.png" alt="" loading="lazy" ></li>
-      <li><img src="https://example.com/media/two.png" alt="" loading="lazy" ></li>
+        <li><img src="https://example.com/media/one.png" alt="" loading="lazy" ></li>
+        <li><img src="https://example.com/media/two.png" alt="" loading="lazy" ></li>
       </ul>
 
       <p><em>some description</em></p>
 
-      <a href="https://example.com/ff077d25.html" class="more">202 слова &rarr;</a>`)
+      <a href="https://example.com/ff077d25.html" class="more">202 слова &rarr;</a>
+    `
   );
 });
 
@@ -262,13 +350,20 @@ test("poster as a opengraph image", async (t) => {
   );
 
   t.equal(result.opengraph.image, "https://example.com/media/x/fit1000.png");
-  t.equal(
+  t.equalHtml(
     result.longread.teaser,
-    dedent(`
-      <p><video playsinline autoplay muted loop src="https://example.com/media/x/gifv.mp4" poster="https://example.com/media/x/fit1000.png"></video></p>
+    `
+      <p>
+        <video
+          playsinline autoplay muted loop
+          src="https://example.com/media/x/gifv.mp4"
+          poster="https://example.com/media/x/fit1000.png"
+        ></video>
+      </p>
 
       <p><em>some description</em></p>
 
-      <a href="https://example.com/1871cf2d.html" class="more">202 слова &rarr;</a>`)
+      <a href="https://example.com/1871cf2d.html" class="more">202 слова &rarr;</a>
+    `
   );
 });

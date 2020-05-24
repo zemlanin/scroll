@@ -1,7 +1,5 @@
 const test = require("tape-promise/tape");
-const inspectSymbol = require("util").inspect.custom;
-const { HtmlDiffer } = require("html-differ");
-const htmlDiffer = new HtmlDiffer();
+require("../equal-html.js");
 
 const { prepare } = require("../../common.js");
 
@@ -37,37 +35,6 @@ function dedent(text) {
 
   return text;
 }
-
-test.Test.prototype.equalHtml = function equalHtml(a, b, msg, extra) {
-  if (arguments.length < 2) {
-    throw new TypeError("two arguments must be provided to compare");
-  }
-
-  const diff = htmlDiffer.diffHtml(a, b);
-
-  this._assert(
-    diff.every((chunk) => !chunk.added && !chunk.removed),
-    {
-      message: typeof msg !== "undefined" ? msg : "should be equal as html",
-      operator: "equalHtml",
-      actual: {
-        [inspectSymbol]: () =>
-          diff
-            .filter((chunk) => !chunk.added)
-            .map((chunk) => chunk.value)
-            .join("\t"),
-      },
-      expected: {
-        [inspectSymbol]: () =>
-          diff
-            .filter((chunk) => !chunk.removed)
-            .map((chunk) => chunk.value)
-            .join("\t"),
-      },
-      extra: extra,
-    }
-  );
-};
 
 test("dedent", async (t) => {
   t.equal(dedent("\nx\n"), "x\n");

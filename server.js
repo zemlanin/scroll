@@ -156,10 +156,32 @@ const handlers = [
   ["GET", "/backstage/goaccess.svg", require("./backstage/goaccess-graph.js")],
   ["GET", "/backstage/embeds", require("./backstage/embeds.js").get],
   ["POST", "/backstage/embeds", require("./backstage/embeds.js").post],
+  ["GET", "/backstage/micropub", require("./backstage/micropub.js").get],
+  ["POST", "/backstage/micropub", require("./backstage/micropub.js").post],
+  [
+    "GET",
+    "/backstage/indielogin/auth",
+    require("./backstage/indielogin-auth.js").get,
+  ],
+  [
+    "POST",
+    "/backstage/indielogin/auth",
+    require("./backstage/indielogin-auth.js").post,
+  ],
+  [
+    "GET",
+    "/backstage/indielogin/token",
+    require("./backstage/indielogin-token.js").get,
+  ],
+  [
+    "POST",
+    "/backstage/indielogin/token",
+    require("./backstage/indielogin-token.js").post,
+  ],
   ["GET", "/:name(.html)", staticHandler],
 ].map(([m, p, h]) => [m, new UrlPattern(p), h]);
 
-async function processPost(request, response) {
+async function processPost(request, response, contentType) {
   var queryData = "";
   return new Promise((resolve, reject) => {
     request.on("data", function (data) {
@@ -173,8 +195,15 @@ async function processPost(request, response) {
     });
 
     request.on("end", function () {
-      request.post = querystring.parse(queryData);
-      resolve(request.post);
+      try {
+        request.post =
+          contentType === "application/x-www-form-urlencoded"
+            ? querystring.parse(queryData)
+            : JSON.parse(queryData);
+        resolve(request.post);
+      } catch (e) {
+        reject(e);
+      }
     });
   });
 }
@@ -206,11 +235,12 @@ const server = http.createServer((req, res) => {
 
     if (
       req.method === "POST" &&
-      req.headers["content-type"] === "application/x-www-form-urlencoded"
+      (req.headers["content-type"] === "application/x-www-form-urlencoded" ||
+        req.headers["content-type"] === "application/json")
     ) {
       const ogHandler = handler;
       handler = async () => {
-        await processPost(req, res);
+        await processPost(req, res, req.headers["content-type"]);
         return ogHandler(req, res);
       };
     }
@@ -249,14 +279,16 @@ const server = http.createServer((req, res) => {
           contentType === "text/html" ||
           contentType === "text/plain" ||
           contentType === "text/markdown" ||
+          contentType === "application/json" ||
           contentType === "application/javascript" ||
+          contentType === "application/x-www-form-urlencoded" ||
           (contentType && contentType.startsWith("image/"))
         ) {
           res.writeHead(res.statusCode, {
             "Content-Type": contentType || "text/html",
           });
           res.end(body);
-        } else if (body || contentType === "application/json") {
+        } else if (body) {
           res.writeHead(res.statusCode, { "Content-Type": "application/json" });
           res.end(JSON.stringify(body));
         } else {

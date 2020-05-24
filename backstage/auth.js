@@ -1,14 +1,69 @@
-const cookie = require("cookie");
 const url = require("url");
+const https = require("https");
+const cookie = require("cookie");
 const jwt = require("jsonwebtoken");
 
-const SECRET = (() => {
+const JWT_SECRET = (() => {
   return (
     process.env.JWT_SECRET || require("crypto").randomBytes(256).toString("hex")
   );
 })();
 
+async function verifyAccessToken(access_token) {
+  if (!access_token) {
+    return null;
+  }
+
+  const githubUserResp = await new Promise((resolve) => {
+    const req = https.request(
+      {
+        host: "api.github.com",
+        path: "/user",
+        method: "get",
+        query: {
+          access_token: access_token,
+        },
+        headers: {
+          Accept: "application/json",
+          Authorization: `token ${access_token}`,
+          "User-Agent": "scroll-auth",
+        },
+      },
+      (authRes) => {
+        let result = "";
+
+        authRes.on("data", function (chunk) {
+          result += chunk;
+        });
+        authRes.on("end", function () {
+          resolve(JSON.parse(result));
+        });
+        authRes.on("error", function (err) {
+          resolve(err);
+        });
+      }
+    );
+
+    req.on("error", function (err) {
+      resolve(err);
+    });
+
+    req.end();
+  });
+
+  if (
+    githubUserResp &&
+    githubUserResp.id &&
+    githubUserResp.id.toString() === process.env.GITHUB_USER_ID
+  ) {
+    return githubUserResp;
+  }
+
+  return null;
+}
+
 module.exports = {
+  verifyAccessToken,
   authed(req, res) {
     const jwtCookie =
       cookie.parse(req.headers.cookie || "").jwt ||
@@ -23,7 +78,7 @@ module.exports = {
     }
 
     try {
-      const verified = jwt.verify(jwtCookie, SECRET);
+      const verified = jwt.verify(jwtCookie, JWT_SECRET);
 
       if (verified && verified.exp && verified.exp * 1000 < +new Date()) {
         module.exports.auth(verified, res);
@@ -70,7 +125,7 @@ module.exports = {
         me: payload.me,
         github: payload.github,
       },
-      SECRET,
+      JWT_SECRET,
       { expiresIn }
     );
   },

@@ -1,7 +1,7 @@
 const url = require("url");
 const https = require("https");
 const querystring = require("querystring");
-const { auth } = require("./auth.js");
+const { auth, verifyAccessToken } = require("./auth.js");
 
 module.exports = async (req, res) => {
   const query = url.parse(req.url, true).query;
@@ -53,65 +53,22 @@ module.exports = async (req, res) => {
     req.end();
   });
 
-  if (verification.access_token) {
-    const authed_user = await new Promise((resolve) => {
-      const req = https.request(
-        {
-          host: "api.github.com",
-          path: "/user",
-          method: "get",
-          query: {
-            access_token: verification.access_token,
-          },
-          headers: {
-            Accept: "application/json",
-            Authorization: `token ${verification.access_token}`,
-            "User-Agent": "scroll-auth",
-          },
-        },
-        (authRes) => {
-          let result = "";
+  const authed_user = verifyAccessToken(verification.access_token);
 
-          authRes.on("data", function (chunk) {
-            result += chunk;
-          });
-          authRes.on("end", function () {
-            resolve(JSON.parse(result));
-          });
-          authRes.on("error", function (err) {
-            resolve(err);
-          });
-        }
-      );
+  if (authed_user) {
+    auth({ me: authed_user.login, github: verification.access_token }, res);
 
-      req.on("error", function (err) {
-        resolve(err);
-      });
-
-      req.end();
-    });
-
-    if (
-      authed_user &&
-      authed_user.id &&
-      authed_user.id.toString() === process.env.GITHUB_USER_ID
-    ) {
-      auth({ me: authed_user.login, github: verification.access_token }, res);
-
-      res.statusCode = 303;
-      res.setHeader(
-        "Location",
-        query.next && query.next.startsWith("/backstage")
-          ? decodeURIComponent(query.next)
-          : "/backstage"
-      );
-      return;
-    }
-
-    return "fail";
-  } else {
-    return "fail";
+    res.statusCode = 303;
+    res.setHeader(
+      "Location",
+      query.next && query.next.startsWith("/backstage")
+        ? decodeURIComponent(query.next)
+        : "/backstage"
+    );
+    return;
   }
+
+  return "fail";
 
   // if (verification.me === query.me) {
   //   auth({ me: verification.me }, res);

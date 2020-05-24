@@ -25,6 +25,7 @@ function parseUTCTimestampWithoutZulu(str) {
 }
 
 module.exports = {
+  getPostId,
   get: async (req, res) => {
     const user = authed(req, res);
 

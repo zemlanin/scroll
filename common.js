@@ -375,7 +375,11 @@ function hideToken(token) {
 }
 
 function walkWithFootnotes(token, postId, footnotes) {
-  if (token.type === "code" && footnotes.checkForMultilineFootnote) {
+  if (
+    token.type === "code" &&
+    token.codeBlockStyle === "indented" &&
+    footnotes.checkForMultilineFootnote
+  ) {
     const footnoteId = footnotes.checkForMultilineFootnote;
     const footnoteToUpdate = footnotes.find((fn) => fn.id === footnoteId);
 

@@ -230,6 +230,54 @@ test("footnote inside non-paragraph blocks", async (t) => {
   );
 });
 
+test.only("footnote before ticked code block", async (t) => {
+  const result = await prepare(
+    {
+      text: dedent(`
+        lorem [^1]
+
+        [^1]: something
+
+        \`\`\`js
+        console.log("lorem");
+        \`\`\`
+
+        ipsum[^2]
+
+        [^2]: something else
+
+        \`\`\`js
+        console.log(\`ipsum\`);
+        \`\`\`
+      `),
+      id: "da4307d5",
+      created: +new Date(),
+    },
+    mockEmbedsLoader
+  );
+
+  t.equalHtml(
+    result.html,
+    `
+      <p>lorem <sup><a href="#fn:da4307d5:1" id="rfn:da4307d5:1" rel="footnote">1</a></sup></p>
+      <pre><code class="language-js"><span class="hljs-built_in">console</span>.log(<span class="hljs-string">"lorem"</span>);</code></pre>
+      <p>ipsum<sup><a href="#fn:da4307d5:2" id="rfn:da4307d5:2" rel="footnote">2</a></sup></p>
+      <pre><code class="language-js"><span class="hljs-built_in">console</span>.log(<span class="hljs-string">\`ipsum\`</span>);</code></pre>
+      <div class="footnotes">
+        <hr/>
+        <ol>
+          <li id="fn:da4307d5:1" tabindex="-1">
+            <p>something&nbsp;<a href="#rfn:da4307d5:1" rev="footnote">&#8617;</a></p>
+          </li>
+          <li id="fn:da4307d5:2" tabindex="-1">
+            <p>something else&nbsp;<a href="#rfn:da4307d5:2" rev="footnote">&#8617;</a></p>
+          </li>
+        </ol>
+      </div>
+    `
+  );
+});
+
 test("footnote with double squares", async (t) => {
   const result = await prepare(
     {

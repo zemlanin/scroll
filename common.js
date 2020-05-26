@@ -561,7 +561,7 @@ async function prepare(post, embedsLoader) {
       footnotes.sort(byIndex);
       html =
         html +
-        `<div class="footnotes"><hr/><ol>${footnotes
+        `<div class="footnotes"><hr><ol>${footnotes
           .map((f) => f.html)
           .join("\n")}</ol></div>`;
     }
@@ -618,7 +618,7 @@ async function prepare(post, embedsLoader) {
     if (footnotes.length) {
       html =
         html +
-        `<div class="footnotes"><hr/><ol>${footnotes
+        `<div class="footnotes"><hr><ol>${footnotes
           .map((f) => f.html)
           .join("\n")}</ol></div>`;
     }

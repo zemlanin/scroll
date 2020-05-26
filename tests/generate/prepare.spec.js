@@ -87,7 +87,7 @@ test("general", async (t) => {
       <p>hello<sup><a href="#fn:f69cd51a:1" id="rfn:f69cd51a:1" rel="footnote">1</a></sup></p>
       <h2 id="should-have-id">should have id</h2>
       <div class="footnotes">
-        <hr/>
+        <hr>
         <ol>
           <li id="fn:f69cd51a:1" tabindex="-1">
             <p>world&nbsp;<a href="#rfn:f69cd51a:1" rev="footnote">&#8617;</a></p>
@@ -103,7 +103,7 @@ test("general", async (t) => {
       <p>hello<sup><a href="#fn:f69cd51a:1" id="rfn:f69cd51a:1" rel="footnote">1</a></sup></p>
       <h2 id="should-have-id">should have id</h2>
       <div class="footnotes">
-        <hr/>
+        <hr>
         <ol>
           <li id="fn:f69cd51a:1" tabindex="-1">
             <p>world&nbsp;<a href="#rfn:f69cd51a:1" rev="footnote">&#8617;</a></p>
@@ -151,7 +151,7 @@ test("footnotes", async (t) => {
       <p>yep<sup><a href="#fn:a22749bc:2" id="rfn:a22749bc:2" rel="footnote">2</a></sup> <sup><a href="#fn:a22749bc:bignote" id="rfn:a22749bc:bignote" rel="footnote">3</a></sup></p>
       <p>lorem<sup><a href="#fn:a22749bc:spec" id="rfn:a22749bc:spec" rel="footnote">4</a></sup> xyz <sup><a href="#fn:a22749bc:spec2" id="rfn:a22749bc:spec2" rel="footnote">5</a></sup> <sup><a href="#fn:a22749bc:word" id="rfn:a22749bc:word" rel="footnote">6</a></sup> <sup><a href="#fn:a22749bc:7" id="rfn:a22749bc:7" rel="footnote">7</a></sup></p>
       <div class="footnotes">
-        <hr/>
+        <hr>
         <ol>
           <li id="fn:a22749bc:hacky" tabindex="-1">
             <p>world ender&nbsp;<a href="#rfn:a22749bc:hacky" rev="footnote">&#8617;</a></p>
@@ -213,7 +213,7 @@ test("footnote inside non-paragraph blocks", async (t) => {
       <p><strong>strong text<sup><a href="#fn:a22749bc:2" id="rfn:a22749bc:2" rel="footnote">2</a></sup></strong></p>
       <p><em>italic text<sup><a href="#fn:a22749bc:3" id="rfn:a22749bc:3" rel="footnote">3</a></sup></em></p>
       <div class="footnotes">
-        <hr/>
+        <hr>
         <ol>
           <li id="fn:a22749bc:1" tabindex="-1">
             <p><a href="/media/a.pdf">a</a>&nbsp;<a href="#rfn:a22749bc:1" rev="footnote">&#8617;</a></p>
@@ -230,7 +230,7 @@ test("footnote inside non-paragraph blocks", async (t) => {
   );
 });
 
-test.only("footnote before ticked code block", async (t) => {
+test("footnote before ticked code block", async (t) => {
   const result = await prepare(
     {
       text: dedent(`
@@ -264,7 +264,7 @@ test.only("footnote before ticked code block", async (t) => {
       <p>ipsum<sup><a href="#fn:da4307d5:2" id="rfn:da4307d5:2" rel="footnote">2</a></sup></p>
       <pre><code class="language-js"><span class="hljs-built_in">console</span>.log(<span class="hljs-string">\`ipsum\`</span>);</code></pre>
       <div class="footnotes">
-        <hr/>
+        <hr>
         <ol>
           <li id="fn:da4307d5:1" tabindex="-1">
             <p>something&nbsp;<a href="#rfn:da4307d5:1" rev="footnote">&#8617;</a></p>
@@ -297,7 +297,7 @@ test("footnote with double squares", async (t) => {
     `
       <p>double squares<sup><a href="#fn:96289b5d:xx" id="rfn:96289b5d:xx" rel="footnote">1</a></sup></p>
       <div class="footnotes">
-        <hr/>
+        <hr>
         <ol>
           <li id="fn:96289b5d:xx" tabindex="-1">
             <p><a href="/media/x.pdf">x</a>&nbsp;<a href="#rfn:96289b5d:xx" rev="footnote">&#8617;</a></p>

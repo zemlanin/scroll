@@ -198,7 +198,7 @@ test("database with posts and embeds", async (t) => {
   );
   t.ok(
     post6.indexOf(
-      `<div class="footnotes"><hr/><ol><li id="fn:6:1" tabindex="-1"><p>footnote <em>text</em>&nbsp;<a href="#rfn:6:1" rev="footnote">&#8617;</a></p>`
+      `<div class="footnotes"><hr><ol><li id="fn:6:1" tabindex="-1"><p>footnote <em>text</em>&nbsp;<a href="#rfn:6:1" rev="footnote">&#8617;</a></p>`
     ) > -1
   );
 
@@ -218,7 +218,7 @@ test("database with posts and embeds", async (t) => {
   );
   t.ok(
     post7.indexOf(
-      `<div class="footnotes"><hr/><ol><li id="fn:7:1" tabindex="-1"><p><a href="https://example.net">text</a>&nbsp;<a href="#rfn:7:1" rev="footnote">&#8617;</a></p>`
+      `<div class="footnotes"><hr><ol><li id="fn:7:1" tabindex="-1"><p><a href="https://example.net">text</a>&nbsp;<a href="#rfn:7:1" rev="footnote">&#8617;</a></p>`
     ) > -1
   );
 
@@ -237,7 +237,7 @@ test("database with posts and embeds", async (t) => {
   );
   t.ok(
     post8.indexOf(
-      `<div class="footnotes"><hr/><ol><li id="fn:8:name" tabindex="-1"><p><strong>fn text</strong>&nbsp;<a href="#rfn:8:name" rev="footnote">&#8617;</a></p>`
+      `<div class="footnotes"><hr><ol><li id="fn:8:name" tabindex="-1"><p><strong>fn text</strong>&nbsp;<a href="#rfn:8:name" rev="footnote">&#8617;</a></p>`
     ) > -1,
     post8
       .split("\n")

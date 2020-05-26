@@ -1,7 +1,12 @@
+const fs = require("fs");
 const url = require("url");
+const path = require("path");
+
+const cheerio = require("cheerio");
+const { HtmlDiffer } = require("html-differ");
 
 const { authed } = require("./auth.js");
-const { prepare: commonPrepare, getBlogObject } = require("../common.js");
+const { prepare: commonPrepare, getBlogObject, DIST } = require("../common.js");
 const { blogRender } = require("../render.js");
 const EmbedsLoader = require("../embeds-loader.js");
 
@@ -60,12 +65,20 @@ module.exports = async (req, res) => {
 
     if (dbPost) {
       post = dbPost;
+    } else {
+      res.statusCode = 404;
+      return `post not found`;
     }
   }
 
   if (req.method === "POST") {
     post.text = req.post.text;
     post.created = +new Date(req.post.created);
+  }
+
+  if (post.text == undefined) {
+    res.statusCode = 400;
+    return `nothing to preview`;
   }
 
   const preparedPost = await prepare(post, {
@@ -112,6 +125,73 @@ module.exports = async (req, res) => {
       older: null,
       newer: null,
     });
+  }
+
+  const showDiff = (req.post && req.post.diff) || query.diff;
+
+  if (showDiff) {
+    if (!existingPostId) {
+      res.statusCode = 400;
+      return `nothing to diff`;
+    }
+
+    let existingPost;
+
+    try {
+      existingPost = fs
+        .readFileSync(path.join(DIST, `${existingPostId}.html`))
+        .toString();
+    } catch (e) {
+      res.statusCode = 400;
+      return `nothing to diff`;
+    }
+
+    const existingPostHtml = cheerio("article", existingPost).html();
+
+    const htmlDiffer = new HtmlDiffer();
+    const diff = htmlDiffer
+      .diffHtml(
+        existingPostHtml,
+        (preparedPost.htmlTitle || "") + preparedPost.html
+      )
+      .filter(
+        // couldn't make `cheerio` delete `<time>` from the article html
+        (chunk) =>
+          !(
+            chunk.removed &&
+            chunk.value.startsWith("<time datetime=") &&
+            chunk.value.endsWith("</time>")
+          )
+      );
+
+    const removed = diff.reduce((acc, chunk) => acc + !!chunk.removed, 0);
+    const added = diff.reduce((acc, chunk) => acc + !!chunk.added, 0);
+
+    const diffTitle =
+      removed || added
+        ? `<h3><span style='color:red'>-${removed}</span> / <span style='color:green'>+${added}</span></h3>`
+        : `<h3>no changes</h3>`;
+
+    return (
+      diffTitle +
+      `<code>` +
+      diff
+        .map(
+          (chunk) =>
+            `<span ${
+              chunk.removed
+                ? "style='color: white; background-color: red'"
+                : chunk.added
+                ? "style='color: white; background-color: green'"
+                : ""
+            }>${chunk.value
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")}</span>`
+        )
+        .join("") +
+      `</code>`
+    );
   }
 
   return blogRender("post.mustache", {

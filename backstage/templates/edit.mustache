@@ -304,6 +304,31 @@
                   </a>
                 </div>
               </div>
+              {{^post.draft}}
+                <div
+                  class="field has-addons"
+                  style="padding-left: 0.5em"
+
+                >
+                  <div class="control">
+                    <button type="submit"
+                      class="button"
+                      formtarget="preview"
+                      formaction="/backstage/preview/"
+                      onclick="window.activeOnPreview(event)"
+                      name="diff"
+                      value="1"
+                    >
+                      diff
+                    </button>
+                  </div>
+                  <div class="control">
+                    <a class="button" href="/backstage/preview/?id={{post.id}}&diff=1" target="_blank">
+                      {{#fas}}link{{/fas}}
+                    </a>
+                  </div>
+                </div>
+              {{/post.draft}}
             </div>
         </div>
     </form>

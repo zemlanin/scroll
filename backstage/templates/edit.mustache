@@ -242,45 +242,68 @@
                     >now</button>
                 </div>
             </div>
-            <div class="tabs">
-                <ul>
-                    {{^post.internal}}
-                        <li>
-                            <button type="submit"
-                                formtarget="preview"
-                                formaction="/backstage/preview/"
-                                style="border: none; background: none;"
-                                onclick="window.tabClick(event)"
-                                name="teaser"
-                                value="1"
-                            >
-                                <a>teaser</a>
-                            </button>
-                        </li>
-                    {{/post.internal}}
-                    <li>
-                        <button type="submit"
-                            formtarget="preview"
-                            formaction="/backstage/preview/"
-                            style="border: none; background: none;"
-                            onclick="window.tabClick(event)"
-                        >
-                            <a>preview</a>
-                        </button>
-                    </li>
-                    <li>
-                        <button type="submit"
-                            formtarget="preview"
-                            formaction="/backstage/preview/"
-                            style="border: none; background: none;"
-                            onclick="window.tabClick(event)"
-                            name="naked"
-                            value="1"
-                        >
-                            <a>naked</a>
-                        </button>
-                    </li>
-                </ul>
+            <div class="field is-horizontal"
+              style="justify-content: space-between; display: flex; flex-flow: row wrap"
+            >
+              {{^post.internal}}
+                <div class="field has-addons" style="padding-left: 0.5em">
+                  <div class="control">
+                    <button type="submit"
+                      class="button"
+                      formtarget="preview"
+                      formaction="/backstage/preview/"
+                      onclick="window.activeOnPreview(event)"
+                      name="teaser"
+                      value="1"
+                    >
+                      teaser
+                    </button>
+                  </div>
+                  <div class="control">
+                    <a class="button" href="/backstage/preview/?id={{post.id}}&teaser=1" target="_blank">
+                      {{#fas}}link{{/fas}}
+                    </a>
+                  </div>
+                </div>
+              {{/post.internal}}
+              <div class="field has-addons" style="padding-left: 0.5em">
+                <div class="control">
+                  <button type="submit"
+                    class="button"
+                    formtarget="preview"
+                    formaction="/backstage/preview/"
+                    onclick="window.activeOnPreview(event)"
+                    name="preview"
+                    value="1"
+                  >
+                    preview
+                  </button>
+                </div>
+                <div class="control">
+                  <a class="button" href="/backstage/preview/?id={{post.id}}&preview=1" target="_blank">
+                    {{#fas}}link{{/fas}}
+                  </a>
+                </div>
+              </div>
+              <div class="field has-addons" style="padding-left: 0.5em">
+                <div class="control">
+                  <button type="submit"
+                    class="button"
+                    formtarget="preview"
+                    formaction="/backstage/preview/"
+                    onclick="window.activeOnPreview(event)"
+                    name="naked"
+                    value="1"
+                  >
+                    naked
+                  </button>
+                </div>
+                <div class="control">
+                  <a class="button" href="/backstage/preview/?id={{post.id}}&naked=1" target="_blank">
+                    {{#fas}}link{{/fas}}
+                  </a>
+                </div>
+              </div>
             </div>
         </div>
     </form>
@@ -299,9 +322,9 @@
     </form>
     <script>
         /* eslint-env browser */
-        window.tabClick = function (event) {
-          for (const tab of event.target.closest(".tabs").querySelectorAll("li")) {
-            tab.classList[tab.contains(event.currentTarget) ? "add" : "remove"]("is-active");
+        window.activeOnPreview = function (event) {
+          for (const button of document.querySelectorAll(`button[formtarget="preview"]`)) {
+            button.classList[button.name === event.currentTarget.name ? "add" : "remove"]("is-active");
           }
 
           return true;

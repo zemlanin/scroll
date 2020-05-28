@@ -112,6 +112,13 @@ function localEmbed(embed) {
         attrs += `poster="${prefixOwnMedia(poster)}" `;
       }
 
+      if (embed.title) {
+        attrs += `title="${embed.title
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")}" `;
+      }
+
       const isOwnGIFV = hrefIsOwnMedia && href.indexOf("/gifv.mp4") > -1;
 
       if (gifv || isOwnGIFV) {
@@ -162,10 +169,13 @@ function localEmbed(embed) {
           .map((line) => `<tspan x="0" dy="12">${line}</tspan>`)
       );
 
-      if (embed.data && embed.data.title) {
+      if (embed.title) {
         lines = [
           ...lines.slice(0, 3),
-          `<tspan x="80" dy="12" fill="#00a500" text-anchor="middle">${embed.data.title}</tspan>`,
+          `<tspan x="80" dy="12" fill="#00a500" text-anchor="middle">${embed.title
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")}</tspan>`,
           ...lines.slice(3, 6),
         ];
       }
@@ -203,6 +213,32 @@ function localEmbed(embed) {
   return `<x-embed>${JSON.stringify({ href })}</x-embed>`;
 }
 
+function getAttr(rawAttrs, attr) {
+  const attrStart = rawAttrs.indexOf(attr + "=");
+  if (attrStart === -1) {
+    return;
+  }
+
+  let valueStart = attrStart + attr.length + 1;
+  let valueEnd;
+
+  if (rawAttrs[valueStart] === `"`) {
+    valueStart += 1;
+    valueEnd = rawAttrs.indexOf(`"`, valueStart);
+  } else if (rawAttrs[valueStart] === `'`) {
+    valueStart += 1;
+    valueEnd = rawAttrs.indexOf(`'`, valueStart);
+  } else {
+    valueEnd = rawAttrs.indexOf(` `, valueStart);
+  }
+
+  return rawAttrs
+    .slice(valueStart, valueEnd === -1 ? undefined : valueEnd)
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+}
+
 function embedCallback(href, title, text) {
   href = prefixOwnMedia(href);
 
@@ -216,13 +252,12 @@ function embedCallback(href, title, text) {
   ) {
     const attrs = decodeAttrs(text);
 
-    const posterMatch = attrs.match(/poster=(['"]?)([^'"\s]+)/);
-
     return localEmbed({
       href,
+      title: getAttr(attrs, "title"),
       video: {
         gifv: !!attrs.match(/(^|\s+)gifv($|\s+)/g),
-        poster: posterMatch ? posterMatch[2] : "",
+        poster: getAttr(attrs, "poster"),
       },
     });
   }
@@ -230,12 +265,10 @@ function embedCallback(href, title, text) {
   if (hrefIsOwnMedia && mimeObj.pdf) {
     const attrs = text ? decodeAttrs(text) : "";
 
-    const posterMatch = attrs.match(/poster=(['"]?)([^'"\s]+)/);
-
     return localEmbed({
       href,
       pdf: {
-        poster: posterMatch ? posterMatch[2] : "",
+        poster: getAttr(attrs, "poster"),
       },
     });
   }
@@ -243,13 +276,13 @@ function embedCallback(href, title, text) {
   if (hrefIsDataURI) {
     const attrs = text ? decodeAttrs(text) : "";
 
-    const posterMatch = attrs.match(/poster=(['"]?)([^'"\s]+)/);
+    const poster = getAttr(attrs, "poster");
 
     return localEmbed({
       href,
+      title: poster ? "" : text,
       data: {
-        poster: posterMatch ? posterMatch[2] : "",
-        title: posterMatch ? "" : text,
+        poster: poster,
       },
     });
   }
@@ -294,7 +327,7 @@ renderer.code = function (code, infostring, escaped) {
     const title = $("title").text();
     const poster = $('meta[property="og:image"]').attr("content");
 
-    return `<p>${localEmbed({ href, data: { title, poster } })}</p>`;
+    return `<p>${localEmbed({ href, title, data: { poster } })}</p>`;
   }
 
   return ogCode(code, infostring, escaped);

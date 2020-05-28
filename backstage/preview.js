@@ -139,12 +139,10 @@ module.exports = async (req, res) => {
     let existingPost;
     const postFilename = post.internal
       ? `${post.slug}.html`
-      : `${existingPostId}.html`
+      : `${existingPostId}.html`;
 
     try {
-      existingPost = fs
-        .readFileSync(path.join(DIST, postFilename))
-        .toString();
+      existingPost = fs.readFileSync(path.join(DIST, postFilename)).toString();
     } catch (e) {
       res.statusCode = 400;
       return `nothing to diff`;

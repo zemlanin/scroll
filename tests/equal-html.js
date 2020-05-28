@@ -17,11 +17,11 @@ if (typeof test.Test.prototype.equalHtml === "undefined") {
 
     const normalizedA = prettier.format(cheerio.load(a)("body").html(), {
       parser: "html",
-      printWidth: Infinity
+      printWidth: Infinity,
     });
     const normalizedB = prettier.format(cheerio.load(b)("body").html(), {
       parser: "html",
-      printWidth: Infinity
+      printWidth: Infinity,
     });
 
     const diff = jsdiff.diffLines(normalizedA, normalizedB);

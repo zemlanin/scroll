@@ -140,7 +140,7 @@ async function generate(db, destination, stdout, stderr, { only } = {}) {
         postsChunk.map(async (post) => {
           const renderedPage = await generatePostPage(post, blog);
 
-          if (post.internal || post.slug && post.id !== post.slug) {
+          if (post.internal || (post.slug && post.id !== post.slug)) {
             await writeFileWithGzip(
               path.join(tmpFolder, `${post.slug}.html`),
               renderedPage,

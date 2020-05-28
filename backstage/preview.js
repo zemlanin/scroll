@@ -180,7 +180,10 @@ module.exports = async (req, res) => {
 
     return (
       diffTitle +
-      `<pre><code>` +
+      `<pre><code style='font-size: 0.8em; font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
+        "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
+        "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
+        "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;'>` +
       diff
         .map(
           (chunk) =>

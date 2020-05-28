@@ -140,7 +140,7 @@ async function generate(db, destination, stdout, stderr, { only } = {}) {
         postsChunk.map(async (post) => {
           const renderedPage = await generatePostPage(post, blog);
 
-          if (post.slug && post.id !== post.slug) {
+          if (post.internal || post.slug && post.id !== post.slug) {
             await writeFileWithGzip(
               path.join(tmpFolder, `${post.slug}.html`),
               renderedPage,
@@ -148,11 +148,13 @@ async function generate(db, destination, stdout, stderr, { only } = {}) {
             );
           }
 
-          await writeFileWithGzip(
-            path.join(tmpFolder, `${post.id}.html`),
-            renderedPage,
-            { flag: "wx" }
-          );
+          if (!post.internal) {
+            await writeFileWithGzip(
+              path.join(tmpFolder, `${post.id}.html`),
+              renderedPage,
+              { flag: "wx" }
+            );
+          }
         })
       );
     }

@@ -83,8 +83,8 @@ test("internal page", async (t) => {
 
   await generate(db, tmpFolder, noopStream, noopStream);
 
-  t.notOk(
-    await fs.promises.access(path.join(tmpFolder, "1.html")),
+  t.rejects(
+    () => fs.promises.readFile(path.join(tmpFolder, "1.html")),
     "should not create {id}.html"
   );
 
@@ -93,7 +93,7 @@ test("internal page", async (t) => {
   ).toString();
 
   t.ok(
-    internalPage.indexOf(`<h1>internal</h1>`) > -1,
+    internalPage.indexOf(`<h1 id="internal">internal</h1>`) > -1,
     internalPage.split("\n").find((line) => line.indexOf("<h1") > -1) ||
       internalPage.match(/<article>([\s\S]+)<\/article>/i)[1].trim()
   );

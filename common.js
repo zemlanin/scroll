@@ -657,7 +657,7 @@ async function prepare(post, embedsLoader) {
 
   const startsWithHeading = post.text && post.text.match(/^#+ [^\r\n]+/);
 
-  if (startsWithHeading) {
+  if (startsWithHeading && !post.internal) {
     const headingLength = startsWithHeading[0].length;
 
     htmlTitle = marked.parse(

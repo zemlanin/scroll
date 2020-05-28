@@ -2,8 +2,9 @@ const fs = require("fs");
 const url = require("url");
 const path = require("path");
 
+const jsdiff = require("diff");
 const cheerio = require("cheerio");
-const { HtmlDiffer } = require("html-differ");
+const prettier = require("prettier");
 
 const { authed } = require("./auth.js");
 const { prepare: commonPrepare, getBlogObject, DIST } = require("../common.js");
@@ -149,23 +150,27 @@ module.exports = async (req, res) => {
       return `nothing to diff`;
     }
 
-    const existingPostHtml = cheerio("article", existingPost).html();
+    const normalizedHtml = prettier.format(
+      cheerio
+        .load((preparedPost.htmlTitle || "") + preparedPost.html)("body")
+        .html(),
+      { parser: "html", printWidth: Infinity }
+    );
 
-    const htmlDiffer = new HtmlDiffer();
-    const diff = htmlDiffer
-      .diffHtml(
-        existingPostHtml,
-        (preparedPost.htmlTitle || "") + preparedPost.html
-      )
-      .filter(
-        // couldn't make `cheerio` delete `<time>` from the article html
-        (chunk) =>
-          !(
-            chunk.removed &&
-            chunk.value.startsWith("<time datetime=") &&
-            chunk.value.endsWith("</time>")
-          )
-      );
+    const existingPostHtml = prettier.format(
+      cheerio.load(existingPost)("article").html(),
+      { parser: "html", printWidth: Infinity }
+    );
+
+    const diff = jsdiff.diffLines(existingPostHtml, normalizedHtml).filter(
+      // couldn't make `cheerio` delete `<time>` from the article html
+      (chunk) =>
+        !(
+          chunk.removed &&
+          chunk.value.trim().startsWith("<time datetime=") &&
+          chunk.value.trim().endsWith("</time>")
+        )
+    );
 
     const removed = diff.reduce((acc, chunk) => acc + !!chunk.removed, 0);
     const added = diff.reduce((acc, chunk) => acc + !!chunk.added, 0);
@@ -177,7 +182,7 @@ module.exports = async (req, res) => {
 
     return (
       diffTitle +
-      `<code>` +
+      `<pre><code>` +
       diff
         .map(
           (chunk) =>
@@ -193,7 +198,7 @@ module.exports = async (req, res) => {
               .replace(/>/g, "&gt;")}</span>`
         )
         .join("") +
-      `</code>`
+      `</code></pre>`
     );
   }
 

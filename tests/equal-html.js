@@ -1,9 +1,10 @@
 const test = require("tape");
 const inspectSymbol = require("util").inspect.custom;
-const { HtmlDiffer } = require("html-differ");
+const jsdiff = require("diff");
+const cheerio = require("cheerio");
+const prettier = require("prettier");
 
 if (typeof test.Test.prototype.equalHtml === "undefined") {
-  const htmlDiffer = new HtmlDiffer();
   const getValue = (chunk) => chunk.value;
   const rejectAdded = (chunk) => !chunk.added;
   const rejectRemoved = (chunk) => !chunk.removed;
@@ -14,7 +15,16 @@ if (typeof test.Test.prototype.equalHtml === "undefined") {
       throw new TypeError("two arguments must be provided to compare");
     }
 
-    const diff = htmlDiffer.diffHtml(a, b);
+    const normalizedA = prettier.format(cheerio.load(a)("body").html(), {
+      parser: "html",
+      printWidth: Infinity
+    });
+    const normalizedB = prettier.format(cheerio.load(b)("body").html(), {
+      parser: "html",
+      printWidth: Infinity
+    });
+
+    const diff = jsdiff.diffLines(normalizedA, normalizedB);
 
     this._assert(diff.every(rejectModified), {
       message: typeof msg !== "undefined" ? msg : "should be equal as html",
@@ -23,13 +33,21 @@ if (typeof test.Test.prototype.equalHtml === "undefined") {
         [inspectSymbol]: () =>
           // joining with a circle instead of `\n` because `tap-spec` can't do yaml
           // https://github.com/scottcorgan/tap-spec/issues/57
-          diff.filter(rejectAdded).map(getValue).join(" 🔴 "),
+          diff
+            .filter(rejectAdded)
+            .map(getValue)
+            .join(" 🔴 ")
+            .replace(/\n/g, "\\n"),
       },
       expected: {
         [inspectSymbol]: () =>
           // joining with a circle instead of `\n` because `tap-spec` can't do yaml
           // https://github.com/scottcorgan/tap-spec/issues/57
-          diff.filter(rejectRemoved).map(getValue).join(" 🔵 "),
+          diff
+            .filter(rejectRemoved)
+            .map(getValue)
+            .join(" 🔵 ")
+            .replace(/\n/g, "\\n"),
       },
       extra: extra,
     });

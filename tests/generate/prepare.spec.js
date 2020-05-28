@@ -368,13 +368,12 @@ test("poster as a opengraph image", async (t) => {
   t.equalHtml(
     result.longread.teaser,
     `
-      <p>
-        <video
-          playsinline autoplay muted loop
-          src="https://example.com/media/x/gifv.mp4"
-          poster="https://example.com/media/x/fit1000.png"
-        ></video>
-      </p>
+      <p><video
+        playsinline
+        src="https://example.com/media/x/gifv.mp4"
+        poster="https://example.com/media/x/fit1000.png"
+        autoplay muted loop
+      ></video></p>
 
       <p><em>some description</em></p>
 
@@ -406,37 +405,31 @@ test("media", async (t) => {
   t.equalHtml(
     result.html,
     `
-      <p>
-        <video
-          playsinline
-          src="https://example.com/media/w/gifv.mp4"
-          autoplay
-          muted
-          loop
-          title="gif &gt;_&lt;"
-        ></video>
-      </p>
-      <p>
-        <video
-          playsinline
-          src="https://example.com/media/x/gifv.mp4"
-          poster="https://example.com/media/x/fit1000.png"
-          autoplay
-          muted
-          loop
-        ></video>
-      </p>
-      <p>
-        <iframe
-          src="https://drive.google.com/viewerng/viewer?pid=explorer&efh=false&a=v&chrome=false&embedded=true&url=https%3A%2F%2Fexample.com%2Fmedia%2Fy.pdf"
-          frameborder="0"
-          width="640"
-          height="360"
-          allow="autoplay; encrypted-media"
-          allowfullscreen="1"
-          loading="lazy"
-        ></iframe>
-      </p>
+      <p><video
+        playsinline
+        src="https://example.com/media/w/gifv.mp4"
+        title="gif &gt;_&lt;"
+        autoplay
+        muted
+        loop
+      ></video></p>
+      <p><video
+        playsinline
+        src="https://example.com/media/x/gifv.mp4"
+        poster="https://example.com/media/x/fit1000.png"
+        autoplay
+        muted
+        loop
+      ></video></p>
+      <p><iframe
+        src="https://drive.google.com/viewerng/viewer?pid=explorer&efh=false&a=v&chrome=false&embedded=true&url=https%3A%2F%2Fexample.com%2Fmedia%2Fy.pdf"
+        frameborder="0"
+        width="640"
+        height="360"
+        allow="autoplay; encrypted-media"
+        allowfullscreen="1"
+        loading="lazy"
+      ></iframe></p>
       <p>
         <a
           class="future-frame"
@@ -446,7 +439,6 @@ test("media", async (t) => {
           <img src="https://example.com/media/z/fit700.png" loading="lazy">
         </a>
       </p>
-
       <p>
         <a
           class="future-frame"
@@ -499,36 +491,30 @@ test("embed code block", async (t) => {
   t.equalHtml(
     result.html,
     `
-      <p>
-        <video
-          playsinline
-          src="https://example.com/media/w/gifv.mp4"
-          autoplay
-          muted
-          loop
-        ></video>
-      </p>
-      <p>
-        <video
-          playsinline
-          src="https://example.com/media/x/gifv.mp4"
-          poster="https://example.com/media/x/fit1000.png"
-          autoplay
-          muted
-          loop
-        ></video>
-      </p>
-      <p>
-        <iframe
-          src="https://drive.google.com/viewerng/viewer?pid=explorer&efh=false&a=v&chrome=false&embedded=true&url=https%3A%2F%2Fexample.com%2Fmedia%2Fy.pdf"
-          frameborder="0"
-          width="640"
-          height="360"
-          allow="autoplay; encrypted-media"
-          allowfullscreen="1"
-          loading="lazy"
-        ></iframe>
-      </p>
+      <p><video
+        playsinline
+        src="https://example.com/media/w/gifv.mp4"
+        autoplay
+        muted
+        loop
+      ></video></p>
+      <p><video
+        playsinline
+        src="https://example.com/media/x/gifv.mp4"
+        poster="https://example.com/media/x/fit1000.png"
+        autoplay
+        muted
+        loop
+      ></video></p>
+      <p><iframe
+        src="https://drive.google.com/viewerng/viewer?pid=explorer&efh=false&a=v&chrome=false&embedded=true&url=https%3A%2F%2Fexample.com%2Fmedia%2Fy.pdf"
+        frameborder="0"
+        width="640"
+        height="360"
+        allow="autoplay; encrypted-media"
+        allowfullscreen="1"
+        loading="lazy"
+      ></iframe></p>
       <p>
         <a
           class="future-frame"
@@ -597,7 +583,6 @@ test("embed-html code block", async (t) => {
           <img src="https://example.com/media/t.png">
         </a>
       </p>
-
       <p>
         <a
           class="future-frame"

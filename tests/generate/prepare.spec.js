@@ -382,3 +382,232 @@ test("poster as a opengraph image", async (t) => {
     `
   );
 });
+
+test("media", async (t) => {
+  const result = await prepare(
+    {
+      text: dedent(`
+          ![](/media/w/gifv.mp4)
+
+          ![poster="/media/x/fit1000.png"](/media/x/gifv.mp4)
+
+          ![](/media/y.pdf)
+
+          ![poster=/media/z/fit700.png](/media/z.pdf)
+
+          ![time-stamp](data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0+e2xldCBiLGM9Xz0+e2Eud2lkdGg9ZS5jbGllbnRXaWR0aCxiPWEuZ2V0Q29udGV4dCgnMmQnKSxiLmZvbnQ9JzQ4cHggTWVubG8nfSxkPShnLGgsaixrPTYsbD00NCk9PntiLmZpbGxTdHlsZT0nIzBhMCcsYi5maWxsUmVjdCgwLDAsYS53aWR0aCxhLmhlaWdodCksYi5maWxsU3R5bGU9JyNmZmYnO2ZvcihoIG9mIGcuc3BsaXQoJyAnKSlqPTI4LjkqaC5sZW5ndGgsNjxrJiZrK2o+PWEud2lkdGgmJihrPTYsbCs9NDgpLGIuZmlsbFRleHQoaCxrLGwpLGsrPWorMjguOTttLnNyYz1hLnRvRGF0YVVSTCgpfSxmPV89PmQoaS52YWx1ZXx8bmV3IERhdGUoKS50b0lTT1N0cmluZygpLnJlcGxhY2UoL1wuXGQrLywnJykpOyhvbnJlc2l6ZT1fPT5mKGMoKSkpKCksc2V0SW50ZXJ2YWwoaS5vbmlucHV0PWYsMWUzKX0pKGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2NhbnZhcycpKSI+PGlucHV0IGlkPWkgcGxhY2Vob2xkZXI9bGFiZWw+PGltZyBpZD1tPjxwIGlkPWU+)
+        `),
+      id: "b0199568",
+      created: +new Date(),
+    },
+    mockEmbedsLoader
+  );
+
+  t.equalHtml(
+    result.html,
+    `
+      <p>
+        <video
+          playsinline
+          src="https://example.com/media/w/gifv.mp4"
+          autoplay
+          muted
+          loop
+        ></video>
+      </p>
+      <p>
+        <video
+          playsinline
+          src="https://example.com/media/x/gifv.mp4"
+          poster="https://example.com/media/x/fit1000.png"
+          autoplay
+          muted
+          loop
+        ></video>
+      </p>
+      <p>
+        <iframe
+          src="https://drive.google.com/viewerng/viewer?pid=explorer&efh=false&a=v&chrome=false&embedded=true&url=https%3A%2F%2Fexample.com%2Fmedia%2Fy.pdf"
+          frameborder="0"
+          width="640"
+          height="360"
+          allow="autoplay; encrypted-media"
+          allowfullscreen="1"
+          loading="lazy"
+        ></iframe>
+      </p>
+      <p>
+        <a
+          class="future-frame"
+          href="https://example.com/media/z.pdf"
+          data-src="https://drive.google.com/viewerng/viewer?pid=explorer&efh=false&a=v&chrome=false&embedded=true&url=https%3A%2F%2Fexample.com%2Fmedia%2Fz.pdf"
+        >
+          <img src="https://example.com/media/z/fit700.png" loading="lazy">
+        </a>
+      </p>
+
+      <p>
+        <a
+          class="future-frame"
+          href="data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0+e2xldCBiLGM9Xz0+e2Eud2lkdGg9ZS5jbGllbnRXaWR0aCxiPWEuZ2V0Q29udGV4dCgnMmQnKSxiLmZvbnQ9JzQ4cHggTWVubG8nfSxkPShnLGgsaixrPTYsbD00NCk9PntiLmZpbGxTdHlsZT0nIzBhMCcsYi5maWxsUmVjdCgwLDAsYS53aWR0aCxhLmhlaWdodCksYi5maWxsU3R5bGU9JyNmZmYnO2ZvcihoIG9mIGcuc3BsaXQoJyAnKSlqPTI4LjkqaC5sZW5ndGgsNjxrJiZrK2o+PWEud2lkdGgmJihrPTYsbCs9NDgpLGIuZmlsbFRleHQoaCxrLGwpLGsrPWorMjguOTttLnNyYz1hLnRvRGF0YVVSTCgpfSxmPV89PmQoaS52YWx1ZXx8bmV3IERhdGUoKS50b0lTT1N0cmluZygpLnJlcGxhY2UoL1wuXGQrLywnJykpOyhvbnJlc2l6ZT1fPT5mKGMoKSkpKCksc2V0SW50ZXJ2YWwoaS5vbmlucHV0PWYsMWUzKX0pKGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2NhbnZhcycpKSI+PGlucHV0IGlkPWkgcGxhY2Vob2xkZXI9bGFiZWw+PGltZyBpZD1tPjxwIGlkPWU+"
+          data-background="#fff"
+        >
+          <img
+            src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%2090%22%3E%0A%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%0Atext%20%7B%0Afont-size%3A%2011px%3B%0Afont-family%3A%20%22SF%20Mono%22%2C%20%22Menlo-Regular%22%2C%20Consolas%2C%20%22Andale%20Mono%20WT%22%2C%0A%22Andale%20Mono%22%2C%20%22Lucida%20Console%22%2C%20%22Lucida%20Sans%20Typewriter%22%2C%0A%22DejaVu%20Sans%20Mono%22%2C%20%22Bitstream%20Vera%20Sans%20Mono%22%2C%20%22Liberation%20Mono%22%2C%0A%22Nimbus%20Mono%20L%22%2C%20Monaco%2C%20%22Courier%20New%22%2C%20Courier%2C%20monospace%3B%0A%7D%0A%3C%2Fstyle%3E%3C%2Fdefs%3E%0A%3Crect%20x%3D%220%22%20y%3D%220%22%20height%3D%2290%22%20width%3D%22160%22%20fill%3D%22white%22%20%2F%3E%0A%3Ctext%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23888%22%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3Edata%3Atext%2Fhtml%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EPGJvZHkgb25sb2FkPSIoYT0%2Be%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3E2xldCBiLGM9Xz0%2Be2Eud2lkdG%3C%2Ftspan%3E%3Ctspan%20x%3D%2280%22%20dy%3D%2212%22%20fill%3D%22%2300a500%22%20text-anchor%3D%22middle%22%3Etime-stamp%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3Eg9ZS5jbGllbnRXaWR0aCxiPWE%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EuZ2V0Q29udGV4dCgnMmQnKSxi%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3ELmZvbnQ9JzQ4cHggTWVubG8nf%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3C%2Fsvg%3E%0A"
+          >
+        </a>
+      </p>
+    `
+  );
+});
+
+test("embed code block", async (t) => {
+  const result = await prepare(
+    {
+      text: dedent(`
+          \`\`\`embed
+          /media/w/gifv.mp4
+          \`\`\`
+
+          \`\`\`embed
+          {"video": { "poster": "/media/x/fit1000.png" }, "href": "/media/x/gifv.mp4" }
+          \`\`\`
+
+          \`\`\`embed
+          /media/y.pdf
+          \`\`\`
+
+          \`\`\`embed
+          {"pdf": { "poster": "/media/z/fit700.png" }, "href": "/media/z.pdf" }
+          \`\`\`
+
+          \`\`\`embed
+          data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0+e2xldCBiLGM9Xz0+e2Eud2lkdGg9ZS5jbGllbnRXaWR0aCxiPWEuZ2V0Q29udGV4dCgnMmQnKSxiLmZvbnQ9JzQ4cHggTWVubG8nfSxkPShnLGgsaixrPTYsbD00NCk9PntiLmZpbGxTdHlsZT0nIzBhMCcsYi5maWxsUmVjdCgwLDAsYS53aWR0aCxhLmhlaWdodCksYi5maWxsU3R5bGU9JyNmZmYnO2ZvcihoIG9mIGcuc3BsaXQoJyAnKSlqPTI4LjkqaC5sZW5ndGgsNjxrJiZrK2o+PWEud2lkdGgmJihrPTYsbCs9NDgpLGIuZmlsbFRleHQoaCxrLGwpLGsrPWorMjguOTttLnNyYz1hLnRvRGF0YVVSTCgpfSxmPV89PmQoaS52YWx1ZXx8bmV3IERhdGUoKS50b0lTT1N0cmluZygpLnJlcGxhY2UoL1wuXGQrLywnJykpOyhvbnJlc2l6ZT1fPT5mKGMoKSkpKCksc2V0SW50ZXJ2YWwoaS5vbmlucHV0PWYsMWUzKX0pKGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2NhbnZhcycpKSI+PGlucHV0IGlkPWkgcGxhY2Vob2xkZXI9bGFiZWw+PGltZyBpZD1tPjxwIGlkPWU+
+          \`\`\`
+
+          \`\`\`embed
+          {"data": {"title": "time-stamp"}, "href": "data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0+e2xldCBiLGM9Xz0+e2Eud2lkdGg9ZS5jbGllbnRXaWR0aCxiPWEuZ2V0Q29udGV4dCgnMmQnKSxiLmZvbnQ9JzQ4cHggTWVubG8nfSxkPShnLGgsaixrPTYsbD00NCk9PntiLmZpbGxTdHlsZT0nIzBhMCcsYi5maWxsUmVjdCgwLDAsYS53aWR0aCxhLmhlaWdodCksYi5maWxsU3R5bGU9JyNmZmYnO2ZvcihoIG9mIGcuc3BsaXQoJyAnKSlqPTI4LjkqaC5sZW5ndGgsNjxrJiZrK2o+PWEud2lkdGgmJihrPTYsbCs9NDgpLGIuZmlsbFRleHQoaCxrLGwpLGsrPWorMjguOTttLnNyYz1hLnRvRGF0YVVSTCgpfSxmPV89PmQoaS52YWx1ZXx8bmV3IERhdGUoKS50b0lTT1N0cmluZygpLnJlcGxhY2UoL1wuXGQrLywnJykpOyhvbnJlc2l6ZT1fPT5mKGMoKSkpKCksc2V0SW50ZXJ2YWwoaS5vbmlucHV0PWYsMWUzKX0pKGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2NhbnZhcycpKSI+PGlucHV0IGlkPWkgcGxhY2Vob2xkZXI9bGFiZWw+PGltZyBpZD1tPjxwIGlkPWU+" }
+          \`\`\`
+        `),
+      id: "8d830862",
+      created: +new Date(),
+    },
+    mockEmbedsLoader
+  );
+
+  t.equalHtml(
+    result.html,
+    `
+      <p>
+        <video
+          playsinline
+          src="https://example.com/media/w/gifv.mp4"
+          autoplay
+          muted
+          loop
+        ></video>
+      </p>
+      <p>
+        <video
+          playsinline
+          src="https://example.com/media/x/gifv.mp4"
+          poster="https://example.com/media/x/fit1000.png"
+          autoplay
+          muted
+          loop
+        ></video>
+      </p>
+      <p>
+        <iframe
+          src="https://drive.google.com/viewerng/viewer?pid=explorer&efh=false&a=v&chrome=false&embedded=true&url=https%3A%2F%2Fexample.com%2Fmedia%2Fy.pdf"
+          frameborder="0"
+          width="640"
+          height="360"
+          allow="autoplay; encrypted-media"
+          allowfullscreen="1"
+          loading="lazy"
+        ></iframe>
+      </p>
+      <p>
+        <a
+          class="future-frame"
+          href="https://example.com/media/z.pdf"
+          data-src="https://drive.google.com/viewerng/viewer?pid=explorer&efh=false&a=v&chrome=false&embedded=true&url=https%3A%2F%2Fexample.com%2Fmedia%2Fz.pdf"
+        >
+          <img src="https://example.com/media/z/fit700.png" loading="lazy">
+        </a>
+      </p>
+      <p>
+        <a
+          class="future-frame"
+          href="data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0+e2xldCBiLGM9Xz0+e2Eud2lkdGg9ZS5jbGllbnRXaWR0aCxiPWEuZ2V0Q29udGV4dCgnMmQnKSxiLmZvbnQ9JzQ4cHggTWVubG8nfSxkPShnLGgsaixrPTYsbD00NCk9PntiLmZpbGxTdHlsZT0nIzBhMCcsYi5maWxsUmVjdCgwLDAsYS53aWR0aCxhLmhlaWdodCksYi5maWxsU3R5bGU9JyNmZmYnO2ZvcihoIG9mIGcuc3BsaXQoJyAnKSlqPTI4LjkqaC5sZW5ndGgsNjxrJiZrK2o+PWEud2lkdGgmJihrPTYsbCs9NDgpLGIuZmlsbFRleHQoaCxrLGwpLGsrPWorMjguOTttLnNyYz1hLnRvRGF0YVVSTCgpfSxmPV89PmQoaS52YWx1ZXx8bmV3IERhdGUoKS50b0lTT1N0cmluZygpLnJlcGxhY2UoL1wuXGQrLywnJykpOyhvbnJlc2l6ZT1fPT5mKGMoKSkpKCksc2V0SW50ZXJ2YWwoaS5vbmlucHV0PWYsMWUzKX0pKGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2NhbnZhcycpKSI+PGlucHV0IGlkPWkgcGxhY2Vob2xkZXI9bGFiZWw+PGltZyBpZD1tPjxwIGlkPWU+"
+          data-background="#fff"
+        >
+          <img
+            src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%2090%22%3E%0A%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%0Atext%20%7B%0Afont-size%3A%2011px%3B%0Afont-family%3A%20%22SF%20Mono%22%2C%20%22Menlo-Regular%22%2C%20Consolas%2C%20%22Andale%20Mono%20WT%22%2C%0A%22Andale%20Mono%22%2C%20%22Lucida%20Console%22%2C%20%22Lucida%20Sans%20Typewriter%22%2C%0A%22DejaVu%20Sans%20Mono%22%2C%20%22Bitstream%20Vera%20Sans%20Mono%22%2C%20%22Liberation%20Mono%22%2C%0A%22Nimbus%20Mono%20L%22%2C%20Monaco%2C%20%22Courier%20New%22%2C%20Courier%2C%20monospace%3B%0A%7D%0A%3C%2Fstyle%3E%3C%2Fdefs%3E%0A%3Crect%20x%3D%220%22%20y%3D%220%22%20height%3D%2290%22%20width%3D%22160%22%20fill%3D%22white%22%20%2F%3E%0A%3Ctext%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23888%22%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3Edata%3Atext%2Fhtml%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EPGJvZHkgb25sb2FkPSIoYT0%2Be%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3E2xldCBiLGM9Xz0%2Be2Eud2lkdG%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3Eg9ZS5jbGllbnRXaWR0aCxiPWE%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EuZ2V0Q29udGV4dCgnMmQnKSxi%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3ELmZvbnQ9JzQ4cHggTWVubG8nf%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3ESxkPShnLGgsaixrPTYsbD00NC%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3C%2Fsvg%3E%0A"
+          >
+        </a>
+      </p>
+      <p>
+        <a
+          class="future-frame"
+          href="data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0+e2xldCBiLGM9Xz0+e2Eud2lkdGg9ZS5jbGllbnRXaWR0aCxiPWEuZ2V0Q29udGV4dCgnMmQnKSxiLmZvbnQ9JzQ4cHggTWVubG8nfSxkPShnLGgsaixrPTYsbD00NCk9PntiLmZpbGxTdHlsZT0nIzBhMCcsYi5maWxsUmVjdCgwLDAsYS53aWR0aCxhLmhlaWdodCksYi5maWxsU3R5bGU9JyNmZmYnO2ZvcihoIG9mIGcuc3BsaXQoJyAnKSlqPTI4LjkqaC5sZW5ndGgsNjxrJiZrK2o+PWEud2lkdGgmJihrPTYsbCs9NDgpLGIuZmlsbFRleHQoaCxrLGwpLGsrPWorMjguOTttLnNyYz1hLnRvRGF0YVVSTCgpfSxmPV89PmQoaS52YWx1ZXx8bmV3IERhdGUoKS50b0lTT1N0cmluZygpLnJlcGxhY2UoL1wuXGQrLywnJykpOyhvbnJlc2l6ZT1fPT5mKGMoKSkpKCksc2V0SW50ZXJ2YWwoaS5vbmlucHV0PWYsMWUzKX0pKGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2NhbnZhcycpKSI+PGlucHV0IGlkPWkgcGxhY2Vob2xkZXI9bGFiZWw+PGltZyBpZD1tPjxwIGlkPWU+"
+          data-background="#fff"
+        >
+          <img
+            src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%2090%22%3E%0A%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%0Atext%20%7B%0Afont-size%3A%2011px%3B%0Afont-family%3A%20%22SF%20Mono%22%2C%20%22Menlo-Regular%22%2C%20Consolas%2C%20%22Andale%20Mono%20WT%22%2C%0A%22Andale%20Mono%22%2C%20%22Lucida%20Console%22%2C%20%22Lucida%20Sans%20Typewriter%22%2C%0A%22DejaVu%20Sans%20Mono%22%2C%20%22Bitstream%20Vera%20Sans%20Mono%22%2C%20%22Liberation%20Mono%22%2C%0A%22Nimbus%20Mono%20L%22%2C%20Monaco%2C%20%22Courier%20New%22%2C%20Courier%2C%20monospace%3B%0A%7D%0A%3C%2Fstyle%3E%3C%2Fdefs%3E%0A%3Crect%20x%3D%220%22%20y%3D%220%22%20height%3D%2290%22%20width%3D%22160%22%20fill%3D%22white%22%20%2F%3E%0A%3Ctext%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23888%22%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3Edata%3Atext%2Fhtml%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EPGJvZHkgb25sb2FkPSIoYT0%2Be%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3E2xldCBiLGM9Xz0%2Be2Eud2lkdG%3C%2Ftspan%3E%3Ctspan%20x%3D%2280%22%20dy%3D%2212%22%20fill%3D%22%2300a500%22%20text-anchor%3D%22middle%22%3Etime-stamp%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3Eg9ZS5jbGllbnRXaWR0aCxiPWE%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EuZ2V0Q29udGV4dCgnMmQnKSxi%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3ELmZvbnQ9JzQ4cHggTWVubG8nf%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3C%2Fsvg%3E%0A"
+          >
+        </a>
+      </p>
+    `
+  );
+});
+
+test("embed-html code block", async (t) => {
+  const result = await prepare(
+    {
+      text: dedent(`
+          \`\`\`embed-html
+          <title>time-stamp</title>
+          <meta property="og:image" content="/media/t.png">
+          <body onload="(a=>{let b,c=_=>{a.width=e.clientWidth,b=a.getContext('2d'),b.font='48px Menlo'},d=(g,h,j,k=6,l=44)=>{b.fillStyle='#0a0',b.fillRect(0,0,a.width,a.height),b.fillStyle='#fff';for(h of g.split(' '))j=28.9*h.length,6<k&&k+j>=a.width&&(k=6,l+=48),b.fillText(h,k,l),k+=j+28.9;m.src=a.toDataURL()},f=_=>d(i.value||new Date().toISOString().replace(/\\.\\d+/,''));(onresize=_=>f(c()))(),setInterval(i.oninput=f,1e3)})(document.createElement('canvas'))"><input id=i placeholder=label><img id=m><p id=e>
+          \`\`\`
+
+          \`\`\`embed-html
+          <title>time-stamp</title>
+          <body onload="(a=>{let b,c=_=>{a.width=e.clientWidth,b=a.getContext('2d'),b.font='48px Menlo'},d=(g,h,j,k=6,l=44)=>{b.fillStyle='#0a0',b.fillRect(0,0,a.width,a.height),b.fillStyle='#fff';for(h of g.split(' '))j=28.9*h.length,6<k&&k+j>=a.width&&(k=6,l+=48),b.fillText(h,k,l),k+=j+28.9;m.src=a.toDataURL()},f=_=>d(i.value||new Date().toISOString().replace(/\\.\\d+/,''));(onresize=_=>f(c()))(),setInterval(i.oninput=f,1e3)})(document.createElement('canvas'))"><input id=i placeholder=label><img id=m><p id=e>
+          \`\`\`
+        `),
+      id: "74244a20",
+      created: +new Date(),
+    },
+    mockEmbedsLoader
+  );
+
+  t.equalHtml(
+    result.html,
+    `
+      <p>
+        <a
+          class="future-frame"
+          href="data:text/html;base64,PHRpdGxlPnRpbWUtc3RhbXA8L3RpdGxlPgo8bWV0YSBwcm9wZXJ0eT0ib2c6aW1hZ2UiIGNvbnRlbnQ9Ii9tZWRpYS90LnBuZyI+Cjxib2R5IG9ubG9hZD0iKGE9PntsZXQgYixjPV89PnthLndpZHRoPWUuY2xpZW50V2lkdGgsYj1hLmdldENvbnRleHQoJzJkJyksYi5mb250PSc0OHB4IE1lbmxvJ30sZD0oZyxoLGosaz02LGw9NDQpPT57Yi5maWxsU3R5bGU9JyMwYTAnLGIuZmlsbFJlY3QoMCwwLGEud2lkdGgsYS5oZWlnaHQpLGIuZmlsbFN0eWxlPScjZmZmJztmb3IoaCBvZiBnLnNwbGl0KCcgJykpaj0yOC45KmgubGVuZ3RoLDY8ayYmaytqPj1hLndpZHRoJiYoaz02LGwrPTQ4KSxiLmZpbGxUZXh0KGgsayxsKSxrKz1qKzI4Ljk7bS5zcmM9YS50b0RhdGFVUkwoKX0sZj1fPT5kKGkudmFsdWV8fG5ldyBEYXRlKCkudG9JU09TdHJpbmcoKS5yZXBsYWNlKC9cLlxkKy8sJycpKTsob25yZXNpemU9Xz0+ZihjKCkpKSgpLHNldEludGVydmFsKGkub25pbnB1dD1mLDFlMyl9KShkb2N1bWVudC5jcmVhdGVFbGVtZW50KCdjYW52YXMnKSkiPjxpbnB1dCBpZD1pIHBsYWNlaG9sZGVyPWxhYmVsPjxpbWcgaWQ9bT48cCBpZD1lPg=="
+          data-background="#fff"
+        >
+          <img src="https://example.com/media/t.png">
+        </a>
+      </p>
+
+      <p>
+        <a
+          class="future-frame"
+          href="data:text/html;base64,PHRpdGxlPnRpbWUtc3RhbXA8L3RpdGxlPgo8Ym9keSBvbmxvYWQ9IihhPT57bGV0IGIsYz1fPT57YS53aWR0aD1lLmNsaWVudFdpZHRoLGI9YS5nZXRDb250ZXh0KCcyZCcpLGIuZm9udD0nNDhweCBNZW5sbyd9LGQ9KGcsaCxqLGs9NixsPTQ0KT0+e2IuZmlsbFN0eWxlPScjMGEwJyxiLmZpbGxSZWN0KDAsMCxhLndpZHRoLGEuaGVpZ2h0KSxiLmZpbGxTdHlsZT0nI2ZmZic7Zm9yKGggb2YgZy5zcGxpdCgnICcpKWo9MjguOSpoLmxlbmd0aCw2PGsmJmsraj49YS53aWR0aCYmKGs9NixsKz00OCksYi5maWxsVGV4dChoLGssbCksays9aisyOC45O20uc3JjPWEudG9EYXRhVVJMKCl9LGY9Xz0+ZChpLnZhbHVlfHxuZXcgRGF0ZSgpLnRvSVNPU3RyaW5nKCkucmVwbGFjZSgvXC5cZCsvLCcnKSk7KG9ucmVzaXplPV89PmYoYygpKSkoKSxzZXRJbnRlcnZhbChpLm9uaW5wdXQ9ZiwxZTMpfSkoZG9jdW1lbnQuY3JlYXRlRWxlbWVudCgnY2FudmFzJykpIj48aW5wdXQgaWQ9aSBwbGFjZWhvbGRlcj1sYWJlbD48aW1nIGlkPW0+PHAgaWQ9ZT4="
+          data-background="#fff"
+        >
+          <img
+            src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%2090%22%3E%0A%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%0Atext%20%7B%0Afont-size%3A%2011px%3B%0Afont-family%3A%20%22SF%20Mono%22%2C%20%22Menlo-Regular%22%2C%20Consolas%2C%20%22Andale%20Mono%20WT%22%2C%0A%22Andale%20Mono%22%2C%20%22Lucida%20Console%22%2C%20%22Lucida%20Sans%20Typewriter%22%2C%0A%22DejaVu%20Sans%20Mono%22%2C%20%22Bitstream%20Vera%20Sans%20Mono%22%2C%20%22Liberation%20Mono%22%2C%0A%22Nimbus%20Mono%20L%22%2C%20Monaco%2C%20%22Courier%20New%22%2C%20Courier%2C%20monospace%3B%0A%7D%0A%3C%2Fstyle%3E%3C%2Fdefs%3E%0A%3Crect%20x%3D%220%22%20y%3D%220%22%20height%3D%2290%22%20width%3D%22160%22%20fill%3D%22white%22%20%2F%3E%0A%3Ctext%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23888%22%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3Edata%3Atext%2Fhtml%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EPHRpdGxlPnRpbWUtc3RhbXA8L%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3E3RpdGxlPgo8Ym9keSBvbmxvYW%3C%2Ftspan%3E%3Ctspan%20x%3D%2280%22%20dy%3D%2212%22%20fill%3D%22%2300a500%22%20text-anchor%3D%22middle%22%3Etime-stamp%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EQ9IihhPT57bGV0IGIsYz1fPT5%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3E7YS53aWR0aD1lLmNsaWVudFdp%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EZHRoLGI9YS5nZXRDb250ZXh0K%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3C%2Fsvg%3E%0A"
+          >
+        </a>
+      </p>
+    `
+  );
+});

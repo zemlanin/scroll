@@ -66,6 +66,7 @@ const ogLink = renderer.link.bind(renderer);
 const ogHTML = renderer.html.bind(renderer);
 const ogParagraph = renderer.paragraph.bind(renderer);
 const ogList = renderer.list.bind(renderer);
+const ogCode = renderer.code.bind(renderer);
 
 function decodeAttrs(text) {
   return (
@@ -80,47 +81,56 @@ function decodeAttrs(text) {
   );
 }
 
-function embedCallback(href, title, text) {
+function prefixOwnMedia(href) {
   if (process.env.BLOG_BASE_URL && href.startsWith("/media/")) {
-    href = process.env.BLOG_BASE_URL + href;
+    return process.env.BLOG_BASE_URL + href;
   } else if (process.env.BLOG_BASE_URL && href.startsWith("media/")) {
-    href = process.env.BLOG_BASE_URL + "/" + href;
+    return process.env.BLOG_BASE_URL + "/" + href;
   } else if (href.startsWith("media/")) {
-    href = "/" + href;
+    return "/" + href;
   }
+
+  return href;
+}
+
+function localEmbed(embed) {
+  const href = prefixOwnMedia(embed.href);
 
   const mimeObj = getMimeObj(href);
   const hrefIsDataURI = href.startsWith("data:text/html;base64");
   const hrefIsOwnMedia = isOwnMedia(href);
 
-  if (
-    (hrefIsOwnMedia || (text && text.indexOf("poster=") > -1)) &&
-    mimeObj.video
-  ) {
-    let attrs = decodeAttrs(text);
+  if ((hrefIsOwnMedia && mimeObj.video) || embed.video) {
+    let { attrs } = embed.video || {};
 
-    const isGIFVattr = attrs.match(/(^|\s+)gifv($|\s+)/g);
-    const isOwnGIFV = hrefIsOwnMedia && href.indexOf("/gifv.mp4") > -1;
+    if (!attrs) {
+      attrs = "";
 
-    if (isGIFVattr || isOwnGIFV) {
-      attrs = isGIFVattr ? attrs.replace(isGIFVattr[0], ``) : attrs;
-      return `<video playsinline autoplay muted loop src="${href}" ${attrs}></video>`;
+      const { gifv, poster } = embed.video || {};
+
+      if (poster) {
+        attrs += `poster="${prefixOwnMedia(poster)}" `;
+      }
+
+      const isOwnGIFV = hrefIsOwnMedia && href.indexOf("/gifv.mp4") > -1;
+
+      if (gifv || isOwnGIFV) {
+        attrs += `autoplay muted loop `;
+      } else {
+        attrs += `controls preload="none" `;
+      }
     }
 
-    return `<video playsinline controls preload="none" src="${href}" ${
-      attrs || ""
-    }></video>`;
+    return `<video playsinline src="${href}" ${attrs}></video>`;
   }
 
-  if (hrefIsOwnMedia && mimeObj.pdf) {
+  if ((hrefIsOwnMedia && mimeObj.pdf) || embed.pdf) {
     const frameSrc = `https://drive.google.com/viewerng/viewer?pid=explorer&efh=false&a=v&chrome=false&embedded=true&url=${encodeURIComponent(
       href
     )}`;
 
-    if (text && text.indexOf("poster=") > -1) {
-      const attrs = decodeAttrs(text);
-
-      const imgSrc = attrs.match(/poster=['"]?([^'" ]+)['"]?/)[1];
+    if (embed.pdf && embed.pdf.poster) {
+      const imgSrc = prefixOwnMedia(embed.pdf.poster);
       return `<a class="future-frame" href="${href}" data-src="${frameSrc}">
         <img src="${imgSrc}" loading="lazy">
       </a>`;
@@ -136,14 +146,12 @@ function embedCallback(href, title, text) {
     }
   }
 
-  if (hrefIsDataURI) {
+  if (hrefIsDataURI || embed.data) {
     const frameSrc = href;
     let imgSrc = null;
 
-    if (text && text.indexOf("poster=") > -1) {
-      const attrs = decodeAttrs(text);
-
-      imgSrc = attrs.match(/poster=['"]?([^'" ]+)['"]?/)[1];
+    if (embed.data && embed.data.poster) {
+      imgSrc = prefixOwnMedia(embed.data.poster);
     } else {
       let lines = [`<tspan x="0" dy="12">data:text/html</tspan>`].concat(
         frameSrc
@@ -154,10 +162,10 @@ function embedCallback(href, title, text) {
           .map((line) => `<tspan x="0" dy="12">${line}</tspan>`)
       );
 
-      if (text) {
+      if (embed.data && embed.data.title) {
         lines = [
           ...lines.slice(0, 3),
-          `<tspan x="80" dy="12" fill="#00a500" text-anchor="middle">${text}</tspan>`,
+          `<tspan x="80" dy="12" fill="#00a500" text-anchor="middle">${embed.data.title}</tspan>`,
           ...lines.slice(3, 6),
         ];
       }
@@ -183,7 +191,7 @@ function embedCallback(href, title, text) {
         );
     }
 
-    return `<a class="future-frame" href="${href}" data-src="${frameSrc}" data-background="#fff">
+    return `<a class="future-frame" href="${frameSrc}" data-background="#fff">
       <img src="${imgSrc}">
     </a>`;
   }
@@ -192,23 +200,112 @@ function embedCallback(href, title, text) {
     return `<iframe src="${href}" width="640" height="360" frameborder="0" loading="lazy"></iframe>`;
   }
 
-  if (!hrefIsDataURI && !hrefIsOwnMedia && !mimeObj.image) {
-    return `<x-embed>${JSON.stringify({ href, title, text })}</x-embed>`;
+  return `<x-embed>${JSON.stringify({ href })}</x-embed>`;
+}
+
+function embedCallback(href, title, text) {
+  href = prefixOwnMedia(href);
+
+  const mimeObj = getMimeObj(href);
+  const hrefIsDataURI = href.startsWith("data:text/html;base64");
+  const hrefIsOwnMedia = isOwnMedia(href);
+
+  if (
+    (hrefIsOwnMedia || (text && text.indexOf("poster=") > -1)) &&
+    mimeObj.video
+  ) {
+    const attrs = decodeAttrs(text);
+
+    const posterMatch = attrs.match(/poster=(['"]?)([^'"\s]+)/);
+
+    return localEmbed({
+      href,
+      video: {
+        gifv: !!attrs.match(/(^|\s+)gifv($|\s+)/g),
+        poster: posterMatch ? posterMatch[2] : "",
+      },
+    });
+  }
+
+  if (hrefIsOwnMedia && mimeObj.pdf) {
+    const attrs = text ? decodeAttrs(text) : "";
+
+    const posterMatch = attrs.match(/poster=(['"]?)([^'"\s]+)/);
+
+    return localEmbed({
+      href,
+      pdf: {
+        poster: posterMatch ? posterMatch[2] : "",
+      },
+    });
+  }
+
+  if (hrefIsDataURI) {
+    const attrs = text ? decodeAttrs(text) : "";
+
+    const posterMatch = attrs.match(/poster=(['"]?)([^'"\s]+)/);
+
+    return localEmbed({
+      href,
+      data: {
+        poster: posterMatch ? posterMatch[2] : "",
+        title: posterMatch ? "" : text,
+      },
+    });
+  }
+
+  if (!hrefIsOwnMedia && !mimeObj.image) {
+    return localEmbed({ href });
   }
 
   return ogImage(href, title, text).replace(/(\/?>)$/, ' loading="lazy" $1');
 }
 
 renderer.image = embedCallback;
+renderer.code = function (code, infostring, escaped) {
+  if (infostring === "embed") {
+    const embeds = code
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .map((l) => (l.startsWith("{") ? JSON.parse(l) : { href: l }));
+
+    if (embeds.length === 0) {
+      return "";
+    }
+
+    const embedElements = embeds.map((e) => localEmbed(e));
+
+    if (embedElements.length === 1) {
+      return `<p>${embedElements[0]}</p>`;
+    }
+
+    const body = embedElements.map((el) => `<li>${el}</li>`).join("\n");
+
+    return `<ul data-gallery style="list-style:none;padding:0">\n${body}</ul>\n`;
+  }
+
+  if (infostring === "embed-html") {
+    const $ = cheerio.load(code);
+
+    const href = `data:text/html;base64,${Buffer.from(code).toString(
+      "base64"
+    )}`;
+    const title = $("title").text();
+    const poster = $('meta[property="og:image"]').attr("content");
+
+    return `<p>${localEmbed({ href, data: { title, poster } })}</p>`;
+  }
+
+  return ogCode(code, infostring, escaped);
+};
 
 renderer.link = function (href, title, text) {
   if (text && text.startsWith(FOOTNOTE_MARKER)) {
     return "";
   }
 
-  if (href.startsWith("/media/") && process.env.BLOG_BASE_URL) {
-    href = process.env.BLOG_BASE_URL + href;
-  }
+  href = prefixOwnMedia(href);
 
   return ogLink(href, title, text);
 };

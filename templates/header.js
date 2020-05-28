@@ -60,7 +60,10 @@ document.addEventListener("DOMContentLoaded", function () {
     target.removeEventListener("click", handleFutureFrame);
     target.classList.add("loading");
     var i = document.createElement("iframe");
-    i.setAttribute("src", target.getAttribute("data-src"));
+    i.setAttribute(
+      "src",
+      target.getAttribute("data-src") || target.getAttribute("href")
+    );
     i.setAttribute("frameborder", 0);
     i.setAttribute("width", width);
     i.setAttribute("height", 0);
@@ -78,7 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   Array.prototype.forEach.call(
-    document.querySelectorAll("a.future-frame[data-src]"),
+    document.querySelectorAll("a.future-frame[data-src],a.future-frame[href]"),
     function (ff) {
       ff.addEventListener("click", handleFutureFrame);
     }

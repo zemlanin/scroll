@@ -333,14 +333,21 @@ function walkWithTeaser(token, postUrl, teaserParagraphs) {
   }
 
   if (token.type === "list") {
-    const firstItemToken = token.items[0].tokens[0];
+    const tokenIsGalleryList = token.items.every((listitem) => {
+      const contentfulTokens = listitem.tokens.filter(
+        (t) => t.type !== "space"
+      );
+      const firstToken = contentfulTokens[0];
 
-    if (
-      firstItemToken &&
-      firstItemToken.type === "text" &&
-      firstItemToken.tokens.length === 1 &&
-      firstItemToken.tokens[0].type === "image"
-    ) {
+      return (
+        contentfulTokens.length === 1 &&
+        firstToken.type === "text" &&
+        firstToken.tokens.length === 1 &&
+        firstToken.tokens[0].type === "image"
+      );
+    });
+
+    if (tokenIsGalleryList) {
       teaserParagraphs.push(marked.parser([token], markedOptions));
       return;
     }

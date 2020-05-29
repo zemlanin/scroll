@@ -1,11 +1,10 @@
 const url = require("url");
 
-const { authed, sendToAuthProvider } = require("./auth.js");
+const { getSession, sendToAuthProvider } = require("./auth.js");
 
 module.exports = async (req, res) => {
-  const user = authed(req, res);
-
-  if (!user) {
+  const session = await getSession(req, res);
+  if (!session) {
     return sendToAuthProvider(req, res);
   }
 

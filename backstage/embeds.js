@@ -16,7 +16,7 @@ const { RequestError } = require("request-promise-native/errors");
 
 const { render } = require("./render.js");
 
-const { authed, sendToAuthProvider } = require("./auth.js");
+const { getSession, sendToAuthProvider } = require("./auth.js");
 
 const CARD_TEMPLATE_PATH = path.resolve(
   __dirname,
@@ -877,9 +877,8 @@ module.exports = {
   },
 
   post: async (req, res) => {
-    const user = authed(req, res);
-
-    if (!user) {
+    const session = await getSession(req, res);
+    if (!session) {
       return sendToAuthProvider(req, res);
     }
 
@@ -967,9 +966,8 @@ module.exports = {
   },
 
   get: async (req, res) => {
-    const user = authed(req, res);
-
-    if (!user) {
+    const session = await getSession(req, res);
+    if (!session) {
       return sendToAuthProvider(req, res);
     }
 

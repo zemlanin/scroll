@@ -6,7 +6,7 @@ const jsdiff = require("diff");
 const cheerio = require("cheerio");
 const prettier = require("prettier");
 
-const { authed } = require("./auth.js");
+const { getSession } = require("./auth.js");
 const { prepare: commonPrepare, getBlogObject, DIST } = require("../common.js");
 const { blogRender } = require("../render.js");
 const EmbedsLoader = require("../embeds-loader.js");
@@ -26,9 +26,8 @@ module.exports = async (req, res) => {
   const query = url.parse(req.url, true).query;
   const rss = (req.post && req.post.rss) || query.rss;
 
-  const user = authed(req, res);
-
-  if (!user && !rss) {
+  const session = await getSession(req, res);
+  if (!session && !rss) {
     return `<a href="/backstage">auth</a>`;
   }
 

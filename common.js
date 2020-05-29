@@ -25,6 +25,10 @@ const PORT = process.env.PORT || 8000;
 const BLOG_BASE_URL = process.env.BLOG_BASE_URL || ".";
 const DIST = path.resolve(__dirname, process.env.DIST || "dist");
 const POSTS_DB = path.resolve(__dirname, process.env.POSTS_DB || "posts.db");
+const SESSIONS_DB = path.resolve(
+  __dirname,
+  process.env.SESSIONS_DB || "sessions.db"
+);
 const FOOTNOTE_MARKER = "^";
 
 function isOwnMedia(href) {
@@ -863,6 +867,7 @@ module.exports = {
   DIST,
   PORT,
   POSTS_DB,
+  SESSIONS_DB,
   PAGE_SIZE,
   MINIMUM_INDEX_PAGE_SIZE,
   getMimeObj,

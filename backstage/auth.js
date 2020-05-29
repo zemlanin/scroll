@@ -1,7 +1,11 @@
 const url = require("url");
-const https = require("https");
+const crypto = require("crypto");
+
 const cookie = require("cookie");
-const jwt = require("jsonwebtoken");
+const sqlite = require("sqlite");
+const sqlite3 = require("sqlite3");
+
+const { SESSIONS_DB } = require("../common.js");
 
 const JWT_SECRET = (() => {
   return (
@@ -9,86 +13,138 @@ const JWT_SECRET = (() => {
   );
 })();
 
-async function verifyAccessToken(access_token) {
-  if (!access_token) {
+function signedSessionId(id) {
+  const hmac = crypto.createHmac("sha256", JWT_SECRET);
+  hmac.update(id);
+  const digest = hmac.digest("hex");
+  return `${id}.${digest}`;
+}
+
+function verifySessionId(signedId) {
+  if (!signedId) {
     return null;
   }
 
-  const githubUserResp = await new Promise((resolve) => {
-    const req = https.request(
-      {
-        host: "api.github.com",
-        path: "/user",
-        method: "get",
-        query: {
-          access_token: access_token,
-        },
-        headers: {
-          Accept: "application/json",
-          Authorization: `token ${access_token}`,
-          "User-Agent": "scroll-auth",
-        },
-      },
-      (authRes) => {
-        let result = "";
+  const [id, signature] = signedId.split(".");
 
-        authRes.on("data", function (chunk) {
-          result += chunk;
-        });
-        authRes.on("end", function () {
-          resolve(JSON.parse(result));
-        });
-        authRes.on("error", function (err) {
-          resolve(err);
-        });
-      }
-    );
+  const hmac = crypto.createHmac("sha256", JWT_SECRET);
+  hmac.update(id);
+  const digest = hmac.digest("hex");
 
-    req.on("error", function (err) {
-      resolve(err);
-    });
-
-    req.end();
-  });
-
-  if (
-    githubUserResp &&
-    githubUserResp.id &&
-    githubUserResp.id.toString() === process.env.GITHUB_USER_ID
-  ) {
-    return githubUserResp;
+  if (signature === digest) {
+    return id;
   }
 
   return null;
 }
 
 module.exports = {
-  verifyAccessToken,
-  authed(req, res) {
-    const jwtCookie =
-      cookie.parse(req.headers.cookie || "").jwt ||
-      (req.headers.authorization &&
-        req.headers.authorization.match(
-          /^Bearer [a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+$/
-        ) &&
-        req.headers.authorization.slice(7));
+  signedSessionId,
+  async createSession(data) {
+    const sessionsDb = await sqlite.open({
+      filename: SESSIONS_DB,
+      driver: sqlite3.Database,
+    });
+    const sessionId = require("crypto").randomBytes(48).toString("hex");
 
-    if (!jwtCookie) {
+    await sessionsDb.run(`INSERT INTO sessions (id, data) VALUES (?1, ?2)`, {
+      1: sessionId,
+      2: JSON.stringify(data || {}),
+    });
+
+    await sessionsDb.close();
+
+    return signedSessionId(sessionId);
+  },
+  async getSessionByOneTimeCode(code) {
+    if (!code) {
       return null;
     }
 
-    try {
-      const verified = jwt.verify(jwtCookie, JWT_SECRET);
+    const sessionsDb = await sqlite.open({
+      filename: SESSIONS_DB,
+      driver: sqlite3.Database,
+    });
 
-      if (verified && verified.exp && verified.exp * 1000 < +new Date()) {
-        module.exports.auth(verified, res);
-      }
+    const sessionRow = await sessionsDb.get(
+      "SELECT * FROM sessions WHERE json_extract(data, '$.otc') = ?1",
+      { 1: code }
+    );
 
-      return verified;
-    } catch (e) {
-      module.exports.logout(res);
+    if (!sessionRow) {
       return null;
     }
+
+    await sessionsDb.run(
+      "UPDATE sessions SET data = json_remove(data, '$.otc') WHERE json_extract(data, '$.otc') = ?1",
+      { 1: code }
+    );
+
+    await sessionsDb.close();
+
+    return Object.freeze({
+      ...JSON.parse(sessionRow.data || "{}"),
+      id: sessionRow.id,
+    });
+  },
+  async getSession(req, res) {
+    const sessionCookie = cookie.parse(req.headers.cookie || "").session;
+
+    const bearerToken =
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer ") &&
+      req.headers.authorization.slice(7);
+
+    if (!sessionCookie && !bearerToken) {
+      return null;
+    }
+
+    const signedSession = sessionCookie || bearerToken;
+
+    const sessionId = verifySessionId(signedSession);
+
+    if (!sessionId) {
+      return null;
+    }
+
+    const sessionsDb = await sqlite.open({
+      filename: SESSIONS_DB,
+      driver: sqlite3.Database,
+    });
+    res.on("finish", () => {
+      sessionsDb.close();
+    });
+    const sessionRow = await sessionsDb.get(
+      "SELECT * from sessions WHERE id = ?1",
+      { 1: sessionId }
+    );
+
+    if (!sessionRow) {
+      module.exports.logout(req, res);
+      return null;
+    }
+
+    await sessionsDb.run(
+      "UPDATE sessions SET last_access = CURRENT_TIMESTAMP WHERE id = ?1",
+      { 1: sessionId }
+    );
+
+    return Object.freeze({
+      ...JSON.parse(sessionRow.data || "{}"),
+      id: sessionRow.id,
+      async clear() {
+        await sessionsDb.run(
+          `UPDATE sessions SET data = json_object() WHERE id = ?1`,
+          { 1: sessionId }
+        );
+      },
+      async patch(obj) {
+        await sessionsDb.run(
+          `UPDATE sessions SET data = json_patch(data, ?2) WHERE id = ?1`,
+          { 1: sessionId, 2: JSON.stringify(obj) }
+        );
+      },
+    });
   },
 
   sendToAuthProvider(req, res) {
@@ -119,34 +175,12 @@ module.exports = {
     res.setHeader("Location", githubAuthUrl);
   },
 
-  generateToken(payload, expiresIn = 60 * 60 * 24 * 7) {
-    return jwt.sign(
-      {
-        me: payload.me,
-        github: payload.github,
-      },
-      JWT_SECRET,
-      { expiresIn }
-    );
-  },
-
-  auth(payload, res) {
-    const jwtToken = module.exports.generateToken(payload);
-
-    res.setHeader(
-      "Set-Cookie",
-      cookie.serialize("jwt", jwtToken, {
-        httpOnly: true,
-        maxAge: 60 * 60 * 24 * 7,
-        path: "/",
-      })
-    );
-  },
-
-  logout(res) {
-    res.setHeader(
-      "Set-Cookie",
-      cookie.serialize("jwt", "", { maxAge: 0, path: "/" })
-    );
+  logout(req, res) {
+    if (req.headers.cookie) {
+      res.setHeader(
+        "Set-Cookie",
+        cookie.serialize("session", "", { maxAge: 0, path: "/" })
+      );
+    }
   },
 };

@@ -1,6 +1,6 @@
 const url = require("url");
 
-const { authed, logout, sendToAuthProvider } = require("./auth.js");
+const { getSession, logout, sendToAuthProvider } = require("./auth.js");
 const { render } = require("./render.js");
 const { prepare: commonPrepare } = require("../common.js");
 const EmbedsLoader = require("../embeds-loader.js");
@@ -52,15 +52,14 @@ module.exports = async (req, res) => {
   const query = url.parse(req.url, true).query;
 
   if (query.logout) {
-    logout(res);
+    logout(req, res);
     res.statusCode = 303;
     res.setHeader("Location", "/");
     return;
   }
 
-  const user = authed(req, res);
-
-  if (!user) {
+  const session = await getSession(req, res);
+  if (!session) {
     return sendToAuthProvider(req, res);
   }
 
@@ -156,7 +155,6 @@ module.exports = async (req, res) => {
   const embedsLoader = new EmbedsLoader(db);
 
   return render("list.mustache", {
-    user: user,
     q: query.q || "",
     drafts: await Promise.all(
       drafts

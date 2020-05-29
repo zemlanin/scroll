@@ -1,4 +1,4 @@
-const { authed, sendToAuthProvider } = require("./auth.js");
+const { getSession, sendToAuthProvider } = require("./auth.js");
 
 async function getTraffic(days = 31) {
   const goaccessPath = process.env.GOACCESS_JSON;
@@ -25,9 +25,8 @@ async function goaccessGraph(req, res) {
     return;
   }
 
-  const user = authed(req, res);
-
-  if (!user) {
+  const session = await getSession(req, res);
+  if (!session) {
     return sendToAuthProvider(req, res);
   }
 

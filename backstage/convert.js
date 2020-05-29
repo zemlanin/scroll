@@ -18,7 +18,7 @@ const ffmpeg = require("fluent-ffmpeg");
 const isAnimatedGif = require("animated-gif-detector");
 const _id = require("nanoid/generate");
 
-const { authed, sendToAuthProvider } = require("./auth.js");
+const { getSession, sendToAuthProvider } = require("./auth.js");
 const { DIST } = require("../common.js");
 
 const getMediaId = () =>
@@ -314,9 +314,8 @@ module.exports = {
   getConversionTags,
   convertMedia,
   post: async (req, res) => {
-    const user = authed(req, res);
-
-    if (!user) {
+    const session = await getSession(req, res);
+    if (!session) {
       return sendToAuthProvider(req, res);
     }
 

@@ -28,7 +28,6 @@
     "dotenv": "^6.2.0",
     "fluent-ffmpeg": "^2.1.2",
     "highlight.js": "^10.0.3",
-    "jsonwebtoken": "^8.5.1",
     "lodash.chunk": "^4.2.0",
     "lodash.groupby": "^4.6.0",
     "marked": "^1.1.0",

@@ -8,7 +8,7 @@ const getPostId = () =>
     10
   )}`;
 
-const { authed, sendToAuthProvider } = require("./auth.js");
+const { getSession, sendToAuthProvider } = require("./auth.js");
 const { getJson: getMediaJson } = require("./media.js");
 const { generateAfterEdit } = require("../generate-post.js");
 const { render } = require("./render.js");
@@ -27,9 +27,8 @@ function parseUTCTimestampWithoutZulu(str) {
 module.exports = {
   getPostId,
   get: async (req, res) => {
-    const user = authed(req, res);
-
-    if (!user) {
+    const session = await getSession(req, res);
+    if (!session) {
       return sendToAuthProvider(req, res);
     }
 
@@ -128,7 +127,6 @@ module.exports = {
     const mediaJson = await getMediaJson(db, { offset: 0 });
 
     return render("edit.mustache", {
-      user: user,
       post: post,
       urls: {
         logout: url.resolve(req.absolute, "/backstage/?logout=1"),
@@ -137,9 +135,8 @@ module.exports = {
     });
   },
   post: async (req, res) => {
-    const user = authed(req, res);
-
-    if (!user) {
+    const session = await getSession(req, res);
+    if (!session) {
       return sendToAuthProvider(req, res);
     }
 
@@ -283,7 +280,6 @@ module.exports = {
     const mediaJson = await getMediaJson(db, { offset: 0 });
 
     return render("edit.mustache", {
-      user: user,
       post: post,
       urls: {
         logout: url.resolve(req.absolute, "/backstage/?logout=1"),

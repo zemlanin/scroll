@@ -2,7 +2,7 @@ const path = require("path");
 const mime = require("mime");
 const chunk = require("lodash.chunk");
 
-const { authed, generateToken, sendToAuthProvider } = require("./auth.js");
+const { getSession, sendToAuthProvider } = require("./auth.js");
 
 const { generate } = require("../generate.js");
 const { DIST } = require("../common.js");
@@ -69,18 +69,16 @@ const writePadding = (out) => {
 
 module.exports = {
   get: async (req, res) => {
-    const user = authed(req, res);
-
-    if (!user) {
+    const session = await getSession(req, res);
+    if (!session) {
       return sendToAuthProvider(req, res);
     }
 
     return render("generate.mustache");
   },
   post: async (req, res) => {
-    const user = authed(req, res);
-
-    if (!user) {
+    const session = await getSession(req, res);
+    if (!session) {
       return sendToAuthProvider(req, res);
     }
 
@@ -114,10 +112,6 @@ module.exports = {
         break;
       case "pages":
         generator = async () => generate(await req.db(), DIST, res, res);
-        break;
-      case "jwt":
-        generator = async () =>
-          res.write(`${generateToken(user, 60 * 60 * 24 * 120)}\n`);
         break;
     }
 

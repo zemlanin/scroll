@@ -1,7 +1,61 @@
 const url = require("url");
 const https = require("https");
+const cookie = require("cookie");
 const querystring = require("querystring");
-const { auth, verifyAccessToken } = require("./auth.js");
+const { createSession } = require("./auth.js");
+
+async function verifyAccessToken(access_token) {
+  if (!access_token) {
+    return null;
+  }
+
+  const githubUserResp = await new Promise((resolve) => {
+    const req = https.request(
+      {
+        host: "api.github.com",
+        path: "/user",
+        method: "get",
+        query: {
+          access_token: access_token,
+        },
+        headers: {
+          Accept: "application/json",
+          Authorization: `token ${access_token}`,
+          "User-Agent": "scroll-auth",
+        },
+      },
+      (authRes) => {
+        let result = "";
+
+        authRes.on("data", function (chunk) {
+          result += chunk;
+        });
+        authRes.on("end", function () {
+          resolve(JSON.parse(result));
+        });
+        authRes.on("error", function (err) {
+          resolve(err);
+        });
+      }
+    );
+
+    req.on("error", function (err) {
+      resolve(err);
+    });
+
+    req.end();
+  });
+
+  if (
+    githubUserResp &&
+    githubUserResp.id &&
+    githubUserResp.id.toString() === process.env.GITHUB_USER_ID
+  ) {
+    return githubUserResp;
+  }
+
+  return null;
+}
 
 module.exports = async (req, res) => {
   const query = url.parse(req.url, true).query;
@@ -53,12 +107,22 @@ module.exports = async (req, res) => {
     req.end();
   });
 
-  const authed_user = verifyAccessToken(verification.access_token);
+  const githubUser = await verifyAccessToken(verification.access_token);
 
-  if (authed_user) {
-    auth({ me: authed_user.login, github: verification.access_token }, res);
+  if (githubUser) {
+    const signedSession = await createSession({ githubUser: githubUser.login });
 
     res.statusCode = 303;
+
+    res.setHeader(
+      "Set-Cookie",
+      cookie.serialize("session", signedSession, {
+        httpOnly: true,
+        maxAge: 60 * 60 * 24 * 7,
+        path: "/",
+      })
+    );
+
     res.setHeader(
       "Location",
       query.next && query.next.startsWith("/backstage")
@@ -69,17 +133,4 @@ module.exports = async (req, res) => {
   }
 
   return "fail";
-
-  // if (verification.me === query.me) {
-  //   auth({ me: verification.me }, res);
-
-  //   return `ok: ${verification.me} <a href="${url.resolve(
-  //     req.absolute,
-  //     "/backstage"
-  //   )}">backstage</a>`;
-  // } else {
-  //   console.log(verification);
-
-  //   return "fail";
-  // }
 };

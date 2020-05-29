@@ -14,7 +14,7 @@ const fsPromises = {
   readFile: promisify(fs.readFile),
   copyFile: promisify(fs.copyFile),
 };
-const { authed, sendToAuthProvider } = require("./auth.js");
+const { getSession, sendToAuthProvider } = require("./auth.js");
 const { convertMedia, getConversionTags } = require("./convert.js");
 const { DIST, getMimeObj, embedCallback } = require("../common.js");
 const { render } = require("./render.js");
@@ -99,9 +99,8 @@ async function openFileMedia(src, filePath, db) {
 
 const mediaId = {
   get: async (req, res) => {
-    const user = authed(req, res);
-
-    if (!user) {
+    const session = await getSession(req, res);
+    if (!session) {
       return sendToAuthProvider(req, res);
     }
 
@@ -183,7 +182,6 @@ const mediaId = {
     }
 
     return render("media-id.mustache", {
-      user: user,
       posts: posts,
       existingConversions: existingConversions,
       possibleConversions: possibleConversions,
@@ -199,9 +197,8 @@ const mediaId = {
     });
   },
   post: async (req, res) => {
-    const user = authed(req, res);
-
-    if (!user) {
+    const session = await getSession(req, res);
+    if (!session) {
       return sendToAuthProvider(req, res);
     }
 
@@ -330,9 +327,8 @@ module.exports = {
       return await mediaId.get(req, res);
     }
 
-    const user = authed(req, res);
-
-    if (!user) {
+    const session = await getSession(req, res);
+    if (!session) {
       return sendToAuthProvider(req, res);
     }
 
@@ -342,7 +338,6 @@ module.exports = {
     const template = query.bar ? "media-bar.mustache" : "media.mustache";
 
     return render(template, {
-      user: user,
       ...(await module.exports.getJson(db, { offset })),
     });
   },
@@ -352,9 +347,8 @@ module.exports = {
       return await mediaId.post(req, res);
     }
 
-    const user = authed(req, res);
-
-    if (!user) {
+    const session = await getSession(req, res);
+    if (!session) {
       return sendToAuthProvider(req, res);
     }
 

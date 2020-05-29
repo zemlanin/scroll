@@ -1,6 +1,6 @@
 const url = require("url");
 const multiparty = require("multiparty");
-const { verifyCode } = require("./indielogin-token.js");
+const { getSession } = require("./auth.js");
 const { getPostId } = require("./edit.js");
 
 function processJSON(body) {
@@ -77,16 +77,8 @@ async function createPost(db, { id, title, text, slug }) {
 
 module.exports = {
   async get(req, res) {
-    const authorization = req.headers.authorization || "";
-
-    if (!authorization.startsWith("Bearer ")) {
-      res.statusCode = 403;
-      return "403";
-    }
-
-    const bearer = authorization.slice("Bearer ".length);
-
-    if (!verifyCode(bearer)) {
+    const session = await getSession(req, res);
+    if (!session) {
       res.statusCode = 403;
       return "403";
     }
@@ -108,6 +100,12 @@ module.exports = {
     if (!contentType) {
       res.statusCode = 400;
       return `400`;
+    }
+
+    const session = await getSession(req, res);
+    if (!session) {
+      res.statusCode = 403;
+      return "403";
     }
 
     if (contentType.startsWith("multipart/form-data")) {

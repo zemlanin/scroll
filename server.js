@@ -14,7 +14,7 @@ const UrlPattern = require("url-pattern");
 
 require("dotenv").config();
 
-const { DIST, POSTS_DB, PORT, loadIcu } = require("./common.js");
+const { DIST, POSTS_DB, SESSIONS_DB, PORT, loadIcu } = require("./common.js");
 
 function write404(req, res) {
   if (!res.finished) {
@@ -247,12 +247,15 @@ const server = http.createServer((req, res) => {
 
     let db;
     req.db = async () => {
-      return (
-        db ||
-        (db = await sqlite
+      if (!db) {
+        db = await sqlite
           .open({ filename: POSTS_DB, driver: sqlite3.Database })
-          .then(loadIcu))
-      );
+          .then(loadIcu);
+
+        res.on("finish", () => db.close());
+      }
+
+      return db;
     };
 
     let result;
@@ -295,7 +298,6 @@ const server = http.createServer((req, res) => {
           res.end();
         }
       })
-      .then(() => db && db.close())
       .catch((err) => {
         if (!res.finished) {
           console.error(err);
@@ -303,21 +305,32 @@ const server = http.createServer((req, res) => {
           res.writeHead(500, { "Content-Type": "text/plain" });
           res.end("500");
         }
-
-        return db && db.close();
       });
   }
 });
 
 function start() {
-  sqlite
-    .open({ filename: POSTS_DB, driver: sqlite3.Database })
-    .then((db) => loadIcu(db))
-    .then((db) =>
-      db.migrate({
+  Promise.resolve()
+    .then(async () => {
+      const db = await sqlite.open({
+        filename: POSTS_DB,
+        driver: sqlite3.Database,
+      });
+      await loadIcu(db);
+      await db.migrate({
         migrationsPath: path.resolve(__dirname, "migrations/posts"),
-      })
-    )
+      });
+    })
+    .then(async () => {
+      const sessionsDb = await sqlite.open({
+        filename: SESSIONS_DB,
+        driver: sqlite3.Database,
+      });
+
+      await sessionsDb.migrate({
+        migrationsPath: path.resolve(__dirname, "migrations/sessions"),
+      });
+    })
     .then(() => {
       server.on("clientError", (err, socket) => {
         socket.end("HTTP/1.1 400 Bad Request\r\n\r\n");

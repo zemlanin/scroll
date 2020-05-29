@@ -13,6 +13,7 @@ module.exports = {
     const tokenSession = await createSession({
       githubUser: session.githubUser,
       micropub: {
+        me: query.me,
         scope: query.scope,
       },
     });

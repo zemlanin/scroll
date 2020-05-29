@@ -300,7 +300,9 @@ function start({ only } = {}) {
     .then((db) => loadIcu(db))
     .then((db) =>
       db
-        .migrate({ migrationsPath: path.resolve(__dirname, "migrations") })
+        .migrate({
+          migrationsPath: path.resolve(__dirname, "migrations/posts"),
+        })
         .then(() =>
           generate(db, DIST, process.stdout, process.stderr, { only })
         )

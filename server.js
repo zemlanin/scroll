@@ -314,7 +314,9 @@ function start() {
     .open({ filename: POSTS_DB, driver: sqlite3.Database })
     .then((db) => loadIcu(db))
     .then((db) =>
-      db.migrate({ migrationsPath: path.resolve(__dirname, "migrations") })
+      db.migrate({
+        migrationsPath: path.resolve(__dirname, "migrations/posts"),
+      })
     )
     .then(() => {
       server.on("clientError", (err, socket) => {

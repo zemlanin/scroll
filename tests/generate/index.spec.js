@@ -50,7 +50,9 @@ test("empty database", async (t) => {
     filename: ":memory:",
     driver: sqlite3.Database,
   });
-  await db.migrate();
+  await db.migrate({
+    migrationsPath: path.resolve(__dirname, "../../migrations/posts"),
+  });
 
   const tmpFolder = await fs.promises.mkdtemp(
     path.join(os.tmpdir(), "scroll-tests-")
@@ -66,7 +68,9 @@ test("internal page", async (t) => {
     filename: ":memory:",
     driver: sqlite3.Database,
   });
-  await db.migrate();
+  await db.migrate({
+    migrationsPath: path.resolve(__dirname, "../../migrations/posts"),
+  });
 
   await db.run(
     `
@@ -126,7 +130,9 @@ test("database with posts and embeds", async (t) => {
     filename: ":memory:",
     driver: sqlite3.Database,
   });
-  await db.migrate();
+  await db.migrate({
+    migrationsPath: path.resolve(__dirname, "../../migrations/posts"),
+  });
 
   await db.run(
     `
@@ -259,7 +265,9 @@ test("opengraph", async (t) => {
     filename: ":memory:",
     driver: sqlite3.Database,
   });
-  await db.migrate();
+  await db.migrate({
+    migrationsPath: path.resolve(__dirname, "../../migrations/posts"),
+  });
 
   await db.run(
     `

@@ -1,11 +1,6 @@
 const fs = require("fs");
 const url = require("url");
 const path = require("path");
-const { promisify } = require("util");
-
-const fsPromises = {
-  readFile: promisify(fs.readFile),
-};
 
 const mime = require("mime");
 const cheerio = require("cheerio");
@@ -43,18 +38,14 @@ const CARD_TEMPLATE_PATH = path.resolve(
     https://soundcloud.com/fairtomidland/the-greener-grass
 */
 
-async function loadCardTemplate() {
-  if (process.env.NODE_ENV === "development") {
-    return (await fsPromises.readFile(CARD_TEMPLATE_PATH)).toString();
-  }
-
-  if (loadCardTemplate.cache) {
+function loadCardTemplate() {
+  if (loadCardTemplate.cache && process.env.NODE_ENV !== "development") {
     return loadCardTemplate.cache;
   }
 
-  return (loadCardTemplate.cache = (
-    await fsPromises.readFile(CARD_TEMPLATE_PATH)
-  ).toString());
+  return (loadCardTemplate.cache = fs
+    .readFileSync(CARD_TEMPLATE_PATH)
+    .toString());
 }
 loadCardTemplate.cache = "";
 
@@ -454,7 +445,7 @@ async function getSingleEmbed(req, _res) {
 
     mimetype = cardWithMetadata ? cardWithMetadata.mimetype : null;
     cardHTML = cardWithMetadata
-      ? await module.exports.renderCard(cardWithMetadata)
+      ? module.exports.renderCard(cardWithMetadata)
       : null;
 
     requested = {
@@ -466,7 +457,7 @@ async function getSingleEmbed(req, _res) {
     mimetype = existingEmbed.mimetype;
     rawMetadata = existingEmbed.raw_metadata;
     const cardWithMetadata = module.exports.generateCardJSON(rawMetadata);
-    cardHTML = await module.exports.renderCard(cardWithMetadata);
+    cardHTML = module.exports.renderCard(cardWithMetadata);
   }
 
   return render("embed.mustache", {
@@ -498,16 +489,16 @@ async function getEmbedsList(req, _res) {
     embeds = (
       await db.all(
         `
-      SELECT
-        original_url,
-        strftime('%s000', created) created,
-        mimetype,
-        raw_metadata
-      FROM embeds
-      WHERE instr(original_url, ?3)
-      ORDER BY datetime(created) DESC, original_url DESC
-      LIMIT ?2 OFFSET ?1
-    `,
+          SELECT
+            original_url,
+            strftime('%s000', created) created,
+            mimetype,
+            raw_metadata
+          FROM embeds
+          WHERE instr(original_url, ?3)
+          ORDER BY datetime(created) DESC, original_url DESC
+          LIMIT ?2 OFFSET ?1
+        `,
         {
           1: offset,
           2: PAGE_SIZE + 1,
@@ -519,15 +510,15 @@ async function getEmbedsList(req, _res) {
     embeds = (
       await db.all(
         `
-      SELECT
-        original_url,
-        strftime('%s000', created) created,
-        mimetype,
-        raw_metadata
-      FROM embeds
-      ORDER BY datetime(created) DESC, original_url DESC
-      LIMIT ?2 OFFSET ?1
-    `,
+          SELECT
+            original_url,
+            strftime('%s000', created) created,
+            mimetype,
+            raw_metadata
+          FROM embeds
+          ORDER BY datetime(created) DESC, original_url DESC
+          LIMIT ?2 OFFSET ?1
+        `,
         { 1: offset, 2: PAGE_SIZE + 1 }
       )
     ).map(prepareEmbed);
@@ -844,7 +835,7 @@ module.exports = {
 
     return card;
   },
-  renderCard: async (card) => {
+  renderCard: (card) => {
     if (!card) {
       return "";
     }
@@ -873,7 +864,7 @@ module.exports = {
       return "";
     }
 
-    return await mustache.render(await loadCardTemplate(), { card });
+    return mustache.render(loadCardTemplate(), { card });
   },
 
   post: async (req, res) => {

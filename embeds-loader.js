@@ -1,3 +1,4 @@
+const merge = require("lodash.merge");
 const cheerio = require("cheerio");
 
 const load = cheerio.load;
@@ -45,19 +46,17 @@ module.exports = class EmbedsLoader {
   }
 
   async query(urls) {
-    const urlsToQuery = urls.filter((u) => !this.cache[u]);
+    for (const url of urls) {
+      if (!url || this.cache[url]) {
+        continue;
+      }
 
-    for (const url of urlsToQuery) {
       const embedFromDB = await queryEmbed(this.db, url);
       if (embedFromDB) {
-        this.cache[url] = await renderCard(
-          generateCardJSON(embedFromDB.raw_metadata)
-        );
+        this.cache[url] = generateCardJSON(embedFromDB.raw_metadata);
+        continue;
       }
-    }
 
-    const urlsToRequest = urlsToQuery.filter((u) => !this.cache[u]);
-    for (const url of urlsToRequest) {
       let raw_metadata;
 
       try {
@@ -81,8 +80,6 @@ module.exports = class EmbedsLoader {
         continue;
       }
 
-      const rendered_html = await renderCard(cardWithMetadata);
-
       if (this.insertOnLoad) {
         await this.db.run(
           `INSERT INTO embeds
@@ -97,7 +94,7 @@ module.exports = class EmbedsLoader {
         );
       }
 
-      this.cache[url] = rendered_html;
+      this.cache[url] = cardWithMetadata;
     }
   }
 
@@ -121,8 +118,17 @@ module.exports = class EmbedsLoader {
 
     $("x-embed").each(function () {
       const $this = $(this);
-      const { href, text } = JSON.parse($this.text());
-      $this.replaceWith(cache[href] || `<a href="${href}">${text || href}</a>`);
+      const embed = JSON.parse($this.text());
+
+      if (cache[embed.href]) {
+        const card = cache[embed.href];
+
+        $this.replaceWith(renderCard(merge({}, card, embed.card)));
+        return;
+      }
+
+      const { href, text } = embed;
+      $this.replaceWith(`<a href="${href}">${text || href}</a>`);
     });
 
     return $("body").html();

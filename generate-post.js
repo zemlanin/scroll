@@ -47,11 +47,13 @@ function getPostsQuery(where, limit) {
 async function getPosts(db, params, where, limit) {
   const embedsLoader = new EmbedsLoader(db);
 
-  return Promise.all(
-    (await db.all(getPostsQuery(where, limit), params)).map((row) =>
-      prepare(row, embedsLoader)
-    )
-  );
+  const posts = [];
+
+  for (const row of await db.all(getPostsQuery(where, limit), params)) {
+    posts.push(await prepare(row, embedsLoader));
+  }
+
+  return posts;
 }
 
 async function getPost(db, postId) {

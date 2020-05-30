@@ -6,6 +6,9 @@ const test = require("tape-promise/tape");
 const sqlite = require("sqlite");
 const sqlite3 = require("sqlite3");
 const mockery = require("mockery");
+const cheerio = require("cheerio");
+
+require("../equal-html.js");
 
 const noopStream = new require("stream").Writable({
   write(chunk, encoding, callback) {
@@ -257,6 +260,76 @@ test("database with posts and embeds", async (t) => {
     post9.indexOf(`<ul data-gallery`) > -1,
     post9.split("\n").find((line) => line.indexOf("<ul data-gallery") > -1) ||
       post9.match(/<article>([\s\S]+)<\/article>/i)[1].trim()
+  );
+});
+
+test("database with patched embeds", async (t) => {
+  const db = await sqlite.open({
+    filename: ":memory:",
+    driver: sqlite3.Database,
+  });
+  await db.migrate({
+    migrationsPath: path.resolve(__dirname, "../../migrations/posts"),
+  });
+
+  await db.run(
+    `
+    INSERT INTO posts
+      (id, text)
+    VALUES
+      ("patched-10", ?10),
+      ("patched-11", ?11);
+  `,
+    {
+      10: '```embed\n{"href": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "card": {}}\n```',
+      11: '```embed\n{"href": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "card": {"img": {"src": "https://youtube.example/media/rickroll.jpg"}}}\n```',
+    }
+  );
+
+  const tmpFolder = await fs.promises.mkdtemp(
+    path.join(os.tmpdir(), "scroll-tests-")
+  );
+
+  await generate(db, tmpFolder, noopStream, noopStream);
+
+  const post10 = (
+    await fs.promises.readFile(path.join(tmpFolder, "patched-10.html"))
+  ).toString();
+  t.equalHtml(
+    cheerio(".card", post10).html(),
+    `
+      <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.com/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
+        <img
+          alt="Rick Astley - Never Gonna Give You Up (Video)"
+          src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
+        />
+      </a>
+
+      <figcaption>
+        <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"><b>Rick Astley - Never Gonna Give You Up (Video)</b> • YouTube<br /></a>
+        <i class="truncated">Rick Astley - Never Gonna Give You Up (Official Video) - Listen On Spotify: http://smarturl.it/AstleySpotify Learn more about the brand new album ‘Beautiful ...</i>
+      </figcaption>
+    `
+  );
+
+  const post11 = (
+    await fs.promises.readFile(path.join(tmpFolder, "patched-11.html"))
+  ).toString();
+  t.equalHtml(
+    cheerio(".card", post11).html(),
+    `
+      <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.com/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
+        <img
+          alt="Rick Astley - Never Gonna Give You Up (Video)"
+          src="https://youtube.example/media/rickroll.jpg"
+        />
+      </a>
+
+      <figcaption>
+        <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"><b>Rick Astley - Never Gonna Give You Up (Video)</b> • YouTube<br /></a>
+        <i class="truncated">Rick Astley - Never Gonna Give You Up (Official Video) - Listen On Spotify: http://smarturl.it/AstleySpotify Learn more about the brand new album ‘Beautiful ...</i>
+      </figcaption>
+    `
   );
 });
 

@@ -30,6 +30,7 @@
     "highlight.js": "^10.0.3",
     "lodash.chunk": "^4.2.0",
     "lodash.groupby": "^4.6.0",
+    "lodash.merge": "^4.6.2",
     "marked": "^1.1.0",
     "mime": "^2.4.5",
     "multiparty": "^4.2.1",

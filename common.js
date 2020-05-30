@@ -98,6 +98,13 @@ function prefixOwnMedia(href) {
 }
 
 function localEmbed(embed) {
+  if (embed.card) {
+    return `<x-embed>${JSON.stringify({
+      card: embed.card,
+      href: embed.href,
+    })}</x-embed>`;
+  }
+
   const href = prefixOwnMedia(embed.href);
 
   const mimeObj = getMimeObj(href);

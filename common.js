@@ -120,7 +120,9 @@ function localEmbed(embed) {
         attrs += `title="${embed.title
           .replace(/&/g, "&amp;")
           .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")}" `;
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&apos;")}" `;
       }
 
       const isOwnGIFV = hrefIsOwnMedia && href.indexOf("/gifv.mp4") > -1;
@@ -179,7 +181,9 @@ function localEmbed(embed) {
           `<tspan x="80" dy="12" fill="#00a500" text-anchor="middle">${embed.title
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")}</tspan>`,
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&apos;")}</tspan>`,
           ...lines.slice(3, 6),
         ];
       }
@@ -240,6 +244,8 @@ function getAttr(rawAttrs, attr) {
     .slice(valueStart, valueEnd === -1 ? undefined : valueEnd)
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, `"`)
+    .replace(/&apos;/g, `'`)
     .replace(/&amp;/g, "&");
 }
 

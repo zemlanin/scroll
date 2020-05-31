@@ -281,8 +281,8 @@ test("database with patched embeds", async (t) => {
       ("patched-11", ?11);
   `,
     {
-      10: '```embed\n{"href": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "card": {}}\n```',
-      11: '```embed\n{"href": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "card": {"img": {"src": "https://youtube.example/media/rickroll.jpg"}}}\n```',
+      10: "```embed\nhttps://www.youtube.com/watch?v=dQw4w9WgXcQ\n```",
+      11: "```embed\nhttps://www.youtube.com/watch?v=dQw4w9WgXcQ\n  poster: https://youtube.example/media/rickroll.jpg\n```",
     }
   );
 

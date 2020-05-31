@@ -463,7 +463,8 @@ test("embed code block", async (t) => {
           \`\`\`
 
           \`\`\`embed
-          {"video": { "poster": "/media/x/fit1000.png" }, "href": "/media/x/gifv.mp4" }
+          /media/x/gifv.mp4
+            poster: /media/x/fit1000.png
           \`\`\`
 
           \`\`\`embed
@@ -471,7 +472,8 @@ test("embed code block", async (t) => {
           \`\`\`
 
           \`\`\`embed
-          {"pdf": { "poster": "/media/z/fit700.png" }, "href": "/media/z.pdf" }
+          /media/z.pdf
+            poster: /media/z/fit700.png
           \`\`\`
 
           \`\`\`embed
@@ -479,7 +481,8 @@ test("embed code block", async (t) => {
           \`\`\`
 
           \`\`\`embed
-          {"title": "time-stamp", "href": "data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0+e2xldCBiLGM9Xz0+e2Eud2lkdGg9ZS5jbGllbnRXaWR0aCxiPWEuZ2V0Q29udGV4dCgnMmQnKSxiLmZvbnQ9JzQ4cHggTWVubG8nfSxkPShnLGgsaixrPTYsbD00NCk9PntiLmZpbGxTdHlsZT0nIzBhMCcsYi5maWxsUmVjdCgwLDAsYS53aWR0aCxhLmhlaWdodCksYi5maWxsU3R5bGU9JyNmZmYnO2ZvcihoIG9mIGcuc3BsaXQoJyAnKSlqPTI4LjkqaC5sZW5ndGgsNjxrJiZrK2o+PWEud2lkdGgmJihrPTYsbCs9NDgpLGIuZmlsbFRleHQoaCxrLGwpLGsrPWorMjguOTttLnNyYz1hLnRvRGF0YVVSTCgpfSxmPV89PmQoaS52YWx1ZXx8bmV3IERhdGUoKS50b0lTT1N0cmluZygpLnJlcGxhY2UoL1wuXGQrLywnJykpOyhvbnJlc2l6ZT1fPT5mKGMoKSkpKCksc2V0SW50ZXJ2YWwoaS5vbmlucHV0PWYsMWUzKX0pKGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2NhbnZhcycpKSI+PGlucHV0IGlkPWkgcGxhY2Vob2xkZXI9bGFiZWw+PGltZyBpZD1tPjxwIGlkPWU+" }
+          data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0+e2xldCBiLGM9Xz0+e2Eud2lkdGg9ZS5jbGllbnRXaWR0aCxiPWEuZ2V0Q29udGV4dCgnMmQnKSxiLmZvbnQ9JzQ4cHggTWVubG8nfSxkPShnLGgsaixrPTYsbD00NCk9PntiLmZpbGxTdHlsZT0nIzBhMCcsYi5maWxsUmVjdCgwLDAsYS53aWR0aCxhLmhlaWdodCksYi5maWxsU3R5bGU9JyNmZmYnO2ZvcihoIG9mIGcuc3BsaXQoJyAnKSlqPTI4LjkqaC5sZW5ndGgsNjxrJiZrK2o+PWEud2lkdGgmJihrPTYsbCs9NDgpLGIuZmlsbFRleHQoaCxrLGwpLGsrPWorMjguOTttLnNyYz1hLnRvRGF0YVVSTCgpfSxmPV89PmQoaS52YWx1ZXx8bmV3IERhdGUoKS50b0lTT1N0cmluZygpLnJlcGxhY2UoL1wuXGQrLywnJykpOyhvbnJlc2l6ZT1fPT5mKGMoKSkpKCksc2V0SW50ZXJ2YWwoaS5vbmlucHV0PWYsMWUzKX0pKGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2NhbnZhcycpKSI+PGlucHV0IGlkPWkgcGxhY2Vob2xkZXI9bGFiZWw+PGltZyBpZD1tPjxwIGlkPWU+
+          - title: time-stamp
           \`\`\`
         `),
       id: "8d830862",

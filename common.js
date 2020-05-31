@@ -98,13 +98,6 @@ function prefixOwnMedia(href) {
 }
 
 function localEmbed(embed) {
-  if (embed.card) {
-    return `<x-embed>${JSON.stringify({
-      card: embed.card,
-      href: embed.href,
-    })}</x-embed>`;
-  }
-
   const href = prefixOwnMedia(embed.href);
 
   const mimeObj = getMimeObj(href);
@@ -112,19 +105,21 @@ function localEmbed(embed) {
   const hrefIsOwnMedia = isOwnMedia(href);
 
   if ((hrefIsOwnMedia && mimeObj.video) || embed.video) {
-    let { attrs } = embed.video || {};
+    let attrs;
 
-    if (!attrs) {
+    if (embed.attrs) {
+      attrs = embed.attrs;
+    } else {
       attrs = "";
 
-      const { gifv, poster } = embed.video || {};
+      const { gifv, poster, title } = embed;
 
       if (poster) {
         attrs += `poster="${prefixOwnMedia(poster)}" `;
       }
 
-      if (embed.title) {
-        attrs += `title="${embed.title
+      if (title) {
+        attrs += `title="${title
           .replace(/&/g, "&amp;")
           .replace(/</g, "&lt;")
           .replace(/>/g, "&gt;")
@@ -149,8 +144,8 @@ function localEmbed(embed) {
       href
     )}`;
 
-    if (embed.pdf && embed.pdf.poster) {
-      const imgSrc = prefixOwnMedia(embed.pdf.poster);
+    if (embed.poster) {
+      const imgSrc = prefixOwnMedia(embed.poster);
       return `<a class="future-frame" href="${href}" data-src="${frameSrc}">
         <img src="${imgSrc}" loading="lazy">
       </a>`;
@@ -166,12 +161,12 @@ function localEmbed(embed) {
     }
   }
 
-  if (hrefIsDataURI || embed.data) {
+  if (hrefIsDataURI) {
     const frameSrc = href;
     let imgSrc = null;
 
-    if (embed.data && embed.data.poster) {
-      imgSrc = prefixOwnMedia(embed.data.poster);
+    if (embed.poster) {
+      imgSrc = prefixOwnMedia(embed.poster);
     } else {
       let lines = [`<tspan x="0" dy="12">data:text/html</tspan>`].concat(
         frameSrc
@@ -225,7 +220,7 @@ function localEmbed(embed) {
     return `<iframe src="${href}" width="640" height="360" frameborder="0" loading="lazy"></iframe>`;
   }
 
-  return `<x-embed>${JSON.stringify({ href })}</x-embed>`;
+  return `<x-embed>${JSON.stringify(embed)}</x-embed>`;
 }
 
 function getAttr(rawAttrs, attr) {
@@ -272,10 +267,8 @@ function embedCallback(href, title, text) {
     return localEmbed({
       href,
       title: getAttr(attrs, "title"),
-      video: {
-        gifv: !!attrs.match(/(^|\s+)gifv($|\s+)/g),
-        poster: getAttr(attrs, "poster"),
-      },
+      gifv: !!attrs.match(/(^|\s+)gifv($|\s+)/g),
+      poster: getAttr(attrs, "poster"),
     });
   }
 
@@ -284,9 +277,7 @@ function embedCallback(href, title, text) {
 
     return localEmbed({
       href,
-      pdf: {
-        poster: getAttr(attrs, "poster"),
-      },
+      poster: getAttr(attrs, "poster"),
     });
   }
 
@@ -298,9 +289,7 @@ function embedCallback(href, title, text) {
     return localEmbed({
       href,
       title: poster ? "" : text,
-      data: {
-        poster: poster,
-      },
+      poster: poster,
     });
   }
 
@@ -316,9 +305,27 @@ renderer.code = function (code, infostring, escaped) {
   if (infostring === "embed") {
     const embeds = code
       .split("\n")
-      .map((l) => l.trim())
       .filter(Boolean)
-      .map((l) => (l.startsWith("{") ? JSON.parse(l) : { href: l }));
+      .reduce((acc, line) => {
+        if (line.startsWith("  ") || line.startsWith("- ")) {
+          const embed = acc.pop() || {};
+
+          const colonIndex = line.indexOf(":");
+
+          const [key, value] = [
+            line.slice(2, colonIndex).trim(),
+            line.slice(colonIndex + 1).trim(),
+          ];
+
+          embed[key] = value;
+
+          acc.push(embed);
+        } else {
+          acc.push({ href: line.trim() });
+        }
+
+        return acc;
+      }, []);
 
     if (embeds.length === 0) {
       return "";
@@ -344,7 +351,7 @@ renderer.code = function (code, infostring, escaped) {
     const title = $("title").text();
     const poster = $('meta[property="og:image"]').attr("content");
 
-    return `<p>${localEmbed({ href, title, data: { poster } })}</p>`;
+    return `<p>${localEmbed({ href, title, poster })}</p>`;
   }
 
   return ogCode(code, infostring, escaped);

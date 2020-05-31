@@ -818,19 +818,27 @@ module.exports = {
         card.img.alt = card.title;
       }
 
-      card.title = card.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      card.title = card.title
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
     }
 
     if (card.site_name) {
       card.site_name = card.site_name
         .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
     }
 
     if (card.description) {
       card.description = card.description
         .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
     }
 
     return card;
@@ -841,11 +849,15 @@ module.exports = {
     }
 
     if (card.mimetype === "image/gif" && card.video && card.video.src) {
-      return `<video playsinline autoplay muted loop src="${card.video.src}" title="${card.title}"></video>`;
+      return `<video playsinline autoplay muted loop src="${
+        card.video.src
+      }" title="${card.title || card.description || ""}"></video>`;
     }
 
     if (card.mimetype.startsWith("image/")) {
-      return `<img src="${card.url}" title="${card.title}" loading="lazy" />`;
+      return `<img src="${card.url}" title="${
+        card.title || card.description || ""
+      }" loading="lazy" />`;
     }
 
     if (card.mimetype.startsWith("video/")) {

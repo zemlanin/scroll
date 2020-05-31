@@ -1,4 +1,3 @@
-const merge = require("lodash.merge");
 const cheerio = require("cheerio");
 
 const load = cheerio.load;
@@ -36,6 +35,47 @@ const {
   renderCard,
   queryEmbed,
 } = require("./backstage/embeds.js");
+
+function overwriteFromEmbed(card, embed) {
+  let result = card;
+  if (embed.title) {
+    result = {
+      ...result,
+      title: embed.title,
+      img: {
+        ...result.img,
+        alt: embed.title,
+      },
+    };
+
+    if (result.img) {
+      result.img = {
+        ...result.img,
+        alt: embed.title,
+      };
+    }
+  }
+
+  if (embed.poster) {
+    result = {
+      ...result,
+      img: {
+        alt: result.img ? result.img.alt : embed.title || "",
+        src: embed.poster,
+      },
+    };
+  }
+
+  if (embed.description) {
+    result = {
+      ...result,
+      description: embed.description,
+      _truncateDescription: false,
+    };
+  }
+
+  return result;
+}
 
 module.exports = class EmbedsLoader {
   constructor(db, insertOnLoad = true) {
@@ -104,7 +144,13 @@ module.exports = class EmbedsLoader {
     const urlsToLoad = [];
 
     $("x-embed").each(function () {
-      const { href } = JSON.parse($(this).text());
+      const $this = $(this);
+
+      if (!$this.text()) {
+        return;
+      }
+
+      const { href } = JSON.parse($this.text());
       urlsToLoad.push(href);
     });
 
@@ -118,12 +164,16 @@ module.exports = class EmbedsLoader {
 
     $("x-embed").each(function () {
       const $this = $(this);
+      if (!$this.text()) {
+        return;
+      }
+
       const embed = JSON.parse($this.text());
 
       if (cache[embed.href]) {
-        const card = cache[embed.href];
+        const card = overwriteFromEmbed(cache[embed.href], embed);
 
-        $this.replaceWith(renderCard(merge({}, card, embed.card)));
+        $this.replaceWith(renderCard(card));
         return;
       }
 

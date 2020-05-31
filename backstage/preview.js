@@ -65,9 +65,6 @@ module.exports = async (req, res) => {
 
     if (dbPost) {
       post = dbPost;
-    } else {
-      res.statusCode = 404;
-      return `post not found`;
     }
   }
 
@@ -130,7 +127,7 @@ module.exports = async (req, res) => {
   const showDiff = (req.post && req.post.diff) || query.diff;
 
   if (showDiff) {
-    if (!existingPostId) {
+    if (!post) {
       res.statusCode = 400;
       return `nothing to diff`;
     }
@@ -138,7 +135,7 @@ module.exports = async (req, res) => {
     let existingPost;
     const postFilename = post.internal
       ? `${post.slug}.html`
-      : `${existingPostId}.html`;
+      : `${post.id}.html`;
 
     try {
       existingPost = fs.readFileSync(path.join(DIST, postFilename)).toString();

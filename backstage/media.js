@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const { promisify } = require("util");
 const mime = require("mime");
-const multiparty = require("multiparty");
+const formidable = require("formidable");
 
 const fsPromises = {
   exists: promisify(fs.exists),
@@ -353,7 +353,7 @@ module.exports = {
     }
 
     const { files } = await new Promise((resolve, reject) => {
-      const form = new multiparty.Form();
+      const form = formidable({ multiples: true });
       form.parse(req, (err, fields, files) => {
         if (err) {
           return reject(err);
@@ -366,7 +366,7 @@ module.exports = {
     const db = await req.db();
     let lastMedia = null;
     for (const f of files.files) {
-      const src = `:upload/size-${f.headers.size}/${f.originalFilename}`;
+      const src = `:upload/size-${f.size}/${f.name}`;
       lastMedia = await openFileMedia(src, f.path, db);
       await fsPromises.unlink(f.path);
     }

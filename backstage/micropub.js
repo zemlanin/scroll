@@ -1,5 +1,5 @@
 const url = require("url");
-const multiparty = require("multiparty");
+const formidable = require("formidable");
 const { getSession } = require("./auth.js");
 const { getPostId } = require("./edit.js");
 
@@ -110,7 +110,7 @@ module.exports = {
 
     if (contentType.startsWith("multipart/form-data")) {
       const multipart = await new Promise((resolve, reject) => {
-        const form = new multiparty.Form();
+        const form = formidable({ multiples: true });
         form.parse(req, (err, fields, files) => {
           if (err) {
             return reject(err);

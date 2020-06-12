@@ -89,15 +89,15 @@
 
       <form id="night-mode" action="javascript:void(0)">
         <label title="Night Mode: on">
-          <input type="radio" name="night-mode" value="on">
+          <input type="radio" name="night-mode" value="on" aria-label="Night Mode: on">
           {{#fas}}moon{{/fas}}
         </label>
         <label title="Night Mode: default">
-          <input type="radio" name="night-mode" value="system" checked>
+          <input type="radio" name="night-mode" value="system" aria-label="Night Mode: default" checked>
           {{#fas}}adjust{{/fas}}
         </label>
         <label title="Night Mode: off">
-          <input type="radio" name="night-mode" value="off">
+          <input type="radio" name="night-mode" value="off" aria-label="Night Mode: off">
           {{#fas}}sun{{/fas}}
         </label>
       </form>

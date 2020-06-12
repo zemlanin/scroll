@@ -114,6 +114,7 @@ module.exports = async (req, res) => {
             internal,
             private,
             (NOT draft AND NOT internal AND NOT private) public,
+            lang,
             text,
             strftime('%s000', created) created,
             strftime('%s000', modified) modified
@@ -135,6 +136,7 @@ module.exports = async (req, res) => {
         internal,
         private,
         (NOT draft AND NOT internal AND NOT private) public,
+        lang,
         text,
         strftime('%s000', created) created,
         strftime('%s000', modified) modified

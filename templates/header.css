@@ -234,6 +234,18 @@ article a.future-frame:after {
   background: var(--color-card-border);
 }
 
+[lang="en"] a.future-frame:after {
+  content: "▶ play";
+}
+
+[lang="ru"] a.future-frame:after {
+  content: "▶ запустить";
+}
+
+[lang="uk"] a.future-frame:after {
+  content: "▶ виконати";
+}
+
 article a.future-frame:hover:after {
   color: white;
   color: var(--color-card-hover);

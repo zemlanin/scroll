@@ -54,6 +54,7 @@ module.exports = async (req, res) => {
           internal,
           private,
           (NOT draft AND NOT internal AND NOT private) public,
+          lang,
           text,
           strftime('%s000', created) created,
           strftime('%s000', modified) modified
@@ -71,6 +72,7 @@ module.exports = async (req, res) => {
   if (req.method === "POST") {
     post.text = req.post.text;
     post.created = +new Date(req.post.created);
+    post.lang = req.post.lang || null;
   }
 
   if (post.text == undefined) {
@@ -116,6 +118,7 @@ module.exports = async (req, res) => {
 
   if (showTeaser) {
     return blogRender("list.mustache", {
+      index: true,
       blog: blog,
       posts: [preparedPost],
       url: preparedPost.url,
@@ -200,6 +203,7 @@ module.exports = async (req, res) => {
   }
 
   return blogRender("post.mustache", {
+    lang: post.lang,
     blog: blog,
     title: preparedPost.title,
     post: preparedPost,

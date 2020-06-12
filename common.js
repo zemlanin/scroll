@@ -812,6 +812,7 @@ async function prepare(post, embedsLoader) {
     longread,
     rss,
     opengraph,
+    lang: post.lang,
     text: post.text,
     created: created.toISOString().replace(/\.\d{3}Z$/, "Z"),
     createdDate: created.toISOString().split("T")[0],
@@ -830,8 +831,9 @@ async function getBlogObject(baseUrl) {
   return {
     title: BLOG_TITLE,
     url: url.resolve(baseUrl, "/"),
+    lang: "ru",
     feed: {
-      description: `Everything feed - ${BLOG_TITLE}`,
+      description: BLOG_TITLE,
       url: url.resolve(baseUrl, "/rss.xml"),
     },
     static: {

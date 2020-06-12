@@ -162,7 +162,19 @@
     </nav>
     <form method="POST" id="main-form">
         <input type="hidden" name="id" value="{{post.id}}">
-        <div class="field is-horizontal has-addons">
+        <div class="field is-horizontal" style="justify-content: space-between; display: flex; flex-flow: row wrap">
+          <div class="control">
+            <div class="select">
+              <select name="lang">
+                <option value="">lang</option>
+                <option value="ru" {{#post.lang=ru}}selected{{/post.lang=ru}}>ru</option>
+                <option value="en" {{#post.lang=en}}selected{{/post.lang=en}}>en</option>
+                <option value="uk" {{#post.lang=uk}}selected{{/post.lang=uk}}>uk</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="field is-horizontal has-addons" style="flex-grow: 1; padding-left: 0.5em;">
             <div class="control">
                 {{#post.slug}}
                     <a href="/{{post.slug}}.html" target="_blank" class="button">/</a>
@@ -202,6 +214,7 @@
                     </a>
                 </div>
             {{/post.internal}}
+          </div>
         </div>
         <textarea
             name="text"
@@ -228,11 +241,12 @@
             <div class="field has-addons">
                 <div class="control">
                 <input
-                    type="datetime-local"
-                    name="created"
-                    value="{{post.created}}"
-                    class="input"
-                    pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}"
+                  type="datetime-local"
+                  name="created"
+                  value="{{post.created}}"
+                  class="input"
+                  style="width: 17ch;"
+                  pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}"
                 />
                 </div>
                 <div class="control">

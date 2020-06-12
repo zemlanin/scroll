@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html prefix="og: http://ogp.me/ns#" xmlns:og="http://opengraphprotocol.org/schema/">
+<html lang="{{#lang}}{{lang}}{{/lang}}{{^lang}}{{blog.lang}}{{/lang}}" prefix="og: http://ogp.me/ns#" xmlns:og="http://opengraphprotocol.org/schema/">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -35,7 +35,10 @@
     {{/internal}}
   {{/post}}
   <title>
-    {{#title}}{{title}} - {{/title}}
+    {{#post}}{{#title}}{{title}} - {{/title}}{{/post}}
+    {{#index}}{{!intentionally left blank}}{{/index}}
+    {{#pagination}}{{#t}}page {{number}}{{/t}} -{{/pagination}}
+    {{#archive}}{{#t}}archive{{/t}} -{{/archive}}
     {{blog.title}}
   </title>
   <style type="text/css">
@@ -74,30 +77,36 @@
           <a href="{{{blog.url}}}">{{blog.title}}</a>
         </h1>
       {{/index}}
-      {{^index}}
+      {{#pagination}}
         <h2>
           <a href="{{{blog.url}}}">{{blog.title}}</a>
-          {{#title}}&nbsp;<span>/ <a href="{{{url}}}">{{title}}</a></span>{{/title}}
+          &nbsp;<span>/ <a href="{{{url}}}">{{#t}}page {{number}}{{/t}}</a></span>
         </h2>
-      {{/index}}
+      {{/pagination}}
+      {{#archive}}
+        <h2>
+          <a href="{{{blog.url}}}">{{blog.title}}</a>
+          &nbsp;<span>/ <a href="{{{url}}}">{{#t}}archive{{/t}}</a></span>
+        </h2>
+      {{/archive}}
     {{/post}}
 
-    <details id="settings-icon" class="print:hidden" title="Settings">
+    <details id="settings-icon" class="print:hidden" title="{{#t}}Settings{{/t}}">
       <summary>
         {{#fas}}sliders-h{{/fas}}
       </summary>
 
       <form id="night-mode" action="javascript:void(0)">
-        <label title="Night Mode: on">
-          <input type="radio" name="night-mode" value="on" aria-label="Night Mode: on">
+        <label title="{{#t}}Dark theme{{/t}}">
+          <input type="radio" name="night-mode" value="on" aria-label="{{#t}}Dark theme{{/t}}">
           {{#fas}}moon{{/fas}}
         </label>
-        <label title="Night Mode: default">
-          <input type="radio" name="night-mode" value="system" aria-label="Night Mode: default" checked>
+        <label title="{{#t}}Default theme{{/t}}">
+          <input type="radio" name="night-mode" value="system" aria-label="{{#t}}Default theme{{/t}}" checked>
           {{#fas}}adjust{{/fas}}
         </label>
-        <label title="Night Mode: off">
-          <input type="radio" name="night-mode" value="off" aria-label="Night Mode: off">
+        <label title="{{#t}}Light theme{{/t}}">
+          <input type="radio" name="night-mode" value="off" aria-label="{{#t}}Light theme{{/t}}">
           {{#fas}}sun{{/fas}}
         </label>
       </form>

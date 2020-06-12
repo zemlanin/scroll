@@ -73,6 +73,7 @@ module.exports = {
             internal,
             private,
             (NOT draft AND NOT internal AND NOT private) public,
+            lang,
             text,
             strftime('%s000', created) created,
             strftime('%s000', modified) modified
@@ -124,6 +125,10 @@ module.exports = {
       }
     }
 
+    post["lang=ru"] = post.lang === "ru";
+    post["lang=en"] = post.lang === "en";
+    post["lang=uk"] = post.lang === "uk";
+
     const mediaJson = await getMediaJson(db, { offset: 0 });
 
     return render("edit.mustache", {
@@ -169,6 +174,7 @@ module.exports = {
             internal,
             private,
             (NOT draft AND NOT internal AND NOT private) public,
+            lang,
             text,
             strftime('%s000', created) created,
             strftime('%s000', modified) modified
@@ -198,6 +204,12 @@ module.exports = {
     }
 
     post.text = req.post.text;
+
+    if (req.post.lang) {
+      post.lang = req.post.lang;
+    } else if (post.lang) {
+      post.lang = null;
+    }
 
     if (req.post.slug) {
       post.slug = req.post.slug;
@@ -234,6 +246,7 @@ module.exports = {
           draft = ?3,
           internal = ?6,
           private = ?4,
+          lang = ?9,
           text = ?5,
           created = ?7,
           modified = ?8
@@ -247,13 +260,14 @@ module.exports = {
           6: post.internal,
           7: post.created.toISOString().replace(/\.\d{3}Z$/, "Z"),
           8: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+          9: post.lang || null,
         }
       );
     } else {
       await db.run(
         `INSERT INTO posts
-          (id, slug, draft, internal, private, text, created)
-          VALUES (?1, ?2, ?3, ?6, ?4, ?5, ?7)`,
+          (id, slug, draft, internal, private, lang, text, created)
+          VALUES (?1, ?2, ?3, ?6, ?4, ?9, ?5, ?7)`,
         {
           1: post.id,
           2: post.slug,
@@ -262,6 +276,7 @@ module.exports = {
           5: post.text,
           6: post.internal,
           7: post.created.toISOString().replace(/\.\d{3}Z$/, "Z"),
+          9: post.lang || null,
         }
       );
     }
@@ -277,6 +292,11 @@ module.exports = {
     }
 
     post.created = post.created.toISOString().replace(/:\d{2}\.\d{3}Z$/, "");
+
+    post["lang=ru"] = post.lang === "ru";
+    post["lang=en"] = post.lang === "en";
+    post["lang=uk"] = post.lang === "uk";
+
     const mediaJson = await getMediaJson(db, { offset: 0 });
 
     return render("edit.mustache", {

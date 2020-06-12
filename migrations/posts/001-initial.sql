@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS "posts" (
 	`private` BOOLEAN NOT NULL DEFAULT 0,
 	`created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	`modified` DATETIME,
+	-- alter table posts add column `lang` TEXT;
+	`lang` TEXT,
 	`text` TEXT NOT NULL,
 	`import_url` TEXT,
 	`import_raw` TEXT,

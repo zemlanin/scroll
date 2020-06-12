@@ -25,6 +25,7 @@ function getPostsQuery(where, limit) {
       internal,
       private,
       (NOT draft AND NOT internal AND NOT private) public,
+      lang,
       text,
       strftime('%s000', created) created,
       strftime('%s000', modified) modified
@@ -66,6 +67,7 @@ async function getPost(db, postId) {
 
 async function generatePostPage(post, blog) {
   return await render("post.mustache", {
+    lang: post.lang,
     blog: blog,
     title: post.title,
     post,
@@ -96,7 +98,6 @@ async function generatePaginationPage(
   );
 
   const pageUrl = `page-${pageNumber}.html`;
-  const title = `page-${pageNumber}`;
 
   const indexPageAsNewer =
     newestPage.index === pageNumber ||
@@ -106,19 +107,26 @@ async function generatePaginationPage(
 
   return await render("list.mustache", {
     blog,
-    title: title,
+    number: pageNumber,
+    pagination: true,
     url: pageUrl,
     posts: posts,
     newer: indexPageAsNewer
-      ? { text: `index`, url: blog.url }
+      ? {
+          lang: blog.lang,
+          isIndex: true,
+          url: blog.url,
+        }
       : {
-          text: `page-${pageNumber + 1}`,
+          lang: blog.lang,
+          number: pageNumber + 1,
           url: url.resolve(blog.url, `page-${pageNumber + 1}.html`),
         },
     older:
       pageNumber > 1
         ? {
-            text: `page-${pageNumber - 1}`,
+            lang: blog.lang,
+            number: pageNumber - 1,
             url: url.resolve(blog.url, `page-${pageNumber - 1}.html`),
           }
         : null,
@@ -147,7 +155,8 @@ async function generateIndexPage(db, blog, newestPage) {
     newer: null,
     older: olderPageIndex
       ? {
-          text: `page-${olderPageIndex}`,
+          lang: blog.lang,
+          number: olderPageIndex,
           url: url.resolve(blog.url, `page-${olderPageIndex}.html`),
         }
       : null,
@@ -218,7 +227,7 @@ async function generateArchivePage(db, blog) {
 
   return await render("archive.mustache", {
     blog,
-    title: "archive",
+    archive: true,
     url: "./archive.html",
     years,
   });

@@ -44,6 +44,56 @@ const jsProcess = (code) => {
 
 const cssProcess = (code) => cleanCSS.minify(code).styles;
 
+const translations = {
+  ru: {
+    archive: "архив",
+    play: "запустить",
+    Settings: "Настройки",
+    "Dark theme": "Тёмная тема",
+    "Default theme": "Тема по умолчанию",
+    "Light theme": "Светлая тема",
+    "page {{number}}": "страница {{number}}",
+    index: "главная",
+  },
+  uk: {
+    archive: "архів",
+    play: "виконати",
+    Settings: "Налаштування",
+    "Dark theme": "Темна тема",
+    "Default theme": "Тема за замовчуванням",
+    "Light theme": "Світла тема",
+    "page {{number}}": "сторінка {{number}}",
+    index: "головна",
+  },
+};
+
+function translate() {
+  const lang = this.lang || (this.blog && this.blog.lang);
+
+  if (lang === "en") {
+    return function (text, render) {
+      return render(text);
+    };
+  }
+
+  return function (text, render) {
+    const i18nKey = text;
+    const translation = translations[lang] && translations[lang][i18nKey];
+
+    if (translation) {
+      return render(translation);
+    }
+
+    if (lang === "en") {
+      return render(i18nKey);
+    }
+
+    throw new Error(
+      `No translation found for string "${i18nKey}" (lang: ${lang})`
+    );
+  };
+}
+
 async function blogRender(tmpl, data) {
   return mustache.render(
     await loadTemplate(path.resolve(BLOG_TEMPLATES, tmpl)),
@@ -51,6 +101,7 @@ async function blogRender(tmpl, data) {
       fas,
       far,
       fab,
+      t: translate,
       ...data,
     },
     {

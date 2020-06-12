@@ -1,15 +1,15 @@
   </main>
   <nav>
-    {{#newer}}<a href="{{{newer.url}}}">&larr; {{newer.text}}</a>{{/newer}}
+    {{#newer}}<a href="{{{newer.url}}}">&larr; {{#isIndex}}{{#t}}index{{/t}}{{/isIndex}}{{^isIndex}}{{#t}}page {{number}}{{/t}}{{/isIndex}}</a>{{/newer}}
     {{^newer}}<span></span>{{/newer}}
-    {{#older}}<a href="{{{older.url}}}" style="text-align: right;">{{older.text}} &rarr;</a>{{/older}}
+    {{#older}}<a href="{{{older.url}}}" style="text-align: right;">{{#t}}page {{number}}{{/t}} &rarr;</a>{{/older}}
     {{^older}}<span></span>{{/older}}
   </nav>
   <footer>
     <a href="https://anton.codes" rel="me">Anton Verinov</a>
     <a href="https://twitter.com/zemlanin" rel="me">@zemlanin</a>
     <br/><br/>
-    <a href="/archive.html">archive</a>
+    <a href="/archive.html">{{#t}}archive{{/t}}</a>
     <a href="{{{blog.feed.url}}}">rss</a>
     <a href="/backstage" rel="nofollow,noindex">
       <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" style="vertical-align:middle" viewBox="0 0 640 512"><path fill="rgba(192,192,192,0.5)" d="{{fas.door-open}}"></path></svg>

@@ -339,9 +339,7 @@ footer form input {
 }
 
 footer form button {
-  font-size: 0.8em;
   line-height: 0;
-  margin-left: 0.5em;
   background: none;
   border: 0;
   cursor: pointer;

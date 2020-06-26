@@ -310,7 +310,26 @@ footer::before {
 
 footer form {
   padding: 0.5em 0;
-  font-size: 0.9em;
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: center;
+}
+
+footer form input,
+footer form button {
+  border-radius: 0;
+}
+
+footer form button {
+  font-size: 0.8em;
+  margin-left: 0.5em;
+}
+
+footer form input {
+  width: 8em;
+  max-width: 16em;
+  flex-grow: 1;
 }
 
 nav {

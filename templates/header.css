@@ -293,13 +293,26 @@ article blockquote {
   border-left-color: var(--color-text-decoration);
 }
 
-nav,
 footer {
   margin-bottom: 1em;
 }
 
 footer {
+  display: flex;
+  flex-flow: column;
   text-align: center;
+}
+
+footer::before {
+  display: block;
+  margin: 0 1em;
+  content: "── ❧ ──";
+  color: 1px solid #dedede;
+  color: var(--color-card-border);
+}
+
+footer form {
+  padding: 0.5em 0;
 }
 
 nav {
@@ -462,8 +475,7 @@ footer a {
 nav a,
 footer a {
   display: inline-block;
-  padding-left: 1em;
-  padding-right: 1em;
+  margin: 0.5em 1em;
 }
 
 header {

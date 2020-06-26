@@ -47,6 +47,7 @@ const cssProcess = (code) => cleanCSS.minify(code).styles;
 const translations = {
   ru: {
     archive: "архив",
+    search: "поиск",
     play: "запустить",
     Settings: "Настройки",
     "Dark theme": "Тёмная тема",
@@ -57,6 +58,7 @@ const translations = {
   },
   uk: {
     archive: "архів",
+    search: "пошук",
     play: "виконати",
     Settings: "Налаштування",
     "Dark theme": "Темна тема",

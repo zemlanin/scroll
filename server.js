@@ -76,6 +76,24 @@ const handlers = [
   ],
   [
     "GET",
+    "/search",
+    async (req, res) => {
+      const { hostname } = url.parse(req.absolute);
+      const { query } = url.parse(req.url, true);
+      const q = query.q || "";
+      const location = new url.URL(
+        "?" +
+          new url.URLSearchParams({
+            q: `${q} site:${hostname}`,
+          }).toString(),
+        "https://duckduckgo.com"
+      ).toString();
+
+      res.writeHead(302, { Location: location });
+    },
+  ],
+  [
+    "GET",
     "/robots.txt",
     async (req, res) => {
       res.setHeader("content-type", "text/plain");

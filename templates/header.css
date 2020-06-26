@@ -7,11 +7,6 @@
   --color-card-hover: white;
   --color-card-caption-background: white;
   --color-deemphasis: #888;
-  /*
-    `-webkit-search-cancel-button` doesn't change color,
-    so making it visible by making input background lighter in t he dark mode
-  */
-  --color-input-background: white;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -21,7 +16,6 @@
     --color-text-decoration: rgba(0, 165, 0, 0.8);
     --color-card-border: #414141;
     --color-card-caption-background: black;
-    --color-input-background: #414141;
   }
 }
 
@@ -31,7 +25,6 @@ body.dark {
   --color-text-decoration: rgba(0, 165, 0, 0.8);
   --color-card-border: #414141;
   --color-card-caption-background: black;
-  --color-input-background: #414141;
 }
 
 body.light {
@@ -40,7 +33,6 @@ body.light {
   --color-text-decoration: rgba(0, 165, 0, 0.6);
   --color-card-border: #dedede;
   --color-card-caption-background: white;
-  --color-input-background: white;
 }
 
 @media print {
@@ -53,7 +45,6 @@ body.light {
     --color-text-decoration: #414141;
     --color-card-border: #dedede;
     --color-card-caption-background: white;
-    --color-input-background: white;
   }
 }
 
@@ -65,7 +56,6 @@ body.light {
     --color-text-decoration: #414141;
     --color-card-border: #dedede;
     --color-card-caption-background: white;
-    --color-input-background: white;
   }
 }
 
@@ -342,17 +332,10 @@ footer form input {
   border-style: solid;
   border-color: #dedede;
   border-color: var(--color-card-border);
-  background-color: var(--color-input-background);
+  background-color: var(--color-background);
   color: var(--color-text);
   transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out,
     border-color 0.2s ease-in-out;
-}
-
-footer form input::-webkit-search-cancel-button {
-  /*
-    `-webkit-search-cancel-button` doesn't change color
-  */
-  --webkit-appearance: none;
 }
 
 footer form button {

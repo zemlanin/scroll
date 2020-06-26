@@ -295,9 +295,6 @@ article blockquote {
 
 footer {
   margin-bottom: 1em;
-}
-
-footer {
   display: flex;
   flex-flow: column;
   text-align: center;
@@ -305,7 +302,7 @@ footer {
 
 footer::before {
   display: block;
-  margin: 0 1em;
+  font-size: 1.3em;
   content: "── ❧ ──";
   color: 1px solid #dedede;
   color: var(--color-card-border);
@@ -313,6 +310,7 @@ footer::before {
 
 footer form {
   padding: 0.5em 0;
+  font-size: 0.9em;
 }
 
 nav {
@@ -494,7 +492,8 @@ header h2 {
   word-break: break-all;
 }
 
-header h1 {
+header h1,
+article h1 {
   font-size: 1.5em;
 }
 
@@ -518,6 +517,7 @@ header h2 {
   nav,
   footer a,
   footer br,
+  footer form,
   .print\:hidden {
     display: none;
   }

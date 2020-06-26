@@ -117,6 +117,10 @@ async function blogRender(tmpl, data) {
         path.join(BLOG_TEMPLATES, "header.js"),
         jsProcess
       ),
+      "normalize.css": await loadTemplate(
+        require.resolve("normalize.css"),
+        cssProcess
+      ),
       "header.css": await loadTemplate(
         path.join(BLOG_TEMPLATES, "header.css"),
         cssProcess

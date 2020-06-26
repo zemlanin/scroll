@@ -398,7 +398,7 @@ article pre {
   border-color: var(--color-card-border);
   padding: 0.2em 0.4em;
   overflow-x: scroll;
-  line-height: 1.5;
+  line-height: 1.3;
 }
 
 article kbd {

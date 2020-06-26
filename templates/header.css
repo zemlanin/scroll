@@ -1,12 +1,17 @@
 :root {
   --color-braaand: #00a500;
-  --color-background: initial;
-  --color-text: initial;
+  --color-background: white;
+  --color-text: black;
   --color-text-decoration: rgba(0, 165, 0, 0.6);
   --color-card-border: #dedede;
   --color-card-hover: white;
   --color-card-caption-background: white;
   --color-deemphasis: #888;
+  /*
+    `-webkit-search-cancel-button` doesn't change color,
+    so making it visible by making input background lighter in t he dark mode
+  */
+  --color-input-background: white;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -16,6 +21,7 @@
     --color-text-decoration: rgba(0, 165, 0, 0.8);
     --color-card-border: #414141;
     --color-card-caption-background: black;
+    --color-input-background: #414141;
   }
 }
 
@@ -25,6 +31,7 @@ body.dark {
   --color-text-decoration: rgba(0, 165, 0, 0.8);
   --color-card-border: #414141;
   --color-card-caption-background: black;
+  --color-input-background: #414141;
 }
 
 body.light {
@@ -33,6 +40,7 @@ body.light {
   --color-text-decoration: rgba(0, 165, 0, 0.6);
   --color-card-border: #dedede;
   --color-card-caption-background: white;
+  --color-input-background: white;
 }
 
 @media print {
@@ -45,6 +53,7 @@ body.light {
     --color-text-decoration: #414141;
     --color-card-border: #dedede;
     --color-card-caption-background: white;
+    --color-input-background: white;
   }
 }
 
@@ -56,6 +65,7 @@ body.light {
     --color-text-decoration: #414141;
     --color-card-border: #dedede;
     --color-card-caption-background: white;
+    --color-input-background: white;
   }
 }
 
@@ -73,6 +83,8 @@ body {
 
   background-color: var(--color-background);
   color: var(--color-text);
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out,
+    border-color 0.2s ease-in-out;
 }
 
 @supports (padding: max(0px)) {
@@ -117,12 +129,15 @@ article {
 }
 
 article figure.card {
-  border: 1px solid #dedede;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #dedede;
   border-color: var(--color-card-border);
   border-radius: 0 0 4px 4px;
   max-width: 30em;
   margin: 1em auto;
   page-break-inside: avoid;
+  transition: border-color 0.2s ease-in-out;
 }
 
 article figure.card a {
@@ -141,6 +156,7 @@ article figure.card figcaption {
   border-radius: 0 0 4px 4px;
   padding: 0.5em;
   background-color: var(--color-card-caption-background);
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
 article figure.card figcaption a {
@@ -291,6 +307,7 @@ article blockquote {
   padding-left: 0.7em;
   border-left: 2px solid rgba(0, 165, 0, 0.6);
   border-left-color: var(--color-text-decoration);
+  transition: border-left-color 0.2s ease-in-out;
 }
 
 footer {
@@ -303,9 +320,10 @@ footer {
 footer::before {
   display: block;
   font-size: 1.3em;
-  content: "── ❧ ──";
-  color: 1px solid #dedede;
-  color: var(--color-card-border);
+  content: "─ ❧ ─";
+  color: #888;
+  color: var(--color-deemphasis);
+  transition: color 0.2s ease-in-out;
 }
 
 footer form {
@@ -316,15 +334,41 @@ footer form {
   justify-content: center;
 }
 
-footer form button {
-  font-size: 0.8em;
-  margin-left: 0.5em;
-}
-
 footer form input {
   width: 8em;
   max-width: 16em;
   flex-grow: 1;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #dedede;
+  border-color: var(--color-card-border);
+  background-color: var(--color-input-background);
+  color: var(--color-text);
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out,
+    border-color 0.2s ease-in-out;
+}
+
+footer form input::-webkit-search-cancel-button {
+  /*
+    `-webkit-search-cancel-button` doesn't change color
+  */
+  --webkit-appearance: none;
+}
+
+footer form button {
+  font-size: 0.8em;
+  margin-left: 0.5em;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: #888;
+  color: var(--color-deemphasis);
+}
+
+footer form button:active,
+footer form button:focus {
+  color: initial;
+  color: var(--color-text);
 }
 
 nav {
@@ -351,7 +395,14 @@ nav span {
   display: none;
 }
 
-@supports (color: var(--color-deemphasis)) {
+#settings-icon > summary:active,
+#settings-icon > summary:focus {
+  color: initial;
+  color: var(--color-text);
+}
+
+@supports (color: var(--color-braaand)) {
+  /* show settings icon only if browser supports theming via CSS variables */
   #settings-icon > summary {
     display: inline-block;
   }
@@ -389,7 +440,9 @@ nav span {
 
 article kbd,
 article code {
-  border: solid 1px #dedede;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #dedede;
   border-color: var(--color-card-border);
   padding: 0.1em 0.2em;
   font-size: 0.9em;
@@ -398,21 +451,25 @@ article code {
     "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
     "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
   word-break: keep-all;
+  transition: border-color 0.2s ease-in-out;
 }
 
 article pre code {
-  border: none;
+  border: 0;
   padding: 0;
   word-wrap: normal;
   font-size: 0.8em;
 }
 
 article pre {
-  border: solid 1px #dedede;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #dedede;
   border-color: var(--color-card-border);
   padding: 0.2em 0.4em;
   overflow-x: scroll;
   line-height: 1.3;
+  transition: border-color 0.2s ease-in-out;
 }
 
 article kbd {
@@ -476,6 +533,9 @@ footer a:visited {
   -webkit-text-decoration-color: var(--color-text-decoration);
   text-decoration-color: rgba(0, 165, 0, 0.6);
   text-decoration-color: var(--color-text-decoration);
+  transition: color 0.2s ease-in-out,
+    -webkit-text-decoration-color 0.2s ease-in-out,
+    text-decoration-color 0.2s ease-in-out;
 }
 
 header a,

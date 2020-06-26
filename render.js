@@ -30,7 +30,12 @@ async function loadTemplate(tmpl, processCallback) {
 loadTemplate.cache = {};
 
 const cleanCSS = new CleanCSS({
-  level: 2,
+  level: {
+    2: {
+      // https://github.com/jakubpawlowicz/clean-css/issues/1022
+      mergeIntoShorthands: false,
+    },
+  },
 });
 
 const BLOG_TEMPLATES = path.resolve(__dirname, "templates");

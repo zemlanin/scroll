@@ -220,6 +220,10 @@ function localEmbed(embed) {
     return `<iframe src="${href}" width="640" height="360" frameborder="0" loading="lazy"></iframe>`;
   }
 
+  if (hrefIsOwnMedia && mimeObj.image) {
+    return `<img src="${href}" alt="${embed.title || ""}" loading="lazy">`;
+  }
+
   return `<x-embed>${JSON.stringify(embed)}</x-embed>`;
 }
 

@@ -359,13 +359,17 @@ module.exports = {
           return reject(err);
         }
 
-        return resolve({ fields, files });
+        if (Array.isArray(files.files)) {
+          return resolve({ fields, files: files.files });
+        }
+
+        return resolve({ fields, files: [files.files] });
       });
     });
 
     const db = await req.db();
     let lastMedia = null;
-    for (const f of files.files) {
+    for (const f of files) {
       const src = `:upload/size-${f.size}/${f.name}`;
       lastMedia = await openFileMedia(src, f.path, db);
       await fsPromises.unlink(f.path);
@@ -374,7 +378,7 @@ module.exports = {
     let location;
     if (query.bar) {
       location = `/backstage/media/?bar=1`;
-    } else if (files.files.length === 1) {
+    } else if (files.length === 1) {
       location = `/backstage/media/?id=${lastMedia.id}`;
     } else {
       location = `/backstage/media/`;

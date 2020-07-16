@@ -60,6 +60,9 @@ const metaPropertyOG = (meta) =>
 const tuplePropertyOG = (meta) => [meta.property.slice(3), meta.content];
 const metaNameTwitter = (meta) => meta.name && meta.name.startsWith("twitter:");
 const tupleNameTwitter = (meta) => [meta.name.slice(8), meta.content];
+const metaPropertyTwitter = (meta) =>
+  meta.property && meta.property.startsWith("twitter:");
+const tuplePropertyTwitter = (meta) => [meta.property.slice(8), meta.content];
 
 const cheerioAttrs = (i, el) => el.attribs;
 
@@ -671,7 +674,12 @@ module.exports = {
     ].filter(Boolean);
 
     const rawMeta = $(
-      `head meta[property^="og:"], head meta[name^="og:"], head meta[name^="twitter:"]`
+      `
+        head meta[property^="og:"],
+        head meta[name^="og:"],
+        head meta[property^="twitter:"],
+        head meta[name^="twitter:"]
+      `
     )
       .map(cheerioAttrs)
       .get()
@@ -707,11 +715,21 @@ module.exports = {
 
     rawOpengraph = rawOpengraph.reduce(metaPropertiesReducer, {});
 
-    const rawTwitter = rawMeta
+    let rawTwitter = rawMeta
       .filter(metaNameTwitter)
       .map(tupleNameTwitter)
-      .filter(numericIfNeeded)
-      .reduce(metaPropertiesReducer, {});
+      .filter(numericIfNeeded);
+
+    if (rawTwitter.length === 0) {
+      // spotify has incorrect <meta> tags
+      // https://open.spotify.com/playlist/3OyGj2MDXWtSn5vmaTFzQ0
+      rawTwitter = rawMeta
+        .filter(metaPropertyTwitter)
+        .map(tuplePropertyTwitter)
+        .filter(numericIfNeeded);
+    }
+
+    rawTwitter = rawTwitter.reduce(metaPropertiesReducer, {});
 
     const card = {
       _parsedMetadata: {

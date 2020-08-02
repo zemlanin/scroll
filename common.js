@@ -4,6 +4,7 @@ const path = require("path");
 const zlib = require("zlib");
 const { promisify } = require("util");
 
+const y = require("yassium");
 const mime = require("mime");
 const marked = require("marked");
 const cheerio = require("cheerio");
@@ -419,20 +420,34 @@ function getPostUrl(post) {
 
 const WORD_REGEX = /[a-zA-Z0-9_\u0392-\u03c9\u0400-\u04FF]+|[\u4E00-\u9FFF\u3400-\u4dbf\uf900-\ufaff\u3040-\u309f\uac00-\ud7af\u0400-\u04FF]+|[\u00E4\u00C4\u00E5\u00C5\u00F6\u00D6]+|\w+/g;
 
-function pluralize(n, ...forms) {
-  const singular = n % 10 === 1 && n % 100 != 11;
-  if (singular) {
-    return forms[0];
-  } else if (forms.length === 2) {
-    return forms[1];
-  } else {
-    const few = n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20);
-    if (few) {
-      return forms[1];
-    } else {
-      return forms[2];
-    }
-  }
+const WORD_COUNT_FORMS = {
+  en: {
+    _rules: new Intl.PluralRules("en"),
+    one: y`${y.number} word`,
+    other: y`${y.number} words`,
+  },
+  ru: {
+    _rules: new Intl.PluralRules("ru"),
+    one: y`${y.number} слово`,
+    few: y`${y.number} слова`,
+    many: y`${y.number} слов`,
+    other: y`${y.number} слов`,
+  },
+  uk: {
+    _rules: new Intl.PluralRules("uk"),
+    one: y`${y.number} слово`,
+    few: y`${y.number} слова`,
+    many: y`${y.number} слів`,
+    other: y`${y.number} слів`,
+  },
+};
+
+function wordCountPhrase(lang, number) {
+  const { _rules, ...forms } = WORD_COUNT_FORMS[lang] || WORD_COUNT_FORMS.ru;
+
+  const form = _rules.select(number);
+
+  return (forms[form] || forms.other)({ number });
 }
 
 const markedOptions = {
@@ -751,12 +766,7 @@ async function prepare(post, embedsLoader) {
       if (wordCount > 200) {
         longread = {
           title: htmlTitle,
-          more: pluralize(
-            wordCount,
-            `${wordCount} слово`,
-            `${wordCount} слова`,
-            `${wordCount} слов`
-          ),
+          more: wordCountPhrase(post.lang, wordCount),
         };
 
         longread.teaser =

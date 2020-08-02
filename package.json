@@ -41,7 +41,7 @@
     "rsync": "^0.6.1",
     "sharp": "^0.25.3",
     "sqlite": "^4.0.10",
-    "sqlite3": "^4.2.0",
+    "sqlite3": "^5.0.0",
     "terser": "^4.7.0",
     "url-pattern": "^1.0.3",
     "yassium": "^1.1.0"

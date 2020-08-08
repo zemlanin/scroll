@@ -15,7 +15,11 @@ COPY package*.json ./
 
 ENV NODE_ENV production
 RUN npm ci
-RUN apt-get remove -y gcc pkg-config && apt-get autoremove -y && apt-get clean
+RUN apt-get remove -y \
+    # clean up after compiling `sqlite-icu/libicu.so`
+    gcc pkg-config \
+  && apt-get autoremove -y \
+  && apt-get clean
 
 COPY *.js ./
 COPY backstage/ ./backstage/

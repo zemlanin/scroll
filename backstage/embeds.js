@@ -562,6 +562,16 @@ async function getEmbedsList(req, _res) {
 
 const ABSOLUTE_URL_REGEX = /^[a-z][a-z\d+-.]*:/;
 
+function getUserAgent(url) {
+  if (url && url.startsWith("https://twitter.com/")) {
+    // workaround until opengraph tags are included in newer Twitter design
+    // https://twittercommunity.com/t/twitter-removed-opengraph-tags-from-server-rendered-tweet-page/138473/6
+    return "DiscourseBot/1.0";
+  }
+
+  return "request (+https://zemlan.in)";
+}
+
 module.exports = {
   queryEmbed,
   loadMetadata: async (ogPageURL) => {
@@ -611,7 +621,7 @@ module.exports = {
         timeout: 4000,
         headers: {
           Accept: mimetypeFromURL,
-          "User-Agent": "request (+https://zemlan.in)",
+          "User-Agent": getUserAgent(ogPageURL),
         },
       });
 
@@ -634,7 +644,7 @@ module.exports = {
       timeout: 4000,
       headers: {
         Accept: "text/html,*/*;q=0.8",
-        "User-Agent": "request (+https://zemlan.in)",
+        "User-Agent": getUserAgent(ogPageURL),
       },
     });
 
@@ -659,7 +669,7 @@ module.exports = {
       timeout: 4000,
       headers: {
         Accept: "text/html; charset=utf-8",
-        "User-Agent": "request (+https://zemlan.in)",
+        "User-Agent": getUserAgent(ogPageURL),
       },
       transform: (body) => cheerio.load(body),
       transform2xxOnly: true,

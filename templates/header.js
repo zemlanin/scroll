@@ -404,11 +404,12 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       function refreshLayoutOnChildrenLoad(parent) {
-        Array.prototype.forEach.call(parent.querySelectorAll("img"), function (
-          img
-        ) {
-          img.addEventListener("load", refreshLayout);
-        });
+        Array.prototype.forEach.call(
+          parent.querySelectorAll("img"),
+          function (img) {
+            img.addEventListener("load", refreshLayout);
+          }
+        );
 
         Array.prototype.forEach.call(
           parent.querySelectorAll("video"),

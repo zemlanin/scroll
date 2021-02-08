@@ -308,6 +308,50 @@ test("footnote with double squares", async (t) => {
   );
 });
 
+test("footnote with cheese", async (t) => {
+  const result = await prepare(
+    {
+      text: dedent(`
+        - мясо[^cheese] — основная часть скрипта, которую выполняет \`urllib.request\`
+        - тесто — интерфейс, за который юзер будет «держать» скрипт
+          - \`logging\` для красивого вывода с таймстампами
+          - \`argparse\` для ввода опций для «соуса»
+
+        [^cheese]: или «мясо + сыр», или «протеин»…
+      `),
+      id: "1ef75fa3",
+      created: +new Date(),
+    },
+    mockEmbedsLoader
+  );
+
+  t.equalHtml(
+    result.html,
+    `
+      <ul>
+        <li>
+          мясо<sup><a href="#fn:1ef75fa3:cheese" id="rfn:1ef75fa3:cheese" rel="footnote">1</a></sup> — основная часть скрипта, которую выполняет <code>urllib.request</code>
+        </li>
+        <li>
+          тесто — интерфейс, за который юзер будет «держать» скрипт
+          <ul>
+            <li><code>logging</code> для красивого вывода с таймстампами</li>
+            <li><code>argparse</code> для ввода опций для «соуса»</li>
+          </ul>
+        </li>
+      </ul>
+      <div class="footnotes">
+        <hr />
+        <ol>
+          <li id="fn:1ef75fa3:cheese" tabindex="-1">
+            <p>или «мясо + сыр», или «протеин»…&nbsp;<a href="#rfn:1ef75fa3:cheese" rev="footnote">↩</a></p>
+          </li>
+        </ol>
+      </div>
+    `
+  );
+});
+
 test("description after gallery", async (t) => {
   const result = await prepare(
     {

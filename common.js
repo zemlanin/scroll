@@ -625,7 +625,11 @@ function walkWithFootnotes(token, postId, footnotes) {
           inRawBlock: false,
           text: anchor,
         });
-      } else if (t.type === "text" && t.text.includes("[" + FOOTNOTE_MARKER)) {
+      } else if (
+        !t.tokens &&
+        t.type === "text" &&
+        t.text.includes("[" + FOOTNOTE_MARKER)
+      ) {
         let cursor = 0;
 
         while (cursor < t.text.length - 1) {

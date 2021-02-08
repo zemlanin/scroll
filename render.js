@@ -18,7 +18,7 @@ async function loadTemplate(tmpl, processCallback) {
   }
 
   if (processCallback) {
-    return (loadTemplate.cache[tmpl] = processCallback(
+    return (loadTemplate.cache[tmpl] = await processCallback(
       (await fsPromises.readFile(tmpl)).toString()
     ));
   }
@@ -39,11 +39,8 @@ const cleanCSS = new CleanCSS({
 });
 
 const BLOG_TEMPLATES = path.resolve(__dirname, "templates");
-const jsProcess = (code) => {
-  const m = terser.minify(code);
-  if (m.error) {
-    throw m.error;
-  }
+const jsProcess = async (code) => {
+  const m = await terser.minify(code);
   return m.code;
 };
 

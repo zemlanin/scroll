@@ -603,7 +603,7 @@ function walkWithFootnotes(token, postId, footnotes) {
 
     hideToken(token);
   } else if (token.tokens && token.tokens.length) {
-    token.tokens = token.tokens.reduce((acc, t, i) => {
+    token.tokens = token.tokens.reduce((acc, t) => {
       if (t.type === "link" && t.text.startsWith(FOOTNOTE_MARKER)) {
         const footnoteId = `${postId}:${t.text.slice(1)}`;
         const footnoteHTML = marked(
@@ -625,44 +625,61 @@ function walkWithFootnotes(token, postId, footnotes) {
           inRawBlock: false,
           text: anchor,
         });
-      } else if (
-        t.type === "text" &&
-        t.text === "[" &&
-        token.tokens[i + 1].text.startsWith(FOOTNOTE_MARKER)
-      ) {
-        const nextToken = token.tokens[i + 1];
-        const restOfFootnote = nextToken.text.slice(
-          1,
-          nextToken.text.indexOf("]")
-        );
+      } else if (t.type === "text" && t.text.includes("[" + FOOTNOTE_MARKER)) {
+        let cursor = 0;
 
-        const footnoteId = restOfFootnote.match(/^[a-zA-Z0-9_-]+$/i)
-          ? `${postId}:${restOfFootnote}`
-          : `${postId}:${footnotes.length + 1}`;
+        while (cursor < t.text.length - 1) {
+          const markerIndex = t.text.indexOf("[" + FOOTNOTE_MARKER, cursor);
 
-        const footnoteHTML = marked(
-          restOfFootnote.trim() +
-            `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`
-        );
+          if (markerIndex === -1) {
+            acc.push({
+              ...t,
+              text: t.text.slice(cursor),
+              raw: t.text.slice(cursor),
+            });
+            break;
+          } else {
+            if (cursor < markerIndex) {
+              acc.push({
+                ...t,
+                text: t.text.slice(cursor, markerIndex),
+                raw: t.text.slice(cursor, markerIndex),
+              });
+            }
 
-        footnotes.push({
-          index: footnotes.length,
-          id: footnoteId,
-          html: `<li id="fn:${footnoteId}" tabindex="-1">${footnoteHTML}</li>`,
-        });
+            cursor = t.text.indexOf("]", markerIndex + 2); // `"[^".length === 2`
+            const restOfFootnote = t.text.slice(
+              markerIndex + 2, // `"[^".length === 2`
+              cursor
+            );
+            cursor += 1; // `"]".length === 1`
 
-        const anchor = `<sup><a href="#fn:${footnoteId}" id="rfn:${footnoteId}" rel="footnote">${footnotes.length}</a></sup>`;
+            const footnoteId = restOfFootnote.match(/^[a-zA-Z0-9_-]+$/i)
+              ? `${postId}:${restOfFootnote}`
+              : `${postId}:${footnotes.length + 1}`;
 
-        acc.push({
-          type: "html",
-          raw: anchor,
-          inLink: true,
-          inRawBlock: false,
-          text: anchor,
-        });
+            const footnoteHTML = marked(
+              restOfFootnote.trim() +
+                `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`
+            );
 
-        nextToken.text = nextToken.text.slice(restOfFootnote.length + 2); // `"] ".length === 2`
-        nextToken.raw = nextToken.raw.slice(restOfFootnote.length + 2); // `"] ".length === 2`
+            footnotes.push({
+              index: footnotes.length,
+              id: footnoteId,
+              html: `<li id="fn:${footnoteId}" tabindex="-1">${footnoteHTML}</li>`,
+            });
+
+            const anchor = `<sup><a href="#fn:${footnoteId}" id="rfn:${footnoteId}" rel="footnote">${footnotes.length}</a></sup>`;
+
+            acc.push({
+              type: "html",
+              raw: anchor,
+              inLink: true,
+              inRawBlock: false,
+              text: anchor,
+            });
+          }
+        }
       } else {
         acc.push(t);
       }

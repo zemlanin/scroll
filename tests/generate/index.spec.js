@@ -3,11 +3,10 @@ const os = require("os");
 const path = require("path");
 
 const test = require("tape-promise/tape");
-const sqlite = require("sqlite");
-const sqlite3 = require("sqlite3");
 const mockery = require("mockery");
 const cheerio = require("cheerio");
 
+const { getTestDB } = require("../db.js");
 require("../equal-html.js");
 
 const noopStream = new require("stream").Writable({
@@ -49,13 +48,7 @@ test.onFinish(() => {
 });
 
 test("empty database", async (t) => {
-  const db = await sqlite.open({
-    filename: ":memory:",
-    driver: sqlite3.Database,
-  });
-  await db.migrate({
-    migrationsPath: path.resolve(__dirname, "../../migrations/posts"),
-  });
+  const db = await getTestDB();
 
   const tmpFolder = await fs.promises.mkdtemp(
     path.join(os.tmpdir(), "scroll-tests-")
@@ -67,13 +60,7 @@ test("empty database", async (t) => {
 });
 
 test("internal page", async (t) => {
-  const db = await sqlite.open({
-    filename: ":memory:",
-    driver: sqlite3.Database,
-  });
-  await db.migrate({
-    migrationsPath: path.resolve(__dirname, "../../migrations/posts"),
-  });
+  const db = await getTestDB();
 
   await db.run(
     `
@@ -129,13 +116,7 @@ test("internal page", async (t) => {
 });
 
 test("database with posts and embeds", async (t) => {
-  const db = await sqlite.open({
-    filename: ":memory:",
-    driver: sqlite3.Database,
-  });
-  await db.migrate({
-    migrationsPath: path.resolve(__dirname, "../../migrations/posts"),
-  });
+  const db = await getTestDB();
 
   await db.run(
     `
@@ -264,13 +245,7 @@ test("database with posts and embeds", async (t) => {
 });
 
 test("database with patched embeds", async (t) => {
-  const db = await sqlite.open({
-    filename: ":memory:",
-    driver: sqlite3.Database,
-  });
-  await db.migrate({
-    migrationsPath: path.resolve(__dirname, "../../migrations/posts"),
-  });
+  const db = await getTestDB();
 
   await db.run(
     `
@@ -334,13 +309,7 @@ test("database with patched embeds", async (t) => {
 });
 
 test("opengraph", async (t) => {
-  const db = await sqlite.open({
-    filename: ":memory:",
-    driver: sqlite3.Database,
-  });
-  await db.migrate({
-    migrationsPath: path.resolve(__dirname, "../../migrations/posts"),
-  });
+  const db = await getTestDB();
 
   await db.run(
     `

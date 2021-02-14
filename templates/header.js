@@ -52,9 +52,10 @@ document.addEventListener("DOMContentLoaded", function () {
       +target.getAttribute("data-width") || Infinity,
       (img && (img.width || img.clientWidth)) || 640
     );
+    var initialHeight = target.height || target.clientHeight;
     var height = Math.min(
       +target.getAttribute("data-height") || Infinity,
-      (img && (img.height || img.clientHeight)) || 360
+      initialHeight
     );
     var background = target.getAttribute("data-background");
     target.removeEventListener("click", handleFutureFrame);
@@ -79,6 +80,10 @@ document.addEventListener("DOMContentLoaded", function () {
       target.style.display = "none";
       i.setAttribute("height", height);
       i.style.height = height + "px";
+      if (height < initialHeight) {
+        i.style.marginTop = i.style.marginBottom =
+          (initialHeight - height) / 2 + "px";
+      }
     });
     e.preventDefault();
   }

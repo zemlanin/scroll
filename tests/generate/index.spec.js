@@ -282,7 +282,9 @@ test("database with patched embeds", async (t) => {
 
       <figcaption>
         <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"><b>Rick Astley - Never Gonna Give You Up (Video)</b> • YouTube<br /></a>
-        <i class="truncated">Rick Astley - Never Gonna Give You Up (Official Video) - Listen On Spotify: http://smarturl.it/AstleySpotify Learn more about the brand new album ‘Beautiful ...</i>
+        <i class="truncated">
+          Rick Astley - Never Gonna Give You Up (Official Video) - Listen On Spotify: http://smarturl.it/AstleySpotify Learn more about the brand new album ‘Beautiful ...
+        </i>
       </figcaption>
     `
   );
@@ -302,7 +304,9 @@ test("database with patched embeds", async (t) => {
 
       <figcaption>
         <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"><b>Rick Astley - Never Gonna Give You Up (Video)</b> • YouTube<br /></a>
-        <i class="truncated">Rick Astley - Never Gonna Give You Up (Official Video) - Listen On Spotify: http://smarturl.it/AstleySpotify Learn more about the brand new album ‘Beautiful ...</i>
+        <i class="truncated">
+          Rick Astley - Never Gonna Give You Up (Official Video) - Listen On Spotify: http://smarturl.it/AstleySpotify Learn more about the brand new album ‘Beautiful ...
+        </i>
       </figcaption>
     `
   );

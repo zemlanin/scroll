@@ -67,6 +67,8 @@ document.addEventListener("DOMContentLoaded", function () {
     i.setAttribute("frameborder", 0);
     i.setAttribute("width", width);
     i.setAttribute("height", 0);
+    i.style.width = width + "px";
+    i.style.height = 0;
     i.setAttribute("allow", "autoplay; encrypted-media");
     i.setAttribute("allowfullscreen", 1);
     if (background) {
@@ -74,8 +76,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     target.parentNode.insertBefore(i, target);
     i.addEventListener("load", function () {
-      i.setAttribute("height", height);
       target.style.display = "none";
+      i.setAttribute("height", height);
+      i.style.height = height + "px";
     });
     e.preventDefault();
   }

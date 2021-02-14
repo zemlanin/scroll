@@ -140,6 +140,11 @@ article figure.card a {
   }
 }
 
+article figure.card blockquote {
+  border: 0;
+  padding: 0.5em;
+}
+
 article figure.card figcaption {
   border-top: #dedede 1px solid;
   border-color: var(--color-card-border);
@@ -149,7 +154,7 @@ article figure.card figcaption {
   transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
-article figure.card figcaption a {
+article figure.card figcaption > a {
   display: block;
 }
 
@@ -158,7 +163,6 @@ article figure.card figcaption i {
   color: var(--color-deemphasis);
   font-size: 0.8em;
   display: block;
-  white-space: pre-wrap;
 }
 
 article figure.card figcaption i.truncated {

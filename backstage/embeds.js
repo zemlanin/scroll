@@ -89,6 +89,7 @@ const isMediaProp = (prop) =>
   prop === "image:width" ||
   prop === "image:height" ||
   prop === "image:alt" ||
+  prop === "image:user_generated" ||
   prop === "video:type" ||
   prop === "video:width" ||
   prop === "video:height" ||
@@ -349,8 +350,12 @@ const getFrameFallback = (graphUrl) => {
   return {};
 };
 
+const isTwitterCard = (cardURL) => {
+  return cardURL && cardURL.startsWith("https://twitter.com/");
+};
+
 const shouldDescriptionBeTruncated = (cardURL) => {
-  if (cardURL && cardURL.startsWith("https://twitter.com/")) {
+  if (isTwitterCard(cardURL)) {
     return false;
   }
 
@@ -762,8 +767,16 @@ module.exports = {
       iframe: null,
     };
 
+    if (card.description && isTwitterCard(card.url)) {
+      card.description = card.description.replace(/^“|”$/g, "");
+    }
+
     if (shouldDescriptionBeTruncated(card.url)) {
       card._truncateDescription = true;
+    }
+
+    if (card.title && card.title.endsWith(card.site_name)) {
+      card._hideRepeatedSiteName = true;
     }
 
     const videoNative =
@@ -837,6 +850,7 @@ module.exports = {
           alt: image.alt,
           width: image.width,
           height: image.height,
+          user_generated: image.user_generated,
         };
       }
     }
@@ -866,7 +880,26 @@ module.exports = {
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
-        .replace(/'/g, "&apos;");
+        .replace(/'/g, "&apos;")
+        .replace(/\n/g, "<br>");
+    }
+
+    if (isTwitterCard(card.url) && card.description) {
+      card.description = card.description.replace(
+        /(https:\/\/t.co\/[0-9a-zA-Z]+)/g,
+        `<a href="$1">$1</a>`
+      );
+
+      if (
+        !card.audio &&
+        !card.video &&
+        !card.iframe &&
+        (!card.img || !card.img.user_generated)
+      ) {
+        card.quote = card.description;
+        card.description = "";
+        card.img = null;
+      }
     }
 
     return card;
@@ -896,7 +929,13 @@ module.exports = {
       return `<audio controls preload="metadata" src="${card.url}"></audio>`;
     }
 
-    if (!card.img && !card.audio && !card.video && !card.iframe) {
+    if (
+      !card.img &&
+      !card.audio &&
+      !card.video &&
+      !card.iframe &&
+      !card.quote
+    ) {
       return `<a href="${card.url}">${card.title || card.url}</a>`;
     }
 

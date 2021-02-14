@@ -1,5 +1,10 @@
 {{# card }}
   <figure class="card">
+    {{# card.quote }}
+      <blockquote cite="{{ card.url }}">
+        {{{ card.quote }}}
+      </blockquote>
+    {{/ card.quote }}
     {{# video }}
       <video playsinline controls
         src="{{video.src}}"
@@ -90,9 +95,11 @@
     {{/ audio }}
 
     <figcaption>
-      <a href="{{ card.url }}"><b>{{{ card.title }}}</b>{{# card.site_name }} • {{{ card.site_name }}}{{/ card.site_name }}<br/></a>
+      <a href="{{ card.url }}"><b>{{{ card.title }}}</b>{{^ card._hideRepeatedSiteName }}{{# card.site_name }} • {{{ card.site_name }}}{{/ card.site_name }}{{/ card._hideRepeatedSiteName }}<br/></a>
       {{# card.description }}
-        <i {{# card._truncateDescription }}class="truncated"{{/ card._truncateDescription }}>{{{ card.description }}}</i>
+        <i {{# card._truncateDescription }}class="truncated"{{/ card._truncateDescription }}>
+          {{{ card.description }}}
+        </i>
       {{/ card.description }}
     </figcaption>
   </figure>

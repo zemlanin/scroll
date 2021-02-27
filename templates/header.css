@@ -217,7 +217,8 @@ article figure.card img.audio-control {
 }
 
 article iframe,
-article a.future-frame {
+article a.future-frame,
+article a.embedded-pdf {
   display: block;
   margin: auto;
   max-width: 100%;
@@ -230,12 +231,14 @@ article a.future-frame {
   }
 }
 
-article a.future-frame {
+article a.future-frame,
+article a.embedded-pdf {
   position: relative;
   text-decoration: none;
 }
 
-article a.future-frame:after {
+article a.future-frame:after,
+article a.embedded-pdf:after {
   display: block;
   width: 100%;
   content: "▶ play";
@@ -244,19 +247,23 @@ article a.future-frame:after {
   background: var(--color-card-border);
 }
 
-[lang="en"] a.future-frame:after {
+[lang="en"] a.future-frame:after,
+[lang="en"] a.embedded-pdf:after {
   content: "▶ play";
 }
 
-[lang="ru"] a.future-frame:after {
+[lang="ru"] a.future-frame:after,
+[lang="ru"] a.embedded-pdf:after {
   content: "▶ запустить";
 }
 
-[lang="uk"] a.future-frame:after {
+[lang="uk"] a.future-frame:after,
+[lang="uk"] a.embedded-pdf:after {
   content: "▶ виконати";
 }
 
-article a.future-frame:hover:after {
+article a.future-frame:hover:after,
+article a.embedded-pdf:hover:after {
   color: white;
   color: var(--color-card-hover);
   background: #00a500;
@@ -273,12 +280,14 @@ article a.future-frame:hover:after {
   }
 }
 
-article a.future-frame.loading:hover:after {
+article a.future-frame.loading:hover:after,
+article a.embedded-pdf.loading:hover:after {
   color: unset;
   background: none;
 }
 
-article a.future-frame.loading:after {
+article a.future-frame.loading:after,
+article a.embedded-pdf.loading:after {
   content: "•••";
   animation: loadingopacity 0.4s ease-in-out infinite alternate-reverse;
 }

@@ -97,6 +97,82 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
+  if (!document.querySelector("a.embedded-pdf[href]")) {
+    return;
+  }
+
+  function getFallbackLink() {
+    var lang = document.documentElement && document.documentElement.lang;
+    if (lang === "en") {
+      return "<p>This browser does not support inline PDFs. <a href='[url]'>Download PDF</a></p>";
+    }
+    if (lang === "uk") {
+      return "<p>Цей браузер не підтримує вбудоване відображення PDF. <a href='[url]'>Завантажити PDF</a></p>";
+    }
+    return "<p>Этот браузер не поддерживает встроенное отображение PDF. <a href='[url]'>Скачать PDF</a></p>";
+  }
+
+  function handleEmbeddedPDF(e) {
+    if (e.ctrlKey || e.metaKey) {
+      return true;
+    }
+
+    var target = e.currentTarget;
+    var img = target.querySelector("img");
+    var width = Math.min(
+      +target.getAttribute("data-width") || Infinity,
+      (img && (img.width || img.clientWidth)) || 640
+    );
+    var initialHeight = target.height || target.clientHeight;
+    var height = Math.min(
+      +target.getAttribute("data-height") || Infinity,
+      initialHeight
+    );
+    var background = target.getAttribute("data-background");
+    target.removeEventListener("click", handleEmbeddedPDF);
+    target.classList.add("loading");
+
+    var div = document.createElement("div");
+    if (background) {
+      div.style.background = background;
+    }
+
+    window.PDFObject.embed(
+      target.href,
+      div,
+      // don't insert comma after the last object value
+      // prettier-ignore
+      {
+        width: width + "px",
+        height: height + "px",
+        fallbackLink: getFallbackLink()
+      }
+    );
+    target.parentNode.insertBefore(div, target);
+    target.style.display = "none";
+    e.preventDefault();
+  }
+
+  var head = document.getElementsByTagName("head")[0];
+  var pdfObjectScript = document.createElement("script");
+  pdfObjectScript.setAttribute("src", "/pdfobject.min.js");
+  pdfObjectScript.setAttribute("type", "application/javascript");
+  pdfObjectScript.addEventListener("load", function () {
+    Array.prototype.forEach.call(
+      document.querySelectorAll("a.embedded-pdf[href]"),
+      function (ep) {
+        if (window.PDFObject.supportsPDFs) {
+          ep.addEventListener("click", handleEmbeddedPDF);
+        } else {
+          ep.target = "_blank";
+        }
+      }
+    );
+  });
+  head.insertBefore(pdfObjectScript, head.firstChild);
+});
+
+document.addEventListener("DOMContentLoaded", function () {
   function handleAudioControl(e) {
     if (e.ctrlKey || e.metaKey) {
       return true;

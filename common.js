@@ -8,6 +8,7 @@ const y = require("yassium");
 const mime = require("mime");
 const marked = require("marked");
 const cheerio = require("cheerio");
+const faFilePdf = require("@fortawesome/free-solid-svg-icons/faFilePdf.js");
 
 const fsPromises = {
   writeFile: promisify(fs.writeFile),
@@ -98,6 +99,46 @@ function prefixOwnMedia(href) {
   return href;
 }
 
+function pdfPlaceholder(href) {
+  const { width, height, svgPathData } = faFilePdf;
+  const iconX = 80 - faFilePdf.width / 20;
+
+  return (
+    "data:image/svg+xml;utf8," +
+    encodeURIComponent(
+      `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90">
+          <defs><style type="text/css">
+            text {
+              font-size: 4px;
+              font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
+                "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
+                "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
+                "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+            }
+          </style></defs>
+          <rect x="0" y="0" height="90" width="160" fill="white" />
+          <svg x="${iconX}" y="10" xmlns="http://www.w3.org/2000/svg" width="${
+        width / 10
+      }px" height="${height / 10}px" viewBox="0 0 ${width} ${height}">
+            <path fill="#00a500" d="${svgPathData}"></path>
+          </svg>
+          <text x="0" y="0" fill="#888">
+            <tspan x="80" dy="80" fill="#00a500" text-anchor="middle">
+              ${href
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&apos;")}
+            </tspan>
+          </text>
+        </svg>
+      `.replace(/^\s+/gm, "")
+    )
+  );
+}
+
 function localEmbed(embed) {
   const href = prefixOwnMedia(embed.href);
 
@@ -141,25 +182,13 @@ function localEmbed(embed) {
   }
 
   if ((hrefIsOwnMedia && mimeObj.pdf) || embed.pdf) {
-    const frameSrc = `https://drive.google.com/viewerng/viewer?pid=explorer&efh=false&a=v&chrome=false&embedded=true&url=${encodeURIComponent(
-      href
-    )}`;
+    const imgSrc = embed.poster
+      ? prefixOwnMedia(embed.poster)
+      : pdfPlaceholder(href);
 
-    if (embed.poster) {
-      const imgSrc = prefixOwnMedia(embed.poster);
-      return `<a class="future-frame" href="${href}" data-src="${frameSrc}">
-        <img src="${imgSrc}" loading="lazy">
-      </a>`;
-    } else {
-      return `<iframe src="${frameSrc}"
-        frameborder="0"
-        width="640"
-        height="360"
-        allow="autoplay; encrypted-media"
-        allowfullscreen="1"
-        loading="lazy"
-      ></iframe>`;
-    }
+    return `<a class="embedded-pdf" href="${href}">
+      <img src="${imgSrc}" loading="lazy">
+    </a>`;
   }
 
   if (hrefIsDataURI) {

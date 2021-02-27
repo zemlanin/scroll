@@ -158,6 +158,17 @@ const handlers = [
       );
     },
   ],
+  [
+    "GET",
+    "/pdfobject.min.js",
+    async (req, res) => {
+      res.setHeader("content-type", "application/javascript");
+
+      return await fsPromises.readFile(
+        path.resolve(__dirname, "static", "pdfobject.min.js")
+      );
+    },
+  ],
   ["GET", "/media/*", staticHandler],
   ["GET", "/backstage", require("./backstage/index.js")],
   ["GET", "/backstage/callback", require("./backstage/callback.js")],

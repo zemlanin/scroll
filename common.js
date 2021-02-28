@@ -526,7 +526,15 @@ function walkWithTeaser(token, postUrl, teaserParagraphs) {
     }
 
     if (paragraphContent.type === "em") {
-      teaserParagraphs.push(marked.parser([token], markedOptions));
+      const tokenWithoutFootnotes = {
+        ...token,
+        tokens: [{ ...paragraphContent, tokens: [...paragraphContent.tokens] }],
+      };
+      walkWithoutFootnotes(tokenWithoutFootnotes.tokens[0]);
+      teaserParagraphs.push(
+        marked.parser([tokenWithoutFootnotes], markedOptions)
+      );
+
       return;
     }
 
@@ -570,7 +578,20 @@ function walkWithoutFootnotes(token) {
         return acc;
       }
 
-      acc.push(t);
+      if (
+        !t.tokens &&
+        t.type === "text" &&
+        t.text.includes("[" + FOOTNOTE_MARKER)
+      ) {
+        acc.push({
+          ...t,
+          raw: t.raw.replace(/\[\^[^\]]+\]/g, ""),
+          text: t.text.replace(/\[\^[^\]]+\]/g, ""),
+        });
+      } else {
+        acc.push(t);
+      }
+
       return acc;
     }, []);
   }

@@ -352,6 +352,94 @@ test("footnote with cheese", async (t) => {
   );
 });
 
+test("footnote in teaser", async (t) => {
+  const result = await prepare(
+    {
+      text: dedent(`
+        # footnote in teaser
+        
+        ![](/media/img.png)
+
+        _aka "The Hard Part"[^1]_
+
+        [^1]: image from somewhere
+
+        ${Array.from(
+          { length: 50 },
+          () => "lorem ipsum something something"
+        ).join("\n\n")}
+      `),
+      id: "6c42981d",
+      created: +new Date(),
+    },
+    mockEmbedsLoader
+  );
+
+  t.equalHtml(
+    result.longread.teaser,
+    `
+      <p><img src="https://example.com/media/img.png" alt="" loading="lazy" /></p>
+
+      <p><em>aka "The Hard Part"</em></p>
+
+      <a href="https://example.com/6c42981d.html" class="more">208 слов →</a>
+    `
+  );
+
+  t.equal(result.opengraph.description, `aka "The Hard Part"`);
+
+  t.ok(
+    result.html.includes(
+      `<sup><a href="#fn:6c42981d:1" id="rfn:6c42981d:1" rel="footnote">1</a></sup>`
+    )
+  );
+  t.ok(result.html.includes(`<li id="fn:6c42981d:1" tabindex="-1">`));
+  t.ok(result.html.includes(`image from somewhere`));
+});
+
+test("inline footnote in teaser", async (t) => {
+  const result = await prepare(
+    {
+      text: dedent(`
+        # inline footnote in teaser
+        
+        ![](/media/picture.png)
+
+        _easier part[^hello world]_
+
+        ${Array.from(
+          { length: 50 },
+          () => "lorem ipsum something something"
+        ).join("\n\n")}
+      `),
+      id: "83674bc3",
+      created: +new Date(),
+    },
+    mockEmbedsLoader
+  );
+
+  t.equalHtml(
+    result.longread.teaser,
+    `
+      <p><img src="https://example.com/media/picture.png" alt="" loading="lazy" /></p>
+
+      <p><em>easier part</em></p>
+
+      <a href="https://example.com/83674bc3.html" class="more">204 слова →</a>
+    `
+  );
+
+  t.equal(result.opengraph.description, "easier part");
+
+  t.ok(
+    result.html.includes(
+      `<sup><a href="#fn:83674bc3:1" id="rfn:83674bc3:1" rel="footnote">1</a></sup>`
+    )
+  );
+  t.ok(result.html.includes(`<li id="fn:83674bc3:1" tabindex="-1">`));
+  t.ok(result.html.includes(`hello world`));
+});
+
 test("description after gallery", async (t) => {
   const result = await prepare(
     {

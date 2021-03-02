@@ -63,6 +63,7 @@ function getSharpConversionTags(mimeType) {
             height: 200,
             fit: "inside",
             withoutEnlargement: true,
+            progressive: true,
           })
           .toFormat(fitExt)
           .toBuffer();
@@ -78,6 +79,7 @@ function getSharpConversionTags(mimeType) {
             height: 1000,
             fit: "inside",
             withoutEnlargement: true,
+            progressive: true,
           })
           .toFormat(fitExt)
           .toBuffer();
@@ -93,6 +95,7 @@ function getSharpConversionTags(mimeType) {
             height: 1600,
             fit: "inside",
             withoutEnlargement: true,
+            progressive: true,
           })
           .toFormat(fitExt)
           .toBuffer();

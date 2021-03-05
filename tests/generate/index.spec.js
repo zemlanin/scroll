@@ -15,17 +15,7 @@ const noopStream = new require("stream").Writable({
   },
 });
 
-const generate = (...args) => {
-  for (const key of Object.keys(require.cache)) {
-    if (key.includes("node_modules")) {
-      continue;
-    }
-
-    delete require.cache[key];
-  }
-
-  return require("../../generate.js").generate(...args);
-};
+const { generate } = require("../../generate.js");
 
 test("empty database", async (t) => {
   const db = await getTestDB();

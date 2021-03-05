@@ -6,7 +6,6 @@ const mime = require("mime");
 const cheerio = require("cheerio");
 const caseless = require("caseless");
 const mustache = require("mustache");
-const rp = require("request-promise-native");
 const { RequestError } = require("request-promise-native/errors");
 
 const { render } = require("./render.js");
@@ -610,7 +609,7 @@ module.exports = {
     const expectedMimetype = getURLMimetype(ogPageURL);
 
     let mimetypeFromURL = null;
-    const jar = rp.jar();
+    const jar = require("request-promise-native").jar();
 
     if (
       expectedMimetype &&
@@ -618,7 +617,7 @@ module.exports = {
         expectedMimetype.startsWith("video/") ||
         expectedMimetype.startsWith("audio/"))
     ) {
-      const headers = await rp.head({
+      const headers = await require("request-promise-native").head({
         url: ogPageURL,
         jar: jar,
         resolveWithFullResponse: true,
@@ -642,7 +641,7 @@ module.exports = {
       }
     }
 
-    const headers = await rp.head({
+    const headers = await require("request-promise-native").head({
       url: ogPageURL,
       jar: jar,
       followRedirect: true,
@@ -667,7 +666,7 @@ module.exports = {
       ];
     }
 
-    const $ = await rp.get({
+    const $ = await require("request-promise-native").get({
       url: ogPageURL,
       jar: jar,
       followRedirect: true,

@@ -9,17 +9,7 @@ const { getTestDB } = require("../db.js");
 require("../equal-html.js");
 require("../tape-mockery.js");
 
-const generate = (...args) => {
-  for (const key of Object.keys(require.cache)) {
-    if (key.includes("node_modules")) {
-      continue;
-    }
-
-    delete require.cache[key];
-  }
-
-  return require("../../generate.js").generate(...args);
-};
+const { generate } = require("../../generate.js");
 
 const noopStream = new require("stream").Writable({
   write(chunk, encoding, callback) {

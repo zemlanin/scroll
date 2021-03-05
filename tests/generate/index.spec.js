@@ -3,11 +3,11 @@ const os = require("os");
 const path = require("path");
 
 const test = require("tape-promise/tape");
-const mockery = require("mockery");
 const cheerio = require("cheerio");
 
 const { getTestDB } = require("../db.js");
 require("../equal-html.js");
+require("../tape-mockery.js");
 
 const noopStream = new require("stream").Writable({
   write(chunk, encoding, callback) {
@@ -15,37 +15,17 @@ const noopStream = new require("stream").Writable({
   },
 });
 
-mockery.enable({
-  warnOnReplace: false,
-  warnOnUnregistered: false,
-});
+const generate = (...args) => {
+  for (const key of Object.keys(require.cache)) {
+    if (key.includes("node_modules")) {
+      continue;
+    }
 
-mockery.registerMock("request-promise-native", {
-  head: function () {
-    return {
-      "content-type": "text/html; charset=utf-8",
-    };
-  },
-  get: function ({ transform }) {
-    return fs.promises
-      .readFile(path.resolve(__dirname, "yt-rickroll.html"), "utf8")
-      .then((body) =>
-        transform(body, {
-          headers: {
-            "content-type": "text/html; charset=utf-8",
-          },
-        })
-      );
-  },
-  jar: () => {},
-});
+    delete require.cache[key];
+  }
 
-const { generate } = require("../../generate.js");
-
-test.onFinish(() => {
-  mockery.disable();
-  mockery.deregisterAll();
-});
+  return require("../../generate.js").generate(...args);
+};
 
 test("empty database", async (t) => {
   const db = await getTestDB();
@@ -144,6 +124,23 @@ test("database with posts and embeds", async (t) => {
   const tmpFolder = await fs.promises.mkdtemp(
     path.join(os.tmpdir(), "scroll-tests-")
   );
+
+  t.mockery("request-promise-native", {
+    head() {
+      return {
+        "content-type": "text/html; charset=utf-8",
+      };
+    },
+    get({ transform }) {
+      return transform(
+        fs.readFileSync(path.resolve(__dirname, "yt-rickroll.html"), "utf8"),
+        {
+          "content-type": "text/html; charset=utf-8",
+        }
+      );
+    },
+    jar() {},
+  });
 
   await generate(db, tmpFolder, noopStream, noopStream);
 
@@ -265,6 +262,23 @@ test("database with patched embeds", async (t) => {
     path.join(os.tmpdir(), "scroll-tests-")
   );
 
+  t.mockery("request-promise-native", {
+    head() {
+      return {
+        "content-type": "text/html; charset=utf-8",
+      };
+    },
+    get({ transform }) {
+      return transform(
+        fs.readFileSync(path.resolve(__dirname, "yt-rickroll.html"), "utf8"),
+        {
+          "content-type": "text/html; charset=utf-8",
+        }
+      );
+    },
+    jar() {},
+  });
+
   await generate(db, tmpFolder, noopStream, noopStream);
 
   const post10 = (
@@ -366,6 +380,23 @@ test("opengraph", async (t) => {
   const tmpFolder = await fs.promises.mkdtemp(
     path.join(os.tmpdir(), "scroll-tests-")
   );
+
+  t.mockery("request-promise-native", {
+    head() {
+      return {
+        "content-type": "text/html; charset=utf-8",
+      };
+    },
+    get({ transform }) {
+      return transform(
+        fs.readFileSync(path.resolve(__dirname, "yt-rickroll.html"), "utf8"),
+        {
+          "content-type": "text/html; charset=utf-8",
+        }
+      );
+    },
+    jar() {},
+  });
 
   await generate(db, tmpFolder, noopStream, noopStream);
 

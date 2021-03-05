@@ -922,6 +922,10 @@ module.exports = {
     }
 
     if (card.mimetype.startsWith("video/")) {
+      if (card.img && card.img.src) {
+        return `<video playsinline controls preload="metadata" poster="${card.img.src}" src="${card.url}"></video>`;
+      }
+
       return `<video playsinline controls preload="metadata" src="${card.url}"></video>`;
     }
 

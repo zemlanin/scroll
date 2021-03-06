@@ -283,6 +283,21 @@ const getAudioNative = (graph) => {
     };
   }
 
+  if (!audio && graph.audio) {
+    for (const entry of graph.audio) {
+      if (
+        entry.url &&
+        (entry.type === "audio/vnd.facebook.bridge" ||
+          entry.type === "audio/mpeg")
+      ) {
+        audio = {
+          url: entry.url,
+        };
+        break;
+      }
+    }
+  }
+
   if (audio) {
     audio.poster = getImageNative(graph);
   }

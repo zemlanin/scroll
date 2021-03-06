@@ -97,7 +97,7 @@ test("database with posts and embeds", async (t) => {
       ("2", "kek"),
       ("3", "# heading"),
       ("4", "![](/media/example.png)"),
-      ("5", "![](https://www.youtube.com/watch?v=dQw4w9WgXcQ)"),
+      ("5", "![](https://www.youtube.example/watch?v=dQw4w9WgXcQ)"),
       ("6", ?6),
       ("7", ?7),
       ("8", ?8),
@@ -154,7 +154,7 @@ test("database with posts and embeds", async (t) => {
     ) > -1
   );
 
-  const YTEmbed = `<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.com/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
+  const YTEmbed = `<a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
           <img alt="Rick Astley - Never Gonna Give You Up (Video)" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg">
       </a>`;
   const post5 = (
@@ -243,8 +243,8 @@ test("database with patched embeds", async (t) => {
       ("patched-11", ?11);
   `,
     {
-      10: "```embed\nhttps://www.youtube.com/watch?v=dQw4w9WgXcQ\n```",
-      11: "```embed\nhttps://www.youtube.com/watch?v=dQw4w9WgXcQ\n  poster: https://youtube.example/media/rickroll.jpg\n```",
+      10: "```embed\nhttps://www.youtube.example/watch?v=dQw4w9WgXcQ\n```",
+      11: "```embed\nhttps://www.youtube.example/watch?v=dQw4w9WgXcQ\n  poster: https://youtube.example/media/rickroll.jpg\n```",
     }
   );
 
@@ -277,7 +277,7 @@ test("database with patched embeds", async (t) => {
   t.equalHtml(
     cheerio(".card", post10).html(),
     `
-      <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.com/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
+      <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
         <img
           alt="Rick Astley - Never Gonna Give You Up (Video)"
           src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
@@ -285,7 +285,7 @@ test("database with patched embeds", async (t) => {
       </a>
 
       <figcaption>
-        <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"><b>Rick Astley - Never Gonna Give You Up (Video)</b> • YouTube<br /></a>
+        <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ"><b>Rick Astley - Never Gonna Give You Up (Video)</b> • YouTube<br /></a>
         <i class="truncated">
           Rick Astley - Never Gonna Give You Up (Official Video) - Listen On Spotify: http://smarturl.it/AstleySpotify Learn more about the brand new album ‘Beautiful ...
         </i>
@@ -299,7 +299,7 @@ test("database with patched embeds", async (t) => {
   t.equalHtml(
     cheerio(".card", post11).html(),
     `
-      <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.com/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
+      <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
         <img
           alt="Rick Astley - Never Gonna Give You Up (Video)"
           src="https://youtube.example/media/rickroll.jpg"
@@ -307,7 +307,7 @@ test("database with patched embeds", async (t) => {
       </a>
 
       <figcaption>
-        <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"><b>Rick Astley - Never Gonna Give You Up (Video)</b> • YouTube<br /></a>
+        <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ"><b>Rick Astley - Never Gonna Give You Up (Video)</b> • YouTube<br /></a>
         <i class="truncated">
           Rick Astley - Never Gonna Give You Up (Official Video) - Listen On Spotify: http://smarturl.it/AstleySpotify Learn more about the brand new album ‘Beautiful ...
         </i>
@@ -340,7 +340,7 @@ test("opengraph", async (t) => {
       1: "lorem ipsum",
       2: "# title\n\nlorem ipsum",
       3: "# img\n\n![](/something.png)\n\nlorem ipsum",
-      4: "# embed\n\n![](https://www.youtube.com/watch?v=dQw4w9WgXcQ)\n\nsome text",
+      4: "# embed\n\n![](https://www.youtube.example/watch?v=dQw4w9WgXcQ)\n\nsome text",
       5:
         "# with teaser\n\n_teaser text_\n\n" +
         ("lorem ".repeat(10) + "\n\n").repeat(20),

@@ -17,7 +17,7 @@ const noopStream = new require("stream").Writable({
   },
 });
 
-test.only("spotify embed with <audio>", async (t) => {
+test("spotify embed with <audio>", async (t) => {
   const db = await getTestDB();
 
   await db.run(

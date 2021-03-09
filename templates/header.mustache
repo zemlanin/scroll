@@ -18,7 +18,7 @@
 
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:creator" content="@zemlanin" />
-  <meta property="og:site_name" content="{{blog.title}}">
+  <meta property="og:site_name" content="{{blog.title}}" />
   {{#post}}
     {{^internal}}
     {{#opengraph}}
@@ -31,6 +31,9 @@
         <meta property="og:image" content="{{{image}}}" />
         <meta property="twitter:card" content="summary_large_image" />
       {{/image}}
+      {{#locale}}
+        <meta property="og:locale" content="{{locale}}" />
+      {{/locale}}
     {{/opengraph}}
     {{/internal}}
   {{/post}}

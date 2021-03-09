@@ -747,6 +747,19 @@ function byIndex(a, b) {
   return a.index - b.index;
 }
 
+function getOpengraphLocaleFromLang(lang) {
+  switch (lang) {
+    case "ru":
+      return "ru_RU";
+    case "uk":
+      return "uk_UA";
+    case "en":
+      return "en_US";
+  }
+
+  return null;
+}
+
 async function prepare(post, embedsLoader) {
   post.text = escapeKaomoji(post.text);
 
@@ -764,6 +777,7 @@ async function prepare(post, embedsLoader) {
 
   const opengraph = {
     url: post.url,
+    locale: getOpengraphLocaleFromLang(post.lang),
     title: title,
     description: null,
     image: null,

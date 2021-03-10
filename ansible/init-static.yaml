@@ -9,6 +9,7 @@
     - file: src=/usr/share/zoneinfo/UTC dest=/etc/localtime state=link force=yes
     - file: path=/var/projects/ state=directory mode=0755
     - file: path=/var/log/scroll/ state=directory mode=0755
+    - file: path=/var/log/scroll/dist state=directory mode=0755
 
     - name: static
       copy: src=../static/ dest=/var/projects/scroll/static/

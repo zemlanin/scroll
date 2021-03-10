@@ -6,16 +6,13 @@
   gather_facts: no
 
   tasks:
-    - name: install certbot prereq
-      apt: pkg=software-properties-common state=present
-
-    - name: install certbot repo
-      apt_repository:
-        repo: ppa:certbot/certbot
-        state: present
-
     - name: install certbot
-      apt: pkg=python-certbot-nginx state=present
+      apt:
+        pkg:
+          - software-properties-common
+          - certbot
+          - python3-certbot-nginx
+        state: present
 
     - name: stop nginx to allow for certbot's server to bind to port 80
       service: name=nginx state=stopped
@@ -32,3 +29,7 @@
         minute="35"
         hour="4"
         weekday="2,5"
+
+  handlers:
+    - name: reload nginx
+      service: name=nginx state=reloaded

@@ -3,9 +3,16 @@
   remote_user: root
   gather_facts: yes
   vars:
-    NODEJS_VERSION: "12"
+    NODEJS_VERSION: "14"
 
   tasks:
+    - name: making it confortable
+      apt:
+        pkg:
+          - fish
+          - mosh
+        state: present
+
     - name: Install the gpg key for nodejs LTS
       apt_key:
         url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
@@ -22,19 +29,21 @@
         name: nodejs
         state: present
 
-    - name: synchronize source
-      synchronize:
-        src: .
-        dest: /root/scroll/
-        checksum: yes
-        times: no
-        recursive: yes
-        rsync_opts:
-          - "--delete"
-          - "--include=posts.db"
-          - "--exclude-from=.gitignore"
-          - "--exclude=.git/"
-          - "--update"
+    - name: install application prereqs
+      apt:
+        pkg:
+          - ffmpeg
+          - gcc
+          - pkg-config
+          - libicu-dev
+          - icu-devtools
+          - libsqlite3-dev
+        state: present
+
+    - name: Git checkout
+      ansible.builtin.git:
+        repo: "https://github.com/zemlanin/scroll.git"
+        dest: /root/scroll
 
     - name: configure systemd
       copy: src=./scroll.service dest=/lib/systemd/system/scroll.service

@@ -1,5 +1,9 @@
+const fs = require("fs");
+const path = require("path");
+
 const test = require("tape-promise/tape");
 require("../equal-html.js");
+const { getTestDB } = require("../db.js");
 
 const { prepare } = require("../../common.js");
 
@@ -357,7 +361,7 @@ test("footnote in teaser", async (t) => {
     {
       text: dedent(`
         # footnote in teaser
-        
+
         ![](/media/img.png)
 
         _aka "The Hard Part"[^1]_
@@ -402,7 +406,7 @@ test("inline footnote in teaser", async (t) => {
     {
       text: dedent(`
         # inline footnote in teaser
-        
+
         ![](/media/picture.png)
 
         _easier part[^hello world]_
@@ -720,5 +724,84 @@ test("embed-html code block", async (t) => {
         </a>
       </p>
     `
+  );
+});
+
+test("show embed in teaser", async (t) => {
+  const EmbedsLoader = require("../../embeds-loader.js");
+  t.mockery("request-promise-native", {
+    head() {
+      return {
+        "content-type": "text/html; charset=utf-8",
+      };
+    },
+    get({ transform }) {
+      return transform(
+        fs.readFileSync(path.resolve(__dirname, "yt-rwm.html"), "utf8"),
+        {
+          "content-type": "text/html; charset=utf-8",
+        }
+      );
+    },
+    jar() {},
+  });
+
+  const embedsLoader = new EmbedsLoader(await getTestDB());
+
+  const result = await prepare(
+    {
+      text: dedent(`
+        # Усатый ядерщик
+
+        \`\`\`embed
+        https://www.youtube.com/watch?v=vEUylyDMFIA
+        - poster: https://example.com/media/jjxvmnCEDWrO9oSohxjhH68Pbc/fit1600.jpeg
+        - title: React with mustaches
+        - description: Are there good parts inside an abandoned project? What could we learn from it? Could we apply some patterns in our current projects?
+        \`\`\`
+
+        _Выковыривая полезные идеи из заброшенного модуля_
+
+        > _Адаптировано из выступления “React with mustaches” на React Kyiv ([видео](https://youtu.be/vEUylyDMFIA) и [слайды](/media/7TZEn3OXO0kfBsTz213YNxhM4W.pdf))_
+
+        Бывает так, что гоняешься не за тем, за чем стоило бы. В разработке, это зачастую выражается в странных решениях временных или надуманных проблем. Для таких решений пишется код, который либо никогда не увидит продакшена, либо довольно быстро будет удалён за ненадобностью
+
+        ${Array.from(
+          { length: 50 },
+          () => "lorem ipsum something something"
+        ).join("\n\n")}
+      `),
+      id: "2d95abd5",
+      created: +new Date(),
+    },
+    embedsLoader
+  );
+
+  t.equalHtml(
+    result.longread.teaser,
+    `
+      <p>
+        <figure class="card">
+          <a href="https://www.youtube.com/watch?v=vEUylyDMFIA" class="future-frame" data-src="https://www.youtube.com/embed/vEUylyDMFIA" data-width="480" data-height="360">
+            <img alt="React with mustaches" src="https://example.com/media/jjxvmnCEDWrO9oSohxjhH68Pbc/fit1600.jpeg">
+          </a>
+
+          <figcaption>
+            <a href="https://www.youtube.com/watch?v=vEUylyDMFIA"><b>React with mustaches</b> • YouTube<br></a>
+              <i>
+                Are there good parts inside an abandoned project? What could we learn from it? Could we apply some patterns in our current projects?
+              </i>
+          </figcaption>
+        </figure>
+      </p>
+      <p><em>Выковыривая полезные идеи из заброшенного модуля</em></p>
+
+      <a href="https://example.com/2d95abd5.html" class="more">286 слов &rarr;</a>
+    `
+  );
+
+  t.equal(
+    result.opengraph.image,
+    `https://example.com/media/jjxvmnCEDWrO9oSohxjhH68Pbc/fit1600.jpeg`
   );
 });

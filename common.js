@@ -565,6 +565,14 @@ function walkWithTeaser(token, postUrl, teaserParagraphs) {
     sealTeaser(teaserParagraphs);
     return;
   }
+
+  if (
+    token.type === "code" &&
+    (token.lang === "embed" || token.lang === "embed-html")
+  ) {
+    teaserParagraphs.push(marked.parser([token], markedOptions));
+    return;
+  }
 }
 
 function escapeKaomoji(str) {

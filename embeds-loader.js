@@ -74,6 +74,13 @@ function overwriteFromEmbed(card, embed) {
     };
   }
 
+  if (embed.site_name || embed.site_name === "") {
+    result = {
+      ...result,
+      site_name: embed.site_name,
+    };
+  }
+
   return result;
 }
 

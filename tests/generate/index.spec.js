@@ -242,13 +242,15 @@ test("database with patched embeds", async (t) => {
       ("patched-10", ?10),
       ("patched-11", ?11),
       ("patched-12", ?12),
-      ("patched-13", ?13);
+      ("patched-13", ?13),
+      ("patched-14", ?14);
   `,
     {
       10: "```embed\nhttps://www.youtube.example/watch?v=dQw4w9WgXcQ\n```",
       11: "```embed\nhttps://www.youtube.example/watch?v=dQw4w9WgXcQ\n  poster: https://youtube.example/media/rickroll.jpg\n```",
       12: "```embed\nhttps://www.youtube.example/watch?v=dQw4w9WgXcQ\n- poster: https://youtube.example/media/rickroll.jpg\n- description: ricky ticky astley\n```",
       13: "```embed\nhttps://www.youtube.example/watch?v=dQw4w9WgXcQ\n- poster: https://youtube.example/media/rickroll.jpg\n- description:\n```",
+      14: "```embed\nhttps://www.youtube.example/watch?v=dQw4w9WgXcQ\n- description: \n- site_name: not a vimeo\n```",
     }
   );
 
@@ -356,6 +358,25 @@ test("database with patched embeds", async (t) => {
 
       <figcaption>
         <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ"><b>Rick Astley - Never Gonna Give You Up (Video)</b> • YouTube<br /></a>
+      </figcaption>
+    `
+  );
+
+  const post14 = (
+    await fs.promises.readFile(path.join(tmpFolder, "patched-14.html"))
+  ).toString();
+  t.equalHtml(
+    cheerio(".card", post14).html(),
+    `
+      <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
+        <img
+          alt="Rick Astley - Never Gonna Give You Up (Video)"
+          src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
+        />
+      </a>
+
+      <figcaption>
+        <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ"><b>Rick Astley - Never Gonna Give You Up (Video)</b> • not a vimeo<br /></a>
       </figcaption>
     `
   );

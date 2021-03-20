@@ -66,7 +66,7 @@ function overwriteFromEmbed(card, embed) {
     };
   }
 
-  if (embed.description) {
+  if (embed.description || embed.description === "") {
     result = {
       ...result,
       description: embed.description,

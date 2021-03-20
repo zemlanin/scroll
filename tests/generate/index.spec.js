@@ -240,11 +240,15 @@ test("database with patched embeds", async (t) => {
       (id, text)
     VALUES
       ("patched-10", ?10),
-      ("patched-11", ?11);
+      ("patched-11", ?11),
+      ("patched-12", ?12),
+      ("patched-13", ?13);
   `,
     {
       10: "```embed\nhttps://www.youtube.example/watch?v=dQw4w9WgXcQ\n```",
       11: "```embed\nhttps://www.youtube.example/watch?v=dQw4w9WgXcQ\n  poster: https://youtube.example/media/rickroll.jpg\n```",
+      12: "```embed\nhttps://www.youtube.example/watch?v=dQw4w9WgXcQ\n- poster: https://youtube.example/media/rickroll.jpg\n- description: ricky ticky astley\n```",
+      13: "```embed\nhttps://www.youtube.example/watch?v=dQw4w9WgXcQ\n- poster: https://youtube.example/media/rickroll.jpg\n- description:\n```",
     }
   );
 
@@ -311,6 +315,47 @@ test("database with patched embeds", async (t) => {
         <i class="truncated">
           Rick Astley - Never Gonna Give You Up (Official Video) - Listen On Spotify: http://smarturl.it/AstleySpotify Learn more about the brand new album ‘Beautiful ...
         </i>
+      </figcaption>
+    `
+  );
+
+  const post12 = (
+    await fs.promises.readFile(path.join(tmpFolder, "patched-12.html"))
+  ).toString();
+  t.equalHtml(
+    cheerio(".card", post12).html(),
+    `
+      <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
+        <img
+          alt="Rick Astley - Never Gonna Give You Up (Video)"
+          src="https://youtube.example/media/rickroll.jpg"
+        />
+      </a>
+
+      <figcaption>
+        <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ"><b>Rick Astley - Never Gonna Give You Up (Video)</b> • YouTube<br /></a>
+        <i>
+          ricky ticky astley
+        </i>
+      </figcaption>
+    `
+  );
+
+  const post13 = (
+    await fs.promises.readFile(path.join(tmpFolder, "patched-13.html"))
+  ).toString();
+  t.equalHtml(
+    cheerio(".card", post13).html(),
+    `
+      <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
+        <img
+          alt="Rick Astley - Never Gonna Give You Up (Video)"
+          src="https://youtube.example/media/rickroll.jpg"
+        />
+      </a>
+
+      <figcaption>
+        <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ"><b>Rick Astley - Never Gonna Give You Up (Video)</b> • YouTube<br /></a>
       </figcaption>
     `
   );

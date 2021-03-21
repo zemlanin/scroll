@@ -948,7 +948,7 @@ async function getBlogObject(baseUrl) {
       title: `Linklist • ${BLOG_TITLE}`,
       url: url.resolve(baseUrl, "/linklist.html"),
       feed: {
-        description: `Linked and Found • ${BLOG_TITLE}`,
+        description: `Linked and Found`,
         url: url.resolve(baseUrl, "/feeds/linklist.xml"),
       },
     },

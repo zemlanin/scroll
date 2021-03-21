@@ -3,7 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="alternate" type="application/rss+xml" title="{{ blog.feed.description }}" href="{{{ blog.feed.url }}}" />
+  {{#linklist}}
+    <link rel="alternate" type="application/rss+xml" title="{{ blog.linklist.feed.description }}" href="{{{ blog.linklist.feed.url }}}" />
+    <link rel="alternate" type="application/rss+xml" title="{{ blog.feed.description }}" href="{{{ blog.feed.url }}}" />
+  {{/linklist}}
+  {{^linklist}}
+    <link rel="alternate" type="application/rss+xml" title="{{ blog.feed.description }}" href="{{{ blog.feed.url }}}" />
+    <link rel="alternate" type="application/rss+xml" title="{{ blog.linklist.feed.description }}" href="{{{ blog.linklist.feed.url }}}" />
+  {{/linklist}}
   <link rel="icon" type="image/vnd.microsoft.icon" href="{{{ blog.static.favicon.ico }}}" />
   <link rel="icon" type="image/png" href="{{{ blog.static.favicon.png }}}" />
   <link rel="icon" type="image/svg+xml" href="{{{ blog.static.favicon.svg }}}" />
@@ -42,6 +49,7 @@
     {{#index}}{{!intentionally left blank}}{{/index}}
     {{#pagination}}{{#t}}page {{number}}{{/t}} •{{/pagination}}
     {{#archive}}{{#t}}archive{{/t}} •{{/archive}}
+    {{#linklist}}{{#t}}linklist{{/t}} •{{/linklist}}
     {{blog.title}}
   </title>
   <style type="text/css">
@@ -93,6 +101,12 @@
           &nbsp;<span>/ <a href="{{{url}}}">{{#t}}archive{{/t}}</a></span>
         </h2>
       {{/archive}}
+      {{#linklist}}
+        <h2>
+          <a href="{{{blog.url}}}">{{blog.title}}</a>
+          &nbsp;<span>/ <a href="{{{url}}}">{{#t}}linklist{{/t}}</a></span>
+        </h2>
+      {{/linklist}}
     {{/post}}
 
     <details id="settings-icon" class="print:hidden" title="{{#t}}Settings{{/t}}">

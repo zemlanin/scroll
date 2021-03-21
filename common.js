@@ -31,6 +31,7 @@ const SESSIONS_DB = path.resolve(
   __dirname,
   process.env.SESSIONS_DB || "sessions.db"
 );
+const LINKLIST_SOURCE_FEED = process.env.LINKLIST_SOURCE_FEED || null;
 const FOOTNOTE_MARKER = "^";
 
 function isOwnMedia(href) {
@@ -943,6 +944,14 @@ async function getBlogObject(baseUrl) {
       description: BLOG_TITLE,
       url: url.resolve(baseUrl, "/rss.xml"),
     },
+    linklist: {
+      title: `Linklist • ${BLOG_TITLE}`,
+      url: url.resolve(baseUrl, "/linklist.html"),
+      feed: {
+        description: `Linked and Found • ${BLOG_TITLE}`,
+        url: url.resolve(baseUrl, "/feeds/linklist.xml"),
+      },
+    },
     static: {
       favicon: {
         ico: url.resolve(baseUrl, "/favicon.ico"),
@@ -997,6 +1006,7 @@ module.exports = {
   PORT,
   POSTS_DB,
   SESSIONS_DB,
+  LINKLIST_SOURCE_FEED,
   PAGE_SIZE,
   MINIMUM_INDEX_PAGE_SIZE,
   getMimeObj,

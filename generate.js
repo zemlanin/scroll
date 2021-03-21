@@ -33,6 +33,11 @@ const {
 } = require("./generate-post.js");
 
 const {
+  generateLinklistPage,
+  generateLinklistRSSPage,
+} = require("./linklist.js");
+
+const {
   DIST,
   POSTS_DB,
   loadIcu,
@@ -96,6 +101,7 @@ async function copyStaticContent(destination, stdout) {
 async function generate(db, destination, stdout, stderr, { only } = {}) {
   const tmpFolder = await fsPromises.mkdtemp(path.join(os.tmpdir(), "scroll-"));
   await fsPromises.mkdir(path.join(tmpFolder, "/media"));
+  await fsPromises.mkdir(path.join(tmpFolder, "/feeds"));
 
   stdout.write(`made tmp dir: ${tmpFolder}\n`);
 
@@ -163,10 +169,26 @@ async function generate(db, destination, stdout, stderr, { only } = {}) {
     stdout.write("posts done\n");
   }
 
-  if (!only || only.has("pagination")) {
-    const pagination = await getPagination(db, null);
-    const newestPage = pagination[0] || { index: 0, posts: [] };
+  let _pagination = [];
+  let _newestPage;
 
+  if (!only || only.has("pagination")) {
+    _pagination = await getPagination(db, null);
+    _newestPage = _pagination[0] || { index: 0, posts: [] };
+
+    await writeFileWithGzip(
+      path.join(tmpFolder, "index.html"),
+      await generateIndexPage(db, blog, _newestPage),
+      { flag: "wx" }
+    );
+
+    stdout.write("index done\n");
+  }
+
+  const pagination = _pagination;
+  const newestPage = _newestPage;
+
+  if (!only || only.has("pagination")) {
     for (const page of pagination) {
       const pageNumber = page.index;
 
@@ -183,13 +205,23 @@ async function generate(db, destination, stdout, stderr, { only } = {}) {
       );
     }
 
+    stdout.write("pagination done\n");
+  }
+
+  if (!only || only.has("linklist")) {
     await writeFileWithGzip(
-      path.join(tmpFolder, "index.html"),
-      await generateIndexPage(db, blog, newestPage),
+      path.join(tmpFolder, "linklist.html"),
+      await generateLinklistPage(db, blog),
       { flag: "wx" }
     );
 
-    stdout.write("pagination done\n");
+    await writeFileWithGzip(
+      path.join(tmpFolder, "feeds/linklist.xml"),
+      await generateLinklistRSSPage(db, blog),
+      { flag: "wx" }
+    );
+
+    stdout.write("linklist done\n");
   }
 
   if (!only || only.has("rss")) {
@@ -294,7 +326,7 @@ async function generate(db, destination, stdout, stderr, { only } = {}) {
   rmrf(tmpFolder);
 }
 
-function start({ only } = {}) {
+function start({ only, stdout, stderr } = {}) {
   sqlite
     .open({ filename: POSTS_DB, driver: sqlite3.Database })
     .then((db) => loadIcu(db))
@@ -304,7 +336,13 @@ function start({ only } = {}) {
           migrationsPath: path.resolve(__dirname, "migrations/posts"),
         })
         .then(() =>
-          generate(db, DIST, process.stdout, process.stderr, { only })
+          generate(
+            db,
+            DIST,
+            stdout || process.stdout,
+            stderr || process.stderr,
+            { only }
+          )
         )
         .then(() => {
           console.log("done");

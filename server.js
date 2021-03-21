@@ -369,6 +369,9 @@ function start() {
 
       console.log(`running on ${PORT}`);
     })
+    .then(() => {
+      return require("./linklist").watch(process.stdout, process.stderr);
+    })
     .catch((err) => {
       console.error(err);
       process.exit(1);

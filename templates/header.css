@@ -300,6 +300,7 @@ article time {
   font-size: 0.9em;
 }
 
+article time,
 article time a {
   color: #888;
   color: var(--color-deemphasis);

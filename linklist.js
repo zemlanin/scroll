@@ -60,8 +60,6 @@ async function loadFreshFeed(db) {
     });
   });
 
-  feed.items.reverse();
-
   for (const item of feed.items) {
     const exists = await db.get(
       `SELECT id FROM linklist WHERE source_id = $1 LIMIT 1`,

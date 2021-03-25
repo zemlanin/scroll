@@ -773,6 +773,7 @@ async function prepare(post, embedsLoader) {
   post.text = escapeKaomoji(post.text);
 
   const created = new Date(parseInt(post.created));
+  const modified = post.modified ? new Date(parseInt(post.modified)) : null;
 
   let title = post.slug || created.toISOString().split("T")[0];
   let htmlTitle = null;
@@ -788,6 +789,10 @@ async function prepare(post, embedsLoader) {
     url: post.url,
     locale: getOpengraphLocaleFromLang(post.lang),
     title: title,
+    published_time: created.toISOString().replace(/\.\d{3}Z$/, "Z"),
+    modified_time: modified
+      ? modified.toISOString().replace(/\.\d{3}Z$/, "Z")
+      : null,
     description: null,
     image: null,
   };
@@ -925,8 +930,8 @@ async function prepare(post, embedsLoader) {
     created: created.toISOString().replace(/\.\d{3}Z$/, "Z"),
     createdDate: created.toISOString().split("T")[0],
     createdUTC: created.toUTCString(),
-    modified: post.modified
-      ? new Date(parseInt(post.modified)).toISOString()
+    modified: modified
+      ? modified.toISOString().replace(/\.\d{3}Z$/, "Z")
       : null,
   };
 }

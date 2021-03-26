@@ -111,6 +111,14 @@ const isPlayerProp = (prop) =>
   prop === "player:stream" ||
   prop === "player:stream:content_type";
 
+const isRestrictionsProp = (prop) => prop === "restrictions:age";
+
+const isAgeRestricted = (graph) => {
+  return Boolean(
+    graph && graph.restrictions && graph.restrictions.age === "18+"
+  );
+};
+
 const numericIfNeeded = ([prop, value]) =>
   !isNumericProp(prop) || value.match(/^[0-9]+$/);
 
@@ -211,6 +219,19 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
             [prop2]: value,
             ...((acc.player && acc.player.stream) || {}),
           },
+        },
+      };
+    }
+  } else if (isRestrictionsProp(prop)) {
+    // prop0 = "restrictions"
+    // prop1 = "age"
+    let [prop0, prop1] = prop.split(":");
+
+    if (prop1 === "age") {
+      patch = {
+        ...(acc[prop0] || {}),
+        [prop0]: {
+          [prop1]: value,
         },
       };
     }
@@ -366,6 +387,10 @@ const getFrameFallback = (graphUrl) => {
 
 const isTwitterCard = (cardURL) => {
   return cardURL && cardURL.startsWith("https://twitter.com/");
+};
+
+const isYoutubeCard = (cardURL) => {
+  return cardURL && cardURL.startsWith("https://www.youtube.com/watch");
 };
 
 const shouldDescriptionBeTruncated = (cardURL) => {
@@ -839,7 +864,7 @@ module.exports = {
         getVideoIframe(rawOpengraph) ||
         getVideoIframe(rawTwitter) ||
         getVideoIframe(rawInitial);
-      if (videoIframe) {
+      if (videoIframe && isYoutubeCard && !isAgeRestricted(rawOpengraph)) {
         card.iframe = {
           src: videoIframe.url,
           width: videoIframe.width || 640,

@@ -143,6 +143,10 @@ module.exports = class EmbedsLoader {
 
       this.cache[url] = cardWithMetadata;
     }
+
+    return urls.reduce((acc, url) => {
+      return [...acc, this.cache[url]];
+    }, []);
   }
 
   async load(html) {

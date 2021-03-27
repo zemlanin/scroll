@@ -92,6 +92,7 @@ async function prepareLink(link, embedsLoader) {
     createdDate: created.toISOString().split("T")[0],
     createdUTC: created.toUTCString(),
     html: await embedsLoader.load(embedCallback(link.original_url)),
+    title: (await embedsLoader.query([link.original_url]))[0].title,
   };
 }
 

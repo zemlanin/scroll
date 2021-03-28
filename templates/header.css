@@ -512,6 +512,14 @@ article ul[data-gallery] li.dim {
   opacity: 0.5;
 }
 
+article ul[data-gallery] li.before-centermost {
+  cursor: w-resize;
+}
+
+article ul[data-gallery] li.after-centermost {
+  cursor: e-resize;
+}
+
 article ul[data-gallery] li.dim img,
 article ul[data-gallery] li.dim video,
 article ul[data-gallery] li.dim a[href] {
@@ -618,5 +626,13 @@ header h2 {
 
   article ul[data-gallery] li.dim {
     opacity: 1;
+  }
+
+  article ul[data-gallery] li.before-centermost {
+    cursor: auto;
+  }
+
+  article ul[data-gallery] li.after-centermost {
+    cursor: auto;
   }
 }

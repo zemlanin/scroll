@@ -435,11 +435,42 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  function styleArrowCursors(node) {
+    var centermost = findCentermost(node);
+    var firstRightOfCenter = findFirstRightOfCenter(node);
+
+    var listItems = node.querySelectorAll("li");
+    var listItemsLength = listItems.length;
+    var isBeforeCentermost = true;
+
+    for (var i = 0; i < listItemsLength; i++) {
+      if (listItems[i] === firstRightOfCenter) {
+        isBeforeCentermost = false;
+      }
+
+      if (listItems[i] === centermost) {
+        isBeforeCentermost = false;
+        listItems[i].classList.remove("before-centermost");
+        listItems[i].classList.remove("after-centermost");
+      } else if (isBeforeCentermost) {
+        listItems[i].classList.add("before-centermost");
+        listItems[i].classList.remove("after-centermost");
+      } /* isAfterCentermost */ else {
+        listItems[i].classList.remove("before-centermost");
+        listItems[i].classList.add("after-centermost");
+      }
+    }
+  }
+
   Array.prototype.forEach.call(
     document.querySelectorAll("ul[data-gallery]"),
     function initGallery(node) {
       var wrappedHighlightCentermost = supportsRAF
         ? wrapInRAF(highlightCentermost, node)
+        : noop;
+
+      var wrappedStyleArrowCursors = supportsRAF
+        ? wrapInRAF(styleArrowCursors, node)
         : noop;
 
       window.addEventListener("keydown", function (e) {
@@ -466,10 +497,12 @@ document.addEventListener("DOMContentLoaded", function () {
           e.preventDefault();
           scrollToCenter(node, findFirstLeftOfCenter(node));
           wrappedHighlightCentermost();
+          wrappedStyleArrowCursors();
         } else if (e.keyCode === RIGHT) {
           e.preventDefault();
           scrollToCenter(node, findFirstRightOfCenter(node));
           wrappedHighlightCentermost();
+          wrappedStyleArrowCursors();
         }
       });
 
@@ -477,6 +510,7 @@ document.addEventListener("DOMContentLoaded", function () {
         li.addEventListener("click", function () {
           scrollToCenter(node, li);
           wrappedHighlightCentermost();
+          wrappedStyleArrowCursors();
         });
       });
 
@@ -485,6 +519,7 @@ document.addEventListener("DOMContentLoaded", function () {
       function refreshLayout() {
         fillTheFillers(node);
         wrappedHighlightCentermost();
+        wrappedStyleArrowCursors();
       }
 
       function refreshLayoutOnChildrenLoad(parent) {
@@ -521,9 +556,11 @@ document.addEventListener("DOMContentLoaded", function () {
       if (resizeObserver /* && supportsRAF */) {
         resizeObserver.observe(node);
         node.addEventListener("scroll", wrappedHighlightCentermost, false);
+        node.addEventListener("scroll", wrappedStyleArrowCursors, false);
       } else if (supportsRAF) {
         window.addEventListener("resize", wrapInRAF(onResize, node), false);
         node.addEventListener("scroll", wrappedHighlightCentermost, false);
+        node.addEventListener("scroll", wrappedStyleArrowCursors, false);
       }
     }
   );

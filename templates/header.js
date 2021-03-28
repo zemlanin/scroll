@@ -420,16 +420,25 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function highlightCentermost(node) {
     var centermost = findCentermost(node);
+    var firstLeftOfCenter = findFirstLeftOfCenter(node);
+    var firstRightOfCenter = findFirstRightOfCenter(node);
 
     if (centermost) {
       centermost.classList.remove("dim");
+    } else {
+      firstLeftOfCenter.classList.remove("dim");
+      firstRightOfCenter.classList.remove("dim");
     }
 
     var listItems = node.querySelectorAll("li:not(.dim)");
     var listItemsLength = listItems.length;
 
     for (var i = 0; i < listItemsLength; i++) {
-      if (listItems[i] !== centermost) {
+      var isCentermost = centermost
+        ? listItems[i] === centermost
+        : listItems[i] === firstLeftOfCenter ||
+          listItems[i] === firstRightOfCenter;
+      if (!isCentermost) {
         listItems[i].classList.add("dim");
       }
     }
@@ -437,21 +446,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function styleArrowCursors(node) {
     var centermost = findCentermost(node);
+    var firstLeftOfCenter = findFirstLeftOfCenter(node);
     var firstRightOfCenter = findFirstRightOfCenter(node);
 
     var listItems = node.querySelectorAll("li");
     var listItemsLength = listItems.length;
     var isBeforeCentermost = true;
 
-    for (var i = 0; i < listItemsLength; i++) {
-      if (listItems[i] === firstRightOfCenter) {
-        isBeforeCentermost = false;
-      }
+    if (centermost) {
+      centermost.classList.remove("before-centermost");
+      centermost.classList.remove("after-centermost");
+    } else {
+      firstLeftOfCenter.classList.remove("before-centermost");
+      firstLeftOfCenter.classList.remove("after-centermost");
 
-      if (listItems[i] === centermost) {
+      firstRightOfCenter.classList.remove("before-centermost");
+      firstRightOfCenter.classList.remove("after-centermost");
+    }
+
+    for (var i = 0; i < listItemsLength; i++) {
+      var isCentermost = centermost
+        ? listItems[i] === centermost
+        : listItems[i] === firstLeftOfCenter ||
+          listItems[i] === firstRightOfCenter;
+
+      if (isCentermost) {
         isBeforeCentermost = false;
-        listItems[i].classList.remove("before-centermost");
-        listItems[i].classList.remove("after-centermost");
       } else if (isBeforeCentermost) {
         listItems[i].classList.add("before-centermost");
         listItems[i].classList.remove("after-centermost");

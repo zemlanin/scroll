@@ -170,6 +170,7 @@ const handlers = [
     },
   ],
   ["GET", "/media/*", staticHandler],
+  ["GET", "/feeds/*", staticHandler],
   ["GET", "/backstage", require("./backstage/index.js")],
   ["GET", "/backstage/callback", require("./backstage/callback.js")],
   ["GET", "/backstage/edit", require("./backstage/edit.js").get],

@@ -1,12 +1,20 @@
 {{> header}}
 
+<section style="margin: 1em auto 3em; text-align: center;">
+  <a href="{{{ blog.linklist.feed.url }}}" style="text-decoration: none">
+    {{#t}}Follow via RSS{{/t}}
+  </a>
+</section>
+
 {{#links}}
-    <article>
-      {{{html}}}
-      <time datetime="{{created}}">
+  <article>
+    {{{html}}}
+    <time datetime="{{created}}">
+      <a href="{{{url}}}">
         {{createdDate}}
-      </time>
-    </article>
+      </a>
+    </time>
+  </article>
 {{/links}}
 
 {{> footer}}

@@ -58,6 +58,7 @@ const translations = {
     "page {{number}}": "страница {{number}}",
     index: "главная",
     linklist: "linklist",
+    "Follow via RSS": "Читать с помощью RSS",
   },
   uk: {
     archive: "архів",
@@ -70,6 +71,7 @@ const translations = {
     "page {{number}}": "сторінка {{number}}",
     index: "головна",
     linklist: "linklist",
+    "Follow via RSS": "Читати за допомогою RSS",
   },
 };
 

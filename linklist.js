@@ -135,7 +135,9 @@ async function generateLinklistRSSPage(db, blog) {
   const links = [];
 
   for (const l of rawLinks) {
-    links.push(await prepareLink(l, embedsLoader));
+    const entry = await prepareLink(l, embedsLoader);
+    entry.html += `<a href="${blog.linklist.url}">via</a>`;
+    links.push(entry);
   }
 
   return await render("linklist-rss.mustache", {

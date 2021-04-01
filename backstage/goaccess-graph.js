@@ -1,5 +1,17 @@
 const { getSession, sendToAuthProvider } = require("./auth.js");
 
+function weekNumberISO8601(date) {
+  const tdt = new Date(date.valueOf());
+  const dayn = (date.getDay() + 6) % 7;
+  tdt.setDate(tdt.getDate() - dayn + 3);
+  const firstThursday = tdt.valueOf();
+  tdt.setMonth(0, 1);
+  if (tdt.getDay() !== 4) {
+    tdt.setMonth(0, 1 + ((4 - tdt.getDay() + 7) % 7));
+  }
+  return 1 + Math.ceil((firstThursday - tdt) / 604800000);
+}
+
 async function getTraffic(days = 31) {
   const goaccessPath = process.env.GOACCESS_JSON;
 
@@ -12,7 +24,12 @@ async function getTraffic(days = 31) {
   return require(goaccessPath)
     .visitors.data.slice(0, days)
     .map((d) => ({
-      date: d.data,
+      date:
+        d.data.slice(0, 4) +
+        "-" +
+        d.data.slice(4, 6) +
+        "-" +
+        d.data.slice(6, 8),
       hits: d.hits.count,
       visitors: d.visitors.count,
     }));
@@ -54,6 +71,17 @@ async function goaccessGraph(req, res) {
   }" preserveAspectRatio="xMinYMin meet" version="1.1" xmlns="http://www.w3.org/2000/svg">
       <g transform="translate(${width}, ${height + 2}) scale(-1,-1)">
         <!-- ${JSON.stringify(traffic)} -->
+        <rect fill="gray"  />
+        ${traffic
+          .map((d) => new Date(d.date))
+          .map((date, i) =>
+            weekNumberISO8601(date) % 2
+              ? `<rect x="${i * 3}" y="0" width="3" height="${
+                  height + 2
+                }" fill="${`hsl(${date.getMonth() * 30}, 100%, 78%)`}" />`
+              : ""
+          )
+          .join("\n")}
         <polyline
           points="${traffic
             .map((d) => d.hits * hK)

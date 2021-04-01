@@ -52,7 +52,7 @@ async function goaccessGraph(req, res) {
     <svg viewBox="0 0 ${width} ${
     height + 2
   }" preserveAspectRatio="xMinYMin meet" version="1.1" xmlns="http://www.w3.org/2000/svg">
-      <g transform="translate(0, ${height + 2}) scale(1,-1)">
+      <g transform="translate(${width}, ${height + 2}) scale(-1,-1)">
         <!-- ${JSON.stringify(traffic)} -->
         <polyline
           points="${traffic

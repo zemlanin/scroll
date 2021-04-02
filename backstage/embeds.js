@@ -135,24 +135,42 @@ const rawMetaReducer = (acc, meta) => {
   }
 };
 
+function isInsecureSquarespaceCDNurl(url) {
+  // https://support.squarespace.com/hc/en-us/articles/205812748-Image-and-file-URLs-in-Squarespace
+  return (
+    url &&
+    (url.startsWith("http://static1.squarespace.com/") ||
+      url.startsWith("http://images.squarespace-cdn.com/") ||
+      url.startsWith("http://static.squarespace.com/"))
+  );
+}
+
 const metaPropertiesReducer = (acc, [prop, value]) => {
   let patch = {};
 
   if (isSimpleProp(prop) && !acc[prop]) {
     patch = { [prop]: value };
   } else if (isBasicMediaProp(prop)) {
+    const patchNode = {
+      url: value,
+    };
+
+    if (isInsecureSquarespaceCDNurl(value)) {
+      patchNode.secure_url = value.replace(/^http:/, "https:");
+    }
+
     if (acc[prop] && acc[prop].length > 0) {
       const prevObj = acc[prop].pop();
 
       if (!prevObj.url) {
         patch = {
-          [prop]: [...acc[prop], { ...prevObj, url: value }],
+          [prop]: [...acc[prop], { ...prevObj, ...patchNode }],
         };
       } else {
-        patch = { [prop]: [...acc[prop], prevObj, { url: value }] };
+        patch = { [prop]: [...acc[prop], prevObj, patchNode] };
       }
     } else {
-      patch = { [prop]: [{ url: value }] };
+      patch = { [prop]: [patchNode] };
     }
   } else if (isInitialMediaProp(prop) || isSecureUrlMediaProp(prop)) {
     let [prop0, prop1] = prop.split(":");
@@ -163,6 +181,8 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
 
     if (isSecureUrlMediaProp(prop)) {
       patchNode.url = value;
+    } else if (isInsecureSquarespaceCDNurl(patchNode.url)) {
+      patchNode.secure_url = patchNode.url.replace(/^http:/, "https:");
     }
 
     if (acc[prop0] && acc[prop0].length > 0) {
@@ -897,7 +917,7 @@ module.exports = {
 
       if (image) {
         card.img = {
-          src: image.url,
+          src: image.secure_url || image.url,
           alt: image.alt,
           width: image.width,
           height: image.height,

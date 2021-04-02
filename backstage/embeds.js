@@ -154,37 +154,43 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
     } else {
       patch = { [prop]: [{ url: value }] };
     }
-  } else if (isInitialMediaProp(prop)) {
-    const prop0 = prop.split(":")[0]; // "image" or "video"
+  } else if (isInitialMediaProp(prop) || isSecureUrlMediaProp(prop)) {
+    let [prop0, prop1] = prop.split(":");
+
+    const patchNode = {
+      [prop1]: value,
+    };
+
+    if (isSecureUrlMediaProp(prop)) {
+      patchNode.url = value;
+    }
 
     if (acc[prop0] && acc[prop0].length > 0) {
       const prevObj = acc[prop0].pop();
 
       if (!prevObj.url) {
         patch = {
-          [prop0]: [...acc[prop0], { ...prevObj, url: value }],
+          [prop0]: [...acc[prop0], { ...prevObj, ...patchNode }],
         };
       } else {
-        patch = { [prop0]: [...acc[prop0], prevObj, { url: value }] };
+        patch = { [prop0]: [...acc[prop0], prevObj, patchNode] };
       }
     } else {
-      patch = { [prop0]: [{ url: value }] };
+      patch = { [prop0]: [patchNode] };
     }
-  } else if (isMediaProp(prop) || isSecureUrlMediaProp(prop)) {
+  } else if (isMediaProp(prop)) {
     let [prop0, prop1] = prop.split(":");
 
-    if (isSecureUrlMediaProp(prop)) {
-      prop1 = "url";
-    }
+    const patchNode = { [prop1]: value };
 
     if (acc[prop0] && acc[prop0].length > 0) {
       const prevObj = acc[prop0].pop();
 
       patch = {
-        [prop0]: [...acc[prop0], { ...prevObj, [prop1]: value }],
+        [prop0]: [...acc[prop0], { ...prevObj, ...patchNode }],
       };
     } else {
-      patch = { [prop0]: [{ [prop1]: value }] };
+      patch = { [prop0]: [patchNode] };
     }
   } else if (isPlayerProp(prop)) {
     // prop0 = "player"
@@ -331,13 +337,19 @@ const getImageNative = (graph, options) => {
     return null;
   }
 
+  const isGif = (v) =>
+    "image/gif" === (v.type ? v.type : getURLMimetype(v.url));
+
   if (options && options.static) {
-    return graph.image.find(
-      (v) => v.url && "image/gif" !== (v.type ? v.type : getURLMimetype(v.url))
+    return (
+      graph.image.find((v) => v.secure_url && !isGif(v)) ||
+      graph.image.find((v) => v.url && !isGif(v))
     );
   }
 
-  return graph.image.find((v) => v.url);
+  return (
+    graph.image.find((v) => v.secure_url) || graph.image.find((v) => v.url)
+  );
 };
 
 //                                    ($1          )              ($2)

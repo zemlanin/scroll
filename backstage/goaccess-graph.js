@@ -12,14 +12,18 @@ function weekNumberISO8601(date) {
   return 1 + Math.ceil((firstThursday - tdt) / 604800000);
 }
 
-async function getTraffic(days = 31) {
+let goaccessTTL = new Date(0);
+function getTraffic(days = 31) {
   const goaccessPath = process.env.GOACCESS_JSON;
 
   if (!goaccessPath) {
     return;
   }
 
-  delete require.cache[require.resolve(goaccessPath)];
+  if (goaccessTTL < new Date()) {
+    delete require.cache[require.resolve(goaccessPath)];
+    goaccessTTL = new Date(+new Date() + 60 * 1000);
+  }
 
   return require(goaccessPath)
     .visitors.data.slice(0, days)
@@ -47,7 +51,7 @@ async function goaccessGraph(req, res) {
     return sendToAuthProvider(req, res);
   }
 
-  const traffic = await getTraffic();
+  const traffic = getTraffic();
 
   if (!traffic) {
     res.writeHead(404, { "Content-Type": "text/plain" });

@@ -102,12 +102,16 @@
             <footer class="card-footer">
                 {{#draft}}<div class="card-footer-item">draft</div>{{/draft}}
                 {{^draft}}
-                    <a class="card-footer-item" href="{{urls.permalink}}">
-                        {{status}}
-                    </a>
+                  <a class="card-footer-item" href="{{urls.permalink}}">
+                    {{status}}
+                  </a>
+                  {{#stats}}
+                    <span class="card-footer-item">
+                      👀 {{stats.hits}} / 👤 {{stats.visitors}}
+                    </span>
+                  {{/stats}}
                 {{/draft}}
                 <a class="card-footer-item" href="{{urls.edit}}">edit</a>
-                <a class="card-footer-item" href="{{urls.preview}}">preview</a>
             </footer>
         </div>
     {{/posts}}

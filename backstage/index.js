@@ -14,9 +14,12 @@ async function prepare(post, options) {
     permalink: url.resolve(options.baseUrl, `/${post.slug || post.id}.html`),
   };
 
+  const stats = getHitsAndVisitors(post);
+
   return {
     ...(await commonPrepare(post, options.embedsLoader)),
     urls: urls,
+    stats: stats.visitors || stats.hits ? stats : null,
   };
 }
 
@@ -46,6 +49,37 @@ async function getSuggestion(db, req) {
       url: `/backstage/edit/?id=${suggestionPost.id}`,
     };
   }
+}
+
+let goaccessTTL = new Date(0);
+function getHitsAndVisitors(post) {
+  const goaccessPath = process.env.GOACCESS_JSON;
+
+  if (!goaccessPath) {
+    return;
+  }
+
+  if (goaccessTTL < new Date()) {
+    delete require.cache[require.resolve(goaccessPath)];
+    goaccessTTL = new Date(+new Date() + 60 * 1000);
+  }
+
+  return require(goaccessPath)
+    .requests.data.filter((d) => d.method === "GET")
+    .filter(
+      (d) =>
+        d.data === `/${post.id}.html` ||
+        d.data === `/${post.id}` ||
+        (post.slug &&
+          (d.data === `/${post.slug}.html` || d.data === `/${post.slug}`))
+    )
+    .reduce(
+      (acc, d) => ({
+        hits: acc.hits + d.hits.count,
+        visitors: acc.visitors + d.visitors.count,
+      }),
+      { hits: 0, visitors: 0 }
+    );
 }
 
 module.exports = async (req, res) => {

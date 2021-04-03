@@ -100,18 +100,28 @@
                 {{/longread}}
             </article>
             <footer class="card-footer">
+                {{#stats}}
+                  <a class="card-footer-item" href="{{urls.edit}}">
+                    {{#fas}}edit{{/fas}}
+                  </a>
+                  <span class="card-footer-item">
+                    {{#fas}}eye{{/fas}}&nbsp;{{stats.hits}}
+                  </span>
+                  <span class="card-footer-item">
+                    {{#fas}}user{{/fas}}&nbsp;{{stats.visitors}}
+                  </span>
+                {{/stats}}
+                {{^stats}}
+                  <a class="card-footer-item" href="{{urls.edit}}">
+                    edit
+                  </a>
+                {{/stats}}
                 {{#draft}}<div class="card-footer-item">draft</div>{{/draft}}
                 {{^draft}}
                   <a class="card-footer-item" href="{{urls.permalink}}">
                     {{status}}
                   </a>
-                  {{#stats}}
-                    <span class="card-footer-item">
-                      👀&nbsp;{{stats.hits}} / 👤&nbsp;{{stats.visitors}}
-                    </span>
-                  {{/stats}}
                 {{/draft}}
-                <a class="card-footer-item" href="{{urls.edit}}">edit</a>
             </footer>
         </div>
     {{/posts}}

@@ -132,7 +132,7 @@ async function blogRender(tmpl, data) {
         cssProcess
       ),
       "highlight.css": await loadTemplate(
-        path.join(BLOG_TEMPLATES, "highlight.css"),
+        path.join(BLOG_TEMPLATES, "highlight-alabaster.css"),
         cssProcess
       ),
     }

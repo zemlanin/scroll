@@ -7,7 +7,9 @@
 .hljs-selector-tag,
 .hljs-meta-keyword,
 .hljs-doctag,
-.hljs-name {
+.hljs-name,
+.hljs-title,
+.hljs-section {
   font-weight: bold;
 }
 
@@ -21,11 +23,6 @@
 .hljs-quote,
 .hljs-template-tag,
 .hljs-deletion {
-}
-
-.hljs-title,
-.hljs-section {
-  font-weight: bold;
 }
 
 .hljs-regexp,

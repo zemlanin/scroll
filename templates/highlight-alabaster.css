@@ -6,6 +6,16 @@
   font-weight: bold;
 }
 
+.hljs-keyword,
+.hljs-attribute,
+.hljs-selector-tag,
+.hljs-meta-keyword,
+.hljs-doctag,
+.hljs-name,
+.hljs-section {
+  font-weight: bold;
+}
+
 .hljs-comment {
   color: #aa3731;
 }
@@ -110,28 +120,4 @@ body.light .hljs-deletion {
 
 body.light .hljs-addition {
   color: hsl(100, 50%, 50%);
-}
-
-.hljs-keyword,
-.hljs-attribute,
-.hljs-selector-tag,
-.hljs-meta-keyword,
-.hljs-doctag,
-.hljs-name,
-.hljs-type,
-.hljs-selector-id,
-.hljs-selector-class,
-.hljs-quote,
-.hljs-template-tag,
-.hljs-section,
-.hljs-symbol,
-.hljs-variable,
-.hljs-template-variable,
-.hljs-link,
-.hljs-selector-attr,
-.hljs-selector-pseudo,
-.hljs-built_in,
-.hljs-bullet,
-.hljs-code,
-.hljs-meta {
 }

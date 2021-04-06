@@ -423,7 +423,12 @@ const isTwitterCard = (cardURL) => {
 };
 
 const isYoutubeCard = (cardURL) => {
-  return cardURL && cardURL.startsWith("https://www.youtube.com/watch");
+  const hostname = cardURL ? new URL(cardURL).hostname : "";
+  return (
+    hostname === "youtube.com" ||
+    hostname === "youtu.be" ||
+    hostname.endsWith(".youtube.com")
+  );
 };
 
 const shouldDescriptionBeTruncated = (cardURL) => {
@@ -690,9 +695,10 @@ module.exports = {
         expectedMimetype.startsWith("video/") ||
         expectedMimetype.startsWith("audio/"))
     ) {
-      const headers = await require("request-promise-native").head({
+      const headResp = await require("request-promise-native").head({
         url: ogPageURL,
         jar: jar,
+        resolveWithFullResponse: true,
         followRedirect: true,
         timeout: 4000,
         headers: {
@@ -701,7 +707,8 @@ module.exports = {
         },
       });
 
-      const cHeaders = headers && caseless(headers);
+      const cHeaders =
+        headResp && headResp.headers && caseless(headResp.headers);
 
       if (
         cHeaders &&
@@ -713,10 +720,12 @@ module.exports = {
       }
     }
 
-    const headers = await require("request-promise-native").head({
+    const headResp = await require("request-promise-native").head({
       url: ogPageURL,
-      jar: jar,
+      // youtube redirects to consent page when loaded with cookies from EU IPs
+      jar: isYoutubeCard(ogPageURL) ? null : jar,
       followRedirect: true,
+      resolveWithFullResponse: true,
       timeout: 4000,
       headers: {
         Accept: "text/html,*/*;q=0.8",
@@ -724,7 +733,7 @@ module.exports = {
       },
     });
 
-    const cHeaders = headers && caseless(headers);
+    const cHeaders = headResp && headResp.headers && caseless(headResp.headers);
 
     const mimetype =
       cHeaders &&
@@ -740,7 +749,8 @@ module.exports = {
 
     const $ = await require("request-promise-native").get({
       url: ogPageURL,
-      jar: jar,
+      // youtube redirects to consent page when loaded with cookies from EU IPs
+      jar: isYoutubeCard(headResp.request.href) ? null : jar,
       followRedirect: true,
       timeout: 4000,
       headers: {

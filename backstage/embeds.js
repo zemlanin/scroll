@@ -35,6 +35,7 @@ const CARD_TEMPLATE_PATH = path.resolve(
     http://foursquare.com/v/lab-by-dk/5ad36e49ad910e7bb2af114e
     https://www.imdb.com/title/tt4154796/
     https://soundcloud.com/fairtomidland/the-greener-grass
+    https://media.giphy.com/media/POZAVqMVRAmjY7jh4L/giphy.gif (giphy doesn't serve `image/gif` when client `Accept`s `text/html`)
 */
 
 function loadCardTemplate() {
@@ -692,7 +693,6 @@ module.exports = {
       const headers = await require("request-promise-native").head({
         url: ogPageURL,
         jar: jar,
-        resolveWithFullResponse: true,
         followRedirect: true,
         timeout: 4000,
         headers: {

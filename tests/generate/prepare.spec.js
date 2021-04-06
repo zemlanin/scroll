@@ -730,9 +730,14 @@ test("embed-html code block", async (t) => {
 test("show embed in teaser", async (t) => {
   const EmbedsLoader = require("../../embeds-loader.js");
   t.mockery("request-promise-native", {
-    head() {
+    head({ url }) {
       return {
-        "content-type": "text/html; charset=utf-8",
+        headers: {
+          "content-type": "text/html; charset=utf-8",
+        },
+        request: {
+          href: url,
+        },
       };
     },
     get({ transform }) {

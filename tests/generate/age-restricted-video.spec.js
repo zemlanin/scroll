@@ -33,9 +33,14 @@ test("age restricted youtube embed", async (t) => {
   );
 
   t.mockery("request-promise-native", {
-    head() {
+    head({ url }) {
       return {
-        "content-type": "text/html; charset=utf-8",
+        headers: {
+          "content-type": "text/html; charset=utf-8",
+        },
+        request: {
+          href: url,
+        },
       };
     },
     get({ transform }) {

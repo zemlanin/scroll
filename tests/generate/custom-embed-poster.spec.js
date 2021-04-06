@@ -35,7 +35,9 @@ test("embed with custom poster", async (t) => {
   t.mockery("request-promise-native", {
     head() {
       return {
-        "content-type": "video/mp4",
+        headers: {
+          "content-type": "video/mp4",
+        },
       };
     },
     jar() {},

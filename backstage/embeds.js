@@ -7,6 +7,7 @@ const cheerio = require("cheerio");
 const caseless = require("caseless");
 const mustache = require("mustache");
 const { RequestError } = require("request-promise-native/errors");
+const oEmbedProviders = require("oembed-providers");
 
 const { render } = require("./render.js");
 
@@ -654,6 +655,66 @@ function getUserAgent(url) {
   return "request (+https://zemlan.in)";
 }
 
+function getOEmbedLinkFromProviders(url) {
+  // https://www.tiktok.com/@hotvickkrishna/video/6937457241968643334
+
+  for (const provider of oEmbedProviders) {
+    for (const endpoint of provider.endpoints) {
+      if (!endpoint.schemes) {
+        if (url.startsWith(provider.provider_url)) {
+          const href = new URL(endpoint.url);
+          href.searchParams.set("format", "json");
+          href.searchParams.set("url", url);
+
+          return {
+            type: "application/json+oembed",
+            href: href.toString(),
+          };
+        } else {
+          continue;
+        }
+      }
+
+      for (const scheme of endpoint.schemes) {
+        if (!scheme.startsWith("http")) {
+          continue;
+        }
+
+        const { protocol, hostname, pathname } = scheme.match(
+          /^(?<protocol>https?:\/\/)(?<hostname>[^/]+)\/(?<pathname>.+)$/
+        ).groups;
+
+        if (
+          !hostname.includes("*") &&
+          !url.startsWith(`${protocol}${hostname}/`)
+        ) {
+          continue;
+        }
+
+        const schemeRegexp = new RegExp(
+          `^${protocol}${hostname.replace(
+            /\*/g,
+            "[a-z0-9-]+"
+          )}/${pathname.replace(/\*/g, "[^/]+")}`
+        );
+
+        if (url.match(schemeRegexp)) {
+          const href = new URL(endpoint.url);
+          href.searchParams.set("format", "json");
+          href.searchParams.set("url", url);
+
+          return {
+            type: "application/json+oembed",
+            href: href.toString(),
+          };
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
 module.exports = {
   queryEmbed,
   loadMetadata: async (ogPageURL) => {
@@ -786,18 +847,25 @@ module.exports = {
       .map(cheerioAttrs)
       .get(0);
 
-    if (oEmbedDiscoveryEl && oEmbedDiscoveryEl.href) {
+    const oEmbedLink =
+      oEmbedDiscoveryEl && oEmbedDiscoveryEl.href
+        ? {
+            type: oEmbedDiscoveryEl.type,
+            href: oEmbedDiscoveryEl.href,
+          }
+        : getOEmbedLinkFromProviders(ogPageURL);
+
+    if (oEmbedLink) {
       rawMeta.push({
         link: true,
-        type: oEmbedDiscoveryEl.type,
-        href: oEmbedDiscoveryEl.href,
+        ...oEmbedLink,
       });
 
       let oEmbed;
 
       try {
         oEmbed = await require("request-promise-native").get({
-          url: oEmbedDiscoveryEl.href,
+          url: oEmbedLink.href,
           followRedirect: true,
           timeout: 4000,
           headers: {

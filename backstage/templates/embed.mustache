@@ -85,8 +85,10 @@
   <pre style="margin-bottom: 1em;"><code>{{ requested.parsedMetadataJSON }}</code></pre>
   {{/ requested.parsedMetadataJSON }}
 
-  <pre {{^ rawMetadata }}hidden{{/ rawMetadata }}><code>{{# rawMetadata }}{{#name}}&lt;meta name="{{name}}" content="{{content}}"&gt;{{/name}}{{#property}}&lt;meta property="{{property}}" content="{{content}}"&gt;{{/property}}
-{{/ rawMetadata }}</code></pre>
+  <pre {{^ rawMetadata }}hidden{{/ rawMetadata }}><code>{{# rawMetadata }}{{#name}}&lt;meta name="{{name}}" content="{{content}}"&gt;
+{{/name}}{{#property}}&lt;meta property="{{property}}" content="{{content}}"&gt;
+{{/property}}{{#link}}&lt;link type="{{type}}" href="{{href}}"&gt;
+{{/link}}{{/ rawMetadata }}</code></pre>
 </article>
 </body>
 </html>

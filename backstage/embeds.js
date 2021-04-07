@@ -782,6 +782,42 @@ module.exports = {
       .filter(hasContent)
       .reduce(rawMetaReducer, initialMeta);
 
+    const oEmbedDiscoveryEl = $(`head link[type="application/json+oembed"]`)
+      .map(cheerioAttrs)
+      .get(0);
+
+    if (oEmbedDiscoveryEl && oEmbedDiscoveryEl.href) {
+      rawMeta.push({
+        link: true,
+        type: oEmbedDiscoveryEl.type,
+        href: oEmbedDiscoveryEl.href,
+      });
+
+      let oEmbed;
+
+      try {
+        oEmbed = await require("request-promise-native").get({
+          url: oEmbedDiscoveryEl.href,
+          followRedirect: true,
+          timeout: 4000,
+          headers: {
+            Accept: "application/json; charset=utf-8",
+            "User-Agent": getUserAgent(ogPageURL),
+          },
+          transform: (body) => JSON.parse(body),
+          transform2xxOnly: true,
+        });
+      } catch (e) {
+        //
+      }
+
+      if (oEmbed) {
+        rawMeta.push({
+          oembed: oEmbed,
+        });
+      }
+    }
+
     return rawMeta;
   },
   generateCardJSON: (rawMeta) => {
@@ -827,11 +863,17 @@ module.exports = {
 
     rawTwitter = rawTwitter.reduce(metaPropertiesReducer, {});
 
+    const rawOEmbed = rawMeta
+      .map((v) => v.oembed)
+      .filter(Boolean)
+      .find(Boolean);
+
     const card = {
       _parsedMetadata: {
         _: rawInitial,
         og: rawOpengraph,
         twitter: rawTwitter,
+        oembed: rawOEmbed,
       },
       mimetype: rawInitial.mimetype || "text/html",
       title: rawOpengraph.title || rawTwitter.title || rawInitial.title,

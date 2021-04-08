@@ -20,6 +20,7 @@ RUN npm ci
 RUN apt-get remove -y \
     # clean up after compiling `sqlite-icu/libicu.so`
     gcc pkg-config \
+    git \
   && apt-get autoremove -y \
   && apt-get clean
 

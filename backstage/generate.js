@@ -113,6 +113,10 @@ module.exports = {
       case "pages":
         generator = async () => generate(await req.db(), DIST, res, res);
         break;
+      case "linklist":
+        generator = async () =>
+          generate(await req.db(), DIST, res, res, { only: "linklist" });
+        break;
     }
 
     return generator()

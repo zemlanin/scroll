@@ -26,7 +26,7 @@ const EmbedsLoader = require("./embeds-loader.js");
 
 const RETRY_TIMEOUT = 1000 * 60 * 30; // 30 minutes
 
-async function loadFreshFeed(db) {
+async function loadFreshFeed(db, stdout, _stderr) {
   const feedparser = new FeedParser({ normalize: true });
 
   const res = await fetch(LINKLIST_SOURCE_FEED);
@@ -60,6 +60,8 @@ async function loadFreshFeed(db) {
     });
   });
 
+  let hasNewItems = false;
+
   for (const item of feed.items) {
     const exists = await db.get(
       `SELECT id FROM linklist WHERE source_id = $1 LIMIT 1`,
@@ -67,6 +69,10 @@ async function loadFreshFeed(db) {
     );
 
     if (!exists) {
+      hasNewItems = true;
+
+      stdout.write(`new link item: ${item.link}\n`);
+
       await db.run(
         `
           INSERT INTO linklist (id, source_id, original_url, created) VALUES ($1, $2, $3, $4)
@@ -80,6 +86,8 @@ async function loadFreshFeed(db) {
       );
     }
   }
+
+  return hasNewItems;
 }
 
 async function prepareLink(link, embedsLoader) {
@@ -156,15 +164,21 @@ async function checkAndUpdate(stdout, stderr) {
     .open({ filename: POSTS_DB, driver: sqlite3.Database })
     .then(loadIcu);
 
-  await loadFreshFeed(db);
-
-  await require("./generate.js").generate(
+  const hasNewItems = await loadFreshFeed(
     db,
-    DIST,
     stdout || process.stdout,
-    stderr || process.stderr,
-    { only: new Set(["linklist"]) }
+    stderr || process.stderr
   );
+
+  if (hasNewItems) {
+    await require("./generate.js").generate(
+      db,
+      DIST,
+      stdout || process.stdout,
+      stderr || process.stderr,
+      { only: new Set(["linklist"]) }
+    );
+  }
 }
 
 function watch() {

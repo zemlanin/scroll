@@ -8,6 +8,7 @@ const caseless = require("caseless");
 const mustache = require("mustache");
 const { RequestError } = require("request-promise-native/errors");
 const oEmbedProviders = require("oembed-providers");
+const faTiktok = require("@fortawesome/free-brands-svg-icons/faTiktok.js");
 
 const { render } = require("./render.js");
 
@@ -432,6 +433,11 @@ const isYoutubeCard = (cardURL) => {
   );
 };
 
+const isTikTokCard = (cardURL) => {
+  const hostname = cardURL ? new URL(cardURL).hostname : "";
+  return hostname === "www.tiktok.com" || hostname.endsWith(".tiktok.com");
+};
+
 const shouldDescriptionBeTruncated = (cardURL) => {
   if (isTwitterCard(cardURL)) {
     return false;
@@ -713,6 +719,50 @@ function getOEmbedLinkFromProviders(url) {
   }
 
   return null;
+}
+
+function tiktokPlaceholder() {
+  const { width, height, svgPathData } = faTiktok;
+  const iconX = 80 - faTiktok.width / 20;
+
+  return (
+    "data:image/svg+xml;utf8," +
+    encodeURIComponent(
+      `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 70">
+          <defs><style type="text/css">
+            text {
+              font-size: 4px;
+              font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
+                "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
+                "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
+                "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+            }
+          </style></defs>
+          <rect x="0" y="0" height="70" width="160" fill="white" />
+          <svg x="${iconX - 2}" y="${
+        10 - 2
+      }" xmlns="http://www.w3.org/2000/svg" width="${width / 10}px" height="${
+        height / 10
+      }px" viewBox="0 0 ${width} ${height}">
+            <path fill="#69c9d0" d="${svgPathData}"></path>
+          </svg>
+          <svg x="${iconX + 2}" y="${
+        10 + 2
+      }" xmlns="http://www.w3.org/2000/svg" width="${width / 10}px" height="${
+        height / 10
+      }px" viewBox="0 0 ${width} ${height}">
+            <path fill="#ee1d52" d="${svgPathData}"></path>
+          </svg>
+          <svg x="${iconX}" y="${10}" xmlns="http://www.w3.org/2000/svg" width="${
+        width / 10
+      }px" height="${height / 10}px" viewBox="0 0 ${width} ${height}">
+            <path fill="#010101" d="${svgPathData}"></path>
+          </svg>
+        </svg>
+      `.replace(/^\s+/gm, "")
+    )
+  );
 }
 
 module.exports = {
@@ -1091,6 +1141,14 @@ module.exports = {
         card.description = "";
         card.img = null;
       }
+    }
+
+    if (isTikTokCard(card.url)) {
+      // tiktok uses expiring urls in its opengraph :rolling_eyes:
+      card.video = null;
+      card.img = {
+        src: tiktokPlaceholder(),
+      };
     }
 
     return card;

@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rsync \
     gcc pkg-config libicu-dev icu-devtools libsqlite3-dev \
     # to install oembed-providers package from github
-    git \
+    git openssh-client \
   && rm -rf /var/lib/apt/lists/*
 
 COPY scripts/ ./scripts/
@@ -20,7 +20,7 @@ RUN npm ci
 RUN apt-get remove -y \
     # clean up after compiling `sqlite-icu/libicu.so`
     gcc pkg-config \
-    git \
+    git openssh-client \
   && apt-get autoremove -y \
   && apt-get clean
 

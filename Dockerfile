@@ -7,6 +7,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     rsync \
     gcc pkg-config libicu-dev icu-devtools libsqlite3-dev \
+    # to install oembed-providers package from github
+    git \
   && rm -rf /var/lib/apt/lists/*
 
 COPY scripts/ ./scripts/

@@ -111,7 +111,11 @@ module.exports = async (req, res) => {
   const naked = (req.post && req.post.naked) || query.naked;
 
   if (naked) {
-    return (preparedPost.htmlTitle || "") + preparedPost.html;
+    return (
+      "<style>html,body,iframe,img{max-width:100%;}</style>" +
+      (preparedPost.htmlTitle || "") +
+      preparedPost.rss.html
+    );
   }
 
   const showTeaser = (req.post && req.post.teaser) || query.teaser;

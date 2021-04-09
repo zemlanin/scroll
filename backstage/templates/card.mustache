@@ -24,31 +24,42 @@
       ></video>
     {{/ video }}
     {{# iframe }}
-      <a href="{{card.url}}"
-        class="future-frame"
-        data-src="{{iframe.src}}"
-        {{# iframe.width}}
-          data-width="{{iframe.width}}"
-        {{/ iframe.width}}
-        {{# iframe.height}}
-          data-height="{{iframe.height}}"
-        {{/ iframe.height}}
-      >
-        {{# img }}
-          <img
-            {{# img.alt}}
-              alt="{{img.alt}}"
-            {{/ img.alt}}
-            {{# img.width}}
-              width="{{img.width}}"
-            {{/ img.width}}
-            {{# img.height}}
-              height="{{img.height}}"
-            {{/ img.height}}
-            src="{{img.src}}"
-          >
-        {{/ img }}
-      </a>
+      {{# externalFrames }}
+        <iframe
+          src="{{iframe.src}}"
+          {{# iframe.width}}width="{{iframe.width}}"{{/ iframe.width}}
+          {{# iframe.height}}height="{{iframe.height}}"{{/ iframe.height}}
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowfullscreen="1"
+        ></iframe>
+      {{/ externalFrames }}
+      {{^ externalFrames }}
+        <a href="{{card.url}}"
+          class="future-frame"
+          data-src="{{iframe.src}}"
+          {{# iframe.width}}
+            data-width="{{iframe.width}}"
+          {{/ iframe.width}}
+          {{# iframe.height}}
+            data-height="{{iframe.height}}"
+          {{/ iframe.height}}
+        >
+          {{# img }}
+            <img
+              {{# img.alt}}
+                alt="{{img.alt}}"
+              {{/ img.alt}}
+              {{# img.width}}
+                width="{{img.width}}"
+              {{/ img.width}}
+              {{# img.height}}
+                height="{{img.height}}"
+              {{/ img.height}}
+              src="{{img.src}}"
+            >
+          {{/ img }}
+        </a>
+      {{/ externalFrames }}
     {{/ iframe }}
     {{^ iframe }}
       {{^ video }}

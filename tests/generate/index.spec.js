@@ -159,18 +159,22 @@ test("database with posts and embeds", async (t) => {
     ) > -1
   );
 
-  const YTEmbed = `<a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
-          <img alt="Rick Astley - Never Gonna Give You Up (Video)" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg">
-      </a>`;
   const post5 = (
     await fs.promises.readFile(path.join(tmpFolder, "5.html"))
   ).toString();
-  t.ok(
-    post5.indexOf(YTEmbed) > -1,
-    post5.indexOf(YTEmbed) > -1
-      ? YTEmbed.split("\n")[0]
-      : post5.match(/<article>([\s\S]+)<\/article>/i)[1].trim()
-  );
+  t.equalHtml(
+    cheerio(".card", post5).html(),
+    `
+      <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
+        <img alt="Rick Astley - Never Gonna Give You Up (Video)" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg">
+      </a>
+
+      <figcaption>
+        <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ"><b>Rick Astley - Never Gonna Give You Up (Video)</b> • YouTube<br /></a>
+        <i class="truncated"> Rick Astley - Never Gonna Give You Up (Official Video) - Listen On Spotify: http://smarturl.it/AstleySpotify Learn more about the brand new album ‘Beautiful ... </i>
+      </figcaption>
+    `
+  )
 
   const post6 = await fs.promises.readFile(path.join(tmpFolder, "6.html"));
   t.ok(

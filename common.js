@@ -845,6 +845,10 @@ async function prepare(post, embedsLoader) {
           .join("\n")}</ol></div>`;
     }
 
+    rss.html = await embedsLoader.load(html, {
+      externalFrames: true,
+      maxWidth: 720,
+    });
     html = await embedsLoader.load(html);
 
     const teaser = await embedsLoader.load(teaserParagraphs.join("\n"));
@@ -896,7 +900,11 @@ async function prepare(post, embedsLoader) {
           .map((f) => f.html)
           .join("\n")}</ol></div>`;
     }
-    rss.html = html = await embedsLoader.load(html);
+    rss.html = await embedsLoader.load(html, {
+      externalFrames: true,
+      maxWidth: 720,
+    });
+    html = await embedsLoader.load(html);
   }
 
   let status;

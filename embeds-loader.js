@@ -149,7 +149,7 @@ module.exports = class EmbedsLoader {
     }, []);
   }
 
-  async load(html) {
+  async load(html, options) {
     const $ = cheerio.load(html);
 
     const urlsToLoad = [];
@@ -184,7 +184,12 @@ module.exports = class EmbedsLoader {
       if (cache[embed.href]) {
         const card = overwriteFromEmbed(cache[embed.href], embed);
 
-        $this.replaceWith(renderCard(card));
+        $this.replaceWith(
+          renderCard(card, {
+            externalFrames: options && options.externalFrames,
+            maxWidth: options && options.maxWidth,
+          })
+        );
         return;
       }
 

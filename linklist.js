@@ -99,7 +99,10 @@ async function prepareLink(link, embedsLoader) {
     created: created.toISOString().replace(/\.\d{3}Z$/, "Z"),
     createdDate: created.toISOString().split("T")[0],
     createdUTC: created.toUTCString(),
-    html: await embedsLoader.load(embedCallback(link.original_url)),
+    html: await embedsLoader.load(embedCallback(link.original_url), {
+      externalFrames: true,
+      maxWidth: 720,
+    }),
     title: (await embedsLoader.query([link.original_url]))[0].title,
   };
 }

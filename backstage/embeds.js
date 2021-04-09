@@ -277,20 +277,21 @@ const getVideoIframe = (graph) =>
   ((graph.video && graph.video.find((v) => v.url && v.type === "text/html")) ||
     (graph.player && {
       url: graph.player.url,
-      width: graph.player.width,
-      height: graph.player.height,
+      width: graph.player.width ? parseInt(graph.player.width, 10) : null,
+      height: graph.player.height ? parseInt(graph.player.height, 10) : null,
     }));
 
 const getOEmbedVideoIframe = (oEmbed) =>
   oEmbed &&
   (oEmbed.type === "video" || oEmbed.type === "rich") &&
+  !isTwitterCard(oEmbed.url) &&
   oEmbed.html && {
     url: `data:text/html;charset=utf-8,${
       "<style>html,body,iframe{padding:0;margin:0;height:100%;max-height:100%;max-width:100%;}</style>" +
       oEmbed.html
     }`,
-    width: oEmbed.width,
-    height: oEmbed.height,
+    width: oEmbed.width ? parseInt(oEmbed.width) : null,
+    height: oEmbed.height ? parseInt(oEmbed.height) : null,
   };
 
 const getVideoNative = (graph) => {
@@ -313,8 +314,8 @@ const getVideoNative = (graph) => {
   ) {
     video = {
       url: graph.player.stream.url,
-      width: graph.player.width,
-      height: graph.player.height,
+      width: graph.player.width ? parseInt(graph.player.width, 10) : null,
+      height: graph.player.height ? parseInt(graph.player.height, 10) : null,
       type: graph.player.stream.content_type,
     };
   }
@@ -375,16 +376,28 @@ const getImageNative = (graph, options) => {
   const isGif = (v) =>
     "image/gif" === (v.type ? v.type : getURLMimetype(v.url));
 
+  let entry;
   if (options && options.static) {
-    return (
+    entry =
       graph.image.find((v) => v.secure_url && !isGif(v)) ||
-      graph.image.find((v) => v.url && !isGif(v))
-    );
+      graph.image.find((v) => v.url && !isGif(v));
+  } else {
+    entry =
+      graph.image.find((v) => v.secure_url) || graph.image.find((v) => v.url);
   }
 
-  return (
-    graph.image.find((v) => v.secure_url) || graph.image.find((v) => v.url)
-  );
+  if (!entry) {
+    return null;
+  }
+
+  return {
+    url: entry.url,
+    secure_url: entry.secure_url,
+    alt: entry.alt,
+    user_generated: entry.user_generated,
+    width: entry.width ? parseInt(entry.width, 10) : null,
+    height: entry.height ? parseInt(entry.height, 10) : null,
+  };
 };
 
 const getOEmbedImageNative = (oEmbed, options) => {
@@ -407,15 +420,17 @@ const getOEmbedImageNative = (oEmbed, options) => {
   if (isTypePhoto) {
     return {
       url: oEmbed.url,
-      width: oEmbed.width,
-      height: oEmbed.height,
+      width: oEmbed.width ? parseInt(oEmbed.width, 10) : null,
+      height: oEmbed.height ? parseInt(oEmbed.height, 10) : null,
     };
   }
 
   return {
     url: oEmbed.thumbnail_url,
-    width: oEmbed.thumbnail_width,
-    height: oEmbed.thumbnail_height,
+    width: oEmbed.thumbnail_width ? parseInt(oEmbed.thumbnail_width, 10) : null,
+    height: oEmbed.thumbnail_height
+      ? parseInt(oEmbed.thumbnail_height, 10)
+      : null,
   };
 };
 
@@ -551,6 +566,7 @@ async function getSingleEmbed(req, _res) {
   let cardHTML;
   let rawMetadata;
   let requested;
+  let naked = !!query.naked;
   if (!existingEmbed || query.request) {
     let error;
     try {
@@ -590,7 +606,7 @@ async function getSingleEmbed(req, _res) {
 
     mimetype = cardWithMetadata ? cardWithMetadata.mimetype : null;
     cardHTML = cardWithMetadata
-      ? module.exports.renderCard(cardWithMetadata)
+      ? module.exports.renderCard(cardWithMetadata, { externalFrames: naked })
       : null;
 
     requested = {
@@ -602,7 +618,15 @@ async function getSingleEmbed(req, _res) {
     mimetype = existingEmbed.mimetype;
     rawMetadata = existingEmbed.raw_metadata;
     const cardWithMetadata = module.exports.generateCardJSON(rawMetadata);
-    cardHTML = module.exports.renderCard(cardWithMetadata);
+    cardHTML = module.exports.renderCard(cardWithMetadata, {
+      externalFrames: naked,
+    });
+  }
+
+  if (naked) {
+    cardHTML = `<iframe width="100%" style="min-height: 80vh;" src="data:text/html;charset=utf8,${encodeURIComponent(
+      cardHTML
+    )}"/>`;
   }
 
   return render("embed.mustache", {
@@ -1213,10 +1237,6 @@ module.exports = {
       }
     }
 
-    if (card.iframe && !card.img) {
-      card.iframe = null;
-    }
-
     if (isTikTokCard(card.url)) {
       // tiktok uses expiring urls in its opengraph :rolling_eyes:
       card.video = null;
@@ -1229,7 +1249,7 @@ module.exports = {
 
     return card;
   },
-  renderCard: (card) => {
+  renderCard: (card, options) => {
     if (!card) {
       return "";
     }
@@ -1268,11 +1288,50 @@ module.exports = {
       return `<a href="${card.url}">${card.title || card.url}</a>`;
     }
 
+    if (!card.img && card.iframe) {
+      return `<a href="${card.url}">${card.title || card.url}</a>`;
+    }
+
     if (card.error) {
       return "";
     }
 
-    return mustache.render(loadCardTemplate(), { card });
+    if (options && options.maxWidth) {
+      card = {
+        ...card,
+        img: card.img ? {
+          ...card.img
+        } : null,
+        video: card.video ? {
+          ...card.video
+        } : null,
+        iframe: card.iframe ? {
+          ...card.iframe
+        } : null,
+      }
+      for (const target of [card.img, card.video, card.iframe]) {
+        if (!target) {
+          continue;
+        }
+
+        if (!target.width && !target.height) {
+          continue;
+        }
+
+        if (target.width <= options.maxWidth) {
+          continue;
+        }
+
+        const aspectRatio = target.width / target.height;
+        target.width = options.maxWidth;
+        target.height = target.width / aspectRatio;
+      }
+    }
+
+    return mustache.render(loadCardTemplate(), {
+      card,
+      externalFrames: options && options.externalFrames,
+    });
   },
 
   post: async (req, res) => {

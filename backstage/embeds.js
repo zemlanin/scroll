@@ -1299,16 +1299,22 @@ module.exports = {
     if (options && options.maxWidth) {
       card = {
         ...card,
-        img: card.img ? {
-          ...card.img
-        } : null,
-        video: card.video ? {
-          ...card.video
-        } : null,
-        iframe: card.iframe ? {
-          ...card.iframe
-        } : null,
-      }
+        img: card.img
+          ? {
+              ...card.img,
+            }
+          : null,
+        video: card.video
+          ? {
+              ...card.video,
+            }
+          : null,
+        iframe: card.iframe
+          ? {
+              ...card.iframe,
+            }
+          : null,
+      };
       for (const target of [card.img, card.video, card.iframe]) {
         if (!target) {
           continue;

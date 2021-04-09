@@ -174,7 +174,7 @@ test("database with posts and embeds", async (t) => {
         <i class="truncated"> Rick Astley - Never Gonna Give You Up (Official Video) - Listen On Spotify: http://smarturl.it/AstleySpotify Learn more about the brand new album ‘Beautiful ... </i>
       </figcaption>
     `
-  )
+  );
 
   const post6 = await fs.promises.readFile(path.join(tmpFolder, "6.html"));
   t.ok(

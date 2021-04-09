@@ -22,6 +22,7 @@ const zlibPromises = {
 
 const PAGE_SIZE = 10;
 const MINIMUM_INDEX_PAGE_SIZE = 5;
+const RSS_SIZE = 20;
 const BLOG_TITLE = "zemlan.in";
 const PORT = process.env.PORT || 8000;
 const BLOG_BASE_URL = process.env.BLOG_BASE_URL || ".";
@@ -1022,6 +1023,7 @@ module.exports = {
   LINKLIST_SOURCE_FEED,
   PAGE_SIZE,
   MINIMUM_INDEX_PAGE_SIZE,
+  RSS_SIZE,
   getMimeObj,
   getBlogObject,
   prepare,

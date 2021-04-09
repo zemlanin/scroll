@@ -8,6 +8,7 @@ const {
   DIST,
   PAGE_SIZE,
   MINIMUM_INDEX_PAGE_SIZE,
+  RSS_SIZE,
   prepare,
   getBlogObject,
   writeFileWithGzip,
@@ -238,7 +239,7 @@ async function generateRSSPage(db, blog) {
     db,
     {},
     "draft = 0 AND internal = 0 AND private = 0",
-    PAGE_SIZE
+    RSS_SIZE
   );
 
   return await render("rss.mustache", {

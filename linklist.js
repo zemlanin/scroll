@@ -16,6 +16,7 @@ const getLinkId = () =>
 
 const {
   DIST,
+  RSS_SIZE,
   POSTS_DB,
   LINKLIST_SOURCE_FEED,
   loadIcu,
@@ -111,13 +112,18 @@ async function prepareLink(link, embedsLoader, options) {
 }
 
 async function generateLinklistPage(db, blog) {
-  const rawLinks = await db.all(`
+  const rawLinks = await db.all(
+    `
     SELECT id, strftime('%s000', created) created, original_url
     FROM linklist
     WHERE private = 0
     ORDER BY created DESC
-    LIMIT 20;
-  `);
+    LIMIT ?1;
+  `,
+    {
+      1: RSS_SIZE,
+    }
+  );
 
   const embedsLoader = new EmbedsLoader(db);
 

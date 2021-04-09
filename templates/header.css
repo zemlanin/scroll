@@ -526,7 +526,7 @@ article ul[data-gallery] li.dim a[href] {
   pointer-events: none;
 }
 
-article ul[data-gallery] li.dim figure.card a {
+article ul[data-gallery] li.dim figure.card > a {
   display: block;
 }
 

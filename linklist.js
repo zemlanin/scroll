@@ -90,7 +90,7 @@ async function loadFreshFeed(db, stdout, _stderr) {
   return hasNewItems;
 }
 
-async function prepareLink(link, embedsLoader) {
+async function prepareLink(link, embedsLoader, options) {
   const created = new Date(parseInt(link.created));
 
   return {
@@ -100,8 +100,8 @@ async function prepareLink(link, embedsLoader) {
     createdDate: created.toISOString().split("T")[0],
     createdUTC: created.toUTCString(),
     html: await embedsLoader.load(embedCallback(link.original_url), {
-      externalFrames: true,
-      maxWidth: 720,
+      externalFrames: options && options.externalFrames,
+      maxWidth: options && options.maxWidth,
     }),
     title: (await embedsLoader.query([link.original_url]))[0].title,
   };
@@ -146,7 +146,10 @@ async function generateLinklistRSSPage(db, blog) {
   const links = [];
 
   for (const l of rawLinks) {
-    const entry = await prepareLink(l, embedsLoader);
+    const entry = await prepareLink(l, embedsLoader, {
+      externalFrames: true,
+      maxWidth: 720,
+    });
     entry.html += `<a href="${blog.linklist.url}">via</a>`;
     links.push(entry);
   }

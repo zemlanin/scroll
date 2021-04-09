@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function () {
     i.setAttribute("height", 0);
     i.style.width = width + "px";
     i.style.height = 0;
-    i.setAttribute("allow", "autoplay; encrypted-media");
+    i.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture");
     i.setAttribute("allowfullscreen", 1);
     if (background) {
       i.style.background = background;

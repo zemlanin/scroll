@@ -281,6 +281,18 @@ const getVideoIframe = (graph) =>
       height: graph.player.height,
     }));
 
+const getOEmbedVideoIframe = (oEmbed) =>
+  oEmbed &&
+  (oEmbed.type === "video" || oEmbed.type === "rich") &&
+  oEmbed.html && {
+    url: `data:text/html;charset=utf-8,${
+      "<style>html,body,iframe{padding:0;margin:0;height:100%;max-height:100%;max-width:100%;}</style>" +
+      oEmbed.html
+    }`,
+    width: oEmbed.width,
+    height: oEmbed.height,
+  };
+
 const getVideoNative = (graph) => {
   if (!graph) {
     return null;
@@ -375,8 +387,37 @@ const getImageNative = (graph, options) => {
   );
 };
 
-//                                    ($1          )              ($2)
-const APPLE_MUSIC_REGEX = /^https:\/\/(itunes|music)\.apple\.com\/(.+)/;
+const getOEmbedImageNative = (oEmbed, options) => {
+  if (!oEmbed) {
+    return null;
+  }
+
+  const isTypePhoto = oEmbed.type === "photo";
+
+  const imageURL = isTypePhoto ? oEmbed.url : oEmbed.thumbnail_url;
+
+  if (!imageURL) {
+    return null;
+  }
+
+  if (options && options.static && "image/gif" === getURLMimetype(imageURL)) {
+    return null;
+  }
+
+  if (isTypePhoto) {
+    return {
+      url: oEmbed.url,
+      width: oEmbed.width,
+      height: oEmbed.height,
+    };
+  }
+
+  return {
+    url: oEmbed.thumbnail_url,
+    width: oEmbed.thumbnail_width,
+    height: oEmbed.thumbnail_height,
+  };
+};
 
 const getFrameFallback = (graphUrl) => {
   const funnyOrDieId = graphUrl.match(
@@ -405,12 +446,15 @@ const getFrameFallback = (graphUrl) => {
     };
   }
 
-  const appleMusicPath = graphUrl.match(APPLE_MUSIC_REGEX);
-  if (appleMusicPath) {
+  if (isAppleMusicCard(graphUrl)) {
+    const videoURL = new URL(graphUrl);
+
+    videoURL.hostname = "embed.music.apple.com";
+
     return {
       video: [
         {
-          url: `https://embed.music.apple.com/${appleMusicPath[2]}`,
+          url: videoURL.toString(),
           type: "text/html",
         },
       ],
@@ -418,6 +462,15 @@ const getFrameFallback = (graphUrl) => {
   }
 
   return {};
+};
+
+const isAppleMusicCard = (cardURL) => {
+  const hostname = cardURL ? new URL(cardURL).hostname : "";
+
+  return (
+    cardURL &&
+    (hostname === "music.apple.com" || hostname === "itunes.apple.com")
+  );
 };
 
 const isTwitterCard = (cardURL) => {
@@ -914,8 +967,12 @@ module.exports = {
       let oEmbed;
 
       try {
+        const oEmbedEndpoint = new URL(oEmbedLink.href);
+        oEmbedEndpoint.searchParams.set("maxwidth", 2000);
+        oEmbedEndpoint.searchParams.set("maxheight", 2000);
+
         oEmbed = await require("request-promise-native").get({
-          url: oEmbedLink.href,
+          url: oEmbedEndpoint.toString(),
           followRedirect: true,
           timeout: 4000,
           headers: {
@@ -939,7 +996,7 @@ module.exports = {
     return rawMeta;
   },
   generateCardJSON: (rawMeta) => {
-    const rawInitial = rawMeta
+    let rawInitial = rawMeta
       .filter(metaInitial)
       .map(tupleInitial)
       .filter(numericIfNeeded)
@@ -981,10 +1038,11 @@ module.exports = {
 
     rawTwitter = rawTwitter.reduce(metaPropertiesReducer, {});
 
-    const rawOEmbed = rawMeta
-      .map((v) => v.oembed)
-      .filter(Boolean)
-      .find(Boolean);
+    const rawOEmbed =
+      rawMeta
+        .map((v) => v.oembed)
+        .filter(Boolean)
+        .find(Boolean) || {};
 
     const card = {
       _parsedMetadata: {
@@ -994,14 +1052,23 @@ module.exports = {
         oembed: rawOEmbed,
       },
       mimetype: rawInitial.mimetype || "text/html",
-      title: rawOpengraph.title || rawTwitter.title || rawInitial.title,
-      url: rawOpengraph.url || rawTwitter.url || rawInitial.url,
+      title:
+        rawOpengraph.title ||
+        rawTwitter.title ||
+        rawOEmbed.title ||
+        rawInitial.title,
+      url:
+        rawOpengraph.url || rawTwitter.url || rawOEmbed.url || rawInitial.url,
       description:
         rawOpengraph.description ||
         rawTwitter.description ||
         rawInitial.description,
       _truncateDescription: false,
-      site_name: rawOpengraph.site_name || rawTwitter.site_name || "",
+      site_name:
+        rawOpengraph.site_name ||
+        rawTwitter.site_name ||
+        rawOEmbed.provider_name ||
+        "",
       img: null,
       video: null,
       audio: null,
@@ -1065,7 +1132,8 @@ module.exports = {
       const videoIframe =
         getVideoIframe(rawOpengraph) ||
         getVideoIframe(rawTwitter) ||
-        getVideoIframe(rawInitial);
+        getVideoIframe(rawInitial) ||
+        getOEmbedVideoIframe(rawOEmbed);
       if (videoIframe && isYoutubeCard && !isAgeRestricted(rawOpengraph)) {
         card.iframe = {
           src: videoIframe.url,
@@ -1077,13 +1145,15 @@ module.exports = {
 
     if (!card.img) {
       const imageOptions = videoNative ? { static: true } : null;
-      const image = card.url.match(APPLE_MUSIC_REGEX)
+      const image = isAppleMusicCard(card.url)
         ? getImageNative(rawTwitter, imageOptions) ||
           getImageNative(rawOpengraph, imageOptions) ||
-          getImageNative(rawInitial, imageOptions)
+          getImageNative(rawInitial, imageOptions) ||
+          getOEmbedImageNative(rawOEmbed, imageOptions)
         : getImageNative(rawOpengraph, imageOptions) ||
           getImageNative(rawTwitter, imageOptions) ||
-          getImageNative(rawInitial, imageOptions);
+          getImageNative(rawInitial, imageOptions) ||
+          getOEmbedImageNative(rawOEmbed, imageOptions);
 
       if (image) {
         card.img = {
@@ -1143,12 +1213,18 @@ module.exports = {
       }
     }
 
+    if (card.iframe && !card.img) {
+      card.iframe = null;
+    }
+
     if (isTikTokCard(card.url)) {
       // tiktok uses expiring urls in its opengraph :rolling_eyes:
       card.video = null;
       card.img = {
         src: tiktokPlaceholder(),
       };
+      // and has shitty oembed
+      card.iframe = null;
     }
 
     return card;

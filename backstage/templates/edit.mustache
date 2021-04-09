@@ -21,7 +21,7 @@
       }
 
       iframe {
-          min-height: 40vh;
+          min-height: 70vh;
           border: 1px solid gray;
       }
 
@@ -203,24 +203,13 @@
                   </p>
                 {{/post.internal}}
             </div>
-            {{^post.internal}}
-                <div class="control">
-                    <a
-                        href="/backstage/preview/?id={{post.id}}&rss=1"
-                        target="_blank"
-                        class="button"
-                    >
-                      {{#fas}}rss{{/fas}}
-                    </a>
-                </div>
-            {{/post.internal}}
           </div>
         </div>
         <textarea
-            name="text"
-            placeholder="markdown text"
-            class="field textarea"
-            rows="8"
+          name="text"
+          placeholder="markdown text"
+          class="field textarea"
+          rows="12"
         >{{post.text}}</textarea>
         <div id="media-bar">
           <div class="new-media">
@@ -316,6 +305,13 @@
                     {{#fas}}link{{/fas}}
                   </a>
                 </div>
+                {{^post.internal}}
+                  <div class="control">
+                    <a class="button" href="/backstage/preview/?id={{post.id}}&rss=1" target="_blank">
+                      {{#fas}}rss{{/fas}}
+                    </a>
+                  </div>
+                {{/post.internal}}
               </div>
               {{^post.draft}}
                 <div

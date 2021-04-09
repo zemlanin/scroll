@@ -99,10 +99,13 @@ async function prepareLink(link, embedsLoader, options) {
     created: created.toISOString().replace(/\.\d{3}Z$/, "Z"),
     createdDate: created.toISOString().split("T")[0],
     createdUTC: created.toUTCString(),
-    html: await embedsLoader.load(embedCallback(link.original_url), {
-      externalFrames: options && options.externalFrames,
-      maxWidth: options && options.maxWidth,
-    }),
+    html: await embedsLoader.load(
+      `<p>${embedCallback(link.original_url)}</p>`,
+      {
+        externalFrames: options && options.externalFrames,
+        maxWidth: options && options.maxWidth,
+      }
+    ),
     title: (await embedsLoader.query([link.original_url]))[0].title,
   };
 }
@@ -150,7 +153,7 @@ async function generateLinklistRSSPage(db, blog) {
       externalFrames: true,
       maxWidth: 720,
     });
-    entry.html += `<a href="${blog.linklist.url}">via</a>`;
+    entry.html += `<p><a href="${blog.linklist.url}">via</a></p>`;
     links.push(entry);
   }
 

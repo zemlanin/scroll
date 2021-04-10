@@ -56,7 +56,7 @@ test("embed with custom poster", async (t) => {
   t.equalHtml(
     cheerio("article p", post.toString()).html(),
     `
-      <video playsinline controls preload="metadata" poster="https://some.example/firstframe.jpeg" src="https://some.example/video.mp4"></video>
+      <video playsinline controls preload="metadata" src="https://some.example/video.mp4" poster="https://some.example/firstframe.jpeg"></video>
     `
   );
 });

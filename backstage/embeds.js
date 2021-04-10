@@ -1250,8 +1250,8 @@ module.exports = {
     if (videoNative) {
       card.video = {
         src: videoNative.url,
-        width: videoNative.width || 640,
-        height: videoNative.height || 360,
+        width: videoNative.width || null,
+        height: videoNative.height || null,
         loop: card.mimetype === "image/gif",
       };
 
@@ -1389,62 +1389,6 @@ module.exports = {
       return "";
     }
 
-    if (
-      card.mimetype === "image/gif" &&
-      card.video &&
-      card.video.src &&
-      !card.title
-    ) {
-      return `<video playsinline autoplay muted loop src="${
-        card.video.src
-      }" title="${card.title || card.description || ""}"></video>`;
-    }
-
-    if (card.mimetype.startsWith("image/") && !card.title) {
-      if (card.img) {
-        return `<img src="${card.img.src}"
-            title="${card.title || card.description || ""}"
-            ${card.img.width ? "width=" + card.img.width : ""}
-            ${card.img.height ? "height=" + card.img.height : ""}
-            loading="lazy"
-          />`;
-      }
-
-      return `<img src="${card.url}" title="${
-        card.title || card.description || ""
-      }" loading="lazy" />`;
-    }
-
-    if (card.mimetype.startsWith("video/") && !card.title) {
-      if (card.img && card.img.src) {
-        return `<video playsinline controls preload="metadata" poster="${card.img.src}" src="${card.url}"></video>`;
-      }
-
-      return `<video playsinline controls preload="metadata" src="${card.url}"></video>`;
-    }
-
-    if (card.mimetype.startsWith("audio/") && !card.title) {
-      return `<audio controls preload="metadata" src="${card.url}"></audio>`;
-    }
-
-    if (
-      !card.img &&
-      !card.audio &&
-      !card.video &&
-      !card.iframe &&
-      !card.quote
-    ) {
-      return `<a href="${card.url}">${card.title || card.url}</a>`;
-    }
-
-    if (!card.img && card.iframe) {
-      return `<a href="${card.url}">${card.title || card.url}</a>`;
-    }
-
-    if (card.error) {
-      return "";
-    }
-
     if (options && options.maxWidth) {
       card = {
         ...card,
@@ -1481,6 +1425,75 @@ module.exports = {
         target.width = options.maxWidth;
         target.height = target.width / aspectRatio;
       }
+    }
+
+    if (
+      card.mimetype === "image/gif" &&
+      card.video &&
+      card.video.src &&
+      !card.title
+    ) {
+      return `<video
+        playsinline
+        autoplay muted loop
+        src="${card.video.src}"
+        ${card.description ? `title="${card.description}"` : ""}
+        ${card.video.width ? `width=${card.video.width}` : ""}
+        ${card.video.height ? `height=${card.video.height}` : ""}
+      ></video>`;
+    }
+
+    if (card.mimetype.startsWith("image/") && !card.title) {
+      if (card.img) {
+        return `<img
+          src="${card.img.src}"
+          title="${card.description || ""}"
+          ${card.description ? `title="${card.description}"` : ""}
+          ${card.img.width ? `width=${card.img.width}` : ""}
+          ${card.img.height ? `height=${card.img.height}` : ""}
+          loading="lazy"
+        />`;
+      }
+
+      return `<img
+        src="${card.url}"
+        title="${card.description || ""}"
+        loading="lazy"
+      />`;
+    }
+
+    if (card.mimetype.startsWith("video/") && !card.title) {
+      return `<video
+        playsinline
+        controls
+        preload="metadata"
+        src="${card.url}"
+        ${card.img && card.img.src ? `poster="${card.img.src}"` : ""}
+        ${card.video.width ? `width=${card.video.width}` : ""}
+        ${card.video.height ? `height=${card.video.height}` : ""}
+      ></video>`;
+    }
+
+    if (card.mimetype.startsWith("audio/") && !card.title) {
+      return `<audio controls preload="metadata" src="${card.url}"></audio>`;
+    }
+
+    if (
+      !card.img &&
+      !card.audio &&
+      !card.video &&
+      !card.iframe &&
+      !card.quote
+    ) {
+      return `<a href="${card.url}">${card.title || card.url}</a>`;
+    }
+
+    if (!card.img && card.iframe) {
+      return `<a href="${card.url}">${card.title || card.url}</a>`;
+    }
+
+    if (card.error) {
+      return "";
     }
 
     return mustache.render(loadCardTemplate(), {

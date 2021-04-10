@@ -940,21 +940,11 @@ module.exports = {
       cHeaders.get("content-type") &&
       mime.getType(mime.getExtension(cHeaders.get("content-type")));
 
-    if (mimetype) {
+    if (mimetype && !nativeMediaMetadata["content-type"]) {
       nativeMediaMetadata["content-type"] = mimetype;
     }
 
-    // flickr sets `imagewidth` and `imageheight` headers for image responses
-    // https://live.staticflickr.com/3040/2362225867_4a87ab8baf_b.jpg
-    if (cHeaders.get("imagewidth")) {
-      nativeMediaMetadata.width = cHeaders.get("imagewidth");
-    }
-
-    if (cHeaders.get("imageheight")) {
-      nativeMediaMetadata.height = cHeaders.get("imageheight");
-    }
-
-    if (nativeMediaMetadata["content-type"] !== "text/html") {
+    if (mimetype !== "text/html") {
       return [
         { name: "url", content: ogPageURL },
         {
@@ -1253,6 +1243,7 @@ module.exports = {
     }
 
     const videoNative =
+      (card.mimetype.startsWith("video/") && getVideoNative(rawInitial)) ||
       getVideoNative(rawTwitter) ||
       getVideoNative(rawOpengraph) ||
       getVideoNative(rawInitial);
@@ -1275,6 +1266,7 @@ module.exports = {
     }
 
     const audioNative =
+      (card.mimetype.startsWith("audio/") && getAudioNative(rawInitial)) ||
       getAudioNative(rawOpengraph) ||
       getAudioNative(rawTwitter) ||
       getAudioNative(rawInitial);
@@ -1315,7 +1307,9 @@ module.exports = {
           getImageNative(rawOpengraph, imageOptions) ||
           getImageNative(rawInitial, imageOptions) ||
           getOEmbedImageNative(rawOEmbed, imageOptions)
-        : getImageNative(rawOpengraph, imageOptions) ||
+        : (card.mimetype.startsWith("image/") &&
+            getImageNative(rawInitial, imageOptions)) ||
+          getImageNative(rawOpengraph, imageOptions) ||
           getImageNative(rawTwitter, imageOptions) ||
           getImageNative(rawInitial, imageOptions) ||
           getOEmbedImageNative(rawOEmbed, imageOptions);
@@ -1395,13 +1389,18 @@ module.exports = {
       return "";
     }
 
-    if (card.mimetype === "image/gif" && card.video && card.video.src) {
+    if (
+      card.mimetype === "image/gif" &&
+      card.video &&
+      card.video.src &&
+      !card.title
+    ) {
       return `<video playsinline autoplay muted loop src="${
         card.video.src
       }" title="${card.title || card.description || ""}"></video>`;
     }
 
-    if (card.mimetype.startsWith("image/")) {
+    if (card.mimetype.startsWith("image/") && !card.title) {
       if (card.img) {
         return `<img src="${card.img.src}"
             title="${card.title || card.description || ""}"
@@ -1416,7 +1415,7 @@ module.exports = {
       }" loading="lazy" />`;
     }
 
-    if (card.mimetype.startsWith("video/")) {
+    if (card.mimetype.startsWith("video/") && !card.title) {
       if (card.img && card.img.src) {
         return `<video playsinline controls preload="metadata" poster="${card.img.src}" src="${card.url}"></video>`;
       }
@@ -1424,7 +1423,7 @@ module.exports = {
       return `<video playsinline controls preload="metadata" src="${card.url}"></video>`;
     }
 
-    if (card.mimetype.startsWith("audio/")) {
+    if (card.mimetype.startsWith("audio/") && !card.title) {
       return `<audio controls preload="metadata" src="${card.url}"></audio>`;
     }
 

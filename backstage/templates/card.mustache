@@ -6,10 +6,13 @@
       </blockquote>
     {{/ card.quote }}
     {{# video }}
-      <video playsinline controls
+      <video playsinline
         src="{{video.src}}"
         {{#video.loop}}
-          loop
+          autoplay muted loop
+        {{/video.loop}}
+        {{^video.loop}}
+          controls
         {{/video.loop}}
         {{# video.width}}
           width="{{video.width}}"

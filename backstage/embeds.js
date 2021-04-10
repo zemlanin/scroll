@@ -1091,6 +1091,18 @@ module.exports = {
       rawInitial.video = frameFallback.video;
     }
 
+    if (
+      rawInitial.mimetype &&
+      !rawMeta.some((v) => v.header && v.key === "content-type")
+    ) {
+      // support for legacy cards
+      rawMeta.push({
+        header: true,
+        key: "content-type",
+        value: rawInitial.mimetype,
+      });
+    }
+
     for (const header of rawMeta.filter((v) => v.header)) {
       if (header.key === "content-type") {
         rawInitial.mimetype = header.value;

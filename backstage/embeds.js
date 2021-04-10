@@ -991,7 +991,7 @@ module.exports = {
         rel: link.rel,
         href: link.href,
         sizes: link.sizes,
-        type: link.type,
+        type: link.type || getURLMimetype(link.href),
       }));
 
     const relImageSrcs = $(`head link[rel="image_src"]`)
@@ -1002,7 +1002,7 @@ module.exports = {
         link: true,
         rel: link.rel,
         href: link.href,
-        type: link.type,
+        type: link.type || getURLMimetype(link.href),
       }));
 
     const initialMeta = [

@@ -90,7 +90,7 @@
 
   <pre {{^ rawMetadata }}hidden{{/ rawMetadata }}><code>{{# rawMetadata }}{{#name}}&lt;meta name="{{name}}" content="{{content}}"&gt;
 {{/name}}{{#property}}&lt;meta property="{{property}}" content="{{content}}"&gt;
-{{/property}}{{#link}}&lt;link type="{{type}}" href="{{href}}"&gt;
+{{/property}}{{#link}}&lt;link {{#rel}}rel="{{rel}}" {{/rel}}type="{{type}}" href="{{href}}" {{#sizes}}sizes="{{sizes}}" {{/sizes}}&gt;
 {{/link}}{{/ rawMetadata }}</code></pre>
 </article>
 </body>

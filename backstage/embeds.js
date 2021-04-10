@@ -54,7 +54,7 @@ loadCardTemplate.cache = "";
 const hasContent = (meta) => meta.content;
 const metaInitial = (meta) =>
   meta.name === "url" || meta.name === "title" || meta.name === "mimetype";
-const tupleInitial = (meta) => [meta.name, meta.content];
+const tupleInitial = (meta) => (meta.link ? null : [meta.name, meta.content]);
 const metaNameOG = (meta) => meta.name && meta.name.startsWith("og:");
 const tupleNameOG = (meta) => [meta.name.slice(3), meta.content];
 const metaPropertyOG = (meta) =>
@@ -287,7 +287,8 @@ const getOEmbedVideoIframe = (oEmbed) =>
   !isTwitterCard(oEmbed.url) &&
   oEmbed.html && {
     url: `data:text/html;charset=utf-8,${
-      "<style>html,body,iframe{padding:0;margin:0;height:100%;max-height:100%;max-width:100%;}</style>" +
+      // `<base>` is for iframes with protocol-less urls, like `//coub.com/embed/2pc24rpb`
+      '<base href="https://example.com/"><style>html,body,iframe{padding:0;margin:0;height:100%;max-height:100%;max-width:100%;}</style>' +
       oEmbed.html
     }`,
     width: oEmbed.width ? parseInt(oEmbed.width) : null,
@@ -951,10 +952,36 @@ module.exports = {
 
     const htmlTitle = $(`head title`).text().trim().replace(`\n`, ` `);
 
+    // http://microformats.org/wiki/existing-rel-values
+    const relThumbnails = $(`head link[rel="thumbnail"]`)
+      .map(cheerioAttrs)
+      .get()
+      .filter((link) => link.href)
+      .map((link) => ({
+        link: true,
+        rel: link.rel,
+        href: link.href,
+        sizes: link.sizes,
+        type: link.type,
+      }));
+
+    const relImageSrcs = $(`head link[rel="image_src"]`)
+      .map(cheerioAttrs)
+      .get()
+      .filter((link) => link.href)
+      .map((link) => ({
+        link: true,
+        rel: link.rel,
+        href: link.href,
+        type: link.type,
+      }));
+
     const initialMeta = [
       { name: "url", content: ogPageURL },
       htmlTitle && { name: "title", content: htmlTitle },
       { name: "mimetype", content: mimetypeFromURL || mimetype },
+      ...relThumbnails,
+      ...relImageSrcs,
     ].filter(Boolean);
 
     const rawMeta = $(
@@ -1023,11 +1050,34 @@ module.exports = {
     let rawInitial = rawMeta
       .filter(metaInitial)
       .map(tupleInitial)
+      .filter(Boolean)
       .filter(numericIfNeeded)
       .reduce(metaPropertiesReducer, {});
     const frameFallback = getFrameFallback(rawInitial.url);
     if (frameFallback.video) {
       rawInitial.video = frameFallback.video;
+    }
+
+    for (const link of rawMeta.filter((v) => v.link)) {
+      if (link.rel === "thumbnail") {
+        const parsedSizes = link.sizes
+          ? link.sizes.match(/^(?<width>\d+)x(?<height>\d+)$/)
+          : null;
+
+        rawInitial.image = rawInitial.image || [];
+        rawInitial.image.push({
+          url: link.href,
+          type: link.type,
+          width: parsedSizes && parsedSizes.groups.width,
+          height: parsedSizes && parsedSizes.groups.height,
+        });
+      } else if (link.rel === "image_src") {
+        rawInitial.image = rawInitial.image || [];
+        rawInitial.image.push({
+          url: link.href,
+          type: link.type,
+        });
+      }
     }
 
     let rawOpengraph = rawMeta
@@ -1086,6 +1136,7 @@ module.exports = {
       description:
         rawOpengraph.description ||
         rawTwitter.description ||
+        rawOEmbed.description ||
         rawInitial.description,
       _truncateDescription: false,
       site_name:

@@ -39,7 +39,6 @@ function verifySessionId(signedId) {
 }
 
 module.exports = {
-  signedSessionId,
   async createSession(data) {
     const sessionsDb = await sqlite.open({
       filename: SESSIONS_DB,
@@ -55,37 +54,6 @@ module.exports = {
     await sessionsDb.close();
 
     return signedSessionId(sessionId);
-  },
-  async getSessionByOneTimeCode(code) {
-    if (!code) {
-      return null;
-    }
-
-    const sessionsDb = await sqlite.open({
-      filename: SESSIONS_DB,
-      driver: sqlite3.Database,
-    });
-
-    const sessionRow = await sessionsDb.get(
-      "SELECT * FROM sessions WHERE json_extract(data, '$.otc') = ?1",
-      { 1: code }
-    );
-
-    if (!sessionRow) {
-      return null;
-    }
-
-    await sessionsDb.run(
-      "UPDATE sessions SET data = json_remove(data, '$.otc') WHERE json_extract(data, '$.otc') = ?1",
-      { 1: code }
-    );
-
-    await sessionsDb.close();
-
-    return Object.freeze({
-      ...JSON.parse(sessionRow.data || "{}"),
-      id: sessionRow.id,
-    });
   },
   async getSession(req, res) {
     const sessionCookie = cookie.parse(req.headers.cookie || "").session;

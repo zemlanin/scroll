@@ -186,28 +186,6 @@ const handlers = [
   ["GET", "/backstage/goaccess.svg", require("./backstage/goaccess-graph.js")],
   ["GET", "/backstage/embeds", require("./backstage/embeds.js").get],
   ["POST", "/backstage/embeds", require("./backstage/embeds.js").post],
-  ["GET", "/backstage/micropub", require("./backstage/micropub.js").get],
-  ["POST", "/backstage/micropub", require("./backstage/micropub.js").post],
-  [
-    "GET",
-    "/backstage/indielogin/auth",
-    require("./backstage/indielogin-auth.js").get,
-  ],
-  [
-    "POST",
-    "/backstage/indielogin/auth",
-    require("./backstage/indielogin-auth.js").post,
-  ],
-  [
-    "GET",
-    "/backstage/indielogin/token",
-    require("./backstage/indielogin-token.js").get,
-  ],
-  [
-    "POST",
-    "/backstage/indielogin/token",
-    require("./backstage/indielogin-token.js").post,
-  ],
   ["GET", "/:name(.html)", staticHandler],
 ].map(([m, p, h]) => [m, new UrlPattern(p), h]);
 

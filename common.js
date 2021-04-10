@@ -976,14 +976,6 @@ async function getBlogObject(baseUrl) {
         svg: url.resolve(baseUrl, "/mask-icon.svg"),
       },
     },
-    indieweb: {
-      micropub: url.resolve(baseUrl, "/backstage/micropub"),
-      authorization_endpoint: url.resolve(
-        baseUrl,
-        "/backstage/indielogin/auth"
-      ),
-      token_endpoint: url.resolve(baseUrl, "/backstage/indielogin/token"),
-    },
   };
 }
 

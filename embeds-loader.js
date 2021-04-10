@@ -81,6 +81,25 @@ function overwriteFromEmbed(card, embed) {
     };
   }
 
+  if (embed.mimetype) {
+    result = {
+      ...result,
+      mimetype: embed.mimetype,
+    };
+  }
+
+  if (embed.href && embed.href.startsWith("data:")) {
+    result = {
+      ...result,
+      url: embed.href,
+      iframe: {
+        src: embed.href,
+        width: 720,
+        height: 405,
+      },
+    };
+  }
+
   return result;
 }
 
@@ -95,6 +114,10 @@ module.exports = class EmbedsLoader {
   async query(urls) {
     for (const url of urls) {
       if (!url || this.cache[url]) {
+        continue;
+      }
+
+      if (url.startsWith("data:")) {
         continue;
       }
 
@@ -181,9 +204,14 @@ module.exports = class EmbedsLoader {
 
       const embed = JSON.parse($this.text());
 
+      let card;
       if (cache[embed.href]) {
-        const card = overwriteFromEmbed(cache[embed.href], embed);
+        card = overwriteFromEmbed(cache[embed.href], embed);
+      } else if (embed.mimetype && embed.poster) {
+        card = overwriteFromEmbed({}, embed);
+      }
 
+      if (card) {
         $this.replaceWith(
           renderCard(card, {
             externalFrames: options && options.externalFrames,

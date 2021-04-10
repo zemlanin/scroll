@@ -196,6 +196,7 @@ function localEmbed(embed) {
   if (hrefIsDataURI) {
     const frameSrc = href;
     let imgSrc = null;
+    embed.mimetype = "text/html";
 
     if (embed.poster) {
       imgSrc = prefixOwnMedia(embed.poster);
@@ -241,11 +242,10 @@ function localEmbed(embed) {
             </svg>
           `.replace(/^\s+/gm, "")
         );
-    }
 
-    return `<a class="future-frame" href="${frameSrc}" data-background="#fff">
-      <img src="${imgSrc}">
-    </a>`;
+      embed.href = frameSrc;
+      embed.poster = imgSrc;
+    }
   }
 
   if (hrefIsOwnMedia && mimeObj.text) {

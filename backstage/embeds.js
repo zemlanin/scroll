@@ -1486,6 +1486,7 @@ module.exports = {
     return mustache.render(loadCardTemplate(), {
       card,
       externalFrames: options && options.externalFrames,
+      withoutLinkedTitle: card.url.startsWith("data:"),
     });
   },
 

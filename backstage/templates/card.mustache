@@ -109,13 +109,20 @@
       <audio controls preload="metadata" src="{{audio.src}}"></audio>
     {{/ audio }}
 
-    <figcaption>
-      <a href="{{ card.url }}"><b>{{{ card.title }}}</b>{{^ card._hideRepeatedSiteName }}{{# card.site_name }} • {{{ card.site_name }}}{{/ card.site_name }}{{/ card._hideRepeatedSiteName }}<br/></a>
-      {{# card.description }}
-        <i {{# card._truncateDescription }}class="truncated"{{/ card._truncateDescription }}>
-          {{{ card.description }}}
-        </i>
-      {{/ card.description }}
-    </figcaption>
+    {{#title}}
+      <figcaption>
+        {{#withoutLinkedTitle}}
+        {{{ card.title }}}{{^ card._hideRepeatedSiteName }}{{# card.site_name }} • {{{ card.site_name }}}{{/ card.site_name }}{{/ card._hideRepeatedSiteName }}<br/>
+        {{/withoutLinkedTitle}}
+        {{^withoutLinkedTitle}}
+        <a href="{{ card.url }}"><b>{{{ card.title }}}</b>{{^ card._hideRepeatedSiteName }}{{# card.site_name }} • {{{ card.site_name }}}{{/ card.site_name }}{{/ card._hideRepeatedSiteName }}<br/></a>
+        {{/withoutLinkedTitle}}
+        {{# card.description }}
+          <i {{# card._truncateDescription }}class="truncated"{{/ card._truncateDescription }}>
+            {{{ card.description }}}
+          </i>
+        {{/ card.description }}
+      </figcaption>
+    {{/title}}
   </figure>
 {{/ card }}

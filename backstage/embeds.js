@@ -581,13 +581,13 @@ async function getSingleEmbed(req, _res) {
         error = error + ": " + e.statusCode;
         rawMetadata = [
           { name: "url", content: query.url },
-          { name: "mimetype", content: "text/html" },
+          { header: true, key: "content-type", value: "text/html" },
         ];
       } else if (e instanceof RequestError) {
         error = error + ": " + e.error.code;
         rawMetadata = [
           { name: "url", content: query.url },
-          { name: "mimetype", content: "text/html" },
+          { header: true, key: "content-type", value: "text/html" },
         ];
       } else {
         console.error(e);
@@ -875,8 +875,9 @@ module.exports = {
 
     const expectedMimetype = getURLMimetype(ogPageURL);
 
-    let mimetypeFromURL = null;
     const jar = require("request-promise-native").jar();
+
+    let nativeMediaMetadata = {};
 
     if (
       expectedMimetype &&
@@ -891,7 +892,7 @@ module.exports = {
         followRedirect: true,
         timeout: 4000,
         headers: {
-          Accept: mimetypeFromURL,
+          Accept: null,
           "User-Agent": getUserAgent(ogPageURL),
         },
       });
@@ -905,7 +906,17 @@ module.exports = {
         mime.getType(mime.getExtension(cHeaders.get("content-type"))) ===
           expectedMimetype
       ) {
-        mimetypeFromURL = expectedMimetype;
+        nativeMediaMetadata["content-type"] = expectedMimetype;
+
+        // flickr sets `imagewidth` and `imageheight` headers for image responses
+        // https://live.staticflickr.com/3040/2362225867_4a87ab8baf_b.jpg
+        if (cHeaders.get("imagewidth")) {
+          nativeMediaMetadata.width = cHeaders.get("imagewidth");
+        }
+
+        if (cHeaders.get("imageheight")) {
+          nativeMediaMetadata.height = cHeaders.get("imageheight");
+        }
       }
     }
 
@@ -929,11 +940,39 @@ module.exports = {
       cHeaders.get("content-type") &&
       mime.getType(mime.getExtension(cHeaders.get("content-type")));
 
-    if (mimetype !== "text/html") {
+    if (mimetype) {
+      nativeMediaMetadata["content-type"] = mimetype;
+    }
+
+    // flickr sets `imagewidth` and `imageheight` headers for image responses
+    // https://live.staticflickr.com/3040/2362225867_4a87ab8baf_b.jpg
+    if (cHeaders.get("imagewidth")) {
+      nativeMediaMetadata.width = cHeaders.get("imagewidth");
+    }
+
+    if (cHeaders.get("imageheight")) {
+      nativeMediaMetadata.height = cHeaders.get("imageheight");
+    }
+
+    if (nativeMediaMetadata["content-type"] !== "text/html") {
       return [
         { name: "url", content: ogPageURL },
-        { name: "mimetype", content: mimetype },
-      ];
+        {
+          header: true,
+          key: "content-type",
+          value: nativeMediaMetadata["content-type"],
+        },
+        nativeMediaMetadata.width && {
+          header: true,
+          key: "width",
+          value: nativeMediaMetadata.width,
+        },
+        nativeMediaMetadata.height && {
+          header: true,
+          key: "height",
+          value: nativeMediaMetadata.height,
+        },
+      ].filter(Boolean);
     }
 
     const $ = await require("request-promise-native").get({
@@ -979,7 +1018,11 @@ module.exports = {
     const initialMeta = [
       { name: "url", content: ogPageURL },
       htmlTitle && { name: "title", content: htmlTitle },
-      { name: "mimetype", content: mimetypeFromURL || mimetype },
+      {
+        header: true,
+        key: "content-type",
+        value: nativeMediaMetadata["content-type"],
+      },
       ...relThumbnails,
       ...relImageSrcs,
     ].filter(Boolean);
@@ -1056,6 +1099,53 @@ module.exports = {
     const frameFallback = getFrameFallback(rawInitial.url);
     if (frameFallback.video) {
       rawInitial.video = frameFallback.video;
+    }
+
+    for (const header of rawMeta.filter((v) => v.header)) {
+      if (header.key === "content-type") {
+        rawInitial.mimetype = header.value;
+
+        if (header.value.startsWith("image/")) {
+          rawInitial.image = [
+            {
+              url: rawInitial.url,
+              type: header.value,
+            },
+          ];
+        } else if (header.value.startsWith("video/")) {
+          rawInitial.video = [
+            {
+              url: rawInitial.url,
+              type: header.value,
+            },
+          ];
+        } else if (header.value.startsWith("audio/")) {
+          rawInitial.audio = [
+            {
+              url: rawInitial.url,
+              type: header.value,
+            },
+          ];
+        }
+      }
+
+      if (
+        header.key === "width" &&
+        header.value &&
+        rawInitial.image &&
+        rawInitial.image[0]
+      ) {
+        rawInitial.image[0].width = header.value;
+      }
+
+      if (
+        header.key === "height" &&
+        header.value &&
+        rawInitial.image &&
+        rawInitial.image[0]
+      ) {
+        rawInitial.image[0].height = header.value;
+      }
     }
 
     for (const link of rawMeta.filter((v) => v.link)) {
@@ -1312,6 +1402,15 @@ module.exports = {
     }
 
     if (card.mimetype.startsWith("image/")) {
+      if (card.img) {
+        return `<img src="${card.img.src}"
+            title="${card.title || card.description || ""}"
+            ${card.img.width ? "width=" + card.img.width : ""}
+            ${card.img.height ? "height=" + card.img.height : ""}
+            loading="lazy"
+          />`;
+      }
+
       return `<img src="${card.url}" title="${
         card.title || card.description || ""
       }" loading="lazy" />`;

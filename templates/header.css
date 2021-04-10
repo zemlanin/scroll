@@ -323,6 +323,18 @@ footer {
   text-align: center;
 }
 
+footer .groups {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+footer .groups .group {
+  display: inline-flex;
+  flex-flow: row;
+}
+
 footer::before {
   display: block;
   font-size: 1.3em;

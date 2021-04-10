@@ -6,12 +6,19 @@
     {{^older}}<span></span>{{/older}}
   </nav>
   <footer>
-    <div>
-      <a href="https://anton.codes" rel="me">Anton Verinov</a>
-      <a href="https://twitter.com/zemlanin" rel="me">@zemlanin</a>
-      <a href="/archive.html">{{#t}}archive{{/t}}</a>
-      <a href="{{{blog.feed.url}}}">rss</a>
-      <a href="https://t.me/s/zemlan_in">telegram</a>
+    <div class="groups">
+      <div class="group">
+        <a href="https://anton.codes" rel="me">Anton Verinov</a>
+        <a href="https://twitter.com/zemlanin" rel="me">@zemlanin</a>
+      </div>
+      <div class="group">
+        <a href="/linkblog.html">{{#t}}linkblog{{/t}}</a>
+        <a href="/archive.html">{{#t}}archive{{/t}}</a>
+      </div>
+      <div class="group">
+        <a href="{{{blog.feed.url}}}">rss</a>
+        <a href="https://t.me/s/zemlan_in">telegram</a>
+      </div>
     </div>
     <form method="GET" action="/search">
       <input type="text" name="q" title="{{#t}}search{{/t}}" aria-label="{{#t}}search{{/t}}">

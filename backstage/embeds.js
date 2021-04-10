@@ -1252,7 +1252,7 @@ module.exports = {
         src: videoNative.url,
         width: videoNative.width || 640,
         height: videoNative.height || 360,
-        loop: getURLMimetype(card.url) === "image/gif",
+        loop: card.mimetype === "image/gif",
       };
 
       if (videoNative.poster) {

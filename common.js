@@ -958,12 +958,12 @@ async function getBlogObject(baseUrl) {
       description: BLOG_TITLE,
       url: url.resolve(baseUrl, "/rss.xml"),
     },
-    linklist: {
-      title: `Linklist • ${BLOG_TITLE}`,
-      url: url.resolve(baseUrl, "/linklist.html"),
+    linkblog: {
+      title: `Linkblog • ${BLOG_TITLE}`,
+      url: url.resolve(baseUrl, "/linkblog.html"),
       feed: {
         description: `Linked and Found`,
-        url: url.resolve(baseUrl, "/feeds/linklist.xml"),
+        url: url.resolve(baseUrl, "/feeds/linkblog.xml"),
       },
     },
     static: {

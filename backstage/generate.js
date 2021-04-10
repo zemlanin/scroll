@@ -5,7 +5,7 @@ const chunk = require("lodash.chunk");
 const { getSession, sendToAuthProvider } = require("./auth.js");
 
 const { generate } = require("../generate.js");
-const { checkAndUpdate } = require("../linklist.js");
+const { checkAndUpdate } = require("../linkblog.js");
 const { DIST } = require("../common.js");
 const { convertMedia, getConversionTags } = require("./convert.js");
 const { render } = require("./render.js");
@@ -114,7 +114,7 @@ module.exports = {
       case "pages":
         generator = async () => generate(await req.db(), DIST, res, res);
         break;
-      case "linklist":
+      case "linkblog":
         generator = async () => checkAndUpdate(res, res);
         break;
     }

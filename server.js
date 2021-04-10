@@ -371,7 +371,7 @@ function start() {
       console.log(`running on ${PORT}`);
     })
     .then(() => {
-      return require("./linklist").watch(process.stdout, process.stderr);
+      return require("./linkblog.js").watch(process.stdout, process.stderr);
     })
     .catch((err) => {
       console.error(err);

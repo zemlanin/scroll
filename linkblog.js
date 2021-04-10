@@ -133,10 +133,10 @@ async function generateLinklistPage(db, blog) {
     links.push(await prepareLink(l, embedsLoader));
   }
 
-  return await render("linklist.mustache", {
+  return await render("linkblog.mustache", {
     blog,
-    linklist: true,
-    url: "./linklist.html",
+    linkblog: true,
+    url: "./linkblog.html",
     links,
   });
 }
@@ -159,11 +159,11 @@ async function generateLinklistRSSPage(db, blog) {
       externalFrames: true,
       maxWidth: 720,
     });
-    entry.html += `<p><a href="${blog.linklist.url}">via</a></p>`;
+    entry.html += `<p><a href="${blog.linkblog.url}">via</a></p>`;
     links.push(entry);
   }
 
-  return await render("linklist-rss.mustache", {
+  return await render("rss-linkblog.mustache", {
     blog,
     links,
     pubDate: new Date().toUTCString(),
@@ -191,7 +191,7 @@ async function checkAndUpdate(stdout, stderr) {
       DIST,
       stdout || process.stdout,
       stderr || process.stderr,
-      { only: new Set(["linklist"]) }
+      { only: new Set(["linkblog"]) }
     );
   }
 }

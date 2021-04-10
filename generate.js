@@ -35,7 +35,7 @@ const {
 const {
   generateLinklistPage,
   generateLinklistRSSPage,
-} = require("./linklist.js");
+} = require("./linkblog.js");
 
 const {
   DIST,
@@ -208,20 +208,20 @@ async function generate(db, destination, stdout, stderr, { only } = {}) {
     stdout.write("pagination done\n");
   }
 
-  if (!only || only.has("linklist")) {
+  if (!only || only.has("linkblog")) {
     await writeFileWithGzip(
-      path.join(tmpFolder, "linklist.html"),
+      path.join(tmpFolder, "linkblog.html"),
       await generateLinklistPage(db, blog),
       { flag: "wx" }
     );
 
     await writeFileWithGzip(
-      path.join(tmpFolder, "feeds/linklist.xml"),
+      path.join(tmpFolder, "feeds/linkblog.xml"),
       await generateLinklistRSSPage(db, blog),
       { flag: "wx" }
     );
 
-    stdout.write("linklist done\n");
+    stdout.write("linkblog done\n");
   }
 
   if (!only || only.has("rss")) {

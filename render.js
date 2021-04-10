@@ -57,7 +57,7 @@ const translations = {
     "Light theme": "Светлая тема",
     "page {{number}}": "страница {{number}}",
     index: "главная",
-    linklist: "linklist",
+    linkblog: "linkblog",
     "Follow via RSS": "Читать с помощью RSS",
   },
   uk: {
@@ -70,7 +70,7 @@ const translations = {
     "Light theme": "Світла тема",
     "page {{number}}": "сторінка {{number}}",
     index: "головна",
-    linklist: "linklist",
+    linkblog: "linkblog",
     "Follow via RSS": "Читати за допомогою RSS",
   },
 };

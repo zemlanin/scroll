@@ -626,7 +626,7 @@ async function getSingleEmbed(req, _res) {
 
   if (naked) {
     cardHTML = `<iframe width="100%" style="min-height: 80vh;" src="data:text/html;charset=utf8,${encodeURIComponent(
-      cardHTML
+      "<style>html,body,iframe,img{max-width:100%;}</style>" + cardHTML
     )}"/>`;
   }
 

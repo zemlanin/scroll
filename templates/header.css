@@ -397,8 +397,7 @@ nav span {
   display: none;
   flex-flow: row;
   justify-content: space-between;
-  font-size: 1.3em;
-  margin-right: -0.3em;
+  margin-right: -0.5em;
   color: #888;
   color: var(--color-deemphasis);
 }
@@ -418,7 +417,7 @@ nav span {
 
 #theme-switcher label svg {
   vertical-align: middle;
-  margin: 0 0.3em;
+  margin: 0 0.5em;
 }
 
 #theme-switcher input[type="checkbox"] {

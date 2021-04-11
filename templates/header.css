@@ -399,6 +399,14 @@ nav span {
   justify-content: space-between;
   font-size: 1.3em;
   margin-right: -0.3em;
+  color: #888;
+  color: var(--color-deemphasis);
+}
+
+#theme-switcher > label:active,
+#theme-switcher > label:focus {
+  color: initial;
+  color: var(--color-text);
 }
 
 @supports (color: var(--color-braaand)) {

@@ -52,6 +52,14 @@ document.addEventListener("DOMContentLoaded", function () {
       document.cookie = "night-mode=; path=/";
     }
   });
+
+  nightModeForm.addEventListener("keypress", function (event) {
+    var SPACE = 32;
+    if (event.keyCode === SPACE && event.target.tagName === "LABEL") {
+      event.preventDefault();
+      event.target.click();
+    }
+  });
 });
 
 document.addEventListener("DOMContentLoaded", function () {

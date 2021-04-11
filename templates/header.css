@@ -393,37 +393,19 @@ nav span {
   flex-grow: 1;
 }
 
-#settings-icon {
-  text-align: right;
-}
-
-#settings-icon > summary {
-  color: #888;
-  color: var(--color-deemphasis);
-  cursor: pointer;
-  list-style: none;
-  display: none;
-}
-
-#settings-icon > summary:active,
-#settings-icon > summary:focus {
-  color: initial;
-  color: var(--color-text);
-}
-
-@supports (color: var(--color-braaand)) {
-  /* show settings icon only if browser supports theming via CSS variables */
-  #settings-icon > summary {
-    display: inline-block;
-  }
-}
-
 #night-mode {
-  display: flex;
+  display: none;
   flex-flow: row;
   justify-content: space-between;
   font-size: 1.3em;
   margin-right: -0.3em;
+}
+
+@supports (color: var(--color-braaand)) {
+  /* show theme switcher only if browser supports theming via CSS variables */
+  #night-mode {
+    display: flex;
+  }
 }
 
 #night-mode label svg {

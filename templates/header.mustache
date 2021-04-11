@@ -60,7 +60,7 @@
   </style>
   <noscript>
     <style type="text/css">
-      #night-mode, article a.future-frame:after {
+      #theme-switcher, article a.future-frame:after {
         display: none;
       }
     </style>
@@ -110,13 +110,13 @@
       {{/linkblog}}
     {{/post}}
 
-      <form id="night-mode" action="javascript:void(0)">
+      <form id="theme-switcher" action="javascript:void(0)">
         <label title="{{#t}}Dark theme{{/t}}" tabindex="0">
-          <input type="checkbox" name="night-mode" value="on" aria-label="{{#t}}Dark theme{{/t}}">
+          <input type="checkbox" name="theme-switcher" value="dark" aria-label="{{#t}}Dark theme{{/t}}">
           {{#fas}}moon{{/fas}}
         </label>
         <label title="{{#t}}Light theme{{/t}}" tabindex="0">
-          <input type="checkbox" name="night-mode" value="off" aria-label="{{#t}}Light theme{{/t}}">
+          <input type="checkbox" name="theme-switcher" value="light" aria-label="{{#t}}Light theme{{/t}}">
           {{#fas}}sun{{/fas}}
         </label>
       </form>

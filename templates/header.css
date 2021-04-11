@@ -393,7 +393,7 @@ nav span {
   flex-grow: 1;
 }
 
-#night-mode {
+#theme-switcher {
   display: none;
   flex-flow: row;
   justify-content: space-between;
@@ -403,21 +403,21 @@ nav span {
 
 @supports (color: var(--color-braaand)) {
   /* show theme switcher only if browser supports theming via CSS variables */
-  #night-mode {
+  #theme-switcher {
     display: flex;
   }
 }
 
-#night-mode label svg {
+#theme-switcher label svg {
   vertical-align: middle;
   margin: 0 0.3em;
 }
 
-#night-mode input[type="checkbox"] {
+#theme-switcher input[type="checkbox"] {
   display: none;
 }
 
-#night-mode input[type="checkbox"]:checked ~ * {
+#theme-switcher input[type="checkbox"]:checked ~ * {
   color: #00a500;
   color: var(--color-braaand);
 }

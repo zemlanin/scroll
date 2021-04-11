@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-  var nightModeForm = document.getElementById("night-mode");
+  var nightModeForm = document.getElementById("theme-switcher");
   if (!nightModeForm) {
     return;
   }
@@ -18,12 +18,12 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   Array.prototype.forEach.call(
-    nightModeForm["night-mode"],
+    nightModeForm["theme-switcher"],
     function (checkbox) {
       if (enabledNightModeCookie) {
-        checkbox.checked = checkbox.value === "on";
+        checkbox.checked = checkbox.value === "dark";
       } else if (disabledNightModeCookie) {
-        checkbox.checked = checkbox.value === "off";
+        checkbox.checked = checkbox.value === "light";
       }
     }
   );
@@ -31,18 +31,18 @@ document.addEventListener("DOMContentLoaded", function () {
   nightModeForm.addEventListener("change", function (event) {
     if (event.target.checked) {
       Array.prototype.forEach.call(
-        nightModeForm["night-mode"],
+        nightModeForm["theme-switcher"],
         function (checkbox) {
           checkbox.checked = checkbox.value === event.target.value;
         }
       );
     }
 
-    if (event.target.value === "on" && event.target.checked) {
+    if (event.target.value === "dark" && event.target.checked) {
       classList.add("dark");
       classList.remove("light");
       document.cookie = "night-mode=1; path=/";
-    } else if (event.target.value === "off" && event.target.checked) {
+    } else if (event.target.value === "light" && event.target.checked) {
       classList.remove("dark");
       classList.add("light");
       document.cookie = "night-mode=0; path=/";

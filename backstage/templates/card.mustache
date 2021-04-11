@@ -35,6 +35,7 @@
           {{# iframe.height}}height="{{iframe.height}}"{{/ iframe.height}}
           allow="autoplay; encrypted-media; picture-in-picture"
           allowfullscreen="1"
+          loading="lazy"
         ></iframe>
       {{/ externalFrames }}
       {{^ externalFrames }}
@@ -60,6 +61,7 @@
                 height="{{img.height}}"
               {{/ img.height}}
               src="{{img.src}}"
+              loading="lazy"
             >
           {{/ img }}
         </a>
@@ -81,6 +83,7 @@
                 height="{{img.height}}"
               {{/ img.height}}
               src="{{img.src}}"
+              loading="lazy"
             >
           {{/ img }}
         {{/ audio }}
@@ -98,6 +101,7 @@
                   height="{{img.height}}"
                 {{/ img.height}}
                 src="{{img.src}}"
+                loading="lazy"
               >
             {{/ img }}
           </a>

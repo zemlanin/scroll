@@ -33,8 +33,8 @@ const {
 } = require("./generate-post.js");
 
 const {
-  generateLinklistPage,
-  generateLinklistRSSPage,
+  generateLinkblogPage,
+  generateLinkblogRSSPage,
 } = require("./linkblog.js");
 
 const {
@@ -211,13 +211,13 @@ async function generate(db, destination, stdout, stderr, { only } = {}) {
   if (!only || only.has("linkblog")) {
     await writeFileWithGzip(
       path.join(tmpFolder, "linkblog.html"),
-      await generateLinklistPage(db, blog),
+      await generateLinkblogPage(db, blog),
       { flag: "wx" }
     );
 
     await writeFileWithGzip(
       path.join(tmpFolder, "feeds/linkblog.xml"),
-      await generateLinklistRSSPage(db, blog),
+      await generateLinkblogRSSPage(db, blog),
       { flag: "wx" }
     );
 

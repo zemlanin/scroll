@@ -76,7 +76,9 @@ async function loadFreshFeed(db, stdout, _stderr) {
 
       await db.run(
         `
-          INSERT INTO linklist (id, source_id, original_url, created) VALUES ($1, $2, $3, $4)
+          INSERT INTO linklist
+          (id, source_id, original_url, created)
+          VALUES ($1, $2, $3, $4)
         `,
         {
           1: getLinkId(),
@@ -111,15 +113,15 @@ async function prepareLink(link, embedsLoader, options) {
   };
 }
 
-async function generateLinklistPage(db, blog) {
+async function generateLinkblogPage(db, blog) {
   const rawLinks = await db.all(
     `
-    SELECT id, strftime('%s000', created) created, original_url
-    FROM linklist
-    WHERE private = 0
-    ORDER BY created DESC
-    LIMIT ?1;
-  `,
+      SELECT id, strftime('%s000', created) created, original_url
+      FROM linklist
+      WHERE private = 0
+      ORDER BY created DESC
+      LIMIT ?1;
+    `,
     {
       1: RSS_SIZE,
     }
@@ -141,7 +143,7 @@ async function generateLinklistPage(db, blog) {
   });
 }
 
-async function generateLinklistRSSPage(db, blog) {
+async function generateLinkblogRSSPage(db, blog) {
   const rawLinks = await db.all(`
     SELECT id, strftime('%s000', created) created, original_url
     FROM linklist
@@ -209,8 +211,8 @@ function watch() {
 module.exports = {
   watch,
   checkAndUpdate,
-  generateLinklistPage,
-  generateLinklistRSSPage,
+  generateLinkblogPage,
+  generateLinkblogRSSPage,
 };
 
 if (require.main === module) {

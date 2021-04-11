@@ -172,6 +172,34 @@ async function generateLinkblogRSSPage(db, blog) {
   });
 }
 
+async function generateLinkblogSection(db, blog) {
+  const rawLinks = await db.all(`
+    SELECT id, strftime('%s000', created) created, original_url
+    FROM linklist
+    WHERE private = 0
+    ORDER BY created DESC
+    LIMIT 20;
+  `);
+
+  const embedsLoader = new EmbedsLoader(db);
+  const embeds = await embedsLoader.query(rawLinks.map((l) => l.original_url));
+  const blogHostname = new URL(blog.url).hostname;
+
+  return embeds
+    .filter((card) => card.title && card.img)
+    .filter((card) => new URL(card.url).hostname !== blogHostname)
+    .map((card) => ({
+      url: card.url,
+      title: card.title,
+      site_name:
+        card.site_name && !card.title.endsWith(card.site_name)
+          ? card.site_name
+          : "",
+      img: card.img,
+    }))
+    .slice(0, 4);
+}
+
 async function checkAndUpdate(stdout, stderr) {
   if (!LINKLIST_SOURCE_FEED) {
     return;
@@ -213,6 +241,7 @@ module.exports = {
   checkAndUpdate,
   generateLinkblogPage,
   generateLinkblogRSSPage,
+  generateLinkblogSection,
 };
 
 if (require.main === module) {

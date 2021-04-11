@@ -172,7 +172,7 @@ async function generate(db, destination, stdout, stderr, { only } = {}) {
   let _pagination = [];
   let _newestPage;
 
-  if (!only || only.has("pagination")) {
+  if (!only || only.has("pagination") || only.has("linkblog")) {
     _pagination = await getPagination(db, null);
     _newestPage = _pagination[0] || { index: 0, posts: [] };
 

@@ -16,6 +16,7 @@ const {
 } = require("./common.js");
 const { render } = require("./render.js");
 const EmbedsLoader = require("./embeds-loader.js");
+const { generateLinkblogSection } = require("./linkblog");
 
 function getPostsQuery(where, limit) {
   let query = `
@@ -150,9 +151,16 @@ async function generateIndexPage(db, blog, newestPage) {
     indexPostsLimit
   );
 
+  const links = await generateLinkblogSection(db, blog);
+
+  if (links.length && posts[0]) {
+    posts[0].insertLinkblogAfterThis = true;
+  }
+
   return await render("list.mustache", {
     blog,
-    posts: posts,
+    posts,
+    links,
     newer: null,
     older: olderPageIndex
       ? {

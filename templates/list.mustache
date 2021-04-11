@@ -17,6 +17,32 @@
     </a>
   </time>
 </article>
+
+{{# insertLinkblogAfterThis}}
+<section class="linkblog-after-post">
+  <ul>
+    {{#links}}
+      <li>
+        <a href="{{url}}" target="_blank">
+          <img
+            src="{{img.src}}"
+            title="{{title}}"
+            {{# img.alt}}
+              alt="{{img.alt}}"
+            {{/ img.alt}}
+            {{^ img.alt}}
+              alt="{{title}}"
+            {{/ img.alt}}
+          >
+        </a>
+      </li>
+    {{/links}}
+  </ul>
+  <div class="anchor-wrapper">
+    {{#blog}}<a href="{{linkblog.url}}">{{#t}}linkblog{{/t}} &rarr;</a>{{/blog}}
+  </div>
+</section>
+{{/ insertLinkblogAfterThis}}
 {{/posts}}
 
 {{> footer}}

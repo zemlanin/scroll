@@ -542,6 +542,68 @@ article ul[data-gallery] li.dim figure.card > a {
   display: block;
 }
 
+.linkblog-after-post {
+  margin-bottom: 3em;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+.linkblog-after-post ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-flow: row wrap;
+  align-content: center;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.linkblog-after-post ul li {
+  width: 7em;
+  flex-grow: 1;
+  padding: 0 0.25em;
+  overflow-y: hidden;
+  line-height: 0;
+}
+
+.linkblog-after-post ul li:nth-child(1) {
+  padding-left: 0;
+}
+
+.linkblog-after-post ul li:nth-child(4) {
+  padding-right: 0;
+}
+
+.linkblog-after-post ul li a {
+  display: inline-block;
+}
+
+.linkblog-after-post ul li img {
+  max-width: 100%;
+}
+
+@media (max-width: 30em) {
+  .linkblog-after-post ul li:nth-child(3) {
+    display: none;
+  }
+}
+
+@media (max-width: 42.5em) {
+  .linkblog-after-post ul li:nth-child(4) {
+    display: none;
+  }
+}
+
+.linkblog-after-post .anchor-wrapper {
+  display: block;
+  text-align: right;
+  font-size: 0.9em;
+}
+
+.linkblog-after-post a {
+  text-decoration: none;
+}
+
 a,
 header a:visited,
 footer a:visited {

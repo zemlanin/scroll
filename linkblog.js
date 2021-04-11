@@ -90,6 +90,35 @@ async function loadFreshFeed(db, stdout, _stderr) {
     }
   }
 
+  const latestLinks = await db.all(
+    `
+      SELECT id, strftime('%s000', created) created, original_url
+      FROM linklist
+      WHERE private = 0
+      ORDER BY created DESC
+      LIMIT ?1;
+    `,
+    {
+      1: feed.items.length,
+    }
+  );
+
+  for (const link of latestLinks) {
+    if (!feed.items.some((item) => item.link === link.original_url)) {
+      // link was removed from the linkblog source feed
+      await db.run(
+        `
+          UPDATE linklist
+          SET private = 1
+          WHERE id = ?1;
+        `,
+        {
+          1: link.id,
+        }
+      );
+    }
+  }
+
   return hasNewItems;
 }
 

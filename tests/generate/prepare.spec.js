@@ -576,7 +576,7 @@ test("media", async (t) => {
       <p>
         <figure class="card">
           <a href="data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0+e2xldCBiLGM9Xz0+e2Eud2lkdGg9ZS5jbGllbnRXaWR0aCxiPWEuZ2V0Q29udGV4dCgnMmQnKSxiLmZvbnQ9JzQ4cHggTWVubG8nfSxkPShnLGgsaixrPTYsbD00NCk9PntiLmZpbGxTdHlsZT0nIzBhMCcsYi5maWxsUmVjdCgwLDAsYS53aWR0aCxhLmhlaWdodCksYi5maWxsU3R5bGU9JyNmZmYnO2ZvcihoIG9mIGcuc3BsaXQoJyAnKSlqPTI4LjkqaC5sZW5ndGgsNjxrJiZrK2o+PWEud2lkdGgmJihrPTYsbCs9NDgpLGIuZmlsbFRleHQoaCxrLGwpLGsrPWorMjguOTttLnNyYz1hLnRvRGF0YVVSTCgpfSxmPV89PmQoaS52YWx1ZXx8bmV3IERhdGUoKS50b0lTT1N0cmluZygpLnJlcGxhY2UoL1wuXGQrLywnJykpOyhvbnJlc2l6ZT1fPT5mKGMoKSkpKCksc2V0SW50ZXJ2YWwoaS5vbmlucHV0PWYsMWUzKX0pKGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2NhbnZhcycpKSI+PGlucHV0IGlkPWkgcGxhY2Vob2xkZXI9bGFiZWw+PGltZyBpZD1tPjxwIGlkPWU+" class="future-frame" data-src="data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0+e2xldCBiLGM9Xz0+e2Eud2lkdGg9ZS5jbGllbnRXaWR0aCxiPWEuZ2V0Q29udGV4dCgnMmQnKSxiLmZvbnQ9JzQ4cHggTWVubG8nfSxkPShnLGgsaixrPTYsbD00NCk9PntiLmZpbGxTdHlsZT0nIzBhMCcsYi5maWxsUmVjdCgwLDAsYS53aWR0aCxhLmhlaWdodCksYi5maWxsU3R5bGU9JyNmZmYnO2ZvcihoIG9mIGcuc3BsaXQoJyAnKSlqPTI4LjkqaC5sZW5ndGgsNjxrJiZrK2o+PWEud2lkdGgmJihrPTYsbCs9NDgpLGIuZmlsbFRleHQoaCxrLGwpLGsrPWorMjguOTttLnNyYz1hLnRvRGF0YVVSTCgpfSxmPV89PmQoaS52YWx1ZXx8bmV3IERhdGUoKS50b0lTT1N0cmluZygpLnJlcGxhY2UoL1wuXGQrLywnJykpOyhvbnJlc2l6ZT1fPT5mKGMoKSkpKCksc2V0SW50ZXJ2YWwoaS5vbmlucHV0PWYsMWUzKX0pKGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2NhbnZhcycpKSI+PGlucHV0IGlkPWkgcGxhY2Vob2xkZXI9bGFiZWw+PGltZyBpZD1tPjxwIGlkPWU+" data-width="720" data-height="405">
-            <img alt="time-stamp" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%2090%22%3E%0A%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%0Atext%20%7B%0Afont-size%3A%2011px%3B%0Afont-family%3A%20%22SF%20Mono%22%2C%20%22Menlo-Regular%22%2C%20Consolas%2C%20%22Andale%20Mono%20WT%22%2C%0A%22Andale%20Mono%22%2C%20%22Lucida%20Console%22%2C%20%22Lucida%20Sans%20Typewriter%22%2C%0A%22DejaVu%20Sans%20Mono%22%2C%20%22Bitstream%20Vera%20Sans%20Mono%22%2C%20%22Liberation%20Mono%22%2C%0A%22Nimbus%20Mono%20L%22%2C%20Monaco%2C%20%22Courier%20New%22%2C%20Courier%2C%20monospace%3B%0A%7D%0A%3C%2Fstyle%3E%3C%2Fdefs%3E%0A%3Crect%20x%3D%220%22%20y%3D%220%22%20height%3D%2290%22%20width%3D%22160%22%20fill%3D%22white%22%20%2F%3E%0A%3Ctext%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23888%22%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3Edata%3Atext%2Fhtml%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EPGJvZHkgb25sb2FkPSIoYT0%2Be%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3E2xldCBiLGM9Xz0%2Be2Eud2lkdG%3C%2Ftspan%3E%3Ctspan%20x%3D%2280%22%20dy%3D%2212%22%20fill%3D%22%2300a500%22%20text-anchor%3D%22middle%22%3Etime-stamp%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3Eg9ZS5jbGllbnRXaWR0aCxiPWE%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EuZ2V0Q29udGV4dCgnMmQnKSxi%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3ELmZvbnQ9JzQ4cHggTWVubG8nf%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3C%2Fsvg%3E%0A" />
+            <img alt="time-stamp" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%2090%22%3E%0A%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%0Atext%20%7B%0Afont-size%3A%2011px%3B%0Afont-family%3A%20%22SF%20Mono%22%2C%20%22Menlo-Regular%22%2C%20Consolas%2C%20%22Andale%20Mono%20WT%22%2C%0A%22Andale%20Mono%22%2C%20%22Lucida%20Console%22%2C%20%22Lucida%20Sans%20Typewriter%22%2C%0A%22DejaVu%20Sans%20Mono%22%2C%20%22Bitstream%20Vera%20Sans%20Mono%22%2C%20%22Liberation%20Mono%22%2C%0A%22Nimbus%20Mono%20L%22%2C%20Monaco%2C%20%22Courier%20New%22%2C%20Courier%2C%20monospace%3B%0A%7D%0A%3C%2Fstyle%3E%3C%2Fdefs%3E%0A%3Crect%20x%3D%220%22%20y%3D%220%22%20height%3D%2290%22%20width%3D%22160%22%20fill%3D%22white%22%20%2F%3E%0A%3Ctext%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23888%22%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3Edata%3Atext%2Fhtml%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EPGJvZHkgb25sb2FkPSIoYT0%2Be%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3E2xldCBiLGM9Xz0%2Be2Eud2lkdG%3C%2Ftspan%3E%3Ctspan%20x%3D%2280%22%20dy%3D%2212%22%20fill%3D%22%2300a500%22%20text-anchor%3D%22middle%22%3Etime-stamp%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3Eg9ZS5jbGllbnRXaWR0aCxiPWE%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EuZ2V0Q29udGV4dCgnMmQnKSxi%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3ELmZvbnQ9JzQ4cHggTWVubG8nf%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3C%2Fsvg%3E%0A" loading="lazy" />
           </a>
 
           <figcaption>time-stamp<br /></figcaption>
@@ -619,7 +619,7 @@ test("media", async (t) => {
       </p>
       <p>
         <figure class="card">
-          <iframe src="data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0+e2xldCBiLGM9Xz0+e2Eud2lkdGg9ZS5jbGllbnRXaWR0aCxiPWEuZ2V0Q29udGV4dCgnMmQnKSxiLmZvbnQ9JzQ4cHggTWVubG8nfSxkPShnLGgsaixrPTYsbD00NCk9PntiLmZpbGxTdHlsZT0nIzBhMCcsYi5maWxsUmVjdCgwLDAsYS53aWR0aCxhLmhlaWdodCksYi5maWxsU3R5bGU9JyNmZmYnO2ZvcihoIG9mIGcuc3BsaXQoJyAnKSlqPTI4LjkqaC5sZW5ndGgsNjxrJiZrK2o+PWEud2lkdGgmJihrPTYsbCs9NDgpLGIuZmlsbFRleHQoaCxrLGwpLGsrPWorMjguOTttLnNyYz1hLnRvRGF0YVVSTCgpfSxmPV89PmQoaS52YWx1ZXx8bmV3IERhdGUoKS50b0lTT1N0cmluZygpLnJlcGxhY2UoL1wuXGQrLywnJykpOyhvbnJlc2l6ZT1fPT5mKGMoKSkpKCksc2V0SW50ZXJ2YWwoaS5vbmlucHV0PWYsMWUzKX0pKGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2NhbnZhcycpKSI+PGlucHV0IGlkPWkgcGxhY2Vob2xkZXI9bGFiZWw+PGltZyBpZD1tPjxwIGlkPWU+" frameborder="0" width="720" height="405" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen="1"></iframe>
+          <iframe src="data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0+e2xldCBiLGM9Xz0+e2Eud2lkdGg9ZS5jbGllbnRXaWR0aCxiPWEuZ2V0Q29udGV4dCgnMmQnKSxiLmZvbnQ9JzQ4cHggTWVubG8nfSxkPShnLGgsaixrPTYsbD00NCk9PntiLmZpbGxTdHlsZT0nIzBhMCcsYi5maWxsUmVjdCgwLDAsYS53aWR0aCxhLmhlaWdodCksYi5maWxsU3R5bGU9JyNmZmYnO2ZvcihoIG9mIGcuc3BsaXQoJyAnKSlqPTI4LjkqaC5sZW5ndGgsNjxrJiZrK2o+PWEud2lkdGgmJihrPTYsbCs9NDgpLGIuZmlsbFRleHQoaCxrLGwpLGsrPWorMjguOTttLnNyYz1hLnRvRGF0YVVSTCgpfSxmPV89PmQoaS52YWx1ZXx8bmV3IERhdGUoKS50b0lTT1N0cmluZygpLnJlcGxhY2UoL1wuXGQrLywnJykpOyhvbnJlc2l6ZT1fPT5mKGMoKSkpKCksc2V0SW50ZXJ2YWwoaS5vbmlucHV0PWYsMWUzKX0pKGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ2NhbnZhcycpKSI+PGlucHV0IGlkPWkgcGxhY2Vob2xkZXI9bGFiZWw+PGltZyBpZD1tPjxwIGlkPWU+" frameborder="0" width="720" height="405" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen="1" loading="lazy"></iframe>
 
           <figcaption>time-stamp<br /></figcaption>
         </figure>
@@ -702,14 +702,14 @@ test("embed code block", async (t) => {
       <p>
         <figure class="card">
           <a href="data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0" class="future-frame" data-src="data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0" data-width="720" data-height="405">
-            <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%2090%22%3E%0A%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%0Atext%20%7B%0Afont-size%3A%2011px%3B%0Afont-family%3A%20%22SF%20Mono%22%2C%20%22Menlo-Regular%22%2C%20Consolas%2C%20%22Andale%20Mono%20WT%22%2C%0A%22Andale%20Mono%22%2C%20%22Lucida%20Console%22%2C%20%22Lucida%20Sans%20Typewriter%22%2C%0A%22DejaVu%20Sans%20Mono%22%2C%20%22Bitstream%20Vera%20Sans%20Mono%22%2C%20%22Liberation%20Mono%22%2C%0A%22Nimbus%20Mono%20L%22%2C%20Monaco%2C%20%22Courier%20New%22%2C%20Courier%2C%20monospace%3B%0A%7D%0A%3C%2Fstyle%3E%3C%2Fdefs%3E%0A%3Crect%20x%3D%220%22%20y%3D%220%22%20height%3D%2290%22%20width%3D%22160%22%20fill%3D%22white%22%20%2F%3E%0A%3Ctext%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23888%22%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3Edata%3Atext%2Fhtml%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EPGJvZHkgb25sb2FkPSIoYT0%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3C%2Fsvg%3E%0A" />
+            <img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%2090%22%3E%0A%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%0Atext%20%7B%0Afont-size%3A%2011px%3B%0Afont-family%3A%20%22SF%20Mono%22%2C%20%22Menlo-Regular%22%2C%20Consolas%2C%20%22Andale%20Mono%20WT%22%2C%0A%22Andale%20Mono%22%2C%20%22Lucida%20Console%22%2C%20%22Lucida%20Sans%20Typewriter%22%2C%0A%22DejaVu%20Sans%20Mono%22%2C%20%22Bitstream%20Vera%20Sans%20Mono%22%2C%20%22Liberation%20Mono%22%2C%0A%22Nimbus%20Mono%20L%22%2C%20Monaco%2C%20%22Courier%20New%22%2C%20Courier%2C%20monospace%3B%0A%7D%0A%3C%2Fstyle%3E%3C%2Fdefs%3E%0A%3Crect%20x%3D%220%22%20y%3D%220%22%20height%3D%2290%22%20width%3D%22160%22%20fill%3D%22white%22%20%2F%3E%0A%3Ctext%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23888%22%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3Edata%3Atext%2Fhtml%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EPGJvZHkgb25sb2FkPSIoYT0%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3C%2Fsvg%3E%0A" loading="lazy" />
           </a>
         </figure>
       </p>
       <p>
         <figure class="card">
           <a href="data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0" class="future-frame" data-src="data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0" data-width="720" data-height="405">
-            <img alt="time-stamp" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%2090%22%3E%0A%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%0Atext%20%7B%0Afont-size%3A%2011px%3B%0Afont-family%3A%20%22SF%20Mono%22%2C%20%22Menlo-Regular%22%2C%20Consolas%2C%20%22Andale%20Mono%20WT%22%2C%0A%22Andale%20Mono%22%2C%20%22Lucida%20Console%22%2C%20%22Lucida%20Sans%20Typewriter%22%2C%0A%22DejaVu%20Sans%20Mono%22%2C%20%22Bitstream%20Vera%20Sans%20Mono%22%2C%20%22Liberation%20Mono%22%2C%0A%22Nimbus%20Mono%20L%22%2C%20Monaco%2C%20%22Courier%20New%22%2C%20Courier%2C%20monospace%3B%0A%7D%0A%3C%2Fstyle%3E%3C%2Fdefs%3E%0A%3Crect%20x%3D%220%22%20y%3D%220%22%20height%3D%2290%22%20width%3D%22160%22%20fill%3D%22white%22%20%2F%3E%0A%3Ctext%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23888%22%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3Edata%3Atext%2Fhtml%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EPGJvZHkgb25sb2FkPSIoYT0%3C%2Ftspan%3E%3Ctspan%20x%3D%2280%22%20dy%3D%2212%22%20fill%3D%22%2300a500%22%20text-anchor%3D%22middle%22%3Etime-stamp%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3C%2Fsvg%3E%0A" />
+            <img alt="time-stamp" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%2090%22%3E%0A%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%0Atext%20%7B%0Afont-size%3A%2011px%3B%0Afont-family%3A%20%22SF%20Mono%22%2C%20%22Menlo-Regular%22%2C%20Consolas%2C%20%22Andale%20Mono%20WT%22%2C%0A%22Andale%20Mono%22%2C%20%22Lucida%20Console%22%2C%20%22Lucida%20Sans%20Typewriter%22%2C%0A%22DejaVu%20Sans%20Mono%22%2C%20%22Bitstream%20Vera%20Sans%20Mono%22%2C%20%22Liberation%20Mono%22%2C%0A%22Nimbus%20Mono%20L%22%2C%20Monaco%2C%20%22Courier%20New%22%2C%20Courier%2C%20monospace%3B%0A%7D%0A%3C%2Fstyle%3E%3C%2Fdefs%3E%0A%3Crect%20x%3D%220%22%20y%3D%220%22%20height%3D%2290%22%20width%3D%22160%22%20fill%3D%22white%22%20%2F%3E%0A%3Ctext%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23888%22%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3Edata%3Atext%2Fhtml%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EPGJvZHkgb25sb2FkPSIoYT0%3C%2Ftspan%3E%3Ctspan%20x%3D%2280%22%20dy%3D%2212%22%20fill%3D%22%2300a500%22%20text-anchor%3D%22middle%22%3Etime-stamp%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3C%2Fsvg%3E%0A" loading="lazy" />
           </a>
 
           <figcaption>time-stamp<br /></figcaption>
@@ -751,12 +751,12 @@ test("embed code block", async (t) => {
       </p>
       <p>
         <figure class="card">
-          <iframe src="data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0" frameborder="0" width="720" height="405" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen="1"></iframe>
+          <iframe src="data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0" frameborder="0" width="720" height="405" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen="1" loading="lazy"></iframe>
         </figure>
       </p>
       <p>
         <figure class="card">
-          <iframe src="data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0" frameborder="0" width="720" height="405" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen="1"></iframe>
+          <iframe src="data:text/html;base64,PGJvZHkgb25sb2FkPSIoYT0" frameborder="0" width="720" height="405" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen="1" loading="lazy"></iframe>
 
           <figcaption>time-stamp<br /></figcaption>
         </figure>
@@ -795,7 +795,7 @@ test("embed-html code block", async (t) => {
       <p>
         <figure class="card">
           <a href="data:text/html;base64,PHRpdGxlPnRpbWUtc3RhbXA8L3RpdGxlPgo8bWV0YSBwcm9wZXJ0eT0ib2c6aW1hZ2UiIGNvbnRlbnQ9Ii9tZWRpYS90LnBuZyI+CjxwPmhlbGxvIHdvcmxkPC9wPg==" class="future-frame" data-src="data:text/html;base64,PHRpdGxlPnRpbWUtc3RhbXA8L3RpdGxlPgo8bWV0YSBwcm9wZXJ0eT0ib2c6aW1hZ2UiIGNvbnRlbnQ9Ii9tZWRpYS90LnBuZyI+CjxwPmhlbGxvIHdvcmxkPC9wPg==" data-width="720" data-height="405">
-            <img alt="time-stamp" src="/media/t.png" />
+            <img alt="time-stamp" src="/media/t.png" loading="lazy" />
           </a>
 
           <figcaption>time-stamp<br /></figcaption>
@@ -804,7 +804,7 @@ test("embed-html code block", async (t) => {
       <p>
         <figure class="card">
           <a href="data:text/html;base64,PHRpdGxlPnRpbWUtc3RhbXA8L3RpdGxlPgo8cD5oZWxsbyB3b3JsZDwvcD4=" class="future-frame" data-src="data:text/html;base64,PHRpdGxlPnRpbWUtc3RhbXA8L3RpdGxlPgo8cD5oZWxsbyB3b3JsZDwvcD4=" data-width="720" data-height="405">
-            <img alt="time-stamp" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%2090%22%3E%0A%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%0Atext%20%7B%0Afont-size%3A%2011px%3B%0Afont-family%3A%20%22SF%20Mono%22%2C%20%22Menlo-Regular%22%2C%20Consolas%2C%20%22Andale%20Mono%20WT%22%2C%0A%22Andale%20Mono%22%2C%20%22Lucida%20Console%22%2C%20%22Lucida%20Sans%20Typewriter%22%2C%0A%22DejaVu%20Sans%20Mono%22%2C%20%22Bitstream%20Vera%20Sans%20Mono%22%2C%20%22Liberation%20Mono%22%2C%0A%22Nimbus%20Mono%20L%22%2C%20Monaco%2C%20%22Courier%20New%22%2C%20Courier%2C%20monospace%3B%0A%7D%0A%3C%2Fstyle%3E%3C%2Fdefs%3E%0A%3Crect%20x%3D%220%22%20y%3D%220%22%20height%3D%2290%22%20width%3D%22160%22%20fill%3D%22white%22%20%2F%3E%0A%3Ctext%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23888%22%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3Edata%3Atext%2Fhtml%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EPHRpdGxlPnRpbWUtc3RhbXA8L%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3E3RpdGxlPgo8cD5oZWxsbyB3b3%3C%2Ftspan%3E%3Ctspan%20x%3D%2280%22%20dy%3D%2212%22%20fill%3D%22%2300a500%22%20text-anchor%3D%22middle%22%3Etime-stamp%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EJsZDwvcD4%3D%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3C%2Fsvg%3E%0A" />
+            <img alt="time-stamp" src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20160%2090%22%3E%0A%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%0Atext%20%7B%0Afont-size%3A%2011px%3B%0Afont-family%3A%20%22SF%20Mono%22%2C%20%22Menlo-Regular%22%2C%20Consolas%2C%20%22Andale%20Mono%20WT%22%2C%0A%22Andale%20Mono%22%2C%20%22Lucida%20Console%22%2C%20%22Lucida%20Sans%20Typewriter%22%2C%0A%22DejaVu%20Sans%20Mono%22%2C%20%22Bitstream%20Vera%20Sans%20Mono%22%2C%20%22Liberation%20Mono%22%2C%0A%22Nimbus%20Mono%20L%22%2C%20Monaco%2C%20%22Courier%20New%22%2C%20Courier%2C%20monospace%3B%0A%7D%0A%3C%2Fstyle%3E%3C%2Fdefs%3E%0A%3Crect%20x%3D%220%22%20y%3D%220%22%20height%3D%2290%22%20width%3D%22160%22%20fill%3D%22white%22%20%2F%3E%0A%3Ctext%20x%3D%220%22%20y%3D%220%22%20fill%3D%22%23888%22%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3Edata%3Atext%2Fhtml%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EPHRpdGxlPnRpbWUtc3RhbXA8L%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3E3RpdGxlPgo8cD5oZWxsbyB3b3%3C%2Ftspan%3E%3Ctspan%20x%3D%2280%22%20dy%3D%2212%22%20fill%3D%22%2300a500%22%20text-anchor%3D%22middle%22%3Etime-stamp%3C%2Ftspan%3E%3Ctspan%20x%3D%220%22%20dy%3D%2212%22%3EJsZDwvcD4%3D%3C%2Ftspan%3E%3C%2Ftext%3E%0A%3C%2Fsvg%3E%0A" loading="lazy" />
           </a>
 
           <figcaption>time-stamp<br /></figcaption>
@@ -818,14 +818,14 @@ test("embed-html code block", async (t) => {
     `
       <p>
         <figure class="card">
-          <iframe src="data:text/html;base64,PHRpdGxlPnRpbWUtc3RhbXA8L3RpdGxlPgo8bWV0YSBwcm9wZXJ0eT0ib2c6aW1hZ2UiIGNvbnRlbnQ9Ii9tZWRpYS90LnBuZyI+CjxwPmhlbGxvIHdvcmxkPC9wPg==" frameborder="0" width="720" height="405" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen="1"></iframe>
+          <iframe src="data:text/html;base64,PHRpdGxlPnRpbWUtc3RhbXA8L3RpdGxlPgo8bWV0YSBwcm9wZXJ0eT0ib2c6aW1hZ2UiIGNvbnRlbnQ9Ii9tZWRpYS90LnBuZyI+CjxwPmhlbGxvIHdvcmxkPC9wPg==" frameborder="0" width="720" height="405" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen="1" loading="lazy"></iframe>
 
           <figcaption>time-stamp<br /></figcaption>
         </figure>
       </p>
       <p>
         <figure class="card">
-          <iframe src="data:text/html;base64,PHRpdGxlPnRpbWUtc3RhbXA8L3RpdGxlPgo8cD5oZWxsbyB3b3JsZDwvcD4=" frameborder="0" width="720" height="405" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen="1"></iframe>
+          <iframe src="data:text/html;base64,PHRpdGxlPnRpbWUtc3RhbXA8L3RpdGxlPgo8cD5oZWxsbyB3b3JsZDwvcD4=" frameborder="0" width="720" height="405" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen="1" loading="lazy"></iframe>
 
           <figcaption>time-stamp<br /></figcaption>
         </figure>
@@ -933,7 +933,7 @@ test("show embed in teaser", async (t) => {
       <p>
         <figure class="card">
           <a href="https://www.youtube.com/watch?v=vEUylyDMFIA" class="future-frame" data-src="https://www.youtube.com/embed/vEUylyDMFIA" data-width="480" data-height="360">
-            <img alt="React with mustaches" src="https://example.com/media/jjxvmnCEDWrO9oSohxjhH68Pbc/fit1600.jpeg">
+            <img alt="React with mustaches" src="https://example.com/media/jjxvmnCEDWrO9oSohxjhH68Pbc/fit1600.jpeg" loading="lazy">
           </a>
 
           <figcaption>

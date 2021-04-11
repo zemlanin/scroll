@@ -166,7 +166,7 @@ test("database with posts and embeds", async (t) => {
     cheerio(".card", post5).html(),
     `
       <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
-        <img alt="Rick Astley - Never Gonna Give You Up (Video)" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg">
+        <img alt="Rick Astley - Never Gonna Give You Up (Video)" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" loading="lazy">
       </a>
 
       <figcaption>
@@ -301,6 +301,7 @@ test("database with patched embeds", async (t) => {
         <img
           alt="Rick Astley - Never Gonna Give You Up (Video)"
           src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
+          loading="lazy"
         />
       </a>
 
@@ -323,6 +324,7 @@ test("database with patched embeds", async (t) => {
         <img
           alt="Rick Astley - Never Gonna Give You Up (Video)"
           src="https://youtube.example/media/rickroll.jpg"
+          loading="lazy"
         />
       </a>
 
@@ -345,6 +347,7 @@ test("database with patched embeds", async (t) => {
         <img
           alt="Rick Astley - Never Gonna Give You Up (Video)"
           src="https://youtube.example/media/rickroll.jpg"
+          loading="lazy"
         />
       </a>
 
@@ -367,6 +370,7 @@ test("database with patched embeds", async (t) => {
         <img
           alt="Rick Astley - Never Gonna Give You Up (Video)"
           src="https://youtube.example/media/rickroll.jpg"
+          loading="lazy"
         />
       </a>
 
@@ -386,6 +390,7 @@ test("database with patched embeds", async (t) => {
         <img
           alt="Rick Astley - Never Gonna Give You Up (Video)"
           src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
+          loading="lazy"
         />
       </a>
 

@@ -17,22 +17,36 @@ document.addEventListener("DOMContentLoaded", function () {
     classList.add("light");
   }
 
-  if (enabledNightModeCookie) {
-    nightModeForm["night-mode"].value = "on";
-  } else if (disabledNightModeCookie) {
-    nightModeForm["night-mode"].value = "off";
-  }
+  Array.prototype.forEach.call(
+    nightModeForm["night-mode"],
+    function (checkbox) {
+      if (enabledNightModeCookie) {
+        checkbox.checked = checkbox.value === "on";
+      } else if (disabledNightModeCookie) {
+        checkbox.checked = checkbox.value === "off";
+      }
+    }
+  );
 
-  nightModeForm.addEventListener("change", function () {
-    if (nightModeForm["night-mode"].value === "on") {
+  nightModeForm.addEventListener("change", function (event) {
+    if (event.target.checked) {
+      Array.prototype.forEach.call(
+        nightModeForm["night-mode"],
+        function (checkbox) {
+          checkbox.checked = checkbox.value === event.target.value;
+        }
+      );
+    }
+
+    if (event.target.value === "on" && event.target.checked) {
       classList.add("dark");
       classList.remove("light");
       document.cookie = "night-mode=1; path=/";
-    } else if (nightModeForm["night-mode"].value === "off") {
+    } else if (event.target.value === "off" && event.target.checked) {
       classList.remove("dark");
       classList.add("light");
       document.cookie = "night-mode=0; path=/";
-    } else if (nightModeForm["night-mode"].value === "system") {
+    } else if (!event.target.checked) {
       classList.remove("dark");
       classList.remove("light");
       document.cookie = "night-mode=; path=/";

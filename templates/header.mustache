@@ -110,25 +110,15 @@
       {{/linkblog}}
     {{/post}}
 
-    <details id="settings-icon" class="print:hidden" title="{{#t}}Settings{{/t}}">
-      <summary>
-        {{#fas}}sliders-h{{/fas}}
-      </summary>
-
       <form id="night-mode" action="javascript:void(0)">
-        <label title="{{#t}}Dark theme{{/t}}">
-          <input type="radio" name="night-mode" value="on" aria-label="{{#t}}Dark theme{{/t}}">
+        <label title="{{#t}}Dark theme{{/t}}" tabindex="0">
+          <input type="checkbox" name="night-mode" value="on" aria-label="{{#t}}Dark theme{{/t}}">
           {{#fas}}moon{{/fas}}
         </label>
-        <label title="{{#t}}Default theme{{/t}}">
-          <input type="radio" name="night-mode" value="system" aria-label="{{#t}}Default theme{{/t}}" checked>
-          {{#fas}}adjust{{/fas}}
-        </label>
-        <label title="{{#t}}Light theme{{/t}}">
-          <input type="radio" name="night-mode" value="off" aria-label="{{#t}}Light theme{{/t}}">
+        <label title="{{#t}}Light theme{{/t}}" tabindex="0">
+          <input type="checkbox" name="night-mode" value="off" aria-label="{{#t}}Light theme{{/t}}">
           {{#fas}}sun{{/fas}}
         </label>
       </form>
-    </details>
   </header>
   <main>

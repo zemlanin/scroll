@@ -1,3 +1,4 @@
+// maybe, remove `<details>` polyfill if it won't get used outside night-mode switcher
 var script;
 var head = document.getElementsByTagName("head")[0];
 var element = document.createElement("details");

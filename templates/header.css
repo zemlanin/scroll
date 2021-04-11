@@ -418,32 +418,24 @@ nav span {
   }
 }
 
-#settings-icon > summary::-webkit-details-marker {
-  display: none;
-}
-
 #night-mode {
   display: flex;
   flex-flow: row;
   justify-content: space-between;
-  margin-top: 0.2em;
   font-size: 1.3em;
+  margin-right: -0.3em;
 }
 
-#night-mode label {
+#night-mode label svg {
+  vertical-align: middle;
   margin: 0 0.3em;
 }
 
-#night-mode label:last-child {
-  margin-right: 0;
+#night-mode input[type="checkbox"] {
+  display: none;
 }
 
-#night-mode label svg,
-#night-mode label input {
-  vertical-align: middle;
-}
-
-#night-mode input[type="radio"]:checked ~ * {
+#night-mode input[type="checkbox"]:checked ~ * {
   color: #00a500;
   color: var(--color-braaand);
 }

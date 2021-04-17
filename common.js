@@ -626,7 +626,8 @@ function walkWithFootnotes(token, postId, footnotes) {
     const text = footnoteToUpdate.multilineStart + "\n\n" + token.text.trim();
 
     const footnoteHTML = marked(
-      text + `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`
+      text + `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`,
+      markedOptions
     );
 
     footnoteToUpdate.multilineStart = "";
@@ -653,7 +654,8 @@ function walkWithFootnotes(token, postId, footnotes) {
       const text = line.slice(match.length).trim();
 
       const footnoteHTML = marked(
-        text + `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`
+        text + `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`,
+        markedOptions
       );
 
       footnoteToUpdate.multilineStart = text;
@@ -668,7 +670,8 @@ function walkWithFootnotes(token, postId, footnotes) {
         const footnoteId = `${postId}:${t.text.slice(1)}`;
         const footnoteHTML = marked(
           (t.title || t.href).trim() +
-            `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`
+            `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`,
+          markedOptions
         );
         footnotes.push({
           index: footnotes.length,
@@ -724,7 +727,8 @@ function walkWithFootnotes(token, postId, footnotes) {
 
             const footnoteHTML = marked(
               restOfFootnote.trim() +
-                `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`
+                `&nbsp;<a href="#rfn:${footnoteId}" rev="footnote">&#8617;</a>`,
+              markedOptions
             );
 
             footnotes.push({

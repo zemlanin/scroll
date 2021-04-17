@@ -204,7 +204,7 @@ test("footnote inside non-paragraph blocks", async (t) => {
         [^3]:
             [c](/media/c.pdf)
       `),
-      id: "a22749bc",
+      id: "589870e6",
       created: +new Date(),
     },
     mockEmbedsLoader
@@ -213,20 +213,20 @@ test("footnote inside non-paragraph blocks", async (t) => {
   t.equalHtml(
     result.html,
     `
-      <p><em>italic text<sup><a href="#fn:a22749bc:1" id="rfn:a22749bc:1" rel="footnote">1</a></sup></em></p>
-      <p><strong>strong text<sup><a href="#fn:a22749bc:2" id="rfn:a22749bc:2" rel="footnote">2</a></sup></strong></p>
-      <p><em>italic text<sup><a href="#fn:a22749bc:3" id="rfn:a22749bc:3" rel="footnote">3</a></sup></em></p>
+      <p><em>italic text<sup><a href="#fn:589870e6:1" id="rfn:589870e6:1" rel="footnote">1</a></sup></em></p>
+      <p><strong>strong text<sup><a href="#fn:589870e6:2" id="rfn:589870e6:2" rel="footnote">2</a></sup></strong></p>
+      <p><em>italic text<sup><a href="#fn:589870e6:3" id="rfn:589870e6:3" rel="footnote">3</a></sup></em></p>
       <div class="footnotes">
         <hr>
         <ol>
-          <li id="fn:a22749bc:1" tabindex="-1">
-            <p><a href="/media/a.pdf">a</a>&nbsp;<a href="#rfn:a22749bc:1" rev="footnote">&#8617;</a></p>
+          <li id="fn:589870e6:1" tabindex="-1">
+            <p><a href="https://example.com/media/a.pdf">a</a>&nbsp;<a href="#rfn:589870e6:1" rev="footnote">&#8617;</a></p>
           </li>
-          <li id="fn:a22749bc:2" tabindex="-1">
-            <p><a href="/media/b.pdf">b</a>&nbsp;<a href="#rfn:a22749bc:2" rev="footnote">&#8617;</a></p>
+          <li id="fn:589870e6:2" tabindex="-1">
+            <p><a href="https://example.com/media/b.pdf">b</a>&nbsp;<a href="#rfn:589870e6:2" rev="footnote">&#8617;</a></p>
           </li>
-          <li id="fn:a22749bc:3" tabindex="-1">
-            <p><a href="/media/c.pdf">c</a>&nbsp;<a href="#rfn:a22749bc:3" rev="footnote">&#8617;</a></p>
+          <li id="fn:589870e6:3" tabindex="-1">
+            <p><a href="https://example.com/media/c.pdf">c</a>&nbsp;<a href="#rfn:589870e6:3" rev="footnote">&#8617;</a></p>
           </li>
         </ol>
       </div>
@@ -304,7 +304,7 @@ test("footnote with double squares", async (t) => {
         <hr>
         <ol>
           <li id="fn:96289b5d:xx" tabindex="-1">
-            <p><a href="/media/x.pdf">x</a>&nbsp;<a href="#rfn:96289b5d:xx" rev="footnote">&#8617;</a></p>
+            <p><a href="https://example.com/media/x.pdf">x</a>&nbsp;<a href="#rfn:96289b5d:xx" rev="footnote">&#8617;</a></p>
           </li>
         </ol>
       </div>

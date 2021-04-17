@@ -29,6 +29,8 @@ document.addEventListener("DOMContentLoaded", function () {
   );
 
   nightModeForm.addEventListener("change", function (event) {
+    classList.add("theme-changed");
+
     if (event.target.checked) {
       Array.prototype.forEach.call(
         nightModeForm["theme-switcher"],

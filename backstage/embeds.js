@@ -504,7 +504,12 @@ const isYoutubeCard = (cardURL) => {
 
 const isTikTokCard = (cardURL) => {
   const hostname = cardURL ? new URL(cardURL).hostname : "";
-  return hostname === "www.tiktok.com" || hostname.endsWith(".tiktok.com");
+  return hostname === "tiktok.com" || hostname.endsWith(".tiktok.com");
+};
+
+const isGiphyCard = (cardURL) => {
+  const hostname = cardURL ? new URL(cardURL).hostname : "";
+  return hostname === "giphy.com" || hostname.endsWith(".giphy.com");
 };
 
 const shouldDescriptionBeTruncated = (cardURL) => {
@@ -1264,7 +1269,7 @@ module.exports = {
         src: videoNative.url,
         width: videoNative.width || null,
         height: videoNative.height || null,
-        loop: card.mimetype === "image/gif",
+        loop: isGiphyCard(card.url) || card.mimetype === "image/gif",
       };
 
       if (videoNative.poster) {

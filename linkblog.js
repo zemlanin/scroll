@@ -215,9 +215,11 @@ async function generateLinkblogSection(db, blog) {
   const blogHostname = new URL(blog.url).hostname;
 
   return embeds
+    .map((card, i) => ({ ...card, id: rawLinks[i].id }))
     .filter((card) => card.title && card.img)
     .filter((card) => new URL(card.url).hostname !== blogHostname)
     .map((card) => ({
+      id: card.id,
       url: card.url,
       title: card.title,
       site_name:

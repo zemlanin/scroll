@@ -497,14 +497,7 @@ article ul[data-gallery] li {
   max-width: 90%;
   max-width: calc(100% - 4em);
   opacity: 1;
-  will-change: opacity;
-  transition: opacity 0.4s ease-in-out;
   position: relative;
-}
-
-article ul[data-gallery] li.dim {
-  opacity: 0.5;
-  transition: opacity 0s ease-in-out;
 }
 
 article ul[data-gallery] li.before-centermost {
@@ -521,16 +514,23 @@ article ul[data-gallery] li.dim a[href] {
   pointer-events: none;
 }
 
-article ul[data-gallery] li.dim figure.card:after {
+article ul[data-gallery] li:after {
   /* think about removing `pointer-events: none` since we now have this... */
+  display: none;
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: transparent;
-  display: block;
+  background-color: white;
+  background-color: var(--color-background);
+  transition: background-color 0.2s ease-in-out;
+  opacity: 0.3;
   content: "";
+}
+
+article ul[data-gallery] li.dim:after {
+  display: block;
 }
 
 article ul[data-gallery] li.dim figure.card > a {

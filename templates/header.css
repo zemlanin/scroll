@@ -499,6 +499,7 @@ article ul[data-gallery] li {
   opacity: 1;
   will-change: opacity;
   transition: opacity 0.5s ease-in-out;
+  position: relative;
 }
 
 article ul[data-gallery] li.dim {
@@ -517,6 +518,18 @@ article ul[data-gallery] li.dim img,
 article ul[data-gallery] li.dim video,
 article ul[data-gallery] li.dim a[href] {
   pointer-events: none;
+}
+
+article ul[data-gallery] li.dim figure.card:after {
+  /* think about removing `pointer-events: none` since we now have this... */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: transparent;
+  display: block;
+  content: "";
 }
 
 article ul[data-gallery] li.dim figure.card > a {

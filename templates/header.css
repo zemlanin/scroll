@@ -335,7 +335,7 @@ footer .groups .group {
   flex-flow: row;
 }
 
-footer::before {
+footer:before {
   display: block;
   font-size: 1.3em;
   content: "─ ❧ ─";

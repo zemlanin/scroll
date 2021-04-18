@@ -105,6 +105,7 @@ async function loadFreshFeed(db, stdout, _stderr) {
 
   for (const link of latestLinks) {
     if (!feed.items.some((item) => item.link === link.original_url)) {
+      hasNewItems = true;
       // link was removed from the linkblog source feed
       await db.run(
         `

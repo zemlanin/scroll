@@ -272,14 +272,37 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
   };
 };
 
-const getVideoIframe = (graph) =>
-  graph &&
-  ((graph.video && graph.video.find((v) => v.url && v.type === "text/html")) ||
-    (graph.player && {
+const getVideoIframe = (graph) => {
+  if (!graph) {
+    return null;
+  }
+
+  if (graph.video) {
+    const videoHtmlPlayer = graph.video.find(
+      (v) => v.url && v.type === "text/html"
+    );
+
+    if (videoHtmlPlayer) {
+      return {
+        url: videoHtmlPlayer.url,
+        width: videoHtmlPlayer.width
+          ? parseInt(videoHtmlPlayer.width, 10)
+          : null,
+        height: videoHtmlPlayer.height
+          ? parseInt(videoHtmlPlayer.height, 10)
+          : null,
+      };
+    }
+  }
+
+  if (graph.player) {
+    return {
       url: graph.player.url,
       width: graph.player.width ? parseInt(graph.player.width, 10) : null,
       height: graph.player.height ? parseInt(graph.player.height, 10) : null,
-    }));
+    };
+  }
+};
 
 const getOEmbedVideoIframe = (oEmbed) =>
   oEmbed &&
@@ -291,8 +314,8 @@ const getOEmbedVideoIframe = (oEmbed) =>
       '<base href="https://example.com/"><style>html,body,iframe{padding:0;margin:0;height:100%;max-height:100%;max-width:100%;}</style>' +
       oEmbed.html
     }`,
-    width: oEmbed.width ? parseInt(oEmbed.width) : null,
-    height: oEmbed.height ? parseInt(oEmbed.height) : null,
+    width: oEmbed.width ? parseInt(oEmbed.width, 10) : null,
+    height: oEmbed.height ? parseInt(oEmbed.height, 10) : null,
   };
 
 const getVideoNative = (graph) => {
@@ -1165,8 +1188,14 @@ module.exports = {
         rawInitial.image.push({
           url: link.href,
           type: link.type,
-          width: parsedSizes && parsedSizes.groups.width,
-          height: parsedSizes && parsedSizes.groups.height,
+          width:
+            parsedSizes &&
+            parsedSizes.groups.width &&
+            parseInt(parsedSizes.groups.width, 10),
+          height:
+            parsedSizes &&
+            parsedSizes.groups.height &&
+            parseInt(parsedSizes.groups.height, 10),
         });
       } else if (link.rel === "image_src") {
         rawInitial.image = rawInitial.image || [];

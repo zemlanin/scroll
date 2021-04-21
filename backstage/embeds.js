@@ -191,7 +191,12 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
     if (acc[prop0] && acc[prop0].length > 0) {
       const prevObj = acc[prop0].pop();
 
-      if (!prevObj.url) {
+      if (
+        !prevObj.url ||
+        prevObj.url === patchNode.url ||
+        prevObj.secure_url === patchNode.url ||
+        prevObj.url === patchNode.secure_url
+      ) {
         patch = {
           [prop0]: [...acc[prop0], { ...prevObj, ...patchNode }],
         };

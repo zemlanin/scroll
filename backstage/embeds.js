@@ -751,7 +751,7 @@ function getOEmbedLinkFromProviders(url) {
     for (const endpoint of provider.endpoints) {
       if (!endpoint.schemes) {
         if (url.startsWith(provider.provider_url)) {
-          const href = new URL(endpoint.url);
+          const href = new URL(endpoint.url.replace("{format}", "json"));
           href.searchParams.set("format", "json");
           href.searchParams.set("url", url);
 
@@ -788,7 +788,7 @@ function getOEmbedLinkFromProviders(url) {
         );
 
         if (url.match(schemeRegexp)) {
-          const href = new URL(endpoint.url);
+          const href = new URL(endpoint.url.replace("{format}", "json"));
           href.searchParams.set("format", "json");
           href.searchParams.set("url", url);
 

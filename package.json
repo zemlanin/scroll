@@ -39,7 +39,7 @@
     "nanoid": "^1.3.4",
     "node-fetch": "^2.6.1",
     "normalize.css": "^8.0.1",
-    "oembed-providers": "git+https://git@github.com/zemlanin/oembed.git",
+    "oembed-providers": "git+https://git@github.com/iamcal/oembed.git",
     "prettier": "^2.0.5",
     "request": "^2.88.2",
     "request-promise-native": "^1.0.9",

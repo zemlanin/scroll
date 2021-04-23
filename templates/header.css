@@ -420,17 +420,21 @@ nav span {
   color: var(--color-deemphasis);
 }
 
-#theme-switcher > label:active,
-#theme-switcher > label:focus {
-  color: initial;
-  color: var(--color-text);
-}
-
 @supports (color: var(--color-braaand)) {
   /* show theme switcher only if browser supports theming via CSS variables */
   #theme-switcher {
     display: flex;
   }
+}
+
+#theme-switcher label {
+  cursor: pointer;
+}
+
+#theme-switcher label:active,
+#theme-switcher label:focus {
+  color: initial;
+  color: var(--color-text);
 }
 
 #theme-switcher label svg {
@@ -445,6 +449,16 @@ nav span {
 #theme-switcher input[type="checkbox"]:checked ~ * {
   color: #00a500;
   color: var(--color-braaand);
+}
+
+#theme-switcher input[value="light"] ~ * {
+  display: none;
+}
+
+@media (prefers-color-scheme) {
+  #theme-switcher input[value="light"] ~ * {
+    display: initial;
+  }
 }
 
 article kbd,

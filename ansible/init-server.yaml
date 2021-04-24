@@ -52,5 +52,8 @@
       npm:
         path: /root/scroll
 
+    - name: enable app to run on startup
+      service: name=scroll.service enabled=yes
+
     - name: restart app
       service: name=scroll.service state=restarted

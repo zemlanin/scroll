@@ -309,9 +309,10 @@ const getVideoIframe = (graph) => {
   }
 };
 
-const getOEmbedVideoIframe = (oEmbed) =>
+const getOEmbedVideoIframe = (oEmbed, options = {}) =>
   oEmbed &&
-  (oEmbed.type === "video" || oEmbed.type === "rich") &&
+  (oEmbed.type === "video" ||
+    (!options.ignoreRich && oEmbed.type === "rich")) &&
   !isTwitterCard(oEmbed.url) &&
   oEmbed.html && {
     url: `data:text/html;charset=utf-8,${
@@ -1337,11 +1338,15 @@ module.exports = {
     }
 
     if (!videoNative && !audioNative) {
+      const hasOGtags =
+        Object.keys(rawOpengraph).length || Object.keys(rawTwitter).length;
+
       const videoIframe =
         getVideoIframe(rawOpengraph) ||
         getVideoIframe(rawTwitter) ||
         getVideoIframe(rawInitial) ||
-        getOEmbedVideoIframe(rawOEmbed);
+        getOEmbedVideoIframe(rawOEmbed, { ignoreRich: hasOGtags });
+
       if (videoIframe && isYoutubeCard && !isAgeRestricted(rawOpengraph)) {
         card.iframe = {
           src: videoIframe.url,

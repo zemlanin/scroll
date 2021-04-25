@@ -506,6 +506,24 @@ const getFrameFallback = (graphUrl) => {
     };
   }
 
+  if (isApplePodcastsCard(graphUrl)) {
+    const videoURL = new URL(graphUrl);
+    const singleEpisodeEmbed = videoURL.searchParams.has("i");
+
+    videoURL.hostname = "embed.podcasts.apple.com";
+
+    return {
+      video: [
+        {
+          url: videoURL.toString(),
+          type: "text/html",
+          width: 660,
+          height: singleEpisodeEmbed ? 175 : 450,
+        },
+      ],
+    };
+  }
+
   return {};
 };
 
@@ -516,6 +534,12 @@ const isAppleMusicCard = (cardURL) => {
     cardURL &&
     (hostname === "music.apple.com" || hostname === "itunes.apple.com")
   );
+};
+
+const isApplePodcastsCard = (cardURL) => {
+  const hostname = cardURL ? new URL(cardURL).hostname : "";
+
+  return cardURL && hostname === "podcasts.apple.com";
 };
 
 const isTwitterCard = (cardURL) => {

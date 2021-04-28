@@ -73,6 +73,7 @@ const isSimpleProp = (prop) =>
   prop === "title" ||
   prop === "mimetype" ||
   prop === "site_name" ||
+  prop === "site" ||
   prop === "description";
 
 const isBasicMediaProp = (prop) =>
@@ -901,6 +902,25 @@ function tiktokPlaceholder() {
   );
 }
 
+async function getHeadersFromHEAD(url, jar) {
+  const headResp = await require("request-promise-native").head({
+    url,
+    // youtube redirects to consent page when loaded with cookies from EU IPs
+    jar: isYoutubeCard(url) ? null : jar,
+    followRedirect: true,
+    resolveWithFullResponse: true,
+    timeout: 4000,
+    headers: {
+      Accept: "text/html,*/*;q=0.8",
+      "User-Agent": getUserAgent(url),
+    },
+  });
+
+  const cHeaders = headResp && headResp.headers && caseless(headResp.headers);
+
+  return cHeaders || null;
+}
+
 module.exports = {
   queryEmbed,
   loadMetadata: async (ogPageURL) => {
@@ -943,20 +963,16 @@ module.exports = {
         expectedMimetype.startsWith("video/") ||
         expectedMimetype.startsWith("audio/"))
     ) {
-      const headResp = await require("request-promise-native").head({
-        url: ogPageURL,
-        jar: jar,
-        resolveWithFullResponse: true,
-        followRedirect: true,
-        timeout: 4000,
-        headers: {
-          Accept: null,
-          "User-Agent": getUserAgent(ogPageURL),
-        },
-      });
-
-      const cHeaders =
-        headResp && headResp.headers && caseless(headResp.headers);
+      let cHeaders;
+      try {
+        cHeaders = await getHeadersFromHEAD(ogPageURL, jar);
+      } catch (e) {
+        if (e && e.statusCode === 405) {
+          // 405 Method Not Allowed
+        } else {
+          throw e;
+        }
+      }
 
       if (
         cHeaders &&
@@ -978,20 +994,16 @@ module.exports = {
       }
     }
 
-    const headResp = await require("request-promise-native").head({
-      url: ogPageURL,
-      // youtube redirects to consent page when loaded with cookies from EU IPs
-      jar: isYoutubeCard(ogPageURL) ? null : jar,
-      followRedirect: true,
-      resolveWithFullResponse: true,
-      timeout: 4000,
-      headers: {
-        Accept: "text/html,*/*;q=0.8",
-        "User-Agent": getUserAgent(ogPageURL),
-      },
-    });
-
-    const cHeaders = headResp && headResp.headers && caseless(headResp.headers);
+    let cHeaders;
+    try {
+      cHeaders = await getHeadersFromHEAD(ogPageURL, jar);
+    } catch (e) {
+      if (e && e.statusCode === 405) {
+        // 405 Method Not Allowed
+      } else {
+        throw e;
+      }
+    }
 
     const mimetype =
       cHeaders &&
@@ -1002,7 +1014,10 @@ module.exports = {
       nativeMediaMetadata["content-type"] = mimetype;
     }
 
-    if (mimetype !== "text/html") {
+    if (
+      nativeMediaMetadata["content-type"] &&
+      nativeMediaMetadata["content-type"] !== "text/html"
+    ) {
       return [
         { name: "url", content: ogPageURL },
         {
@@ -1021,12 +1036,14 @@ module.exports = {
           value: nativeMediaMetadata.height,
         },
       ].filter(Boolean);
+    } else {
+      nativeMediaMetadata["content-type"] = "text/html";
     }
 
     const $ = await require("request-promise-native").get({
       url: ogPageURL,
       // youtube redirects to consent page when loaded with cookies from EU IPs
-      jar: isYoutubeCard(headResp.request.href) ? null : jar,
+      jar: isYoutubeCard(ogPageURL) ? null : jar,
       followRedirect: true,
       timeout: 4000,
       headers: {
@@ -1298,6 +1315,7 @@ module.exports = {
       site_name:
         rawOpengraph.site_name ||
         rawTwitter.site_name ||
+        rawTwitter.site ||
         rawOEmbed.provider_name ||
         "",
       img: null,
@@ -1565,11 +1583,17 @@ module.exports = {
       !card.iframe &&
       !card.quote
     ) {
-      return `<a href="${card.url}">${card.title || card.url}</a>`;
+      const title = card.title || card.url;
+      return card.site_name
+        ? `<a href="${card.url}">${title} • ${card.site_name}</a>`
+        : `<a href="${card.url}">${title}</a>`;
     }
 
     if (!card.img && card.iframe) {
-      return `<a href="${card.url}">${card.title || card.url}</a>`;
+      const title = card.title || card.url;
+      return card.site_name
+        ? `<a href="${card.url}">${title} • ${card.site_name}</a>`
+        : `<a href="${card.url}">${title}</a>`;
     }
 
     if (card.error) {

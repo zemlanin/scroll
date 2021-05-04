@@ -363,7 +363,7 @@ footer form {
   padding: 0.5em 0;
   display: flex;
   flex-flow: row wrap;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
 }
 
@@ -415,6 +415,7 @@ nav span {
   display: none;
   flex-flow: row;
   justify-content: space-between;
+  align-items: center;
   margin-right: -0.5em;
   color: #888;
   color: var(--color-deemphasis);
@@ -676,8 +677,8 @@ footer a {
 header {
   display: flex;
   flex-direction: row;
-  align-items: baseline;
-  justify-content: flex-start;
+  align-items: stretch;
+  justify-content: center;
 }
 
 header h1,

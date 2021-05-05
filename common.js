@@ -958,6 +958,10 @@ async function getBlogObject(baseUrl) {
     title: BLOG_TITLE,
     url: url.resolve(baseUrl, "/"),
     lang: "ru",
+    author: {
+      name: "Anton Verinov",
+      twitter: "zemlanin",
+    },
     feed: {
       description: BLOG_TITLE,
       url: url.resolve(baseUrl, "/rss.xml"),

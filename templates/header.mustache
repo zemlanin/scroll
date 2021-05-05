@@ -17,11 +17,13 @@
   <link rel="apple-touch-icon-precomposed" href="{{{ blog.static.favicon.png }}}" />
   <link rel="mask-icon" href="{{{ blog.static.mask-icon.svg }}}" color="#00a500" />
 
-  <link rel="me" href="https://twitter.com/zemlanin">
+  <link rel="me" href="https://twitter.com/{{blog.author.twitter}}">
   <link rel="me" href="https://github.com/zemlanin">
+  <link rel="me" href="https://t.me/zemlanin">
 
+  {{#blog.author.name}}<meta name="author" content="{{blog.author.name}}">{{/blog.author.name}}
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:creator" content="@zemlanin" />
+  {{#blog.author.twitter}}<meta name="twitter:creator" content="@{{blog.author.twitter}}" />{{/blog.author.twitter}}
   <meta property="og:site_name" content="{{blog.title}}" />
   {{#post}}
     {{^internal}}

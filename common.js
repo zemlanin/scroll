@@ -974,6 +974,9 @@ async function getBlogObject(baseUrl) {
         url: url.resolve(baseUrl, "/feeds/linkblog.xml"),
       },
     },
+    archive: {
+      url: url.resolve(baseUrl, "/archive.html"),
+    },
     static: {
       favicon: {
         ico: url.resolve(baseUrl, "/favicon.ico"),

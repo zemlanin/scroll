@@ -110,7 +110,10 @@ async function generatePaginationPage(
   return await render("list.mustache", {
     blog,
     number: pageNumber,
-    pagination: true,
+    pagination: {
+      url: url.resolve(blog.url, pageUrl),
+      lang: blog.lang, // HACK: provide `lang` for `{{#t}}` block inside `{{#pagination}}`
+    },
     url: pageUrl,
     posts: posts,
     newer: indexPageAsNewer

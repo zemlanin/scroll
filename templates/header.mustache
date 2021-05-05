@@ -21,6 +21,12 @@
   <link rel="me" href="https://github.com/zemlanin">
   <link rel="me" href="https://t.me/zemlanin">
 
+  {{#post}}{{#public}}<link rel="canonical" href="{{{post.url}}}">{{/public}}{{/post}}
+  {{#index}}<link rel="canonical" href="{{{blog.url}}}">{{/index}}
+  {{#pagination}}<link rel="canonical" href="{{{pagination.url}}}">{{/pagination}}
+  {{#archive}}<link rel="canonical" href="{{{blog.archive.url}}}">{{/archive}}
+  {{#linkblog}}<link rel="canonical" href="{{{blog.linkblog.url}}}">{{/linkblog}}
+
   {{#blog.author.name}}<meta name="author" content="{{blog.author.name}}">{{/blog.author.name}}
   <meta name="twitter:card" content="summary" />
   {{#blog.author.twitter}}<meta name="twitter:creator" content="@{{blog.author.twitter}}" />{{/blog.author.twitter}}

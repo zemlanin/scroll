@@ -21,6 +21,7 @@
   <link rel="me" href="https://github.com/zemlanin">
   <link rel="me" href="https://t.me/zemlanin">
 
+  {{#post}}{{^public}}<meta name="robots" content="noindex">{{/public}}{{/post}}
   {{#post}}{{#public}}<link rel="canonical" href="{{{post.url}}}">{{/public}}{{/post}}
   {{#index}}<link rel="canonical" href="{{{blog.url}}}">{{/index}}
   {{#pagination}}<link rel="canonical" href="{{{pagination.url}}}">{{/pagination}}

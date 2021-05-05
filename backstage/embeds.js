@@ -967,8 +967,10 @@ module.exports = {
       try {
         cHeaders = await getHeadersFromHEAD(ogPageURL, jar);
       } catch (e) {
-        if (e && e.statusCode === 405) {
+        if (e && e.statusCode) {
+          // 403 Forbidden
           // 405 Method Not Allowed
+          // etc.
         } else {
           throw e;
         }
@@ -998,8 +1000,10 @@ module.exports = {
     try {
       cHeaders = await getHeadersFromHEAD(ogPageURL, jar);
     } catch (e) {
-      if (e && e.statusCode === 405) {
+      if (e && e.statusCode) {
+        // 403 Forbidden
         // 405 Method Not Allowed
+        // etc.
       } else {
         throw e;
       }

@@ -391,7 +391,8 @@ footer form button {
   border-color: var(--color-deemphasis);
   border-radius: 4px;
   padding: 0 0.5em;
-  height: 1.5em;
+  margin-left: 0.25em;
+  min-height: 1.5em;
   cursor: pointer;
   color: #888;
   color: var(--color-deemphasis);

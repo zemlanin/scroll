@@ -387,8 +387,8 @@ body.theme-changed footer form input {
 footer form button {
   line-height: 0;
   background: none;
-  border: 1px solid #888;
-  border-color: var(--color-deemphasis);
+  border: 1px solid #dedede;
+  border-color: var(--color-card-border);
   border-radius: 4px;
   padding: 0 0.5em;
   margin-left: 0.25em;
@@ -400,8 +400,8 @@ footer form button {
 
 footer form button:active,
 footer form button:focus {
-  color: initial;
-  color: var(--color-text);
+  color: #888;
+  color: var(--color-deemphasis);
 }
 
 nav {
@@ -435,8 +435,8 @@ nav span {
 
 #theme-switcher label {
   cursor: pointer;
-  border: 1px solid #888;
-  border-color: var(--color-deemphasis);
+  border: 1px solid #dedede;
+  border-color: var(--color-card-border);
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
@@ -453,6 +453,7 @@ nav span {
   padding: 0 0.5em;
   height: 1.5em;
   width: 100%;
+  border-radius: 3px;
 }
 
 #theme-switcher input[type="checkbox"] {
@@ -494,9 +495,17 @@ nav span {
     border-radius: 4px 0 0 4px;
   }
 
+  #theme-switcher label:first-child svg {
+    border-radius: 3px 0 0 3px;
+  }
+
   #theme-switcher label:last-child {
     border-radius: 0 4px 4px 0;
     margin-left: -1px;
+  }
+
+  #theme-switcher label:last-child svg {
+    border-radius: 0 3px 3px 0;
   }
 }
 

@@ -400,6 +400,10 @@ footer form button {
   color: var(--color-deemphasis);
 }
 
+body.theme-changed footer form button {
+  transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
 footer form button:active,
 footer form button:focus {
   color: #888;
@@ -444,6 +448,10 @@ nav span {
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
+}
+
+body.theme-changed #theme-switcher label {
+  transition: border-color 0.2s ease-in-out;
 }
 
 #theme-switcher label:active,

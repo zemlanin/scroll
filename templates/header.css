@@ -316,6 +316,53 @@ article time a {
   text-decoration: none;
 }
 
+article .share-and-time {
+  display: flex;
+  justify-content: space-between;
+}
+
+article .share-and-time button {
+  line-height: 0;
+  background: none;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #dedede;
+  border-color: var(--color-card-border);
+  border-radius: 4px;
+  padding: 0 0.5em;
+  margin-left: 0.25em;
+  min-height: 1.5em;
+  cursor: pointer;
+  color: #888;
+  color: var(--color-deemphasis);
+}
+
+article .share-and-time button {
+  transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+article .share-and-time button:active,
+article .share-and-time button:focus {
+  color: #888;
+  color: var(--color-deemphasis);
+}
+
+article button[data-share][data-share-state="unknown"] {
+  display: none;
+}
+
+article button[data-share] span[data-share-done] {
+  display: none;
+}
+
+article button[data-share][data-share-state="done"] span[data-share-done] {
+  display: initial;
+}
+
+article button[data-share][data-share-state="done"] span[data-share-default] {
+  display: none;
+}
+
 article blockquote {
   margin-left: 0;
   margin-right: 0;
@@ -811,5 +858,9 @@ header h2 {
 
   article ul[data-gallery] li.after-centermost {
     cursor: auto;
+  }
+
+  article button[data-share] {
+    display: none;
   }
 }

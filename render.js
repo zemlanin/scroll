@@ -69,6 +69,7 @@ const translations = {
     index: "главная",
     linkblog: "linkblog",
     "Follow via RSS": "Читать с помощью RSS",
+    Share: "Поделиться",
   },
   uk: {
     archive: "архів",
@@ -82,11 +83,13 @@ const translations = {
     index: "головна",
     linkblog: "linkblog",
     "Follow via RSS": "Читати за допомогою RSS",
+    Share: "Поділитися",
   },
 };
 
 function translate() {
-  const lang = this.lang || (this.blog && this.blog.lang);
+  // DEBT use `getBlogObject().lang` as a fallback instead of hardcoded "ru"
+  const lang = this.lang || (this.blog && this.blog.lang) || "ru";
 
   if (lang === "en") {
     return function (text, render) {
@@ -148,19 +151,6 @@ async function blogRender(tmpl, data) {
       far,
       fab,
       t: translate,
-      static: {
-        json: JSON.stringify({
-          // TODO: compute this based on files in `static/` directory
-          "/details-element-polyfill.js": await loadTemplate(
-            path.join(STATICS, "details-element-polyfill.js"),
-            appendStaticHash
-          ),
-          "/pdfobject.min.js": await loadTemplate(
-            path.join(STATICS, "pdfobject.min.js"),
-            appendStaticHash
-          ),
-        }),
-      },
       ...data,
     },
     {

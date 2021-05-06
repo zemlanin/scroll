@@ -617,3 +617,32 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   );
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  if (!("share" in navigator && "canShare" in navigator)) {
+    return;
+  }
+
+  Array.prototype.forEach.call(
+    document.querySelectorAll("button[data-share]"),
+    function (b) {
+      var url = b.getAttribute("data-share-url");
+      var payload = { url: url };
+
+      if (navigator.canShare(payload)) {
+        b.removeAttribute("hidden");
+        b.setAttribute("data-share-state", "available");
+        b.addEventListener("click", function () {
+          navigator
+            .share(payload)
+            .then(function () {
+              b.setAttribute("data-share-state", "done");
+            })
+            .catch(function () {});
+        });
+      } else {
+        b.setAttribute("hidden", 1);
+      }
+    }
+  );
+});

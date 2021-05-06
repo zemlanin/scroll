@@ -6,11 +6,18 @@
   {{{html}}}
 
   {{^internal}}
-  <time datetime="{{created}}">
-    <a href="{{{url}}}" title="{{created}}">
-      {{createdDate}}
-    </a>
-  </time>
+  <div class="share-and-time">
+    <button title="{{#t}}Share{{/t}}" data-share data-share-url="{{{url}}}" data-share-state="unknown">
+      <span data-share-default>{{#fas}}share{{/fas}}</span>
+      <span data-share-done>{{#fas}}check{{/fas}}</span>
+    </button>
+    <div style="flex-grow: 1;"></div>
+    <time datetime="{{created}}">
+      <a href="{{{url}}}" title="{{created}}">
+        {{createdDate}}
+      </a>
+    </time>
+  </div>
   {{/internal}}
 </article>
 {{/post}}

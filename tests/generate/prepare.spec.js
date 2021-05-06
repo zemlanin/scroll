@@ -94,7 +94,7 @@ test("general", async (t) => {
         <hr>
         <ol>
           <li id="fn:f69cd51a:1" tabindex="-1">
-            <p>world&nbsp;<a href="#rfn:f69cd51a:1" rev="footnote">&#8617;</a></p>
+            <p>world&nbsp;<a href="#rfn:f69cd51a:1" rev="footnote">&#8617;&#xfe0e;</a></p>
           </li>
         </ol>
       </div>
@@ -110,7 +110,7 @@ test("general", async (t) => {
         <hr>
         <ol>
           <li id="fn:f69cd51a:1" tabindex="-1">
-            <p>world&nbsp;<a href="#rfn:f69cd51a:1" rev="footnote">&#8617;</a></p>
+            <p>world&nbsp;<a href="#rfn:f69cd51a:1" rev="footnote">&#8617;&#xfe0e;</a></p>
           </li>
         </ol>
       </div>
@@ -158,28 +158,28 @@ test("footnotes", async (t) => {
         <hr>
         <ol>
           <li id="fn:a22749bc:hacky" tabindex="-1">
-            <p>world ender&nbsp;<a href="#rfn:a22749bc:hacky" rev="footnote">&#8617;</a></p>
+            <p>world ender&nbsp;<a href="#rfn:a22749bc:hacky" rev="footnote">&#8617;&#xfe0e;</a></p>
           </li>
           <li id="fn:a22749bc:2" tabindex="-1">
-            <p>inline footnote&nbsp;<a href="#rfn:a22749bc:2" rev="footnote">&#8617;</a></p>
+            <p>inline footnote&nbsp;<a href="#rfn:a22749bc:2" rev="footnote">&#8617;&#xfe0e;</a></p>
           </li>
           <li id="fn:a22749bc:bignote" tabindex="-1">
             <p>Here&#39;s one with multiple paragraphs and code.</p>
             <p>Indent paragraphs to include them in the footnote.</p>
             <p><code>{ my code }</code></p>
-            <p>Add as many paragraphs as you like.&nbsp;<a href="#rfn:a22749bc:bignote" rev="footnote">&#8617;</a></p>
+            <p>Add as many paragraphs as you like.&nbsp;<a href="#rfn:a22749bc:bignote" rev="footnote">&#8617;&#xfe0e;</a></p>
           </li>
           <li id="fn:a22749bc:spec" tabindex="-1">
-            <p>ipsum ode <a href="https://example.com">something</a>&nbsp;<a href="#rfn:a22749bc:spec" rev="footnote">&#8617;</a></p>
+            <p>ipsum ode <a href="https://example.com">something</a>&nbsp;<a href="#rfn:a22749bc:spec" rev="footnote">&#8617;&#xfe0e;</a></p>
           </li>
           <li id="fn:a22749bc:spec2" tabindex="-1">
-            <p>whatever&nbsp;<a href="#rfn:a22749bc:spec2" rev="footnote">&#8617;</a></p>
+            <p>whatever&nbsp;<a href="#rfn:a22749bc:spec2" rev="footnote">&#8617;&#xfe0e;</a></p>
           </li>
           <li id="fn:a22749bc:word" tabindex="-1">
-            <p>word&nbsp;<a href="#rfn:a22749bc:word" rev="footnote">&#8617;</a></p>
+            <p>word&nbsp;<a href="#rfn:a22749bc:word" rev="footnote">&#8617;&#xfe0e;</a></p>
           </li>
           <li id="fn:a22749bc:7" tabindex="-1">
-            <p>слово&nbsp;<a href="#rfn:a22749bc:7" rev="footnote">&#8617;</a></p>
+            <p>слово&nbsp;<a href="#rfn:a22749bc:7" rev="footnote">&#8617;&#xfe0e;</a></p>
           </li>
         </ol>
       </div>
@@ -220,13 +220,13 @@ test("footnote inside non-paragraph blocks", async (t) => {
         <hr>
         <ol>
           <li id="fn:589870e6:1" tabindex="-1">
-            <p><a href="https://example.com/media/a.pdf">a</a>&nbsp;<a href="#rfn:589870e6:1" rev="footnote">&#8617;</a></p>
+            <p><a href="https://example.com/media/a.pdf">a</a>&nbsp;<a href="#rfn:589870e6:1" rev="footnote">&#8617;&#xfe0e;</a></p>
           </li>
           <li id="fn:589870e6:2" tabindex="-1">
-            <p><a href="https://example.com/media/b.pdf">b</a>&nbsp;<a href="#rfn:589870e6:2" rev="footnote">&#8617;</a></p>
+            <p><a href="https://example.com/media/b.pdf">b</a>&nbsp;<a href="#rfn:589870e6:2" rev="footnote">&#8617;&#xfe0e;</a></p>
           </li>
           <li id="fn:589870e6:3" tabindex="-1">
-            <p><a href="https://example.com/media/c.pdf">c</a>&nbsp;<a href="#rfn:589870e6:3" rev="footnote">&#8617;</a></p>
+            <p><a href="https://example.com/media/c.pdf">c</a>&nbsp;<a href="#rfn:589870e6:3" rev="footnote">&#8617;&#xfe0e;</a></p>
           </li>
         </ol>
       </div>
@@ -271,10 +271,10 @@ test("footnote before ticked code block", async (t) => {
         <hr>
         <ol>
           <li id="fn:da4307d5:1" tabindex="-1">
-            <p>something&nbsp;<a href="#rfn:da4307d5:1" rev="footnote">&#8617;</a></p>
+            <p>something&nbsp;<a href="#rfn:da4307d5:1" rev="footnote">&#8617;&#xfe0e;</a></p>
           </li>
           <li id="fn:da4307d5:2" tabindex="-1">
-            <p>something else&nbsp;<a href="#rfn:da4307d5:2" rev="footnote">&#8617;</a></p>
+            <p>something else&nbsp;<a href="#rfn:da4307d5:2" rev="footnote">&#8617;&#xfe0e;</a></p>
           </li>
         </ol>
       </div>
@@ -304,7 +304,7 @@ test("footnote with double squares", async (t) => {
         <hr>
         <ol>
           <li id="fn:96289b5d:xx" tabindex="-1">
-            <p><a href="https://example.com/media/x.pdf">x</a>&nbsp;<a href="#rfn:96289b5d:xx" rev="footnote">&#8617;</a></p>
+            <p><a href="https://example.com/media/x.pdf">x</a>&nbsp;<a href="#rfn:96289b5d:xx" rev="footnote">&#8617;&#xfe0e;</a></p>
           </li>
         </ol>
       </div>
@@ -348,7 +348,7 @@ test("footnote with cheese", async (t) => {
         <hr />
         <ol>
           <li id="fn:1ef75fa3:cheese" tabindex="-1">
-            <p>или «мясо + сыр», или «протеин»…&nbsp;<a href="#rfn:1ef75fa3:cheese" rev="footnote">↩</a></p>
+            <p>или «мясо + сыр», или «протеин»…&nbsp;<a href="#rfn:1ef75fa3:cheese" rev="footnote">&#8617;&#xfe0e;</a></p>
           </li>
         </ol>
       </div>

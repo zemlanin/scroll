@@ -25,6 +25,10 @@ document.addEventListener("DOMContentLoaded", function () {
       } else if (disabledNightModeCookie) {
         checkbox.checked = checkbox.value === "light";
       }
+
+      Array.prototype.forEach.call(checkbox.labels, function (label) {
+        label.setAttribute("aria-checked", checkbox.checked.toString());
+      });
     }
   );
 
@@ -36,6 +40,10 @@ document.addEventListener("DOMContentLoaded", function () {
         nightModeForm["theme-switcher"],
         function (checkbox) {
           checkbox.checked = checkbox.value === event.target.value;
+
+          Array.prototype.forEach.call(checkbox.labels, function (label) {
+            label.setAttribute("aria-checked", checkbox.checked.toString());
+          });
         }
       );
     }

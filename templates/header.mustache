@@ -121,11 +121,11 @@
     {{/post}}
 
       <form id="theme-switcher" action="javascript:void(0)">
-        <label title="{{#t}}Dark theme{{/t}}" tabindex="0">
+        <label title="{{#t}}Dark theme{{/t}}" role="checkbox" aria-checked="false" tabindex="0">
           <input type="checkbox" name="theme-switcher" value="dark" aria-label="{{#t}}Dark theme{{/t}}">
           {{#fas}}moon{{/fas}}
         </label>
-        <label title="{{#t}}Light theme{{/t}}" tabindex="0">
+        <label title="{{#t}}Light theme{{/t}}" role="checkbox" aria-checked="false" tabindex="0">
           <input type="checkbox" name="theme-switcher" value="light" aria-label="{{#t}}Light theme{{/t}}">
           {{#fas}}sun{{/fas}}
         </label>

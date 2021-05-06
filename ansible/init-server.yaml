@@ -3,7 +3,7 @@
   remote_user: root
   gather_facts: yes
   vars:
-    NODEJS_VERSION: "14"
+    NODEJS_VERSION: "15"
 
   tasks:
     - name: making it confortable
@@ -13,12 +13,12 @@
           - mosh
         state: present
 
-    - name: Install the gpg key for nodejs LTS
+    - name: Install the gpg key for nodejs
       apt_key:
         url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
         state: present
 
-    - name: Install the nodejs LTS repos
+    - name: Install the nodejs repos
       apt_repository:
         repo: "deb https://deb.nodesource.com/node_{{ NODEJS_VERSION }}.x {{ ansible_distribution_release }} main"
         state: present

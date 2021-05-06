@@ -1,4 +1,4 @@
-FROM node:14-buster-slim
+FROM node:15-buster-slim
 RUN npm set unsafe-perm true
 
 WORKDIR /usr/src/app

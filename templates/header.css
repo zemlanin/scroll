@@ -387,7 +387,11 @@ body.theme-changed footer form input {
 footer form button {
   line-height: 0;
   background: none;
-  border: 0;
+  border: 1px solid #888;
+  border-color: var(--color-deemphasis);
+  border-radius: 4px;
+  padding: 0 0.5em;
+  height: 1.5em;
   cursor: pointer;
   color: #888;
   color: var(--color-deemphasis);
@@ -416,7 +420,7 @@ nav span {
   flex-flow: row;
   justify-content: space-between;
   align-items: center;
-  margin-right: -0.5em;
+  margin: 0.75em -0.5em 0.75em 0;
   color: #888;
   color: var(--color-deemphasis);
 }
@@ -430,6 +434,11 @@ nav span {
 
 #theme-switcher label {
   cursor: pointer;
+  border: 1px solid #888;
+  border-color: var(--color-deemphasis);
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
 }
 
 #theme-switcher label:active,
@@ -440,7 +449,9 @@ nav span {
 
 #theme-switcher label svg {
   vertical-align: middle;
-  margin: 0 0.5em;
+  padding: 0 0.5em;
+  height: 1.5em;
+  width: 100%;
 }
 
 #theme-switcher input[type="checkbox"] {
@@ -448,8 +459,21 @@ nav span {
 }
 
 #theme-switcher input[type="checkbox"]:checked ~ * {
-  color: #00a500;
-  color: var(--color-braaand);
+  color: white;
+  color: var(--color-background);
+  background-color: #888;
+  background-color: var(--color-deemphasis);
+}
+
+#theme-switcher label:active input[type="checkbox"]:checked ~ *,
+#theme-switcher label:focus input[type="checkbox"]:checked ~ * {
+  background-color: black;
+  background-color: var(--color-text);
+}
+
+/* DEBT: replace this positional selector with `label[for="light"]` or something */
+#theme-switcher label:last-child {
+  display: none;
 }
 
 #theme-switcher input[value="light"] ~ * {
@@ -457,8 +481,21 @@ nav span {
 }
 
 @media (prefers-color-scheme) {
+  #theme-switcher label:last-child {
+    display: inline-flex;
+  }
+
   #theme-switcher input[value="light"] ~ * {
     display: initial;
+  }
+
+  #theme-switcher label:first-child {
+    border-radius: 4px 0 0 4px;
+  }
+
+  #theme-switcher label:last-child {
+    border-radius: 0 4px 4px 0;
+    margin-left: -1px;
   }
 }
 

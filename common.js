@@ -10,6 +10,8 @@ const marked = require("marked");
 const cheerio = require("cheerio");
 const faFilePdf = require("@fortawesome/free-solid-svg-icons/faFilePdf.js");
 
+const { getStaticsObject } = require("./render.js");
+
 const fsPromises = {
   writeFile: promisify(fs.writeFile),
   unlink: promisify(fs.unlink),
@@ -954,6 +956,8 @@ async function getBlogObject(baseUrl) {
     baseUrl = BLOG_BASE_URL;
   }
 
+  const statics = await getStaticsObject();
+
   return {
     title: BLOG_TITLE,
     url: url.resolve(baseUrl, "/"),
@@ -979,12 +983,12 @@ async function getBlogObject(baseUrl) {
     },
     static: {
       favicon: {
-        ico: url.resolve(baseUrl, "/favicon.ico"),
-        png: url.resolve(baseUrl, "/favicon.png"),
-        svg: url.resolve(baseUrl, "/favicon.svg"),
+        ico: url.resolve(baseUrl, statics["/favicon.ico"]),
+        png: url.resolve(baseUrl, statics["/favicon.png"]),
+        svg: url.resolve(baseUrl, statics["/favicon.svg"]),
       },
       "mask-icon": {
-        svg: url.resolve(baseUrl, "/mask-icon.svg"),
+        svg: url.resolve(baseUrl, statics["/mask-icon.svg"]),
       },
     },
   };

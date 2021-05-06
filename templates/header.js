@@ -179,7 +179,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   var head = document.getElementsByTagName("head")[0];
   var pdfObjectScript = document.createElement("script");
-  pdfObjectScript.setAttribute("src", "/pdfobject.min.js");
+  pdfObjectScript.setAttribute("src", window.__statics__["/pdfobject.min.js"]);
   pdfObjectScript.setAttribute("type", "application/javascript");
   pdfObjectScript.addEventListener("load", function () {
     Array.prototype.forEach.call(

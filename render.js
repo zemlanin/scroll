@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { promisify } = require("util");
+const crypto = require("crypto");
 
 const mustache = require("mustache");
 const terser = require("terser");
@@ -8,6 +9,9 @@ const CleanCSS = require("clean-css");
 
 const fsPromises = {
   readFile: promisify(fs.readFile),
+  stat: promisify(fs.stat),
+  lstat: promisify(fs.lstat),
+  readdir: promisify(fs.readdir),
 };
 
 const { fas, far, fab } = require("./font-awesome-mustache.js");
@@ -19,7 +23,8 @@ async function loadTemplate(tmpl, processCallback) {
 
   if (processCallback) {
     return (loadTemplate.cache[tmpl] = await processCallback(
-      (await fsPromises.readFile(tmpl)).toString()
+      (await fsPromises.readFile(tmpl)).toString(),
+      { tmpl }
     ));
   }
 
@@ -40,6 +45,11 @@ const cleanCSS = new CleanCSS({
 
 const BLOG_TEMPLATES = path.resolve(__dirname, "templates");
 const jsProcess = async (code) => {
+  if (code.includes("window.__statics__")) {
+    const statics = JSON.stringify(await getStaticsObject());
+
+    code = `(window.__statics__ = window.__statics__ || ${statics}); ${code}`;
+  }
   const m = await terser.minify(code);
   return m.code;
 };
@@ -102,6 +112,34 @@ function translate() {
   };
 }
 
+const STATICS = path.resolve(__dirname, "static");
+const appendStaticHash = async (content, { tmpl }) => {
+  const sha = crypto.createHash("sha1");
+  sha.update(content);
+  return `${tmpl.replace(STATICS, "")}?_=${sha
+    .digest("base64url")
+    .slice(0, 8)}`;
+};
+const getStaticsObject = async () => {
+  const result = {};
+
+  for (const filename of await fsPromises.readdir(STATICS)) {
+    if ((filename && filename[0] == ".") || filename === "robots.txt") {
+      continue;
+    }
+
+    const filepath = path.resolve(STATICS, filename);
+
+    if ((await fsPromises.lstat(filepath)).isDirectory()) {
+      throw new Error("getStaticsObject() doesn't support directories");
+    }
+
+    result[`/${filename}`] = await loadTemplate(filepath, appendStaticHash);
+  }
+
+  return result;
+};
+
 async function blogRender(tmpl, data) {
   return mustache.render(
     await loadTemplate(path.resolve(BLOG_TEMPLATES, tmpl)),
@@ -110,6 +148,19 @@ async function blogRender(tmpl, data) {
       far,
       fab,
       t: translate,
+      static: {
+        json: JSON.stringify({
+          // TODO: compute this based on files in `static/` directory
+          "/details-element-polyfill.js": await loadTemplate(
+            path.join(STATICS, "details-element-polyfill.js"),
+            appendStaticHash
+          ),
+          "/pdfobject.min.js": await loadTemplate(
+            path.join(STATICS, "pdfobject.min.js"),
+            appendStaticHash
+          ),
+        }),
+      },
       ...data,
     },
     {
@@ -139,4 +190,9 @@ async function blogRender(tmpl, data) {
   );
 }
 
-module.exports = { blogRender, render: blogRender, blog: blogRender };
+module.exports = {
+  blogRender,
+  render: blogRender,
+  blog: blogRender,
+  getStaticsObject,
+};

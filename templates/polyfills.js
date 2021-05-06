@@ -7,7 +7,10 @@ var elementIsNative =
   element instanceof HTMLDetailsElement;
 if (!elementIsNative) {
   script = document.createElement("script");
-  script.setAttribute("src", "/details-element-polyfill.js");
+  script.setAttribute(
+    "src",
+    window.__statics__["/details-element-polyfill.js"]
+  );
   script.setAttribute("type", "application/javascript");
   head.insertBefore(script, head.firstChild);
 }

@@ -11,13 +11,14 @@ const fsPromises = {
 const mustache = require("mustache");
 
 const { fas, far, fab } = require("../font-awesome-mustache.js");
+const { getStaticsObject } = require("../render.js");
 
 async function loadTemplate(tmpl, processCallback) {
   if (process.env.NODE_ENV === "development") {
     const result = (await fsPromises.readFile(tmpl)).toString();
 
     if (processCallback) {
-      return processCallback(result);
+      return processCallback(result, { tmpl });
     }
 
     return result;
@@ -29,7 +30,8 @@ async function loadTemplate(tmpl, processCallback) {
 
   if (processCallback) {
     return (loadTemplate.cache[tmpl] = processCallback(
-      (await fsPromises.readFile(tmpl)).toString()
+      (await fsPromises.readFile(tmpl)).toString(),
+      { tmpl }
     ));
   }
 
@@ -62,6 +64,14 @@ const cleanCSS = new CleanCSS({
   },
 });
 
+const jsProcess = async (code) => {
+  if (code.includes("window.__statics__")) {
+    const statics = JSON.stringify(await getStaticsObject());
+    code = `(window.__statics__ = window.__statics__ || ${statics}); ${code}`;
+  }
+  return code;
+};
+
 async function backstageRender(tmpl, data) {
   return mustache.render(
     await loadTemplate(path.resolve(BACKSTAGE_TEMPLATES, tmpl)),
@@ -87,7 +97,8 @@ async function backstageRender(tmpl, data) {
           ).styles
       ),
       "header.blog.js": await loadTemplate(
-        path.join(BLOG_TEMPLATES, "header.js")
+        path.join(BLOG_TEMPLATES, "header.js"),
+        jsProcess
       ),
     }
   );

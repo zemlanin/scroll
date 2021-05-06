@@ -387,7 +387,9 @@ body.theme-changed footer form input {
 footer form button {
   line-height: 0;
   background: none;
-  border: 1px solid #dedede;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #dedede;
   border-color: var(--color-card-border);
   border-radius: 4px;
   padding: 0 0.5em;
@@ -435,7 +437,9 @@ nav span {
 
 #theme-switcher label {
   cursor: pointer;
-  border: 1px solid #dedede;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #dedede;
   border-color: var(--color-card-border);
   border-radius: 4px;
   display: inline-flex;

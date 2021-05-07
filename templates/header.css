@@ -321,7 +321,8 @@ article .share-and-time {
   justify-content: space-between;
 }
 
-article .share-and-time button {
+article .share-and-time button,
+article .share-and-time a[href*="patreon.com/"] {
   line-height: 0;
   background: none;
   border-width: 1px;
@@ -335,10 +336,12 @@ article .share-and-time button {
   cursor: pointer;
   color: #888;
   color: var(--color-deemphasis);
+  transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
-article .share-and-time button {
-  transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+article .share-and-time a[href*="patreon.com/"] {
+  display: inline-block;
+  padding-top: 4px;
 }
 
 article .share-and-time button:active,

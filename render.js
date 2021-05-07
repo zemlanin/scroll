@@ -70,6 +70,7 @@ const translations = {
     linkblog: "linkblog",
     "Follow via RSS": "Читать с помощью RSS",
     Share: "Поделиться",
+    "Support on Patreon": "Поддержать на Патреоне",
   },
   uk: {
     archive: "архів",
@@ -84,6 +85,7 @@ const translations = {
     linkblog: "linkblog",
     "Follow via RSS": "Читати за допомогою RSS",
     Share: "Поділитися",
+    "Support on Patreon": "Підтримати на Патреоні",
   },
 };
 

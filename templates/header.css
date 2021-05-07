@@ -7,6 +7,7 @@
   --color-card-hover: white;
   --color-card-caption-background: white;
   --color-deemphasis: #888;
+  --color-patreon: #f96854;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -319,10 +320,11 @@ article time a {
 article .share-and-time {
   display: flex;
   justify-content: space-between;
+  min-height: 1.5em;
+  align-items: stretch;
 }
 
-article .share-and-time button,
-article .share-and-time a[href*="patreon.com/"] {
+article .share-and-time button {
   line-height: 0;
   background: none;
   border-width: 1px;
@@ -331,17 +333,11 @@ article .share-and-time a[href*="patreon.com/"] {
   border-color: var(--color-card-border);
   border-radius: 4px;
   padding: 0 0.5em;
-  margin-left: 0.25em;
-  min-height: 1.5em;
+  margin-right: 0.25em;
   cursor: pointer;
   color: #888;
   color: var(--color-deemphasis);
   transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-}
-
-article .share-and-time a[href*="patreon.com/"] {
-  display: inline-block;
-  padding-top: 4px;
 }
 
 article .share-and-time button:active,
@@ -364,6 +360,19 @@ article button[data-share][data-share-state="done"] span[data-share-done] {
 
 article button[data-share][data-share-state="done"] span[data-share-default] {
   display: none;
+}
+
+article .share-and-time a[href*="patreon.com/"] {
+  background: none;
+  border-radius: 4px;
+  padding: 0 0.5em;
+  margin-right: 0.25em;
+  cursor: pointer;
+  color: #f96854;
+  color: var(--color-patreon);
+  transition: color 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
 }
 
 article blockquote {

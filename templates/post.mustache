@@ -7,17 +7,14 @@
 
   {{^internal}}
   <div class="share-and-time">
-    <div style="flex-grow: 1; display: flex;">
-      {{#public}}
-        <button title="{{#t}}Share{{/t}}" data-share data-share-url="{{{url}}}" data-share-state="unknown">
-          <span data-share-default>{{#fas}}share{{/fas}}</span>
-          <span data-share-done>{{#fas}}check{{/fas}}</span>
-        </button>
-        <a href="https://www.patreon.com/zemlanin" target="_blank" title="{{#t}}Support on Patreon{{/t}}">
-          {{#fab}}patreon{{/fab}}
-        </a>
-      {{/public}}
-    </div>
+    {{#public}}
+      <button title="{{#t}}Share{{/t}}" data-share data-share-url="{{{url}}}" data-share-state="unknown">
+        <span data-share-default>{{#fas}}share{{/fas}}</span>
+        <span data-share-done>{{#fas}}check{{/fas}}</span>
+      </button>
+      <a href="https://www.patreon.com/zemlanin" target="_blank" title="{{#t}}Support on Patreon{{/t}}">{{#fab}}patreon{{/fab}}</a>
+    {{/public}}
+    <div style="flex-grow: 1; display: flex;"></div>
     <time datetime="{{created}}">
       <a href="{{{url}}}" title="{{created}}">
         {{createdDate}}

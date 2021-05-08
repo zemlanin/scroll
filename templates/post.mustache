@@ -12,7 +12,9 @@
         <span data-share-default>{{#fas}}share{{/fas}}</span>
         <span data-share-done>{{#fas}}check{{/fas}}</span>
       </button>
-      <a href="https://www.patreon.com/zemlanin" target="_blank" title="{{#t}}Support on Patreon{{/t}}">{{#fab}}patreon{{/fab}}</a>
+      {{#blog.author.patreon}}
+        <a href="https://www.patreon.com/{{blog.author.patreon}}" target="_blank" title="{{#t}}Support on Patreon{{/t}}">{{#fab}}patreon{{/fab}}</a>
+      {{/blog.author.patreon}}
     {{/public}}
     <div style="flex-grow: 1; display: flex;"></div>
     <time datetime="{{created}}">

@@ -8,6 +8,7 @@
   --color-card-caption-background: white;
   --color-deemphasis: #888;
   --color-patreon: #f96854;
+  --color-twitter: #1da1f2;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -399,6 +400,7 @@ footer .groups {
   flex-flow: row;
   flex-wrap: wrap;
   justify-content: center;
+  align-content: stretch;
 }
 
 footer .groups .group {
@@ -416,6 +418,21 @@ footer:before {
 
 body.theme-changed footer:before {
   transition: color 0.2s ease-in-out;
+}
+
+footer a[rel="me"] {
+  display: inline-flex;
+  align-items: center;
+}
+
+footer a[rel="me"][href*="twitter.com/"] {
+  color: #1da1f2;
+  color: var(--color-twitter);
+}
+
+footer a[rel="me"][href*="patreon.com/"] {
+  color: #f96854;
+  color: var(--color-patreon);
 }
 
 footer form {

@@ -342,7 +342,6 @@ article .share-and-time button {
 
 body.theme-changed article .share-and-time button {
   transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-
 }
 
 article .share-and-time button:active,
@@ -658,6 +657,7 @@ article kbd {
 article h1 a,
 article h2 a,
 article h3 a,
+article time a,
 article .share-and-time a,
 article .more-and-time a {
   text-decoration: none;

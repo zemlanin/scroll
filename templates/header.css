@@ -338,7 +338,11 @@ article .share-and-time button {
   cursor: pointer;
   color: #888;
   color: var(--color-deemphasis);
+}
+
+body.theme-changed article .share-and-time button {
   transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+
 }
 
 article .share-and-time button:active,
@@ -371,9 +375,12 @@ article .share-and-time a[href*="patreon.com/"] {
   cursor: pointer;
   color: #f96854;
   color: var(--color-patreon);
-  transition: color 0.2s ease-in-out;
   display: flex;
   align-items: center;
+}
+
+body.theme-changed article .share-and-time a[href*="patreon.com/"] {
+  transition: color 0.2s ease-in-out;
 }
 
 article blockquote {

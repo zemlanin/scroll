@@ -385,10 +385,10 @@ test("footnote in teaser", async (t) => {
       <p><img src="https://example.com/media/img.png" alt="" loading="lazy" /></p>
 
       <p><em>aka "The Hard Part"</em></p>
-
-      <a href="https://example.com/6c42981d.html" class="more">208 слов →</a>
     `
   );
+
+  t.equal(result.longread.more, "208 слов");
 
   t.equal(result.opengraph.description, `aka "The Hard Part"`);
 
@@ -428,10 +428,10 @@ test("inline footnote in teaser", async (t) => {
       <p><img src="https://example.com/media/picture.png" alt="" loading="lazy" /></p>
 
       <p><em>easier part</em></p>
-
-      <a href="https://example.com/83674bc3.html" class="more">204 слова →</a>
     `
   );
+
+  t.equal(result.longread.more, "204 слова");
 
   t.equal(result.opengraph.description, "easier part");
 
@@ -475,10 +475,9 @@ test("description after gallery", async (t) => {
       </ul>
 
       <p><em>some description</em></p>
-
-      <a href="https://example.com/ff077d25.html" class="more">202 слова &rarr;</a>
     `
   );
+  t.equal(result.longread.more, "202 слова");
 });
 
 test("poster as a opengraph image", async (t) => {
@@ -512,10 +511,10 @@ test("poster as a opengraph image", async (t) => {
       ></video></p>
 
       <p><em>some description</em></p>
-
-      <a href="https://example.com/1871cf2d.html" class="more">202 слова &rarr;</a>
     `
   );
+
+  t.equal(result.longread.more, "202 слова");
 });
 
 test("media", async (t) => {
@@ -945,10 +944,10 @@ test("show embed in teaser", async (t) => {
         </figure>
       </p>
       <p><em>Выковыривая полезные идеи из заброшенного модуля</em></p>
-
-      <a href="https://example.com/2d95abd5.html" class="more">286 слов &rarr;</a>
     `
   );
+
+  t.equal(result.longread.more, "286 слов");
 
   t.equal(
     result.opengraph.image,

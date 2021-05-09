@@ -315,10 +315,10 @@ article time,
 article time a {
   color: #888;
   color: var(--color-deemphasis);
-  text-decoration: none;
 }
 
-article .share-and-time {
+article .share-and-time,
+article .more-and-time {
   display: flex;
   justify-content: space-between;
   min-height: 1.5em;
@@ -651,7 +651,8 @@ article kbd {
 article h1 a,
 article h2 a,
 article h3 a,
-article a.more {
+article .share-and-time a,
+article .more-and-time a {
   text-decoration: none;
 }
 

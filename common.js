@@ -878,12 +878,9 @@ async function prepare(post, embedsLoader) {
       if (wordCount > 200) {
         longread = {
           title: htmlTitle,
+          teaser: teaser,
           more: wordCountPhrase(post.lang, wordCount),
         };
-
-        longread.teaser =
-          teaser +
-          `\n<a href="${post.url}" class="more">${longread.more} &rarr;</a>`;
       }
     }
 

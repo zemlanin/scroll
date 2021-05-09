@@ -11,11 +11,17 @@
     {{{html}}}
   {{/longread}}
 
-  <time datetime="{{created}}">
-    <a href="{{{url}}}" title="{{created}}">
-      {{createdDate}}
-    </a>
-  </time>
+  <div class="more-and-time">
+    {{#longread}}
+      <a href="{{{url}}}" class="more">{{more}} &rarr;</a>
+    {{/longread}}
+    <div style="flex-grow: 1; display: flex;"></div>
+    <time datetime="{{created}}">
+      <a href="{{{url}}}" title="{{created}}">
+        {{createdDate}}
+      </a>
+    </time>
+  </div>
 </article>
 
 {{# insertLinkblogAfterThis}}

@@ -964,7 +964,6 @@ async function getBlogObject(baseUrl) {
     author: {
       name: "Anton Verinov",
       twitter: "zemlanin",
-      patreon: "zemlanin",
     },
     feed: {
       description: BLOG_TITLE,

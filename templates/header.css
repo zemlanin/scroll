@@ -7,8 +7,6 @@
   --color-card-hover: white;
   --color-card-caption-background: white;
   --color-deemphasis: #888;
-  --color-patreon: #f96854;
-  --color-twitter: #1da1f2;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -366,22 +364,6 @@ article button[data-share][data-share-state="done"] span[data-share-default] {
   display: none;
 }
 
-article .share-and-time a[href*="patreon.com/"] {
-  background: none;
-  border-radius: 4px;
-  padding: 0 0.5em;
-  margin-right: 0.25em;
-  cursor: pointer;
-  color: #f96854;
-  color: var(--color-patreon);
-  display: flex;
-  align-items: center;
-}
-
-body.theme-changed article .share-and-time a[href*="patreon.com/"] {
-  transition: color 0.2s ease-in-out;
-}
-
 article blockquote {
   margin-left: 0;
   margin-right: 0;
@@ -429,16 +411,6 @@ body.theme-changed footer:before {
 footer a[rel="me"] {
   display: inline-flex;
   align-items: center;
-}
-
-footer a[rel="me"][href*="twitter.com/"] {
-  color: #1da1f2;
-  color: var(--color-twitter);
-}
-
-footer a[rel="me"][href*="patreon.com/"] {
-  color: #f96854;
-  color: var(--color-patreon);
 }
 
 footer form {

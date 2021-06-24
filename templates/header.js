@@ -4,6 +4,12 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
+  if (navigator.userAgent.match(/SamsungBrowser/i)) {
+    // samsung's "dark mode" inverts colors, ignoring the CSS, and undetectable via JS
+    nightModeForm.style.display = "none";
+    return;
+  }
+
   var enabledNightModeCookie =
     document.cookie && document.cookie.match(/(^|; )night-mode=1(;|$)/);
   var disabledNightModeCookie =

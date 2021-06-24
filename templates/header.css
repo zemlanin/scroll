@@ -548,7 +548,7 @@ body.theme-changed #theme-switcher label {
   display: none;
 }
 
-@media (prefers-color-scheme) {
+@media not print and (prefers-color-scheme) {
   #theme-switcher label:last-child {
     display: inline-flex;
   }
@@ -824,7 +824,7 @@ header h2 {
     page-break-inside: avoid;
   }
 
-  header label,
+  #theme-switcher label,
   article .footnotes a[rev="footnote"],
   nav,
   footer a,

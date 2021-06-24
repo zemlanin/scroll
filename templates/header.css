@@ -518,7 +518,7 @@ body.theme-changed #theme-switcher label {
   vertical-align: middle;
   padding: 0 0.5em;
   height: 1.5em;
-  width: 100%;
+  width: 2em;
   border-radius: 3px;
 }
 

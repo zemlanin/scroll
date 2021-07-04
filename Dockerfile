@@ -7,8 +7,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     rsync \
     gcc pkg-config libicu-dev icu-devtools libsqlite3-dev \
-    # to install `oembed-providers` package from github
-    git ca-certificates \
+    # to install packages from github
+    # git ca-certificates \
     # `sqlite3` npm package doesn't always have precompiled binaries
     g++ make python3 \
   && rm -rf /var/lib/apt/lists/*
@@ -24,8 +24,8 @@ RUN npm ci
 RUN apt-get remove -y \
     # clean up after compiling `sqlite-icu/libicu.so`
     gcc pkg-config \
-    # to install `oembed-providers` package from github
-    git ca-certificates \
+    # to install packages from github
+    # git ca-certificates \
     # `sqlite3` npm package doesn't always have precompiled binaries
     g++ make python3 \
   && apt-get autoremove -y \

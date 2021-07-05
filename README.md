@@ -35,7 +35,7 @@ and then run via
 ```
 docker run \
   -p 8000:8000 \
-  --env-list .env \
+  --env-file .env \
   -v <path/to/posts/database>:/db/posts \
   -v <path/to/sessions/database>:/db/sessions \
   -v <path/to/built/blog>:/dist \

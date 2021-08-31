@@ -54,7 +54,7 @@ test("embed with custom poster", async (t) => {
   );
 
   t.equalHtml(
-    cheerio("article p", post.toString()).html(),
+    cheerio.load(post.toString())("article p").html(),
     `
       <video playsinline controls preload="metadata" src="https://some.example/video.mp4" poster="https://some.example/firstframe.jpeg"></video>
     `

@@ -68,7 +68,7 @@ test("shopify product page with secure_url images", async (t) => {
   );
 
   t.equalHtml(
-    cheerio("article .card", post.toString()).html(),
+    cheerio.load(post.toString())("article .card").html(),
     `
       <a href="https://keymastergames.com/products/control">
         <img alt="Control (2nd Edition)" src="https://cdn.shopify.com/s/files/1/1898/8501/products/Control_Front_1200x1200.jpg?v=1604682445" loading="lazy" />

@@ -68,7 +68,7 @@ test("age restricted youtube embed", async (t) => {
   );
 
   t.equalHtml(
-    cheerio("article .card", post.toString()).html(),
+    cheerio.load(post.toString())("article .card").html(),
     `
       <a href="https://www.youtube.com/watch?v=Z1EbSXxrZ34">
         <img alt="The Suicide Squad - August 2021" width="1280" height="720" src="https://i.ytimg.com/vi/Z1EbSXxrZ34/maxresdefault.jpg" loading="lazy" />

@@ -163,7 +163,7 @@ test("database with posts and embeds", async (t) => {
     await fs.promises.readFile(path.join(tmpFolder, "5.html"))
   ).toString();
   t.equalHtml(
-    cheerio(".card", post5).html(),
+    cheerio.load(post5)(".card").html(),
     `
       <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
         <img alt="Rick Astley - Never Gonna Give You Up (Video)" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" loading="lazy">
@@ -295,7 +295,7 @@ test("database with patched embeds", async (t) => {
     await fs.promises.readFile(path.join(tmpFolder, "patched-10.html"))
   ).toString();
   t.equalHtml(
-    cheerio(".card", post10).html(),
+    cheerio.load(post10)(".card").html(),
     `
       <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
         <img
@@ -318,7 +318,7 @@ test("database with patched embeds", async (t) => {
     await fs.promises.readFile(path.join(tmpFolder, "patched-11.html"))
   ).toString();
   t.equalHtml(
-    cheerio(".card", post11).html(),
+    cheerio.load(post11)(".card").html(),
     `
       <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
         <img
@@ -341,7 +341,7 @@ test("database with patched embeds", async (t) => {
     await fs.promises.readFile(path.join(tmpFolder, "patched-12.html"))
   ).toString();
   t.equalHtml(
-    cheerio(".card", post12).html(),
+    cheerio.load(post12)(".card").html(),
     `
       <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
         <img
@@ -364,7 +364,7 @@ test("database with patched embeds", async (t) => {
     await fs.promises.readFile(path.join(tmpFolder, "patched-13.html"))
   ).toString();
   t.equalHtml(
-    cheerio(".card", post13).html(),
+    cheerio.load(post13)(".card", post13).html(),
     `
       <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
         <img
@@ -384,7 +384,7 @@ test("database with patched embeds", async (t) => {
     await fs.promises.readFile(path.join(tmpFolder, "patched-14.html"))
   ).toString();
   t.equalHtml(
-    cheerio(".card", post14).html(),
+    cheerio.load(post14)(".card").html(),
     `
       <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
         <img

@@ -65,7 +65,7 @@ test("spotify embed with <audio>", async (t) => {
   );
 
   t.equalHtml(
-    cheerio("article .card", post.toString()).html(),
+    cheerio.load(post.toString())("article .card").html(),
     `
       <img class="audio-control" data-src="https://p.scdn.co/mp3-preview/8181e65039260f4842d825e19fa98c0ed0dcc332?cid=162b7dc01f3a4a2ca32ed3cec83d1e02&amp;utm_medium=facebook" alt=".getawayfortheweekend." src="https://i.scdn.co/image/ab67616d0000b273d6d1706ce469749028db3af5" loading="lazy" />
 

@@ -729,6 +729,8 @@ article ul[data-gallery] li.dim figure.card > a {
 
 .linkblog-after-post ul li a {
   display: inline-block;
+  width: 100%;
+  text-align: center;
 }
 
 .linkblog-after-post ul li img {

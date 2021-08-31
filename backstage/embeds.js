@@ -80,7 +80,10 @@ const isBasicMediaProp = (prop) =>
   prop === "image" || prop === "video" || prop === "audio";
 
 const isInitialMediaProp = (prop) =>
-  prop === "image:url" || prop === "video:url" || prop === "audio:url";
+  prop === "image:url" ||
+  prop === "image:src" ||
+  prop === "video:url" ||
+  prop === "audio:url";
 
 const isSecureUrlMediaProp = (prop) =>
   prop === "image:secure_url" ||
@@ -178,6 +181,10 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
     }
   } else if (isInitialMediaProp(prop) || isSecureUrlMediaProp(prop)) {
     let [prop0, prop1] = prop.split(":");
+
+    if (prop1 === "src") {
+      prop1 = "url";
+    }
 
     const patchNode = {
       [prop1]: value,

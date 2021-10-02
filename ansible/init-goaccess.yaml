@@ -46,7 +46,6 @@
         name: "generate goaccess json"
         minute: "*"
         job: "goaccess -f /var/log/scroll/nginx_access.log
-          --keep-last=60
           --ignore-statics
           --ignore-crawlers
           --ignore-status=301

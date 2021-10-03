@@ -869,6 +869,10 @@ async function prepare(post, embedsLoader) {
         parsedTeaser("[poster]").attr("poster") ||
         null
       : null;
+
+    if (opengraph.image) {
+      opengraph.image = prefixOwnMedia(opengraph.image);
+    }
     opengraph.title = title.trim();
 
     if (numberOfParagraphs > 3) {

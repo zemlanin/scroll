@@ -904,7 +904,7 @@ test("show embed in teaser", async (t) => {
 
         \`\`\`embed
         https://www.youtube.com/watch?v=vEUylyDMFIA
-        - poster: https://example.com/media/jjxvmnCEDWrO9oSohxjhH68Pbc/fit1600.jpeg
+        - poster: /media/jjxvmnCEDWrO9oSohxjhH68Pbc/fit1600.jpeg
         - title: React with mustaches
         - description: Are there good parts inside an abandoned project? What could we learn from it? Could we apply some patterns in our current projects?
         \`\`\`
@@ -932,7 +932,7 @@ test("show embed in teaser", async (t) => {
       <p>
         <figure class="card">
           <a href="https://www.youtube.com/watch?v=vEUylyDMFIA" class="future-frame" data-src="https://www.youtube.com/embed/vEUylyDMFIA" data-width="480" data-height="360">
-            <img alt="React with mustaches" src="https://example.com/media/jjxvmnCEDWrO9oSohxjhH68Pbc/fit1600.jpeg" loading="lazy">
+            <img alt="React with mustaches" src="/media/jjxvmnCEDWrO9oSohxjhH68Pbc/fit1600.jpeg" loading="lazy">
           </a>
 
           <figcaption>

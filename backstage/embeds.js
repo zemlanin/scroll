@@ -487,18 +487,6 @@ const getFrameFallback = (graphUrl) => {
     };
   }
 
-  const vimeoId = graphUrl.match(/(vimeo\.com\/)(\d+)/);
-  if (vimeoId) {
-    return {
-      video: [
-        {
-          url: `https://player.vimeo.com/video/${vimeoId[2]}`,
-          type: "text/html",
-        },
-      ],
-    };
-  }
-
   if (isAppleMusicCard(graphUrl)) {
     const videoURL = new URL(graphUrl);
 
@@ -822,6 +810,7 @@ function getOEmbedLinkFromProviders(url) {
           href.searchParams.set("url", url);
 
           return {
+            link: true,
             type: "application/json+oembed",
             href: href.toString(),
           };
@@ -859,6 +848,7 @@ function getOEmbedLinkFromProviders(url) {
           href.searchParams.set("url", url);
 
           return {
+            link: true,
             type: "application/json+oembed",
             href: href.toString(),
           };
@@ -933,6 +923,196 @@ async function getHeadersFromHEAD(url, jar) {
   return cHeaders || null;
 }
 
+function hardcodedURLReplacement(ogPageURL) {
+  if (ogPageURL.startsWith("https://mobile.twitter.com/")) {
+    return ogPageURL.replace(
+      "https://mobile.twitter.com/",
+      "https://twitter.com/"
+    );
+  } else if (ogPageURL.startsWith("https://www.youtube.com/embed/")) {
+    return ogPageURL.replace(
+      "https://www.youtube.com/embed/",
+      "https://www.youtube.com/watch?v="
+    );
+  }
+
+  return ogPageURL;
+}
+
+async function extractNative(ogPageURL, jar) {
+  const expectedMimetype = getURLMimetype(ogPageURL);
+
+  let nativeMediaMetadata = {};
+
+  if (
+    expectedMimetype &&
+    (expectedMimetype.startsWith("image/") ||
+      expectedMimetype.startsWith("video/") ||
+      expectedMimetype.startsWith("audio/"))
+  ) {
+    let cHeaders;
+    try {
+      cHeaders = await getHeadersFromHEAD(ogPageURL, jar);
+    } catch (e) {
+      if (e && e.statusCode) {
+        // 403 Forbidden
+        // 405 Method Not Allowed
+        // etc.
+      } else {
+        throw e;
+      }
+    }
+
+    if (
+      cHeaders &&
+      cHeaders.get("content-type") &&
+      mime.getType(mime.getExtension(cHeaders.get("content-type"))) ===
+        expectedMimetype
+    ) {
+      nativeMediaMetadata["content-type"] = expectedMimetype;
+
+      // flickr sets `imagewidth` and `imageheight` headers for image responses
+      // https://live.staticflickr.com/3040/2362225867_4a87ab8baf_b.jpg
+      if (cHeaders.get("imagewidth")) {
+        nativeMediaMetadata.width = cHeaders.get("imagewidth");
+      }
+
+      if (cHeaders.get("imageheight")) {
+        nativeMediaMetadata.height = cHeaders.get("imageheight");
+      }
+    }
+  }
+
+  let cHeaders;
+  try {
+    cHeaders = await getHeadersFromHEAD(ogPageURL, jar);
+  } catch (e) {
+    if (e && e.statusCode) {
+      // 403 Forbidden
+      // 405 Method Not Allowed
+      // etc.
+    } else {
+      throw e;
+    }
+  }
+
+  const mimetype =
+    cHeaders &&
+    cHeaders.get("content-type") &&
+    mime.getType(mime.getExtension(cHeaders.get("content-type")));
+
+  if (mimetype && !nativeMediaMetadata["content-type"]) {
+    nativeMediaMetadata["content-type"] = mimetype;
+  }
+
+  return nativeMediaMetadata;
+}
+
+async function extractOpengraph(ogPageURL, jar) {
+  let $;
+
+  try {
+    $ = await require("request-promise-native").get({
+      url: ogPageURL,
+      // youtube redirects to consent page when loaded with cookies from EU IPs
+      jar: isYoutubeCard(ogPageURL) ? null : jar,
+      followRedirect: true,
+      timeout: 4000,
+      headers: {
+        Accept: "text/html; charset=utf-8",
+        "User-Agent": getUserAgent(ogPageURL),
+      },
+      transform: (body) => cheerio.load(body),
+      transform2xxOnly: true,
+    });
+  } catch (e) {
+    if (e && e.statusCode) {
+      // 403 Forbidden
+      // etc.
+      return [];
+    } else {
+      throw e;
+    }
+  }
+
+  const htmlTitle = $(`head title`).text().trim().replace(`\n`, ` `);
+
+  // http://microformats.org/wiki/existing-rel-values
+  const relThumbnails = $(`head link[rel="thumbnail"]`)
+    .map(cheerioAttrs)
+    .get()
+    .filter((link) => link.href)
+    .map((link) => ({
+      link: true,
+      rel: link.rel,
+      href: link.href,
+      sizes: link.sizes,
+      type: link.type || getURLMimetype(link.href),
+    }));
+
+  const relImageSrcs = $(`head link[rel="image_src"]`)
+    .map(cheerioAttrs)
+    .get()
+    .filter((link) => link.href)
+    .map((link) => ({
+      link: true,
+      rel: link.rel,
+      href: link.href,
+      type: link.type || getURLMimetype(link.href),
+    }));
+
+  const initialMeta = [
+    htmlTitle && { name: "title", content: htmlTitle },
+    ...relThumbnails,
+    ...relImageSrcs,
+  ].filter(Boolean);
+
+  const rawOpengraphMeta = $(
+    `
+        head meta[property^="og:"],
+        head meta[name^="og:"],
+        head meta[property^="twitter:"],
+        head meta[name^="twitter:"]
+      `
+  )
+    .map(cheerioAttrs)
+    .get()
+    .filter(hasContent)
+    .reduce(rawMetaReducer, initialMeta);
+
+  const oEmbedDiscoveryEl = $(`head link[type="application/json+oembed"]`)
+    .map(cheerioAttrs)
+    .get(0);
+
+  if (oEmbedDiscoveryEl && oEmbedDiscoveryEl.href) {
+    rawOpengraphMeta.push({
+      link: true,
+      type: oEmbedDiscoveryEl.type,
+      href: oEmbedDiscoveryEl.href,
+    });
+  }
+
+  return rawOpengraphMeta;
+}
+
+async function extractOEmbed(ogPageURL, oEmbedURL) {
+  const oEmbedEndpoint = new URL(oEmbedURL);
+  oEmbedEndpoint.searchParams.set("maxwidth", 2000);
+  oEmbedEndpoint.searchParams.set("maxheight", 2000);
+
+  return await require("request-promise-native").get({
+    url: oEmbedEndpoint.toString(),
+    followRedirect: true,
+    timeout: 4000,
+    headers: {
+      Accept: "application/json; charset=utf-8",
+      "User-Agent": getUserAgent(ogPageURL),
+    },
+    transform: (body) => JSON.parse(body),
+    transform2xxOnly: true,
+  });
+}
+
 module.exports = {
   queryEmbed,
   loadMetadata: async (ogPageURL) => {
@@ -951,96 +1131,27 @@ module.exports = {
         : null;
     }
 
-    if (ogPageURL.startsWith("https://mobile.twitter.com/")) {
-      ogPageURL = ogPageURL.replace(
-        "https://mobile.twitter.com/",
-        "https://twitter.com/"
-      );
-    } else if (ogPageURL.startsWith("https://www.youtube.com/embed/")) {
-      ogPageURL = ogPageURL.replace(
-        "https://www.youtube.com/embed/",
-        "https://www.youtube.com/watch?v="
-      );
-    }
-
-    const expectedMimetype = getURLMimetype(ogPageURL);
+    ogPageURL = hardcodedURLReplacement(ogPageURL);
 
     const jar = require("request-promise-native").jar();
 
-    let nativeMediaMetadata = {};
+    const nativeMediaMetadata = await extractNative(ogPageURL, jar);
 
-    if (
-      expectedMimetype &&
-      (expectedMimetype.startsWith("image/") ||
-        expectedMimetype.startsWith("video/") ||
-        expectedMimetype.startsWith("audio/"))
-    ) {
-      let cHeaders;
-      try {
-        cHeaders = await getHeadersFromHEAD(ogPageURL, jar);
-      } catch (e) {
-        if (e && e.statusCode) {
-          // 403 Forbidden
-          // 405 Method Not Allowed
-          // etc.
-        } else {
-          throw e;
-        }
-      }
-
-      if (
-        cHeaders &&
-        cHeaders.get("content-type") &&
-        mime.getType(mime.getExtension(cHeaders.get("content-type"))) ===
-          expectedMimetype
-      ) {
-        nativeMediaMetadata["content-type"] = expectedMimetype;
-
-        // flickr sets `imagewidth` and `imageheight` headers for image responses
-        // https://live.staticflickr.com/3040/2362225867_4a87ab8baf_b.jpg
-        if (cHeaders.get("imagewidth")) {
-          nativeMediaMetadata.width = cHeaders.get("imagewidth");
-        }
-
-        if (cHeaders.get("imageheight")) {
-          nativeMediaMetadata.height = cHeaders.get("imageheight");
-        }
-      }
-    }
-
-    let cHeaders;
-    try {
-      cHeaders = await getHeadersFromHEAD(ogPageURL, jar);
-    } catch (e) {
-      if (e && e.statusCode) {
-        // 403 Forbidden
-        // 405 Method Not Allowed
-        // etc.
-      } else {
-        throw e;
-      }
-    }
-
-    const mimetype =
-      cHeaders &&
-      cHeaders.get("content-type") &&
-      mime.getType(mime.getExtension(cHeaders.get("content-type")));
-
-    if (mimetype && !nativeMediaMetadata["content-type"]) {
-      nativeMediaMetadata["content-type"] = mimetype;
-    }
+    const initialMeta = [
+      { name: "url", content: ogPageURL },
+      {
+        header: true,
+        key: "content-type",
+        value: nativeMediaMetadata["content-type"] || "text/html",
+      },
+    ];
 
     if (
       nativeMediaMetadata["content-type"] &&
       nativeMediaMetadata["content-type"] !== "text/html"
     ) {
       return [
-        { name: "url", content: ogPageURL },
-        {
-          header: true,
-          key: "content-type",
-          value: nativeMediaMetadata["content-type"],
-        },
+        ...initialMeta,
         nativeMediaMetadata.width && {
           header: true,
           key: "width",
@@ -1052,123 +1163,45 @@ module.exports = {
           value: nativeMediaMetadata.height,
         },
       ].filter(Boolean);
-    } else {
-      nativeMediaMetadata["content-type"] = "text/html";
     }
 
-    const $ = await require("request-promise-native").get({
-      url: ogPageURL,
-      // youtube redirects to consent page when loaded with cookies from EU IPs
-      jar: isYoutubeCard(ogPageURL) ? null : jar,
-      followRedirect: true,
-      timeout: 4000,
-      headers: {
-        Accept: "text/html; charset=utf-8",
-        "User-Agent": getUserAgent(ogPageURL),
-      },
-      transform: (body) => cheerio.load(body),
-      transform2xxOnly: true,
-    });
+    const rawOpengraphMeta = await extractOpengraph(ogPageURL, jar);
 
-    const htmlTitle = $(`head title`).text().trim().replace(`\n`, ` `);
+    let oEmbedLink = rawOpengraphMeta.find(
+      (m) => m.link && m.type === "application/json+oembed"
+    );
 
-    // http://microformats.org/wiki/existing-rel-values
-    const relThumbnails = $(`head link[rel="thumbnail"]`)
-      .map(cheerioAttrs)
-      .get()
-      .filter((link) => link.href)
-      .map((link) => ({
-        link: true,
-        rel: link.rel,
-        href: link.href,
-        sizes: link.sizes,
-        type: link.type || getURLMimetype(link.href),
-      }));
-
-    const relImageSrcs = $(`head link[rel="image_src"]`)
-      .map(cheerioAttrs)
-      .get()
-      .filter((link) => link.href)
-      .map((link) => ({
-        link: true,
-        rel: link.rel,
-        href: link.href,
-        type: link.type || getURLMimetype(link.href),
-      }));
-
-    const initialMeta = [
-      { name: "url", content: ogPageURL },
-      htmlTitle && { name: "title", content: htmlTitle },
-      {
-        header: true,
-        key: "content-type",
-        value: nativeMediaMetadata["content-type"],
-      },
-      ...relThumbnails,
-      ...relImageSrcs,
-    ].filter(Boolean);
-
-    const rawMeta = $(
-      `
-        head meta[property^="og:"],
-        head meta[name^="og:"],
-        head meta[property^="twitter:"],
-        head meta[name^="twitter:"]
-      `
-    )
-      .map(cheerioAttrs)
-      .get()
-      .filter(hasContent)
-      .reduce(rawMetaReducer, initialMeta);
-
-    const oEmbedDiscoveryEl = $(`head link[type="application/json+oembed"]`)
-      .map(cheerioAttrs)
-      .get(0);
-
-    const oEmbedLink =
-      oEmbedDiscoveryEl && oEmbedDiscoveryEl.href
-        ? {
-            type: oEmbedDiscoveryEl.type,
-            href: oEmbedDiscoveryEl.href,
-          }
-        : getOEmbedLinkFromProviders(ogPageURL);
+    const rawOEmbedMeta = [];
 
     if (oEmbedLink) {
-      rawMeta.push({
-        link: true,
-        ...oEmbedLink,
-      });
+      // `oEmbedLink` is already in the result (because it is in `rawOpengraphMeta`)
+      //
+      // rawOEmbedMeta.push(oEmbedLink)
+    } else {
+      oEmbedLink = getOEmbedLinkFromProviders(ogPageURL);
 
+      if (oEmbedLink) {
+        rawOEmbedMeta.push(oEmbedLink);
+      }
+    }
+
+    if (oEmbedLink) {
       let oEmbed;
 
       try {
-        const oEmbedEndpoint = new URL(oEmbedLink.href);
-        oEmbedEndpoint.searchParams.set("maxwidth", 2000);
-        oEmbedEndpoint.searchParams.set("maxheight", 2000);
-
-        oEmbed = await require("request-promise-native").get({
-          url: oEmbedEndpoint.toString(),
-          followRedirect: true,
-          timeout: 4000,
-          headers: {
-            Accept: "application/json; charset=utf-8",
-            "User-Agent": getUserAgent(ogPageURL),
-          },
-          transform: (body) => JSON.parse(body),
-          transform2xxOnly: true,
-        });
+        oEmbed = await extractOEmbed(ogPageURL, oEmbedLink.href);
       } catch (e) {
         //
       }
 
       if (oEmbed) {
-        rawMeta.push({
+        rawOEmbedMeta.push({
           oembed: oEmbed,
         });
       }
     }
 
-    return rawMeta;
+    return [...initialMeta, ...rawOpengraphMeta, ...rawOEmbedMeta];
   },
   generateCardJSON: (rawMeta) => {
     let rawInitial = rawMeta
@@ -1476,7 +1509,7 @@ module.exports = {
 
     if (isTwitterCard(card.url) && card.description) {
       card.description = card.description.replace(
-        /(https:\/\/t.co\/[0-9a-zA-Z]+)/g,
+        /(https:\/\/t\.co\/[0-9a-zA-Z]+)/g,
         `<a href="$1">$1</a>`
       );
 

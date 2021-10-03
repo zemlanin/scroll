@@ -56,7 +56,7 @@ function getHitsAndVisitors(post) {
   const goaccessPath = process.env.GOACCESS_JSON;
 
   if (!goaccessPath) {
-    return;
+    return {};
   }
 
   if (goaccessTTL < new Date()) {

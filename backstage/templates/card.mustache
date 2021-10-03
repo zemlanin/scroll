@@ -116,15 +116,22 @@
     {{#title}}
       <figcaption>
         {{#withoutLinkedTitle}}
-        {{{ card.title }}}{{^ card._hideRepeatedSiteName }}{{# card.site_name }} • {{{ card.site_name }}}{{/ card.site_name }}{{/ card._hideRepeatedSiteName }}<br/>
+          {{{ card.title }}}{{{ card._titleSuffix }}}<br/>
         {{/withoutLinkedTitle}}
         {{^withoutLinkedTitle}}
-        <a href="{{ card.url }}"><b>{{{ card.title }}}</b>{{^ card._hideRepeatedSiteName }}{{# card.site_name }} • {{{ card.site_name }}}{{/ card.site_name }}{{/ card._hideRepeatedSiteName }}<br/></a>
+          <a href="{{ card.url }}"><b>{{{ card.title }}}</b>{{{ card._titleSuffix }}}<br/></a>
         {{/withoutLinkedTitle}}
         {{# card.description }}
-          <i {{# card._truncateDescription }}class="truncated"{{/ card._truncateDescription }}>
-            {{{ card.description }}}
-          </i>
+          {{# card._truncateDescription }}
+            <i class="truncated">
+              {{{ card._descriptionFirstLine }}}
+            </i>
+          {{/ card._truncateDescription }}
+          {{^ card._truncateDescription }}
+            <i>
+              {{{ card.description }}}
+            </i>
+          {{/ card._truncateDescription }}
         {{/ card.description }}
       </figcaption>
     {{/title}}

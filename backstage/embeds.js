@@ -573,6 +573,11 @@ const isGiphyCard = (cardURL) => {
   return hostname === "giphy.com" || hostname.endsWith(".giphy.com");
 };
 
+const isVimeoCard = (cardURL) => {
+  const hostname = cardURL ? new URL(cardURL).hostname : "";
+  return hostname === "vimeo.com" || hostname.endsWith(".vimeo.com");
+};
+
 const shouldDescriptionBeTruncated = (cardURL) => {
   if (isTwitterCard(cardURL)) {
     return false;
@@ -1314,7 +1319,8 @@ module.exports = {
         rawOpengraph.title ||
         rawTwitter.title ||
         rawOEmbed.title ||
-        rawInitial.title,
+        rawInitial.title ||
+        "",
       url:
         rawOpengraph.url || rawTwitter.url || rawOEmbed.url || rawInitial.url,
       description:
@@ -1329,6 +1335,7 @@ module.exports = {
         rawTwitter.site ||
         rawOEmbed.provider_name ||
         "",
+      author_name: rawOEmbed.author_name || "",
       img: null,
       video: null,
       audio: null,
@@ -1341,10 +1348,6 @@ module.exports = {
 
     if (shouldDescriptionBeTruncated(card.url)) {
       card._truncateDescription = true;
-    }
-
-    if (card.title && card.title.endsWith(card.site_name)) {
-      card._hideRepeatedSiteName = true;
     }
 
     const videoNative =
@@ -1440,6 +1443,14 @@ module.exports = {
       }
 
       card.title = card.title
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+    }
+
+    if (card.author_name) {
+      card.author_name = card.author_name
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
@@ -1587,6 +1598,22 @@ module.exports = {
       return `<audio controls preload="metadata" src="${card.url}"></audio>`;
     }
 
+    const useAuthorNameAsSuffix =
+      card.author_name &&
+      !card.title.endsWith(card.author_name) &&
+      (isYoutubeCard(card.url) ||
+        isVimeoCard(card.url) ||
+        isGiphyCard(card.url));
+
+    const useSiteNameAsSuffix =
+      card.site_name && !card.title.endsWith(card.site_name);
+
+    card._titleSuffix = useAuthorNameAsSuffix
+      ? ` • ${card.author_name}`
+      : useSiteNameAsSuffix
+      ? ` • ${card.site_name}`
+      : "";
+
     if (
       !card.img &&
       !card.audio &&
@@ -1595,21 +1622,28 @@ module.exports = {
       !card.quote
     ) {
       const title = card.title || card.url;
-      return card.site_name
-        ? `<a href="${card.url}">${title} • ${card.site_name}</a>`
-        : `<a href="${card.url}">${title}</a>`;
+      return `<a href="${card.url}">${title}${card._titleSuffix}</a>`;
     }
 
     if (!card.img && card.iframe) {
       const title = card.title || card.url;
-      return card.site_name
-        ? `<a href="${card.url}">${title} • ${card.site_name}</a>`
-        : `<a href="${card.url}">${title}</a>`;
+      return `<a href="${card.url}">${title}${card._titleSuffix}</a>`;
     }
 
     if (card.error) {
       return "";
     }
+
+    if (
+      card._truncateDescription &&
+      card.description &&
+      card.description.includes("<br>")
+    ) {
+      card._descriptionFirstLine = card.description
+        .split("<br>")
+        .map((l) => l && l.trim())
+        .find(Boolean);
+    } else if (card.description) card._descriptionFirstLine = card.description;
 
     return mustache.render(loadCardTemplate(), {
       card,

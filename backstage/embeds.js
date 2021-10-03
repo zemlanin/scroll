@@ -53,7 +53,10 @@ loadCardTemplate.cache = "";
 
 const hasContent = (meta) => meta.content;
 const metaInitial = (meta) =>
-  meta.name === "url" || meta.name === "title" || meta.name === "mimetype";
+  meta.name === "url" ||
+  meta.name === "title" ||
+  meta.name === "mimetype" ||
+  meta.name === "author";
 const tupleInitial = (meta) => (meta.link ? null : [meta.name, meta.content]);
 const metaNameOG = (meta) => meta.name && meta.name.startsWith("og:");
 const tupleNameOG = (meta) => [meta.name.slice(3), meta.content];
@@ -74,6 +77,7 @@ const isSimpleProp = (prop) =>
   prop === "mimetype" ||
   prop === "site_name" ||
   prop === "site" ||
+  prop === "author" ||
   prop === "description";
 
 const isBasicMediaProp = (prop) =>
@@ -1069,11 +1073,12 @@ async function extractOpengraph(ogPageURL, jar) {
 
   const rawOpengraphMeta = $(
     `
-        head meta[property^="og:"],
-        head meta[name^="og:"],
-        head meta[property^="twitter:"],
-        head meta[name^="twitter:"]
-      `
+      head meta[property^="og:"],
+      head meta[name^="og:"],
+      head meta[property^="twitter:"],
+      head meta[name^="twitter:"],
+      head meta[name="author"]
+    `
   )
     .map(cheerioAttrs)
     .get()
@@ -1368,7 +1373,7 @@ module.exports = {
         rawTwitter.site ||
         rawOEmbed.provider_name ||
         "",
-      author_name: rawOEmbed.author_name || "",
+      author_name: rawOEmbed.author_name || rawInitial.author || "",
       img: null,
       video: null,
       audio: null,

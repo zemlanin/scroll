@@ -289,6 +289,10 @@ const metaPropertiesReducer = (acc, [prop, value]) => {
   };
 };
 
+const ABSOLUTE_URL_REGEX = /^[a-z][a-z\d+-.]*:/;
+
+const isAbsoluteUrl = (url) => Boolean(url && ABSOLUTE_URL_REGEX.test(url));
+
 const getVideoIframe = (graph) => {
   if (!graph) {
     return null;
@@ -790,8 +794,6 @@ async function getEmbedsList(req, _res) {
   });
 }
 
-const ABSOLUTE_URL_REGEX = /^[a-z][a-z\d+-.]*:/;
-
 function getUserAgent(url) {
   if (url && url.startsWith("https://twitter.com/")) {
     // workaround until opengraph tags are included in newer Twitter design
@@ -1125,7 +1127,7 @@ module.exports = {
       return null;
     }
 
-    if (!ABSOLUTE_URL_REGEX.test(ogPageURL)) {
+    if (!isAbsoluteUrl(ogPageURL)) {
       const expectedMimetype = getURLMimetype(ogPageURL);
 
       return expectedMimetype
@@ -1393,7 +1395,7 @@ module.exports = {
       getVideoNative(rawTwitter) ||
       getVideoNative(rawOpengraph) ||
       getVideoNative(rawInitial);
-    if (videoNative) {
+    if (videoNative && isAbsoluteUrl(videoNative.url)) {
       card.video = {
         src: videoNative.url,
         width: videoNative.width || null,
@@ -1401,7 +1403,7 @@ module.exports = {
         loop: isGiphyCard(card.url) || card.mimetype === "image/gif",
       };
 
-      if (videoNative.poster) {
+      if (videoNative.poster && isAbsoluteUrl(videoNative.poster.url)) {
         card.img = {
           src: videoNative.poster.url,
           alt: videoNative.poster.alt,
@@ -1416,12 +1418,12 @@ module.exports = {
       getAudioNative(rawOpengraph) ||
       getAudioNative(rawTwitter) ||
       getAudioNative(rawInitial);
-    if (audioNative) {
+    if (audioNative && isAbsoluteUrl(audioNative.url)) {
       card.audio = {
         src: audioNative.url,
       };
 
-      if (audioNative.poster) {
+      if (audioNative.poster && isAbsoluteUrl(audioNative.poster.url)) {
         card.img = {
           src: audioNative.poster.url,
           alt: audioNative.poster.alt,
@@ -1464,7 +1466,10 @@ module.exports = {
           getImageNative(rawInitial, imageOptions) ||
           getOEmbedImageNative(rawOEmbed, imageOptions);
 
-      if (image) {
+      if (
+        image &&
+        (isAbsoluteUrl(image.secure_url) || isAbsoluteUrl(image.url))
+      ) {
         card.img = {
           src: image.secure_url || image.url,
           alt: image.alt,

@@ -325,20 +325,34 @@ const getVideoIframe = (graph) => {
   }
 };
 
-const getOEmbedVideoIframe = (oEmbed, options = {}) =>
-  oEmbed &&
-  (oEmbed.type === "video" ||
-    (!options.ignoreRich && oEmbed.type === "rich")) &&
-  !isTwitterCard(oEmbed.url) &&
-  oEmbed.html && {
-    url: `data:text/html;charset=utf-8,${
-      // `<base>` is for iframes with protocol-less urls, like `//coub.com/embed/2pc24rpb`
-      '<base href="https://example.com/"><style>html,body,iframe{padding:0;margin:0;height:100%;max-height:100%;max-width:100%;}</style>' +
-      oEmbed.html
-    }`,
+const getOEmbedVideoIframe = (oEmbed, options = {}) => {
+  if (
+    !(
+      oEmbed &&
+      oEmbed.html &&
+      (oEmbed.type === "video" ||
+        (!options.ignoreRich && oEmbed.type === "rich")) &&
+      !isTwitterCard(oEmbed.url)
+    )
+  ) {
+    return null;
+  }
+
+  const frameBody =
+    // `<base>` is for iframes with protocol-less urls, like `//coub.com/embed/2pc24rpb`
+    '<base href="https://example.com/"><style>html,body,iframe{padding:0;margin:0;height:100%;max-height:100%;max-width:100%;}</style>' +
+    oEmbed.html;
+
+  const frameURL = `data:text/html;charset=utf-8;base64,${Buffer.from(
+    frameBody
+  ).toString("base64")}`;
+
+  return {
+    url: frameURL,
     width: oEmbed.width ? parseInt(oEmbed.width, 10) : null,
     height: oEmbed.height ? parseInt(oEmbed.height, 10) : null,
   };
+};
 
 const getVideoNative = (graph) => {
   if (!graph) {
@@ -1436,13 +1450,17 @@ module.exports = {
       const hasOGtags =
         Object.keys(rawOpengraph).length || Object.keys(rawTwitter).length;
 
-      const videoIframe =
+      let videoIframe =
         getVideoIframe(rawOpengraph) ||
         getVideoIframe(rawTwitter) ||
         getVideoIframe(rawInitial) ||
         getOEmbedVideoIframe(rawOEmbed, { ignoreRich: hasOGtags });
 
-      if (videoIframe && isYoutubeCard && !isAgeRestricted(rawOpengraph)) {
+      if (isYoutubeCard && isAgeRestricted(rawOpengraph)) {
+        videoIframe = null;
+      }
+
+      if (videoIframe) {
         card.iframe = {
           src: videoIframe.url,
           width: videoIframe.width || 640,

@@ -587,6 +587,11 @@ const isVimeoCard = (cardURL) => {
   return hostname === "vimeo.com" || hostname.endsWith(".vimeo.com");
 };
 
+const isSpotifyCard = (cardURL) => {
+  const hostname = cardURL ? new URL(cardURL).hostname : "";
+  return hostname === "spotify.com" || hostname.endsWith(".spotify.com");
+};
+
 const shouldDescriptionBeTruncated = (cardURL) => {
   if (isTwitterCard(cardURL)) {
     return false;
@@ -1454,7 +1459,9 @@ module.exports = {
         getVideoIframe(rawOpengraph) ||
         getVideoIframe(rawTwitter) ||
         getVideoIframe(rawInitial) ||
-        getOEmbedVideoIframe(rawOEmbed, { ignoreRich: hasOGtags });
+        getOEmbedVideoIframe(rawOEmbed, {
+          ignoreRich: hasOGtags && !isSpotifyCard(card.url),
+        });
 
       if (isYoutubeCard && isAgeRestricted(rawOpengraph)) {
         videoIframe = null;

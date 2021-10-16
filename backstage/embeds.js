@@ -78,7 +78,8 @@ const isSimpleProp = (prop) =>
   prop === "site_name" ||
   prop === "site" ||
   prop === "author" ||
-  prop === "description";
+  prop === "description" ||
+  prop === "type";
 
 const isBasicMediaProp = (prop) =>
   prop === "image" || prop === "video" || prop === "audio";
@@ -326,14 +327,12 @@ const getVideoIframe = (graph) => {
 };
 
 const getOEmbedVideoIframe = (oEmbed, options = {}) => {
+  if (!oEmbed || !oEmbed.html) {
+    return null;
+  }
+
   if (
-    !(
-      oEmbed &&
-      oEmbed.html &&
-      (oEmbed.type === "video" ||
-        (!options.ignoreRich && oEmbed.type === "rich")) &&
-      !isTwitterCard(oEmbed.url)
-    )
+    !(oEmbed.type === "video" || (oEmbed.type === "rich" && options.allowRich))
   ) {
     return null;
   }
@@ -585,11 +584,6 @@ const isGiphyCard = (cardURL) => {
 const isVimeoCard = (cardURL) => {
   const hostname = cardURL ? new URL(cardURL).hostname : "";
   return hostname === "vimeo.com" || hostname.endsWith(".vimeo.com");
-};
-
-const isSpotifyCard = (cardURL) => {
-  const hostname = cardURL ? new URL(cardURL).hostname : "";
-  return hostname === "spotify.com" || hostname.endsWith(".spotify.com");
 };
 
 const shouldDescriptionBeTruncated = (cardURL) => {
@@ -1460,7 +1454,13 @@ module.exports = {
         getVideoIframe(rawTwitter) ||
         getVideoIframe(rawInitial) ||
         getOEmbedVideoIframe(rawOEmbed, {
-          ignoreRich: hasOGtags && !isSpotifyCard(card.url),
+          allowRich:
+            !hasOGtags ||
+            (rawOpengraph.type &&
+              (rawOpengraph.type === "music.playlist" ||
+                rawOpengraph.type === "music.song" ||
+                rawOpengraph.type === "music.album" ||
+                rawOpengraph.type === "video.other")),
         });
 
       if (isYoutubeCard && isAgeRestricted(rawOpengraph)) {

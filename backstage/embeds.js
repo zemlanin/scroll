@@ -1460,7 +1460,10 @@ module.exports = {
               (rawOpengraph.type === "music.playlist" ||
                 rawOpengraph.type === "music.song" ||
                 rawOpengraph.type === "music.album" ||
-                rawOpengraph.type === "video.other")),
+                rawOpengraph.type === "video.other" ||
+                // bandcamp's opengraph lacks `music.` prefix in `og:type`
+                rawOpengraph.type === "song" ||
+                rawOpengraph.type === "album")),
         });
 
       if (isYoutubeCard && isAgeRestricted(rawOpengraph)) {

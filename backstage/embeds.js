@@ -807,7 +807,7 @@ async function getEmbedsList(req, _res) {
 }
 
 function getUserAgent(url) {
-  if (url && url.startsWith("https://twitter.com/")) {
+  if (url && isTwitterCard(url)) {
     // workaround until opengraph tags are included in newer Twitter design
     // https://twittercommunity.com/t/twitter-removed-opengraph-tags-from-server-rendered-tweet-page/138473/6
     return "DiscourseBot/1.0";

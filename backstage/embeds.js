@@ -534,20 +534,19 @@ const getFrameFallback = (graphUrl) => {
 const isAppleMusicCard = (cardURL) => {
   const hostname = cardURL ? new URL(cardURL).hostname : "";
 
-  return (
-    cardURL &&
-    (hostname === "music.apple.com" || hostname === "itunes.apple.com")
-  );
+  return hostname === "music.apple.com" || hostname === "itunes.apple.com";
 };
 
 const isApplePodcastsCard = (cardURL) => {
   const hostname = cardURL ? new URL(cardURL).hostname : "";
 
-  return cardURL && hostname === "podcasts.apple.com";
+  return hostname === "podcasts.apple.com";
 };
 
 const isTwitterCard = (cardURL) => {
-  return cardURL && cardURL.startsWith("https://twitter.com/");
+  const hostname = cardURL ? new URL(cardURL).hostname : "";
+
+  return hostname === "twitter.com";
 };
 
 const isYoutubeCard = (cardURL) => {

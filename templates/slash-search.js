@@ -28,7 +28,9 @@ window["slash-search"] = function slashSearch(selector) {
     input = document.querySelector(selector);
 
     if (input) {
-      input.addEventListener("focus", catchFocus);
+      input.addEventListener("keypress", catchEscape);
+      // ^ listening for escapes is now handled by `input` itself
+      document.removeEventListener("keypress", catchEscape);
     }
 
     return input;
@@ -60,24 +62,6 @@ window["slash-search"] = function slashSearch(selector) {
     event.preventDefault();
   }
 
-  function catchFocus() {
-    if (!input) {
-      return;
-    }
-
-    input.addEventListener("keypress", catchEscape);
-    input.addEventListener("blur", catchBlur);
-  }
-
-  function catchBlur() {
-    if (!input) {
-      return;
-    }
-
-    input.removeEventListener("keypress", catchEscape);
-    input.removeEventListener("blur", catchBlur);
-  }
-
   function catchEscape(event) {
     if (event.keyCode !== ESCAPE_KEY_CODE) {
       return;
@@ -101,5 +85,7 @@ window["slash-search"] = function slashSearch(selector) {
   }
 
   document.addEventListener("keypress", catchSlash);
+
+  // listening for global escapes until input is initiated (via `initInput`)
   document.addEventListener("keypress", catchEscape);
 };

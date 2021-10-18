@@ -29,13 +29,6 @@ cheerio.load = function () {
   return instance;
 };
 
-const {
-  loadMetadata,
-  generateCardJSON,
-  renderCard,
-  queryEmbed,
-} = require("./backstage/embeds.js");
-
 function overwriteFromEmbed(card, embed) {
   let result = card;
   if (embed.title) {
@@ -128,16 +121,16 @@ module.exports = class EmbedsLoader {
         continue;
       }
 
-      const embedFromDB = await queryEmbed(this.db, url);
+      const embedFromDB = await embeds.queryEmbed(this.db, url);
       if (embedFromDB) {
-        this.cache[url] = generateCardJSON(embedFromDB.raw_metadata);
+        this.cache[url] = embeds.generateCardJSON(embedFromDB.raw_metadata);
         continue;
       }
 
       let raw_metadata;
 
       try {
-        raw_metadata = await loadMetadata(url);
+        raw_metadata = await embeds.loadMetadata(url);
       } catch (e) {
         console.error(e);
 
@@ -151,7 +144,7 @@ module.exports = class EmbedsLoader {
         continue;
       }
 
-      const cardWithMetadata = generateCardJSON(raw_metadata);
+      const cardWithMetadata = embeds.generateCardJSON(raw_metadata);
 
       if (!cardWithMetadata) {
         continue;
@@ -220,7 +213,7 @@ module.exports = class EmbedsLoader {
 
       if (card) {
         $this.replaceWith(
-          renderCard(card, {
+          embeds.renderCard(card, {
             externalFrames: options && options.externalFrames,
             maxWidth: options && options.maxWidth,
           })
@@ -235,3 +228,5 @@ module.exports = class EmbedsLoader {
     return $("body").html();
   }
 };
+
+var embeds = require("./backstage/embeds.js");

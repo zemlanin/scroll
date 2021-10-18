@@ -10,7 +10,17 @@ const { RequestError } = require("request-promise-native/errors");
 const oEmbedProviders = require("oembed-providers");
 const faTiktok = require("@fortawesome/free-brands-svg-icons/faTiktok.js");
 
-const { getLinkId } = require("../common.js");
+const {
+  DIST,
+  getLinkId,
+  getBlogObject,
+  writeFileWithGzip,
+} = require("../common.js");
+const { generateIndexPage, getPagination } = require("../generate-post.js");
+const {
+  generateLinkblogPage,
+  generateLinkblogRSSPage,
+} = require("../linkblog.js");
 
 const { render } = require("./render.js");
 
@@ -1175,6 +1185,28 @@ async function extractOEmbed(ogPageURL, oEmbedURL) {
   });
 }
 
+async function generateLinkblog(db) {
+  const blog = await getBlogObject();
+
+  await writeFileWithGzip(
+    path.join(DIST, "linkblog.html"),
+    await generateLinkblogPage(db, blog)
+  );
+
+  await writeFileWithGzip(
+    path.join(DIST, "feeds/linkblog.xml"),
+    await generateLinkblogRSSPage(db, blog)
+  );
+
+  const pagination = await getPagination(db, null);
+  const newestPage = pagination[0] || { index: 0, posts: [] };
+
+  await writeFileWithGzip(
+    path.join(DIST, "index.html"),
+    await generateIndexPage(db, blog, newestPage)
+  );
+}
+
 module.exports = {
   queryEmbed,
   loadMetadata: async (ogPageURL) => {
@@ -1822,6 +1854,8 @@ module.exports = {
             4: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
           }
         );
+
+        await generateLinkblog(db);
       } else {
         // just ignore public linkblog entry
       }
@@ -1850,6 +1884,8 @@ module.exports = {
             1: existingEmbed.original_url,
           }
         );
+
+        await generateLinkblog(db);
       }
 
       res.writeHead(303, {
@@ -1874,6 +1910,8 @@ module.exports = {
           await db.run(`DELETE FROM linklist WHERE original_url = ?1`, {
             1: original_url,
           });
+
+          await generateLinkblog(db);
         }
 
         res.writeHead(303, {

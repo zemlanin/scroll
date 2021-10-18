@@ -10,6 +10,8 @@ const { RequestError } = require("request-promise-native/errors");
 const oEmbedProviders = require("oembed-providers");
 const faTiktok = require("@fortawesome/free-brands-svg-icons/faTiktok.js");
 
+const { getLinkId } = require("../common.js");
+
 const { render } = require("./render.js");
 
 const { getSession, sendToAuthProvider } = require("./auth.js");
@@ -629,6 +631,42 @@ async function queryEmbed(db, embedURL) {
   return prepareEmbed(embed);
 }
 
+const prepareLinkblogEntry = (entry) => {
+  entry.original_url_encoded = encodeURIComponent(entry.original_url);
+  entry.created = new Date(parseInt(entry.created))
+    .toISOString()
+    .replace(/:\d{2}\.\d{3}Z$/, "");
+
+  return entry;
+};
+
+async function queryLinkblog(db, original_url) {
+  if (!original_url) {
+    return null;
+  }
+
+  const linkblogEntry = await db.get(
+    `
+      SELECT
+        id,
+        source_id,
+        original_url,
+        strftime('%s000', created) created,
+        private
+      FROM linklist
+      WHERE
+        original_url = ?1
+    `,
+    { 1: original_url }
+  );
+
+  if (!linkblogEntry) {
+    return null;
+  }
+
+  return prepareLinkblogEntry(linkblogEntry);
+}
+
 async function getSingleEmbed(req, _res) {
   const query = url.parse(req.url, true).query;
 
@@ -709,6 +747,10 @@ async function getSingleEmbed(req, _res) {
     )}"/>`;
   }
 
+  const linkblogEntry = existingEmbed
+    ? await queryLinkblog(db, query.url)
+    : null;
+
   return render("embed.mustache", {
     url: query.url,
     existingEmbed,
@@ -721,6 +763,7 @@ async function getSingleEmbed(req, _res) {
       saved: !query.request && Boolean(existingEmbed),
       requested: cardHTML && (!existingEmbed || Boolean(query.request)),
     },
+    linkblog: linkblogEntry && !linkblogEntry.private ? linkblogEntry : null,
   });
 }
 
@@ -1751,11 +1794,87 @@ module.exports = {
 
     const existingEmbed = await queryEmbed(db, original_url);
 
-    if (req.post.delete === "1") {
+    if (req.post["save-to-linkblog"] === "1") {
+      if (!existingEmbed) {
+        res.statusCode = 400;
+        return `embed must be saved before publishing it in linkblog`;
+      }
+
+      const existingLinkblogEntry = await queryLinkblog(
+        db,
+        existingEmbed.original_url
+      );
+
+      if (!existingLinkblogEntry || existingLinkblogEntry.private) {
+        await db.run(
+          `
+            INSERT INTO linklist
+            (id, source_id, original_url, created)
+            VALUES ($1, $2, $3, $4)
+          `,
+          {
+            1: getLinkId(),
+            2: url.resolve(
+              req.absolute,
+              `/backstage/embeds?url=${encodeURIComponent(original_url)}`
+            ),
+            3: existingEmbed.original_url,
+            4: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+          }
+        );
+      } else {
+        // just ignore public linkblog entry
+      }
+
+      res.writeHead(303, {
+        Location: url.resolve(
+          req.absolute,
+          `/backstage/embeds?url=${encodeURIComponent(original_url)}`
+        ),
+      });
+
+      return;
+    } else if (req.post["delete-from-linkblog"] === "1") {
+      const existingLinkblogEntry = await queryLinkblog(
+        db,
+        existingEmbed.original_url
+      );
+
+      if (existingLinkblogEntry && !existingLinkblogEntry.private) {
+        await db.run(
+          `
+            DELETE FROM linklist
+            WHERE original_url = ?1
+          `,
+          {
+            1: existingEmbed.original_url,
+          }
+        );
+      }
+
+      res.writeHead(303, {
+        Location: url.resolve(
+          req.absolute,
+          `/backstage/embeds?url=${encodeURIComponent(original_url)}`
+        ),
+      });
+
+      return;
+    } else if (req.post.delete === "1") {
       if (existingEmbed) {
         await db.run(`DELETE FROM embeds WHERE original_url = ?1`, {
           1: original_url,
         });
+
+        const existingLinkblogEntry = await queryLinkblog(
+          db,
+          existingEmbed.original_url
+        );
+        if (existingLinkblogEntry) {
+          await db.run(`DELETE FROM linklist WHERE original_url = ?1`, {
+            1: original_url,
+          });
+        }
 
         res.writeHead(303, {
           Location: url.resolve(req.absolute, `/backstage/embeds`),

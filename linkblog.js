@@ -5,15 +5,6 @@ const sqlite3 = require("sqlite3");
 const fetch = require("node-fetch");
 const FeedParser = require("feedparser");
 
-const _id = require("nanoid/generate");
-const getLinkId = () =>
-  `link-${new Date().getFullYear()}-${(new Date().getMonth() + 1)
-    .toString()
-    .padStart(2, "0")}-${_id(
-    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-    10
-  )}`;
-
 const {
   DIST,
   RSS_SIZE,
@@ -21,6 +12,7 @@ const {
   LINKLIST_SOURCE_FEED,
   loadIcu,
   embedCallback,
+  getLinkId,
 } = require("./common.js");
 const { render } = require("./render.js");
 const EmbedsLoader = require("./embeds-loader.js");
@@ -85,36 +77,6 @@ async function loadFreshFeed(db, stdout, _stderr) {
           2: item.guid,
           3: item.link,
           4: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
-        }
-      );
-    }
-  }
-
-  const latestLinks = await db.all(
-    `
-      SELECT id, strftime('%s000', created) created, original_url
-      FROM linklist
-      WHERE private = 0
-      ORDER BY created DESC
-      LIMIT ?1;
-    `,
-    {
-      1: feed.items.length,
-    }
-  );
-
-  for (const link of latestLinks) {
-    if (!feed.items.some((item) => item.link === link.original_url)) {
-      hasNewItems = true;
-      // link was removed from the linkblog source feed
-      await db.run(
-        `
-          UPDATE linklist
-          SET private = 1
-          WHERE id = ?1;
-        `,
-        {
-          1: link.id,
         }
       );
     }
@@ -274,6 +236,7 @@ module.exports = {
   generateLinkblogPage,
   generateLinkblogRSSPage,
   generateLinkblogSection,
+  getLinkId,
 };
 
 if (require.main === module) {

@@ -7,6 +7,7 @@ const { promisify } = require("util");
 const y = require("yassium");
 const mime = require("mime");
 const marked = require("marked");
+const nanoid = require("nanoid/generate");
 const cheerio = require("cheerio");
 const faFilePdf = require("@fortawesome/free-solid-svg-icons/faFilePdf.js");
 
@@ -1024,6 +1025,14 @@ async function loadIcu(db) {
   return db;
 }
 
+const getLinkId = () =>
+  `link-${new Date().getFullYear()}-${(new Date().getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}-${nanoid(
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    10
+  )}`;
+
 module.exports = {
   BLOG_TITLE,
   BLOG_BASE_URL,
@@ -1043,4 +1052,5 @@ module.exports = {
   embedCallback,
   writeFileWithGzip,
   unlinkFileWithGzip,
+  getLinkId,
 };

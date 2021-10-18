@@ -49,6 +49,23 @@
           <button class="button" disabled>save</button>
         </div>
       {{/ status.requested }}
+      {{# status.saved }}
+        {{# linkblog.id }}
+          <div class="control">
+            <button class="button" name="delete-from-linkblog" value="1">un-linkblog</button>
+          </div>
+        {{/ linkblog.id }}
+        {{^ linkblog.id }}
+          <div class="control">
+            <button class="button" name="save-to-linkblog" value="1">linkblog</button>
+          </div>
+        {{/ linkblog.id }}
+      {{/ status.saved }}
+      {{^ status.saved }}
+        <div class="control">
+          <button class="button" disabled>linkblog</button>
+        </div>
+      {{/ status.saved }}
     </form>
   </nav>
 

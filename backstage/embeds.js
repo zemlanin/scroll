@@ -16,7 +16,7 @@ const {
   getBlogObject,
   writeFileWithGzip,
 } = require("../common.js");
-const { generateIndexPage, getPagination } = require("../generate-post.js");
+const generatePost = require("../generate-post.js");
 const {
   generateLinkblogPage,
   generateLinkblogRSSPage,
@@ -1198,12 +1198,12 @@ async function generateLinkblog(db) {
     await generateLinkblogRSSPage(db, blog)
   );
 
-  const pagination = await getPagination(db, null);
+  const pagination = await generatePost.getPagination(db, null);
   const newestPage = pagination[0] || { index: 0, posts: [] };
 
   await writeFileWithGzip(
     path.join(DIST, "index.html"),
-    await generateIndexPage(db, blog, newestPage)
+    await generatePost.generateIndexPage(db, blog, newestPage)
   );
 }
 

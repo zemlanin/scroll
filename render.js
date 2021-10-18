@@ -164,6 +164,10 @@ async function blogRender(tmpl, data) {
         path.join(BLOG_TEMPLATES, "header.js"),
         jsProcess
       ),
+      "slash-search.js": await loadTemplate(
+        path.join(BLOG_TEMPLATES, "slash-search.js"),
+        jsProcess
+      ),
       "normalize.css": await loadTemplate(
         require.resolve("normalize.css"),
         cssProcess

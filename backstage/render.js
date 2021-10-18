@@ -100,6 +100,10 @@ async function backstageRender(tmpl, data) {
         path.join(BLOG_TEMPLATES, "header.js"),
         jsProcess
       ),
+      "slash-search.js": await loadTemplate(
+        path.join(BLOG_TEMPLATES, "slash-search.js"),
+        jsProcess
+      ),
     }
   );
 }

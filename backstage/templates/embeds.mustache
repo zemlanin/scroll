@@ -41,6 +41,11 @@
         margin-bottom: 64px;
       }
     </style>
+
+    <script type="text/javascript">
+      {{> slash-search.js}}
+      ;window["slash-search"]('input[name="q"]');
+    </script>
 </head>
 <body class="container is-fluid" style="margin: 1em auto 80px; max-width: 60em; padding-left: 0.75em; padding-right: 0.75em;">
     <nav class="level">
@@ -53,11 +58,8 @@
         method="GET"
       >
         <div class="control is-expanded">
-          <input name="q" type="search" class="input"
-            {{#q}}
-              value="{{q}}"
-              autofocus
-            {{/q}}
+          <input name="q" type="text" class="input"
+            {{#q}}value="{{q}}"{{/q}}
           >
         </div>
         <div class="control">
@@ -72,11 +74,7 @@
         method="GET"
       >
         <div class="control is-expanded">
-          <input name="url" type="url" class="input" placeholder="url"
-            {{^q}}
-              autofocus
-            {{/q}}
-          >
+          <input name="url" type="url" class="input" placeholder="url">
         </div>
         <div class="control">
           <button class="button">&rarr;</button>

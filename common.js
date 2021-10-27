@@ -970,6 +970,7 @@ async function getBlogObject(baseUrl) {
     author: {
       name: "Anton Verinov",
       twitter: "zemlanin",
+      buymeacoffee: "zemlanin",
     },
     feed: {
       description: BLOG_TITLE,

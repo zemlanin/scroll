@@ -70,6 +70,7 @@ const translations = {
     linkblog: "linkblog",
     "Follow via RSS": "Читать с помощью RSS",
     Share: "Поделиться",
+    "Buy me a coffee": "Угостить кофе",
   },
   uk: {
     archive: "архів",
@@ -84,6 +85,7 @@ const translations = {
     linkblog: "linkblog",
     "Follow via RSS": "Читати за допомогою RSS",
     Share: "Поділитися",
+    "Buy me a coffee": "Пригостити кавою",
   },
 };
 
@@ -179,6 +181,9 @@ async function blogRender(tmpl, data) {
       "highlight.css": await loadTemplate(
         path.join(BLOG_TEMPLATES, "highlight-alabaster.css"),
         cssProcess
+      ),
+      "buymeacoffee.svg": await loadTemplate(
+        path.join(BLOG_TEMPLATES, "buymeacoffee.svg")
       ),
     }
   );

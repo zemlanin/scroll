@@ -307,6 +307,7 @@ article time {
   display: block;
   text-align: right;
   font-size: 0.9em;
+  white-space: nowrap;
 }
 
 article time,
@@ -321,6 +322,7 @@ article .more-and-time {
   justify-content: space-between;
   min-height: 1.5em;
   align-items: stretch;
+  flex-wrap: wrap;
 }
 
 article .share-and-time button {
@@ -362,6 +364,31 @@ article button[data-share][data-share-state="done"] span[data-share-done] {
 
 article button[data-share][data-share-state="done"] span[data-share-default] {
   display: none;
+}
+
+article .share-and-time a[href*="buymeacoffee.com/"] {
+  background: none;
+  border-radius: 4px;
+  padding: 0 0.5em;
+  margin-right: 0.25em;
+  display: flex;
+  align-items: center;
+}
+
+article .share-and-time a[href*="buymeacoffee.com/"] svg {
+  color: #888;
+  color: var(--color-deemphasis);
+  margin-right: 0.3em;
+}
+
+body.theme-changed article .share-and-time a[href*="buymeacoffee.com/"] svg {
+  transition: color 0.2s ease-in-out;
+}
+
+@media (max-width: 20em) {
+  article .share-and-time a[href*="buymeacoffee.com/"] span {
+    display: none;
+  }
 }
 
 article blockquote {

@@ -12,6 +12,9 @@
         <span data-share-default>{{#fas}}share{{/fas}}</span>
         <span data-share-done>{{#fas}}check{{/fas}}</span>
       </button>
+      {{#blog.author.buymeacoffee}}
+        <a href="https://www.buymeacoffee.com/{{blog.author.buymeacoffee}}" target="_blank" title="{{#t}}Buy me a coffee{{/t}}" class="print:hidden">{{> buymeacoffee.svg }}<span>{{#t}}Buy me a coffee{{/t}}</span></a>
+      {{/blog.author.buymeacoffee}}
     {{/public}}
     <div style="flex-grow: 1; display: flex;"></div>
     <time datetime="{{created}}">

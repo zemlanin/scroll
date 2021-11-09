@@ -1147,7 +1147,8 @@ async function extractOpengraph(ogPageURL, jar) {
       rel: link.rel,
       href: link.href,
       sizes: link.sizes,
-      type: link.type || getURLMimetype(link.href),
+      type:
+        link.type || getURLMimetype(new URL(link.href, ogPageURL).toString()),
     }));
 
   const relImageSrcs = $(`head link[rel="image_src"]`)
@@ -1158,7 +1159,8 @@ async function extractOpengraph(ogPageURL, jar) {
       link: true,
       rel: link.rel,
       href: link.href,
-      type: link.type || getURLMimetype(link.href),
+      type:
+        link.type || getURLMimetype(new URL(link.href, ogPageURL).toString()),
     }));
 
   const relIcons = $(
@@ -1171,7 +1173,8 @@ async function extractOpengraph(ogPageURL, jar) {
       link: true,
       rel: link.rel,
       href: link.href,
-      type: link.type || getURLMimetype(link.href),
+      type:
+        link.type || getURLMimetype(new URL(link.href, ogPageURL).toString()),
       sizes: link.sizes,
     }));
 

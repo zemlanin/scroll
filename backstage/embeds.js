@@ -365,6 +365,29 @@ const getOEmbedVideoIframe = (oEmbed, options = {}) => {
   };
 };
 
+const MP4_MIMETYPE = "video/mp4";
+const M3U8_MIMETYPE = "application/vnd.apple.mpegurl";
+
+function isNativeVideoMimetype(type) {
+  return type === MP4_MIMETYPE || type === M3U8_MIMETYPE;
+}
+
+function findWithFallbacks(arr, ...conditions) {
+  if (arr.length === 0) {
+    return undefined;
+  }
+
+  for (const cond of conditions) {
+    const result = arr.find(cond);
+
+    if (result !== undefined) {
+      return result;
+    }
+  }
+
+  return undefined;
+}
+
 const getVideoNative = (graph) => {
   if (!graph) {
     return null;
@@ -373,7 +396,13 @@ const getVideoNative = (graph) => {
   let video = null;
 
   if (!video && graph.video) {
-    video = graph.video.find((v) => v.url && v.type === "video/mp4");
+    video = findWithFallbacks(
+      graph.video.filter((v) => v.url),
+      (v) => v.type === MP4_MIMETYPE,
+      (v) => getURLMimetype(v.url) === MP4_MIMETYPE,
+      (v) => v.type === M3U8_MIMETYPE,
+      (v) => getURLMimetype(v.url) === M3U8_MIMETYPE
+    );
   }
 
   if (
@@ -381,7 +410,7 @@ const getVideoNative = (graph) => {
     graph.player &&
     graph.player.stream &&
     graph.player.stream.url &&
-    graph.player.stream.content_type === "video/mp4"
+    isNativeVideoMimetype(graph.player.stream.content_type)
   ) {
     video = {
       url: graph.player.stream.url,
@@ -1018,7 +1047,7 @@ async function extractNative(ogPageURL, jar) {
   if (
     expectedMimetype &&
     (expectedMimetype.startsWith("image/") ||
-      expectedMimetype.startsWith("video/") ||
+      isNativeVideoMimetype(expectedMimetype) ||
       expectedMimetype.startsWith("audio/"))
   ) {
     let cHeaders;
@@ -1332,7 +1361,7 @@ module.exports = {
               type: header.value,
             },
           ];
-        } else if (header.value.startsWith("video/")) {
+        } else if (isNativeVideoMimetype(header.value)) {
           rawInitial.video = [
             {
               url: rawInitial.url,
@@ -1478,7 +1507,7 @@ module.exports = {
     }
 
     const videoNative =
-      (card.mimetype.startsWith("video/") && getVideoNative(rawInitial)) ||
+      (isNativeVideoMimetype(card.mimetype) && getVideoNative(rawInitial)) ||
       getVideoNative(rawTwitter) ||
       getVideoNative(rawOpengraph) ||
       getVideoNative(rawInitial);
@@ -1739,7 +1768,7 @@ module.exports = {
       />`;
     }
 
-    if (card.mimetype.startsWith("video/") && !card.title) {
+    if (isNativeVideoMimetype(card.mimetype) && !card.title) {
       return `<video
         playsinline
         controls

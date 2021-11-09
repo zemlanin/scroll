@@ -70,7 +70,7 @@ test("reddit post page with m3u8 video", async (t) => {
   t.equalHtml(
     cheerio.load(post.toString())("article .card").html(),
     `
-      <video playsinline src="https://v.redd.it/ddvtu8tl0fu71/HLSPlaylist.m3u8?a=1639045123%2CNTk1Y2M3NGI3NzY4NjdlYzc0ODQ4OWI5ZTQwM2M3YWNjNzU1ZTRhMjk0M2RlZjU3ZjU1MGYzYzRkYWZlYTc4OQ%3D%3D&amp;v=1&amp;f=sd" controls="" preload="none" poster="https://external-preview.redd.it/CH0qoPnF963dQYG8wDyZsFOsLdLzoBq5fSGIWGOjpu8.png?format=pjpg&amp;auto=webp&amp;s=a6f20a068d82d68720161285624db4b546e73ff1"></video>
+      <video playsinline src="https://v.redd.it/ddvtu8tl0fu71/HLSPlaylist.m3u8?a=1639045123%2CNTk1Y2M3NGI3NzY4NjdlYzc0ODQ4OWI5ZTQwM2M3YWNjNzU1ZTRhMjk0M2RlZjU3ZjU1MGYzYzRkYWZlYTc4OQ%3D%3D&amp;v=1&amp;f=sd" controls="" preload="none" poster="https://external-preview.redd.it/CH0qoPnF963dQYG8wDyZsFOsLdLzoBq5fSGIWGOjpu8.png?format=pjpg&amp;auto=webp&amp;s=a6f20a068d82d68720161285624db4b546e73ff1" data-hls=""></video>
 
       <figcaption>
         <a href="https://www.reddit.com/r/ac_newhorizons/comments/qbcds8/my_farm_space_is_already_coming_together/"><b>r/ac_newhorizons - My farm space is already coming together🤗 Suggestions?</b> • reddit<br /></a>

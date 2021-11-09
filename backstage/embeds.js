@@ -1161,10 +1161,25 @@ async function extractOpengraph(ogPageURL, jar) {
       type: link.type || getURLMimetype(link.href),
     }));
 
+  const relIcons = $(
+    `head link[rel="icon"], head link[rel="shortcut icon"], head link[rel="apple-touch-icon"]`
+  )
+    .map(cheerioAttrs)
+    .get()
+    .filter((link) => link.href)
+    .map((link) => ({
+      link: true,
+      rel: link.rel,
+      href: link.href,
+      type: link.type || getURLMimetype(link.href),
+      sizes: link.sizes,
+    }));
+
   const initialMeta = [
     htmlTitle && { name: "title", content: htmlTitle },
     ...relThumbnails,
     ...relImageSrcs,
+    ...relIcons,
   ].filter(Boolean);
 
   const rawOpengraphMeta = $(

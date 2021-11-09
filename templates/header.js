@@ -652,3 +652,41 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   );
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  if (!document.querySelector("video[data-hls]")) {
+    return;
+  }
+
+  var supportsHLS = document
+    .createElement("video")
+    .canPlayType("application/vnd.apple.mpegURL");
+
+  if (supportsHLS) {
+    return;
+  }
+
+  var head = document.getElementsByTagName("head")[0];
+  var hlsScript = document.createElement("script");
+  hlsScript.setAttribute("src", window.__statics__["/hls.min.js"]);
+  hlsScript.setAttribute("type", "application/javascript");
+  hlsScript.addEventListener("load", function () {
+    Array.prototype.forEach.call(
+      document.querySelectorAll("video[data-hls]"),
+      function (video) {
+        var Hls = window.Hls;
+        var src = video.src;
+        var hls;
+
+        if (Hls.isSupported()) {
+          hls = new Hls();
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+            hls.loadSource(src);
+          });
+        }
+      }
+    );
+  });
+  head.insertBefore(hlsScript, head.firstChild);
+});

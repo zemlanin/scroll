@@ -1537,6 +1537,13 @@ module.exports = {
         loop: isGiphyCard(card.url) || card.mimetype === "image/gif",
       };
 
+      if (
+        videoNative.type === M3U8_MIMETYPE ||
+        (!videoNative.type && getURLMimetype(videoNative.url) === M3U8_MIMETYPE)
+      ) {
+        card.video.hls = true;
+      }
+
       if (videoNative.poster && isAbsoluteUrl(videoNative.poster.url)) {
         card.img = {
           src: videoNative.poster.url,

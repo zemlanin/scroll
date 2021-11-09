@@ -24,6 +24,9 @@
           preload="none"
           poster="{{ img.src }}"
         {{/ img }}
+        {{# video.hls}}
+          data-hls
+        {{/ video.hls}}
       ></video>
     {{/ video }}
     {{# iframe }}

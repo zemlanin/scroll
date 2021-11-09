@@ -169,6 +169,17 @@ const handlers = [
       );
     },
   ],
+  [
+    "GET",
+    "/hls.min.js",
+    async (req, res) => {
+      res.setHeader("content-type", "application/javascript");
+
+      return await fsPromises.readFile(
+        path.resolve(__dirname, "static", "hls.min.js")
+      );
+    },
+  ],
   ["GET", "/media/*", staticHandler],
   ["GET", "/feeds/*", staticHandler],
   ["GET", "/backstage", require("./backstage/index.js")],

@@ -627,6 +627,13 @@ const isVimeoCard = (cardURL) => {
   return hostname === "vimeo.com" || hostname.endsWith(".vimeo.com");
 };
 
+const isButtondownEmailCard = (cardURL) => {
+  const hostname = cardURL ? new URL(cardURL).hostname : "";
+  return (
+    hostname === "buttondown.email" || hostname.endsWith(".buttondown.email")
+  );
+};
+
 const shouldDescriptionBeTruncated = (cardURL) => {
   if (isTwitterCard(cardURL)) {
     return false;
@@ -1814,7 +1821,8 @@ module.exports = {
       !card.title.endsWith(card.author_name) &&
       (isYoutubeCard(card.url) ||
         isVimeoCard(card.url) ||
-        isGiphyCard(card.url));
+        isGiphyCard(card.url) ||
+        isButtondownEmailCard(card.url));
 
     const useSiteNameAsSuffix =
       card.site_name && !card.title.endsWith(card.site_name);

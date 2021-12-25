@@ -1612,6 +1612,12 @@ module.exports = {
           width: videoIframe.width || 640,
           height: videoIframe.height || 360,
         };
+
+        if (isYoutubeCard || isVimeoCard) {
+          const autoplaySrc = new URL(card.iframe.src);
+          autoplaySrc.searchParams.set("autoplay", 1);
+          card.iframe._autoplaySrc = autoplaySrc.toString();
+        }
       }
     }
 

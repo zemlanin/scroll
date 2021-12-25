@@ -44,7 +44,12 @@
       {{^ externalFrames }}
         <a href="{{card.url}}"
           class="future-frame"
-          data-src="{{iframe.src}}"
+          {{# iframe._autoplaySrc }}
+            data-src="{{iframe._autoplaySrc}}"
+          {{/ iframe._autoplaySrc }}
+          {{^ iframe._autoplaySrc }}
+            data-src="{{iframe.src}}"
+          {{/ iframe._autoplaySrc }}
           {{# iframe.width}}
             data-width="{{iframe.width}}"
           {{/ iframe.width}}

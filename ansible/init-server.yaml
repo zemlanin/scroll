@@ -1,12 +1,13 @@
 ---
+# ansible-playbook ansible/init-server.yaml -i '[IP],'
 - hosts: all
   remote_user: root
   gather_facts: yes
   vars:
-    NODEJS_VERSION: "15"
+    NODEJS_VERSION: "16"
 
   tasks:
-    - name: making it confortable
+    - name: making it comfortable
       apt:
         pkg:
           - fish

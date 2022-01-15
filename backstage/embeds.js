@@ -937,7 +937,7 @@ function getOEmbedLinkFromProviders(url) {
         }
 
         const { protocol, hostname, pathname } = scheme.match(
-          /^(?<protocol>https?:\/\/)(?<hostname>[^/]+)\/(?<pathname>.+)$/
+          /^(?<protocol>https?:\/\/)(?<hostname>[^/]+)(?<pathname>\/.*)$/
         ).groups;
 
         if (
@@ -951,7 +951,7 @@ function getOEmbedLinkFromProviders(url) {
           `^${protocol}${hostname.replace(
             /\*/g,
             "[a-z0-9-]+"
-          )}/${pathname.replace(/\*/g, "[^/]+")}`
+          )}${pathname.replace(/\*/g, "[^/]+")}`
         );
 
         if (url.match(schemeRegexp)) {

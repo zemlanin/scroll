@@ -634,6 +634,11 @@ const isButtondownEmailCard = (cardURL) => {
   );
 };
 
+const isCoubCard = (cardURL) => {
+  const hostname = cardURL ? new URL(cardURL).hostname : "";
+  return hostname === "coub.com" || hostname.endsWith(".coub.com");
+};
+
 const shouldDescriptionBeTruncated = (cardURL) => {
   if (isTwitterCard(cardURL)) {
     return false;
@@ -1602,7 +1607,7 @@ module.exports = {
                 rawOpengraph.type === "album")),
         });
 
-      if (isYoutubeCard && isAgeRestricted(rawOpengraph)) {
+      if (isYoutubeCard(card.url) && isAgeRestricted(rawOpengraph)) {
         videoIframe = null;
       }
 
@@ -1613,7 +1618,12 @@ module.exports = {
           height: videoIframe.height || 360,
         };
 
-        if (isYoutubeCard || isVimeoCard) {
+        const shouldAutoplay =
+          isYoutubeCard(card.url) ||
+          isVimeoCard(card.url) ||
+          isCoubCard(card.url);
+
+        if (shouldAutoplay) {
           const autoplaySrc = new URL(card.iframe.src);
           autoplaySrc.searchParams.set("autoplay", 1);
           card.iframe._autoplaySrc = autoplaySrc.toString();

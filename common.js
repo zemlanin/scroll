@@ -6,7 +6,7 @@ const { promisify } = require("util");
 
 const y = require("yassium");
 const mime = require("mime");
-const marked = require("marked");
+const { marked } = require("marked");
 const nanoid = require("nanoid/generate");
 const cheerio = require("cheerio");
 const faFilePdf = require("@fortawesome/free-solid-svg-icons/faFilePdf.js");
@@ -649,6 +649,7 @@ function walkWithFootnotes(token, postId, footnotes) {
     token.type === "paragraph" &&
     token.raw
       .split("\n")
+      .filter(Boolean)
       .every((line) => line.startsWith("[" + FOOTNOTE_MARKER))
   ) {
     for (const line of token.raw.split("\n").filter(Boolean)) {

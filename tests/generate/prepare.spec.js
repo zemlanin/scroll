@@ -264,9 +264,9 @@ test("footnote before ticked code block", async (t) => {
     result.html,
     `
       <p>lorem <sup><a href="#fn:da4307d5:1" id="rfn:da4307d5:1" rel="footnote">1</a></sup></p>
-      <pre><code class="language-js"><span class="hljs-built_in">console</span>.log(<span class="hljs-string">"lorem"</span>);\n</code></pre>
+      <pre><code class="language-js"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">"lorem"</span>);\n</code></pre>
       <p>ipsum<sup><a href="#fn:da4307d5:2" id="rfn:da4307d5:2" rel="footnote">2</a></sup></p>
-      <pre><code class="language-js"><span class="hljs-built_in">console</span>.log(<span class="hljs-string">\`ipsum\`</span>);\n</code></pre>
+      <pre><code class="language-js"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">\`ipsum\`</span>);\n</code></pre>
       <div class="footnotes">
         <hr>
         <ol>

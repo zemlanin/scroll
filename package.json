@@ -30,7 +30,7 @@
     "feedparser": "^2.2.10",
     "fluent-ffmpeg": "^2.1.2",
     "formidable": "^1.2.2",
-    "highlight.js": "^10.1.2",
+    "highlight.js": "^11.4.0",
     "lodash.chunk": "^4.2.0",
     "lodash.groupby": "^4.6.0",
     "marked": "^4.0.10",

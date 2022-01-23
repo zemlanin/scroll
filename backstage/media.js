@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const { promisify } = require("util");
 const mime = require("mime");
-const formidable = require("formidable");
+const formidableModule = import("formidable");
 
 const fsPromises = {
   exists: promisify(fs.exists),
@@ -38,7 +38,7 @@ async function rmrf(filepath) {
   }
 }
 
-async function openFileMedia(src, filePath, db) {
+async function openFileMedia(src, mimeType, filePath, db) {
   const alreadyLoaded = await db.get("SELECT * from media WHERE src = ?1", [
     src,
   ]);
@@ -52,8 +52,6 @@ async function openFileMedia(src, filePath, db) {
   }
 
   const resp = await fsPromises.readFile(filePath);
-
-  const mimeType = mime.getType(src);
   const result = {
     id: getMediaId(),
     ext: mimeType
@@ -350,27 +348,25 @@ module.exports = {
       return sendToAuthProvider(req, res);
     }
 
+    const { default: formidable } = await formidableModule;
+
     const { files } = await new Promise((resolve, reject) => {
-      const form = formidable({ multiples: true });
+      const form = formidable();
       form.parse(req, (err, fields, files) => {
         if (err) {
           return reject(err);
         }
 
-        if (Array.isArray(files.files)) {
-          return resolve({ fields, files: files.files });
-        }
-
-        return resolve({ fields, files: [files.files] });
+        return resolve({ fields, files: files.files });
       });
     });
 
     const db = await req.db();
     let lastMedia = null;
     for (const f of files) {
-      const src = `:upload/size-${f.size}/${f.name}`;
-      lastMedia = await openFileMedia(src, f.path, db);
-      await fsPromises.unlink(f.path);
+      const src = `:upload/size-${f.size}/${f.originalFilename}`;
+      lastMedia = await openFileMedia(src, f.mimetype, f.filepath, db);
+      await fsPromises.unlink(f.filepath);
     }
 
     let location;

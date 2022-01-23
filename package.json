@@ -37,7 +37,7 @@
     "mime": "^2.4.6",
     "mustache": "^4.0.1",
     "nanoid": "^3.1.31",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^3.1.1",
     "normalize.css": "^8.0.1",
     "oembed-providers": "^1.0.20210622",
     "prettier": "^2.0.5",
@@ -63,7 +63,7 @@
     "extends": "eslint:recommended",
     "env": {
       "browser": false,
-      "es6": true,
+      "es2020": true,
       "node": true
     },
     "overrides": [
@@ -75,24 +75,32 @@
         ],
         "env": {
           "browser": true,
-          "es6": false,
+          "es2020": false,
           "node": false
         },
         "parserOptions": {
-          "ecmaVersion": 3
+          "ecmaVersion": 3,
+          "sourceType": "script"
         }
       },
       {
         "files": [
           "./backstage/templates/*.js"
         ],
+        "env": {
+          "browser": true,
+          "es2020": true,
+          "node": false
+        },
         "parserOptions": {
-          "ecmaVersion": 9
+          "ecmaVersion": 2020,
+          "sourceType": "script"
         }
       }
     ],
     "parserOptions": {
-      "ecmaVersion": 9
+      "ecmaVersion": 2020,
+      "sourceType": "module"
     },
     "rules": {
       "no-unused-vars": [

@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const sqlite = require("sqlite");
 const sqlite3 = require("sqlite3");
-const fetch = require("node-fetch");
+const fetch = import("node-fetch");
 const FeedParser = require("feedparser");
 
 const {

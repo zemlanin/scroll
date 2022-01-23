@@ -7,7 +7,7 @@ const { promisify } = require("util");
 const y = require("yassium");
 const mime = require("mime");
 const { marked } = require("marked");
-const nanoid = require("nanoid/generate");
+const { customAlphabet } = require("nanoid");
 const cheerio = require("cheerio");
 const faFilePdf = require("@fortawesome/free-solid-svg-icons/faFilePdf.js");
 
@@ -37,6 +37,21 @@ const SESSIONS_DB = path.resolve(
 );
 const LINKLIST_SOURCE_FEED = process.env.LINKLIST_SOURCE_FEED || null;
 const FOOTNOTE_MARKER = "^";
+
+const nanoid = {
+  link: customAlphabet(
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    10
+  ),
+  post: customAlphabet(
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    10
+  ),
+  media: customAlphabet(
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    26
+  ),
+};
 
 function isOwnMedia(href) {
   return (
@@ -1030,10 +1045,7 @@ async function loadIcu(db) {
 const getLinkId = () =>
   `link-${new Date().getFullYear()}-${(new Date().getMonth() + 1)
     .toString()
-    .padStart(2, "0")}-${nanoid(
-    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-    10
-  )}`;
+    .padStart(2, "0")}-${nanoid.link()}`;
 
 module.exports = {
   BLOG_TITLE,
@@ -1055,4 +1067,5 @@ module.exports = {
   writeFileWithGzip,
   unlinkFileWithGzip,
   getLinkId,
+  nanoid,
 };

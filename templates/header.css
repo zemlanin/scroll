@@ -667,6 +667,7 @@ article ul[data-gallery] {
   overflow-y: hidden;
   white-space: nowrap;
   scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
 }
 
 article ul[data-gallery] figure.card {
@@ -680,6 +681,7 @@ article ul[data-gallery] li {
   max-width: calc(100% - 4em);
   opacity: 1;
   position: relative;
+  scroll-snap-align: center;
 }
 
 article ul[data-gallery] li.before-centermost {

@@ -1,12 +1,9 @@
 const url = require("url");
-const _id = require("nanoid/generate");
+const { nanoid } = require("../common");
 const getPostId = () =>
   `post-${new Date().getFullYear()}-${(new Date().getMonth() + 1)
     .toString()
-    .padStart(2, "0")}-${_id(
-    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-    10
-  )}`;
+    .padStart(2, "0")}-${nanoid.post()}`;
 
 const { getSession, sendToAuthProvider } = require("./auth.js");
 const { getJson: getMediaJson } = require("./media.js");

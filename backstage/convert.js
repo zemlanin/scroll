@@ -16,13 +16,12 @@ const mime = require("mime");
 const sharp = require("sharp");
 const ffmpeg = require("fluent-ffmpeg");
 const isAnimatedGif = require("animated-gif-detector");
-const _id = require("nanoid/generate");
+const { nanoid } = require("../common");
 
 const { getSession, sendToAuthProvider } = require("./auth.js");
 const { DIST } = require("../common.js");
 
-const getMediaId = () =>
-  _id("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 26);
+const getMediaId = () => nanoid.media();
 
 const SHARP_SUPPORTED_INPUT_MIMETYPES = new Set([
   "image/gif",

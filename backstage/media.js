@@ -16,14 +16,12 @@ const fsPromises = {
 };
 const { getSession, sendToAuthProvider } = require("./auth.js");
 const { convertMedia, getConversionTags } = require("./convert.js");
-const { DIST, getMimeObj, embedCallback } = require("../common.js");
+const { DIST, getMimeObj, embedCallback, nanoid } = require("../common.js");
 const { render } = require("./render.js");
 
 const PAGE_SIZE = 20;
 
-const _id = require("nanoid/generate");
-const getMediaId = () =>
-  _id("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", 26);
+const getMediaId = () => nanoid.media();
 
 async function rmrf(filepath) {
   if (await fsPromises.exists(filepath)) {

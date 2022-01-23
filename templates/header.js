@@ -249,6 +249,8 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
+  function noop() {}
+
   function ignoreAbortError(e) {
     if (e && e.name === "AbortError") {
       return;
@@ -261,7 +263,7 @@ document.addEventListener("DOMContentLoaded", function () {
     v.setAttribute("autoplay", "");
 
     if (v.paused) {
-      v.play().catch(ignoreAbortError);
+      v.play(noop, ignoreAbortError);
     }
   }
 
@@ -629,6 +631,8 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
+  function noop() {}
+
   Array.prototype.forEach.call(
     document.querySelectorAll("button[data-share]"),
     function (b) {
@@ -639,12 +643,9 @@ document.addEventListener("DOMContentLoaded", function () {
         b.removeAttribute("hidden");
         b.setAttribute("data-share-state", "available");
         b.addEventListener("click", function () {
-          navigator
-            .share(payload)
-            .then(function () {
-              b.setAttribute("data-share-state", "done");
-            })
-            .catch(function () {});
+          navigator.share(payload).then(function () {
+            b.setAttribute("data-share-state", "done");
+          }, noop);
         });
       } else {
         b.setAttribute("hidden", 1);

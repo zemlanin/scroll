@@ -45,23 +45,27 @@ const BACKSTAGE_TEMPLATES = path.resolve(__dirname, "templates");
 const BLOG_TEMPLATES = path.resolve(__dirname, "..", "templates");
 
 const cleanCSS = new CleanCSS({
-  level: {
-    1: {
-      transform: function (propertyName, propertyValue, selector) {
-        if (
-          selector.indexOf("article") === -1 &&
-          selector !== "to" &&
-          selector !== "from"
-        ) {
-          return false;
-        }
+  plugins: [
+    {
+      level1: {
+        property: function keepArticleStyles(rule, property) {
+          const isArticleSpecificSelector = rule.indexOf("article") > -1;
+          const isKeyframe = rule === "to" || rule === "from";
+          const isCSSVariable = property.name.startsWith("--");
 
-        if (selector === "article" && propertyName === "margin-bottom") {
-          return false;
-        }
+          if (!isArticleSpecificSelector && !isKeyframe && !isCSSVariable) {
+            property.unused = true;
+            return;
+          }
+
+          // tidy up margins
+          if (rule === "article" && property.name === "margin-bottom") {
+            property.unused = true;
+          }
+        },
       },
     },
-  },
+  ],
 });
 
 const jsProcess = async (code) => {

@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const sqlite = require("sqlite");
 const sqlite3 = require("sqlite3");
-const fetch = import("node-fetch");
+const fetchModule = import("node-fetch");
 const FeedParser = require("feedparser");
 
 const {
@@ -22,6 +22,7 @@ const RETRY_TIMEOUT = 1000 * 60 * 30; // 30 minutes
 async function loadFreshFeed(db, stdout, _stderr) {
   const feedparser = new FeedParser({ normalize: true });
 
+  const { default: fetch } = await fetchModule;
   const res = await fetch(LINKLIST_SOURCE_FEED);
 
   if (res.status !== 200) {

@@ -120,21 +120,28 @@ const appendStaticHash = async (content, { tmpl }) => {
     .digest("base64url")
     .slice(0, 8)}`;
 };
-const getStaticsObject = async () => {
-  const result = {};
+const getStaticsObject = async (directory = STATICS) => {
+  let result = {};
 
-  for (const filename of await fsPromises.readdir(STATICS)) {
+  for (const filename of await fsPromises.readdir(directory)) {
     if ((filename && filename[0] == ".") || filename === "robots.txt") {
       continue;
     }
 
-    const filepath = path.resolve(STATICS, filename);
+    const filepath = path.resolve(directory, filename);
 
     if ((await fsPromises.lstat(filepath)).isDirectory()) {
-      throw new Error("getStaticsObject() doesn't support directories");
+      result = {
+        ...result,
+        ...(await getStaticsObject(filepath)),
+      };
+      continue;
     }
 
-    result[`/${filename}`] = await loadTemplate(filepath, appendStaticHash);
+    result[`/${path.relative(STATICS, filepath)}`] = await loadTemplate(
+      filepath,
+      appendStaticHash
+    );
   }
 
   return result;

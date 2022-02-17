@@ -83,21 +83,22 @@ async function copyStaticContent(
 
       await fsPromises.mkdir(destinationSubdirectory, { recursive: true });
 
-      stdout.write(`${filename} folder>\n`);
-
       await copyStaticContent(
         destinationSubdirectory,
         stdout,
         staticSubdirectory
       );
 
-      stdout.write(`${filename} folder<\n`);
-
       continue;
     }
 
     const mimeType = mime.getType(filename);
-    stdout.write(`${filename} ${mimeType}\n`);
+    stdout.write(
+      `${path.relative(
+        path.resolve(__dirname, "static"),
+        filepath
+      )} ${mimeType}\n`
+    );
 
     if (
       (mimeType && mimeType.startsWith("text/")) ||

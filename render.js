@@ -85,8 +85,8 @@ const translations = {
 };
 
 function translate() {
-  // DEBT use `getBlogObject().lang` as a fallback instead of hardcoded "ru"
-  const lang = this.lang || (this.blog && this.blog.lang) || "ru";
+  // DEBT use `getBlogObject().lang` as a fallback instead of hardcoded "uk"
+  const lang = this.lang || (this.blog && this.blog.lang) || "uk";
 
   if (lang === "en") {
     return function (text, render) {

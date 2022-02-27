@@ -982,7 +982,7 @@ async function getBlogObject(baseUrl) {
   return {
     title: BLOG_TITLE,
     url: url.resolve(baseUrl, "/"),
-    lang: "ru",
+    lang: "uk",
     author: {
       name: "Anton Verinov",
       twitter: "zemlanin",

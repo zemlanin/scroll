@@ -65,26 +65,45 @@ function uniq(arr) {
 
 const mkdirP = (p) => fsPromises.mkdir(p, { recursive: true });
 
-async function copyStaticContent(destination, stdout) {
-  const staticPath = path.resolve(__dirname, "static");
-
+async function copyStaticContent(
+  destination,
+  stdout,
+  staticPath = path.resolve(__dirname, "static")
+) {
   for (const filename of await fsPromises.readdir(staticPath)) {
-    if (filename && filename[0] == ".") {
+    if (filename && filename[0] == "." && filename !== ".well-known") {
       continue;
     }
 
     const filepath = path.resolve(staticPath, filename);
 
     if ((await fsPromises.lstat(filepath)).isDirectory()) {
-      throw new Error("copyStaticContent() doesn't support directories");
+      const staticSubdirectory = filepath;
+      const destinationSubdirectory = path.resolve(destination, filename);
+
+      await fsPromises.mkdir(destinationSubdirectory, { recursive: true });
+
+      await copyStaticContent(
+        destinationSubdirectory,
+        stdout,
+        staticSubdirectory
+      );
+
+      continue;
     }
 
     const mimeType = mime.getType(filename);
-    stdout.write(`${filename} ${mimeType}\n`);
+    stdout.write(
+      `${path.relative(
+        path.resolve(__dirname, "static"),
+        filepath
+      )} ${mimeType}\n`
+    );
 
     if (
-      mimeType.startsWith("text/") ||
-      mime === "application/javascript" ||
+      (mimeType && mimeType.startsWith("text/")) ||
+      mimeType === "application/javascript" ||
+      mimeType === "application/json" ||
       mimeType === "image/svg+xml"
     ) {
       await writeFileWithGzip(

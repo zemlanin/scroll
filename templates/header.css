@@ -833,6 +833,15 @@ header h2 {
   display: flex;
   flex-flow: row wrap;
   word-break: break-all;
+  align-items: baseline;
+}
+
+header h1 a:first-child::first-letter,
+header h2 a:first-child::first-letter {
+  font-family: Damion-z, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-size: 1.5em;
+  letter-spacing: 0.05em;
 }
 
 header h1,

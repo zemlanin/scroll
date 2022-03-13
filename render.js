@@ -187,6 +187,21 @@ async function blogRender(tmpl, data) {
       "buymeacoffee.svg": await loadTemplate(
         path.join(BLOG_TEMPLATES, "buymeacoffee.svg")
       ),
+      "damion.css": cssProcess(`
+        @font-face {
+          font-family: "Damion-z";
+          src: url(${await loadTemplate(
+            path.resolve(STATICS, "fonts", "Damion-z.woff2")
+          )}) format("woff2"),
+            url(${await loadTemplate(
+              path.resolve(STATICS, "fonts", "Damion-z.woff")
+            )}) format("woff"),
+            url(${await loadTemplate(
+              path.resolve(STATICS, "fonts", "Damion-z.ttf")
+            )}) format("truetype");
+          unicode-range: U+007A;
+        }
+      `),
     }
   );
 }

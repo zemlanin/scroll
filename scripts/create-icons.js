@@ -4,7 +4,7 @@ const { spawnSync } = require("child_process");
 const TextToSVG = require("text-to-svg");
 
 const textToSVG = TextToSVG.loadSync(
-  path.resolve(__dirname, "..", "static", "fonts", "Damion-Regular.ttf")
+  path.resolve(__dirname, "..", "templates", "fonts", "Damion-Regular.ttf")
 );
 
 const getSvg = (

@@ -23,7 +23,7 @@ async function loadTemplate(tmpl, processCallback) {
 
   if (processCallback) {
     return (loadTemplate.cache[tmpl] = await processCallback(
-      (await fsPromises.readFile(tmpl)).toString(),
+      await fsPromises.readFile(tmpl),
       { tmpl }
     ));
   }
@@ -40,6 +40,7 @@ const cleanCSS = new CleanCSS({
 
 const BLOG_TEMPLATES = path.resolve(__dirname, "templates");
 const jsProcess = async (code) => {
+  code = code.toString();
   if (code.includes("window.__statics__")) {
     const statics = JSON.stringify(await getStaticsObject());
 
@@ -49,7 +50,9 @@ const jsProcess = async (code) => {
   return m.code;
 };
 
-const cssProcess = (code) => cleanCSS.minify(code).styles;
+const cssProcess = (code) => cleanCSS.minify(code.toString()).styles;
+const dataUrlProcess = (type) => (code) =>
+  `data:${type};base64,${Buffer.from(code, "binary").toString("base64")}`;
 
 const translations = {
   ru: {
@@ -191,14 +194,9 @@ async function blogRender(tmpl, data) {
         @font-face {
           font-family: "Damion-z";
           src: url(${await loadTemplate(
-            path.resolve(STATICS, "fonts", "Damion-z.woff2")
-          )}) format("woff2"),
-            url(${await loadTemplate(
-              path.resolve(STATICS, "fonts", "Damion-z.woff")
-            )}) format("woff"),
-            url(${await loadTemplate(
-              path.resolve(STATICS, "fonts", "Damion-z.ttf")
-            )}) format("truetype");
+            path.resolve(BLOG_TEMPLATES, "fonts", "Damion-z.woff"),
+            dataUrlProcess("application/x-font-woff")
+          )}) format("woff");
           unicode-range: U+007A;
         }
       `),

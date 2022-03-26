@@ -386,6 +386,9 @@ module.exports = {
 
     if (req.post.delete) {
       if (existing) {
+        await db.run(`DELETE FROM converted_media_dimensions WHERE id = ?1`, {
+          1: existing.id,
+        });
         await db.run(`DELETE FROM converted_media WHERE id = ?1`, {
           1: existing.id,
         });

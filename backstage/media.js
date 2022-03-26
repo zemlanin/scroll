@@ -281,11 +281,20 @@ const mediaId = {
     }
 
     if (req.post && req.post.delete) {
+      await db.run(
+        `DELETE FROM converted_media_dimensions WHERE media_id = ?1`,
+        {
+          1: m.id,
+        }
+      );
       await db.run(`DELETE FROM converted_media WHERE media_id = ?1`, {
         1: m.id,
       });
       await rmrf(path.join(DIST, "media", m.id));
 
+      await db.run(`DELETE FROM media_dimensions WHERE id = ?1`, {
+        1: m.id,
+      });
       await db.run(`DELETE FROM media WHERE id = ?1`, {
         1: m.id,
       });

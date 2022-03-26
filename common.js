@@ -881,11 +881,22 @@ async function prepare(post, embedsLoader) {
     const teaser = await embedsLoader.load(teaserParagraphs.join("\n"));
 
     const parsedTeaser = teaser && cheerio.load(teaser);
-    opengraph.image = parsedTeaser
-      ? parsedTeaser("img").attr("src") ||
-        parsedTeaser("[poster]").attr("poster") ||
-        null
-      : null;
+
+    if (parsedTeaser) {
+      const teaserImg = parsedTeaser("img");
+
+      if (teaserImg && teaserImg.attr("src")) {
+        opengraph.image = teaserImg.attr("src");
+        opengraph.imageWidth = teaserImg.attr("width") || null;
+        opengraph.imageHeight = teaserImg.attr("height") || null;
+      } else {
+        const teaserPoster = parsedTeaser("[poster]");
+
+        if (teaserPoster && teaserPoster.attr("poster")) {
+          opengraph.image = teaserPoster.attr("poster");
+        }
+      }
+    }
 
     if (opengraph.image) {
       opengraph.image = prefixOwnMedia(opengraph.image);

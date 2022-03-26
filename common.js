@@ -267,7 +267,7 @@ function localEmbed(embed) {
   }
 
   if (hrefIsOwnMedia && mimeObj.text) {
-    return `<iframe src="${href}" width="640" height="360" frameborder="0" loading="lazy"></iframe>`;
+    return `<iframe src="${href}" width="640" height="360" frameborder="0"></iframe>`;
   }
 
   if (hrefIsOwnMedia && mimeObj.image) {

@@ -197,16 +197,14 @@ class OwnMediaDimensionsLoader {
         return;
       }
 
-      if (dimensions.width && !$this.attr("width")) {
-        $this.attr("width", dimensions.width);
-      }
+      if (!$this.attr("width") && !$this.attr("height")) {
+        if (dimensions.width) {
+          $this.attr("width", dimensions.width);
+        }
 
-      if (dimensions.height && !$this.attr("height")) {
-        $this.attr("height", dimensions.height);
-      }
-
-      if (dimensions.width && dimensions.height && !$this.attr("loading")) {
-        $this.attr("loading", "lazy");
+        if (dimensions.height) {
+          $this.attr("height", dimensions.height);
+        }
       }
     });
 

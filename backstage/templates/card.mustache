@@ -38,7 +38,6 @@
           {{# iframe.height}}height="{{iframe.height}}"{{/ iframe.height}}
           allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
           allowfullscreen="1"
-          loading="lazy"
         ></iframe>
       {{/ externalFrames }}
       {{^ externalFrames }}
@@ -69,11 +68,6 @@
                 height="{{img.height}}"
               {{/ img.height}}
               src="{{img.src}}"
-              {{# img.width}}
-                {{# img.height}}
-                  loading="lazy"
-                {{/ img.height}}
-              {{/ img.width}}
             >
           {{/ img }}
         </a>
@@ -95,11 +89,6 @@
                 height="{{img.height}}"
               {{/ img.height}}
               src="{{img.src}}"
-              {{# img.width}}
-                {{# img.height}}
-                  loading="lazy"
-                {{/ img.height}}
-              {{/ img.width}}
             >
           {{/ img }}
         {{/ audio }}
@@ -117,11 +106,6 @@
                   height="{{img.height}}"
                 {{/ img.height}}
                 src="{{img.src}}"
-                {{# img.width}}
-                  {{# img.height}}
-                    loading="lazy"
-                  {{/ img.height}}
-                {{/ img.width}}
               >
             {{/ img }}
           </a>

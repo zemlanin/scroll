@@ -1810,7 +1810,6 @@ module.exports = {
           ${card.description ? `title="${card.description}"` : ""}
           ${card.img.width ? `width=${card.img.width}` : ""}
           ${card.img.height ? `height=${card.img.height}` : ""}
-          ${card.img.width && card.img.height ? `loading="lazy"` : ""}
         />`;
       }
 

@@ -82,8 +82,8 @@ async function openFileMedia(src, mimeType, filePath, db) {
 
     dimensions = {
       size,
-      width: orientation || 0 >= 5 ? height : width,
-      height: orientation || 0 >= 5 ? width : height,
+      width: (orientation || 0) >= 5 ? height : width,
+      height: (orientation || 0) >= 5 ? width : height,
     };
   }
 

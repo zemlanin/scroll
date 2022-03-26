@@ -155,7 +155,7 @@ test("database with posts and embeds", async (t) => {
   const post4 = await fs.promises.readFile(path.join(tmpFolder, "4.html"));
   t.ok(
     post4.indexOf(
-      `<img src="https://example.com/media/example.png" alt="" loading="lazy" >`
+      `<img src="https://example.com/media/example.png" alt="">`
     ) > -1
   );
 
@@ -166,7 +166,7 @@ test("database with posts and embeds", async (t) => {
     cheerio.load(post5)(".card").html(),
     `
       <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
-        <img alt="Rick Astley - Never Gonna Give You Up (Video)" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg" loading="lazy">
+        <img alt="Rick Astley - Never Gonna Give You Up (Video)" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg">
       </a>
 
       <figcaption>
@@ -301,7 +301,6 @@ test("database with patched embeds", async (t) => {
         <img
           alt="Rick Astley - Never Gonna Give You Up (Video)"
           src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
-          loading="lazy"
         />
       </a>
 
@@ -324,7 +323,6 @@ test("database with patched embeds", async (t) => {
         <img
           alt="Rick Astley - Never Gonna Give You Up (Video)"
           src="https://youtube.example/media/rickroll.jpg"
-          loading="lazy"
         />
       </a>
 
@@ -347,7 +345,6 @@ test("database with patched embeds", async (t) => {
         <img
           alt="Rick Astley - Never Gonna Give You Up (Video)"
           src="https://youtube.example/media/rickroll.jpg"
-          loading="lazy"
         />
       </a>
 
@@ -370,7 +367,6 @@ test("database with patched embeds", async (t) => {
         <img
           alt="Rick Astley - Never Gonna Give You Up (Video)"
           src="https://youtube.example/media/rickroll.jpg"
-          loading="lazy"
         />
       </a>
 
@@ -390,7 +386,6 @@ test("database with patched embeds", async (t) => {
         <img
           alt="Rick Astley - Never Gonna Give You Up (Video)"
           src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
-          loading="lazy"
         />
       </a>
 

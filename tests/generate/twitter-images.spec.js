@@ -133,7 +133,7 @@ test("twitter with a photo", async (t) => {
     cheerio.load(post.toString())("article .card").html(),
     `
       <a href="https://twitter.com/zemlanin/status/1322221511776886784">
-        <img alt="Anton Verinov on Twitter" src="https://pbs.twimg.com/media/Ell5c5LXYAIR0ZK.jpg:large" loading="lazy" />
+        <img alt="Anton Verinov on Twitter" src="https://pbs.twimg.com/media/Ell5c5LXYAIR0ZK.jpg:large" />
       </a>
 
       <figcaption>
@@ -195,7 +195,7 @@ test("twitter with a video", async (t) => {
     cheerio.load(post.toString())("article .card").html(),
     `
       <a href="https://twitter.com/zemlanin/status/1317458198153015303">
-        <img alt="Anton Verinov on Twitter" src="https://pbs.twimg.com/ext_tw_video_thumb/1317458177013796864/pu/img/R34fXJahvnaWxFPD.jpg" loading="lazy" />
+        <img alt="Anton Verinov on Twitter" src="https://pbs.twimg.com/ext_tw_video_thumb/1317458177013796864/pu/img/R34fXJahvnaWxFPD.jpg" />
       </a>
 
       <figcaption>

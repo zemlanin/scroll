@@ -944,6 +944,30 @@ async function prepare(post, embedsLoader) {
       maxWidth: 720,
     });
     html = await embedsLoader.load(html);
+
+    if (!post.internal) {
+      const parsedPost = cheerio.load(html);
+
+      if (parsedPost) {
+        const firstImg = parsedPost("img");
+
+        if (firstImg && firstImg.attr("src")) {
+          opengraph.image = firstImg.attr("src");
+          opengraph.imageWidth = firstImg.attr("width") || null;
+          opengraph.imageHeight = firstImg.attr("height") || null;
+        } else {
+          const firstPoster = parsedPost("[poster]");
+
+          if (firstPoster && firstPoster.attr("poster")) {
+            opengraph.image = firstPoster.attr("poster");
+          }
+        }
+      }
+
+      if (opengraph.image) {
+        opengraph.image = prefixOwnMedia(opengraph.image);
+      }
+    }
   }
 
   let status;

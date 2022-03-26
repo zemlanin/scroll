@@ -154,9 +154,8 @@ test("database with posts and embeds", async (t) => {
 
   const post4 = await fs.promises.readFile(path.join(tmpFolder, "4.html"));
   t.ok(
-    post4.indexOf(
-      `<img src="https://example.com/media/example.png" alt="">`
-    ) > -1
+    post4.indexOf(`<img src="https://example.com/media/example.png" alt="">`) >
+      -1
   );
 
   const post5 = (

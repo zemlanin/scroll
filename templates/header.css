@@ -765,6 +765,7 @@ article ul[data-gallery] li.dim figure.card > a {
 .linkblog-after-post ul li img {
   max-width: 100%;
   height: auto;
+  min-height: 1px;
 }
 
 @media (max-width: 30em) {

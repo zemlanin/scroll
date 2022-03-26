@@ -8,12 +8,12 @@
   {{^internal}}
   <div class="share-and-time">
     {{#public}}
-      <button title="{{#t}}Share{{/t}}" data-share data-share-url="{{{url}}}" data-share-state="unknown">
+      <button title="{{#post}}{{#t}}Share{{/t}}{{/post}}" data-share data-share-url="{{{url}}}" data-share-state="unknown">
         <span data-share-default>{{#fas}}share{{/fas}}</span>
         <span data-share-done>{{#fas}}check{{/fas}}</span>
       </button>
       {{#blog.author.buymeacoffee}}
-        <a href="https://www.buymeacoffee.com/{{blog.author.buymeacoffee}}" target="_blank" title="{{#t}}Buy me a coffee{{/t}}" class="print:hidden">{{> buymeacoffee.svg }}<span>{{#t}}Buy me a coffee{{/t}}</span></a>
+        <a href="https://www.buymeacoffee.com/{{blog.author.buymeacoffee}}" target="_blank" title="{{#post}}{{#t}}Buy me a coffee{{/t}}{{/post}}" class="print:hidden">{{> buymeacoffee.svg }}<span>{{#post}}{{#t}}Buy me a coffee{{/t}}{{/post}}</span></a>
       {{/blog.author.buymeacoffee}}
     {{/public}}
     <div style="flex-grow: 1; display: flex;"></div>

@@ -89,7 +89,11 @@ const translations = {
 
 function translate() {
   // DEBT use `getBlogObject().lang` as a fallback instead of hardcoded "uk"
-  const lang = this.lang || (this.blog && this.blog.lang) || "uk";
+  const lang =
+    this.lang ||
+    (this.post && this.post.lang) ||
+    (this.blog && this.blog.lang) ||
+    "ru";
 
   if (lang === "en") {
     return function (text, render) {

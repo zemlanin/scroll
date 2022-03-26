@@ -978,11 +978,12 @@ async function getBlogObject(baseUrl) {
   }
 
   const statics = await getStaticsObject();
+  const lang = "uk";
 
   return {
     title: BLOG_TITLE,
     url: url.resolve(baseUrl, "/"),
-    lang: "uk",
+    lang,
     author: {
       name: "Anton Verinov",
       twitter: "zemlanin",
@@ -993,6 +994,7 @@ async function getBlogObject(baseUrl) {
       url: url.resolve(baseUrl, "/rss.xml"),
     },
     linkblog: {
+      lang,
       title: `Linkblog • ${BLOG_TITLE}`,
       url: url.resolve(baseUrl, "/linkblog.html"),
       feed: {
@@ -1001,6 +1003,7 @@ async function getBlogObject(baseUrl) {
       },
     },
     archive: {
+      lang,
       url: url.resolve(baseUrl, "/archive.html"),
     },
     static: {

@@ -1810,14 +1810,14 @@ module.exports = {
           ${card.description ? `title="${card.description}"` : ""}
           ${card.img.width ? `width=${card.img.width}` : ""}
           ${card.img.height ? `height=${card.img.height}` : ""}
-          loading="lazy"
+          ${card.img.width && card.img.height ? `loading="lazy"` : ""}
         />`;
       }
 
+      // TODO: restore lazy loading if/when `img` has known dimensions
       return `<img
         src="${card.url}"
         title="${card.description || ""}"
-        loading="lazy"
       />`;
     }
 

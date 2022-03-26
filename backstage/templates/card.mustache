@@ -69,7 +69,11 @@
                 height="{{img.height}}"
               {{/ img.height}}
               src="{{img.src}}"
-              loading="lazy"
+              {{# img.width}}
+                {{# img.height}}
+                  loading="lazy"
+                {{/ img.height}}
+              {{/ img.width}}
             >
           {{/ img }}
         </a>
@@ -91,7 +95,11 @@
                 height="{{img.height}}"
               {{/ img.height}}
               src="{{img.src}}"
-              loading="lazy"
+              {{# img.width}}
+                {{# img.height}}
+                  loading="lazy"
+                {{/ img.height}}
+              {{/ img.width}}
             >
           {{/ img }}
         {{/ audio }}
@@ -109,7 +117,11 @@
                   height="{{img.height}}"
                 {{/ img.height}}
                 src="{{img.src}}"
-                loading="lazy"
+                {{# img.width}}
+                  {{# img.height}}
+                    loading="lazy"
+                  {{/ img.height}}
+                {{/ img.width}}
               >
             {{/ img }}
           </a>

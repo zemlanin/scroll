@@ -45,7 +45,11 @@
             {{# img.height}}
               height="{{img.height}}"
             {{/ img.height}}
-            loading="lazy"
+            {{# img.width}}
+              {{# img.height}}
+                loading="lazy"
+              {{/ img.height}}
+            {{/ img.width}}
           >
         </a>
       </li>

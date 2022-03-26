@@ -206,8 +206,9 @@ function localEmbed(embed) {
       ? prefixOwnMedia(embed.poster)
       : pdfPlaceholder(href);
 
+    // TODO: restore lazy loading if/when `img` has known dimensions
     return `<a class="embedded-pdf" href="${href}">
-      <img src="${imgSrc}" loading="lazy">
+      <img src="${imgSrc}">
     </a>`;
   }
 
@@ -271,7 +272,8 @@ function localEmbed(embed) {
   }
 
   if (hrefIsOwnMedia && mimeObj.image) {
-    return `<img src="${href}" alt="${embed.title || ""}" loading="lazy">`;
+    // TODO: restore lazy loading if/when `img` has known dimensions
+    return `<img src="${href}" alt="${embed.title || ""}">`;
   }
 
   return `<x-embed>${JSON.stringify(embed)}</x-embed>`;
@@ -351,7 +353,8 @@ function embedCallback(href, title, text) {
     return localEmbed({ href });
   }
 
-  return ogImage(href, title, text).replace(/(\/?>)$/, ' loading="lazy" $1');
+  // TODO: restore lazy loading if/when `img` has known dimensions
+  return ogImage(href, title, text); //.replace(/(\/?>)$/, ' loading="lazy" $1');
 }
 
 renderer.image = embedCallback;

@@ -301,6 +301,40 @@ async function convertMedia(db, tag, blob, mediaId, mimeType, destination) {
     }
   );
 
+  let dimensions = null;
+
+  const convertedMimeType = mime.getType(result.ext);
+  if (SHARP_SUPPORTED_INPUT_MIMETYPES.has(convertedMimeType)) {
+    const { size, width, height, orientation } = await sharp(
+      converted
+    ).metadata();
+
+    dimensions = {
+      size,
+      width: orientation || 0 >= 5 ? height : width,
+      height: orientation || 0 >= 5 ? width : height,
+    };
+  }
+
+  if (dimensions) {
+    await db.run(
+      `
+        INSERT INTO converted_media_dimensions
+        (id, media_id, tag, size, width, height, duration_ms)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)
+      `,
+      {
+        1: result.id,
+        2: result.media_id,
+        3: result.tag,
+        4: dimensions.size,
+        5: dimensions.width,
+        6: dimensions.height,
+        7: dimensions.duration_ms,
+      }
+    );
+  }
+
   const dpath = path.join(destination, mediaId);
 
   if (!(await fsPromises.exists(dpath))) {
@@ -313,6 +347,7 @@ async function convertMedia(db, tag, blob, mediaId, mimeType, destination) {
 }
 
 module.exports = {
+  SHARP_SUPPORTED_INPUT_MIMETYPES,
   getConversionTags,
   convertMedia,
   post: async (req, res) => {

@@ -4,6 +4,7 @@ const path = require("path");
 const { promisify } = require("util");
 const mime = require("mime");
 const formidableModule = import("formidable");
+const sharp = require("sharp");
 
 const fsPromises = {
   exists: promisify(fs.exists),
@@ -15,7 +16,11 @@ const fsPromises = {
   copyFile: promisify(fs.copyFile),
 };
 const { getSession, sendToAuthProvider } = require("./auth.js");
-const { convertMedia, getConversionTags } = require("./convert.js");
+const {
+  SHARP_SUPPORTED_INPUT_MIMETYPES,
+  convertMedia,
+  getConversionTags,
+} = require("./convert.js");
 const { DIST, getMimeObj, embedCallback, nanoid } = require("../common.js");
 const { render } = require("./render.js");
 
@@ -70,6 +75,31 @@ async function openFileMedia(src, mimeType, filePath, db) {
     }
   );
 
+  let dimensions = null;
+
+  if (SHARP_SUPPORTED_INPUT_MIMETYPES.has(mimeType)) {
+    const { size, width, height, orientation } = await sharp(resp).metadata();
+
+    dimensions = {
+      size,
+      width: orientation || 0 >= 5 ? height : width,
+      height: orientation || 0 >= 5 ? width : height,
+    };
+  }
+
+  if (dimensions) {
+    await db.run(
+      "INSERT INTO media_dimensions (id, size, width, height, duration_ms) VALUES (?1, ?2, ?3, ?4, ?5)",
+      {
+        1: result.id,
+        2: dimensions.size,
+        3: dimensions.width,
+        4: dimensions.height,
+        5: dimensions.duration_ms,
+      }
+    );
+  }
+
   await fsPromises.copyFile(
     filePath,
     path.join(DIST, "media", `${result.id}.${result.ext}`)
@@ -91,6 +121,18 @@ async function openFileMedia(src, mimeType, filePath, db) {
   }
 
   return result;
+}
+
+function getReadableSize(size) {
+  if (size < 1024) {
+    return `${size}B`;
+  }
+
+  if (size < Math.pow(1024, 2)) {
+    return `${Math.floor(size / 1024)}KB`;
+  }
+
+  return `${Math.floor(size / Math.pow(1024, 2))}MB`;
 }
 
 const mediaId = {
@@ -125,6 +167,20 @@ const mediaId = {
       res.end();
       return;
     }
+
+    const dimensions = await db.get(
+      `
+        SELECT
+          id,
+          size,
+          width,
+          height,
+          duration_ms
+        FROM media_dimensions
+        WHERE id = ?1
+      `,
+      { 1: m.id }
+    );
 
     const existingConversions = await db.all(
       `
@@ -190,6 +246,14 @@ const mediaId = {
         ),
         type: getMimeObj(m.ext),
       },
+      dimensions: dimensions
+        ? {
+            ...dimensions,
+            size_readable: dimensions.size
+              ? getReadableSize(dimensions.size)
+              : dimensions.size,
+          }
+        : null,
     });
   },
   post: async (req, res) => {

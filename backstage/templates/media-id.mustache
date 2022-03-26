@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        {{> bulma.css}}
+      {{> bulma.css}}
     </style>
     <style>
       nav {
@@ -79,6 +79,15 @@
             </form>
             {{/posts}}
           </div>
+          {{#dimensions}}
+            <span class="title is-5">dimensions:</span>
+            <ul>
+              {{#size}}<li>size: {{size_readable}}</li>{{/size}}
+              {{#width}}<li>width: {{width}}</li>{{/width}}
+              {{#height}}<li>height: {{height}}</li>{{/height}}
+              {{#duration_ms}}<li>duration: {{duration_readable}}</li>{{/duration_ms}}
+            </ul>
+          {{/dimensions}}
           <span class="title is-4">conversions:</span>
           {{^existingConversions}}
             {{^possibleConversions}}

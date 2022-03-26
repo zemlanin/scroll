@@ -1814,7 +1814,6 @@ module.exports = {
         />`;
       }
 
-      // TODO: restore lazy loading if/when `img` has known dimensions
       return `<img
         src="${card.url}"
         title="${card.description || ""}"

@@ -1,4 +1,7 @@
+const { URL } = require("url");
+
 const cheerio = require("cheerio");
+const common = require("./common");
 
 const load = cheerio.load;
 
@@ -103,12 +106,122 @@ function overwriteFromEmbed(card, embed) {
   return result;
 }
 
+class OwnMediaDimensionsLoader {
+  constructor(db) {
+    this.db = db;
+
+    this.cache = {};
+  }
+
+  async query(urls) {
+    for (const url of urls) {
+      if (!url || this.cache[url] || !common.isOwnMedia(url)) {
+        continue;
+      }
+
+      let dimensions = null;
+
+      const { pathname } = new URL(url, "http://example.com/");
+
+      // `['', 'media', mediaId (`id` or `id.ext`), conversion (`undefined` or `tag.ext`)]`
+      const [mediaId, conversion] = pathname.split("/").slice(2);
+
+      if (conversion) {
+        const [tag] = conversion.split(".");
+
+        dimensions = await this.db.get(
+          `
+            SELECT size, width, height, duration_ms
+            FROM converted_media_dimensions
+            WHERE media_id = ?1 AND tag = ?2
+            LIMIT 1
+          `,
+          { 1: mediaId, 2: tag }
+        );
+      } else if (mediaId) {
+        const [id] = mediaId.split(".");
+
+        dimensions = await this.db.get(
+          `
+            SELECT size, width, height, duration_ms
+            FROM media_dimensions
+            WHERE id = ?1
+            LIMIT 1
+          `,
+          { 1: id }
+        );
+      }
+
+      this.cache[url] = dimensions || {};
+    }
+
+    return urls.reduce((acc, url) => {
+      return [...acc, this.cache[url]];
+    }, []);
+  }
+
+  async load(html) {
+    const $ = cheerio.load(html);
+
+    const urlsToLoad = [];
+
+    $("img[src]").each(function () {
+      const $this = $(this);
+      const src = $this.attr("src");
+
+      if (!src) {
+        return;
+      }
+
+      urlsToLoad.push(src);
+    });
+
+    if (!urlsToLoad.length) {
+      return html;
+    }
+
+    await this.query(urlsToLoad);
+
+    const cache = this.cache;
+
+    $("img[src]").each(function () {
+      const $this = $(this);
+
+      const src = $this.attr("src");
+      if (!src) {
+        return;
+      }
+
+      const dimensions = cache[src];
+      if (!dimensions) {
+        return;
+      }
+
+      if (dimensions.width && !$this.attr("width")) {
+        $this.attr("width", dimensions.width);
+      }
+
+      if (dimensions.height && !$this.attr("height")) {
+        $this.attr("height", dimensions.height);
+      }
+
+      if (dimensions.width && dimensions.height && !$this.attr("loading")) {
+        $this.attr("loading", "lazy");
+      }
+    });
+
+    return $("body").html();
+  }
+}
+
 module.exports = class EmbedsLoader {
   constructor(db, insertOnLoad = true) {
     this.db = db;
     this.insertOnLoad = insertOnLoad;
 
     this.cache = {};
+
+    this.ownMediaDimensionsLoader = new OwnMediaDimensionsLoader(db);
   }
 
   async query(urls) {
@@ -189,7 +302,7 @@ module.exports = class EmbedsLoader {
     });
 
     if (!urlsToLoad.length) {
-      return html;
+      return await this.ownMediaDimensionsLoader.load(html);
     }
 
     await this.query(urlsToLoad);
@@ -225,7 +338,7 @@ module.exports = class EmbedsLoader {
       $this.replaceWith(`<a href="${href}">${text || href}</a>`);
     });
 
-    return $("body").html();
+    return await this.ownMediaDimensionsLoader.load(await $("body").html());
   }
 };
 

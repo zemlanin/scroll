@@ -164,7 +164,7 @@ test("database with posts and embeds", async (t) => {
   t.equalHtml(
     cheerio.load(post5)(".card").html(),
     `
-      <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
+      <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720" data-full-width>
         <img alt="Rick Astley - Never Gonna Give You Up (Video)" src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg">
       </a>
 
@@ -296,7 +296,7 @@ test("database with patched embeds", async (t) => {
   t.equalHtml(
     cheerio.load(post10)(".card").html(),
     `
-      <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
+      <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720" data-full-width>
         <img
           alt="Rick Astley - Never Gonna Give You Up (Video)"
           src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"
@@ -318,7 +318,7 @@ test("database with patched embeds", async (t) => {
   t.equalHtml(
     cheerio.load(post11)(".card").html(),
     `
-      <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
+      <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720" data-full-width>
         <img
           alt="Rick Astley - Never Gonna Give You Up (Video)"
           src="https://youtube.example/media/rickroll.jpg"
@@ -340,7 +340,7 @@ test("database with patched embeds", async (t) => {
   t.equalHtml(
     cheerio.load(post12)(".card").html(),
     `
-      <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
+      <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720" data-full-width>
         <img
           alt="Rick Astley - Never Gonna Give You Up (Video)"
           src="https://youtube.example/media/rickroll.jpg"
@@ -362,7 +362,7 @@ test("database with patched embeds", async (t) => {
   t.equalHtml(
     cheerio.load(post13)(".card", post13).html(),
     `
-      <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
+      <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720" data-full-width>
         <img
           alt="Rick Astley - Never Gonna Give You Up (Video)"
           src="https://youtube.example/media/rickroll.jpg"
@@ -381,7 +381,7 @@ test("database with patched embeds", async (t) => {
   t.equalHtml(
     cheerio.load(post14)(".card").html(),
     `
-      <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720">
+      <a href="https://www.youtube.example/watch?v=dQw4w9WgXcQ" class="future-frame" data-src="https://www.youtube.example/embed/dQw4w9WgXcQ" data-width="1280" data-height="720" data-full-width>
         <img
           alt="Rick Astley - Never Gonna Give You Up (Video)"
           src="https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg"

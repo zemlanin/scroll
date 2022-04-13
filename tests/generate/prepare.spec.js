@@ -927,7 +927,7 @@ test("show embed in teaser", async (t) => {
     `
       <p>
         <figure class="card">
-          <a href="https://www.youtube.com/watch?v=vEUylyDMFIA" class="future-frame" data-src="https://www.youtube.com/embed/vEUylyDMFIA?autoplay=1" data-width="480" data-height="360">
+          <a href="https://www.youtube.com/watch?v=vEUylyDMFIA" class="future-frame" data-src="https://www.youtube.com/embed/vEUylyDMFIA?autoplay=1" data-width="480" data-height="360" data-full-width>
             <img alt="React with mustaches" src="/media/jjxvmnCEDWrO9oSohxjhH68Pbc/fit1600.jpeg">
           </a>
 

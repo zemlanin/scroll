@@ -104,9 +104,14 @@ document.addEventListener("DOMContentLoaded", function () {
       target.getAttribute("data-src") || target.getAttribute("href")
     );
     i.setAttribute("frameborder", 0);
-    i.setAttribute("width", width);
+    i.setAttribute(
+      "width",
+      target.hasAttribute("data-full-width") ? "100%" : width
+    );
     i.setAttribute("height", 0);
-    i.style.width = width + "px";
+    i.style.width = target.hasAttribute("data-full-width")
+      ? "100%"
+      : width + "px";
     i.style.height = 0;
     i.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture");
     i.setAttribute("allowfullscreen", 1);

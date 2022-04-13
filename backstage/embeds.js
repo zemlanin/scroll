@@ -1621,6 +1621,7 @@ module.exports = {
           src: videoIframe.url,
           width: videoIframe.width || 640,
           height: videoIframe.height || 360,
+          _fullWidth: true,
         };
 
         const shouldAutoplay =

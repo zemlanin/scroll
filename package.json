@@ -44,7 +44,7 @@
     "request": "^2.88.2",
     "request-promise-native": "^1.0.9",
     "rsync": "^0.6.1",
-    "sharp": "^0.29.2",
+    "sharp": "^0.30.5",
     "sqlite": "^4.0.12",
     "sqlite3": "^5.0.2",
     "terser": "^5.5.1",

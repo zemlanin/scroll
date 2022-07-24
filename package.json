@@ -44,9 +44,9 @@
     "request": "^2.88.2",
     "request-promise-native": "^1.0.9",
     "rsync": "^0.6.1",
-    "sharp": "^0.29.2",
+    "sharp": "^0.30.7",
     "sqlite": "^4.0.12",
-    "sqlite3": "^5.0.2",
+    "sqlite3": "^5.0.3",
     "terser": "^5.5.1",
     "url-pattern": "^1.0.3",
     "yassium": "^1.1.0"

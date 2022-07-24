@@ -1662,18 +1662,6 @@ module.exports = {
           height: image.height,
           user_generated: image.user_generated,
         };
-
-        if (
-          isTwitterCard(card.url) &&
-          !card.img.user_generated &&
-          card.img.src.includes("ext_tw_video_thumb")
-        ) {
-          // twitter doesn't include videos in opengraph tags
-          // and doesn't set `og:image:user_generated` for video thumbnails
-          // (while still using avatars as `og:image` for tweets without media)
-
-          card.img.user_generated = true;
-        }
       }
     }
 
@@ -1724,7 +1712,7 @@ module.exports = {
         !card.audio &&
         !card.video &&
         !card.iframe &&
-        (!card.img || !card.img.user_generated)
+        (!card.img || card.img.src.includes("profile_images"))
       ) {
         card.quote = card.description;
         card.description = "";

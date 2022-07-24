@@ -639,16 +639,6 @@ const isCoubCard = (cardURL) => {
   return hostname === "coub.com" || hostname.endsWith(".coub.com");
 };
 
-// const isNebulaCard = (cardURL) => {
-//   const hostname = cardURL ? new URL(cardURL).hostname : "";
-//   return (
-//     hostname === "nebula.app" ||
-//     hostname.endsWith(".nebula.app") ||
-//     hostname === "watchnebula.com" ||
-//     hostname.endsWith(".watchnebula.com")
-//   );
-// };
-
 const shouldDescriptionBeTruncated = (cardURL) => {
   if (isTwitterCard(cardURL)) {
     return false;
@@ -911,7 +901,7 @@ async function getEmbedsList(req, _res) {
 }
 
 function getUserAgent(_url) {
-  // `Bot` in the user-agent helps with loading twitter.com and nebula.app opengraph data
+  // `Bot` in the user-agent helps with loading twitter.com opengraph data
   return "Scroll-EmbedsBot (+https://zemlan.in)";
 }
 

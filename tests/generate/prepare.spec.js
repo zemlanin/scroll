@@ -507,7 +507,7 @@ test("poster as a opengraph image", async (t) => {
         playsinline
         src="https://example.com/media/x/gifv.mp4"
         poster="https://example.com/media/x/fit1000.png"
-        autoplay muted loop
+        autoplay muted loop disableRemotePlayback
       ></video></p>
 
       <p><em>some description</em></p>
@@ -547,17 +547,13 @@ test("media", async (t) => {
         playsinline
         src="https://example.com/media/w/gifv.mp4"
         title="gif &gt;_&lt;"
-        autoplay
-        muted
-        loop
+        autoplay muted loop disableRemotePlayback
       ></video></p>
       <p><video
         playsinline
         src="https://example.com/media/x/gifv.mp4"
         poster="https://example.com/media/x/fit1000.png"
-        autoplay
-        muted
-        loop
+        autoplay muted loop disableRemotePlayback
       ></video></p>
       <p>
         <a class="embedded-pdf" href="https://example.com/media/y.pdf">
@@ -590,17 +586,13 @@ test("media", async (t) => {
         playsinline
         src="https://example.com/media/w/gifv.mp4"
         title="gif &gt;_&lt;"
-        autoplay
-        muted
-        loop
+        autoplay muted loop disableRemotePlayback
       ></video></p>
       <p><video
         playsinline
         src="https://example.com/media/x/gifv.mp4"
         poster="https://example.com/media/x/fit1000.png"
-        autoplay
-        muted
-        loop
+        autoplay muted loop disableRemotePlayback
       ></video></p>
       <p>
         <a class="embedded-pdf" href="https://example.com/media/y.pdf">
@@ -671,17 +663,13 @@ test("embed code block", async (t) => {
       <p><video
         playsinline
         src="https://example.com/media/w/gifv.mp4"
-        autoplay
-        muted
-        loop
+        autoplay muted loop disableRemotePlayback
       ></video></p>
       <p><video
         playsinline
         src="https://example.com/media/x/gifv.mp4"
         poster="https://example.com/media/x/fit1000.png"
-        autoplay
-        muted
-        loop
+        autoplay muted loop disableRemotePlayback
       ></video></p>
       <p>
         <a class="embedded-pdf" href="https://example.com/media/y.pdf">
@@ -720,17 +708,13 @@ test("embed code block", async (t) => {
       <p><video
         playsinline
         src="https://example.com/media/w/gifv.mp4"
-        autoplay
-        muted
-        loop
+        autoplay muted loop disableRemotePlayback
       ></video></p>
       <p><video
         playsinline
         src="https://example.com/media/x/gifv.mp4"
         poster="https://example.com/media/x/fit1000.png"
-        autoplay
-        muted
-        loop
+        autoplay muted loop disableRemotePlayback
       ></video></p>
       <p>
         <a class="embedded-pdf" href="https://example.com/media/y.pdf">

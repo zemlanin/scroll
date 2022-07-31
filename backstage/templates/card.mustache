@@ -9,7 +9,7 @@
       <video playsinline
         src="{{video.src}}"
         {{#video.loop}}
-          autoplay muted loop
+          autoplay muted loop disableRemotePlayback
         {{/video.loop}}
         {{^video.loop}}
           controls

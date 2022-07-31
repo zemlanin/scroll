@@ -1773,7 +1773,7 @@ module.exports = {
     ) {
       return `<video
         playsinline
-        autoplay muted loop
+        autoplay muted loop disableRemotePlayback
         src="${card.video.src}"
         ${card.description ? `title="${card.description}"` : ""}
         ${card.video.width ? `width=${card.video.width}` : ""}

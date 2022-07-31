@@ -192,7 +192,7 @@ function localEmbed(embed) {
       const isOwnGIFV = hrefIsOwnMedia && href.indexOf("/gifv.mp4") > -1;
 
       if (gifv || isOwnGIFV) {
-        attrs += `autoplay muted loop `;
+        attrs += `autoplay muted loop disableRemotePlayback `;
       } else {
         attrs += `controls preload="none" `;
       }

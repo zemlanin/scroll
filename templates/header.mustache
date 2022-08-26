@@ -33,32 +33,35 @@
   {{#blog.author.twitter}}<meta name="twitter:creator" content="@{{blog.author.twitter}}" />{{/blog.author.twitter}}
   <meta property="og:site_name" content="{{blog.title}}" />
   {{#post}}
+    {{^public}}
+      <meta name="referrer" content="origin" />
+    {{/public}}
     {{^internal}}
-    {{#opengraph}}
-      <meta property="og:url" content="{{{url}}}" />
-      <meta property="og:title" content="{{title}}" />
-      {{#description}}
-        <meta name="description" content="{{description}}" />
-        <meta property="og:description" content="{{description}}" />
-      {{/description}}
-      {{#image}}
-        <meta property="og:image" content="{{{image}}}" />
-        {{#imageWidth}}
-          <meta property="og:image:width" content="{{imageWidth}}" />
-        {{/imageWidth}}
-        {{#imageHeight}}
-          <meta property="og:image:height" content="{{imageHeight}}" />
-        {{/imageHeight}}
-        <meta property="twitter:card" content="summary_large_image" />
-      {{/image}}
-      {{#locale}}
-        <meta property="og:locale" content="{{locale}}" />
-      {{/locale}}
-      <meta property="article:published_time" content="{{published_time}}" />
-      {{#modified_time}}
-        <meta property="article:modified_time" content="{{modified_time}}" />
-      {{/modified_time}}
-    {{/opengraph}}
+      {{#opengraph}}
+        <meta property="og:url" content="{{{url}}}" />
+        <meta property="og:title" content="{{title}}" />
+        {{#description}}
+          <meta name="description" content="{{description}}" />
+          <meta property="og:description" content="{{description}}" />
+        {{/description}}
+        {{#image}}
+          <meta property="og:image" content="{{{image}}}" />
+          {{#imageWidth}}
+            <meta property="og:image:width" content="{{imageWidth}}" />
+          {{/imageWidth}}
+          {{#imageHeight}}
+            <meta property="og:image:height" content="{{imageHeight}}" />
+          {{/imageHeight}}
+          <meta property="twitter:card" content="summary_large_image" />
+        {{/image}}
+        {{#locale}}
+          <meta property="og:locale" content="{{locale}}" />
+        {{/locale}}
+        <meta property="article:published_time" content="{{published_time}}" />
+        {{#modified_time}}
+          <meta property="article:modified_time" content="{{modified_time}}" />
+        {{/modified_time}}
+      {{/opengraph}}
     {{/internal}}
   {{/post}}
   <title>

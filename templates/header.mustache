@@ -21,22 +21,21 @@
   <link rel="me" href="https://github.com/zemlanin">
   <link rel="me" href="https://t.me/zemlanin">
 
-  {{#post}}{{^public}}<meta name="robots" content="noindex">{{/public}}{{/post}}
+  {{#post}}{{^public}}
+    <meta name="robots" content="noindex" />
+    <meta name="referrer" content="origin" />
+  {{/public}}{{/post}}
   {{#post}}{{#public}}<link rel="canonical" href="{{{post.url}}}">{{/public}}{{/post}}
   {{#index}}<link rel="canonical" href="{{{blog.url}}}">{{/index}}
-  {{#pagination}}<link rel="canonical" href="{{{pagination.url}}}">{{/pagination}}
-  {{#archive}}<link rel="canonical" href="{{{blog.archive.url}}}">{{/archive}}
-  {{#linkblog}}<link rel="canonical" href="{{{blog.linkblog.url}}}">{{/linkblog}}
+  {{#pagination}}<meta name="robots" content="noindex" />{{/pagination}}
+  {{#archive}}<meta name="robots" content="noindex" />{{/archive}}
+  {{#linkblog}}<meta name="robots" content="noindex" />{{/linkblog}}
 
   {{#blog.author.name}}<meta name="author" content="{{blog.author.name}}">{{/blog.author.name}}
   <meta name="twitter:card" content="summary" />
   {{#blog.author.twitter}}<meta name="twitter:creator" content="@{{blog.author.twitter}}" />{{/blog.author.twitter}}
   <meta property="og:site_name" content="{{blog.title}}" />
   {{#post}}
-    {{^public}}
-      <meta name="referrer" content="origin" />
-      <meta name="robots" content="noindex" />
-    {{/public}}
     {{^internal}}
       {{#opengraph}}
         <meta property="og:url" content="{{{url}}}" />

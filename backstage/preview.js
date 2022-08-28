@@ -128,6 +128,7 @@ module.exports = async (req, res) => {
       url: preparedPost.url,
       older: null,
       newer: null,
+      preview: true,
     });
   }
 
@@ -214,5 +215,6 @@ module.exports = async (req, res) => {
     url: preparedPost.url,
     older: null,
     newer: null,
+    preview: true,
   });
 };

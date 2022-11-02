@@ -2,6 +2,7 @@ const { URL } = require("url");
 
 const cheerio = require("cheerio");
 const common = require("./common");
+const { renderCard } = require("./backstage/render-card.js");
 
 const load = cheerio.load;
 
@@ -324,7 +325,7 @@ module.exports = class EmbedsLoader {
 
       if (card) {
         $this.replaceWith(
-          embeds.renderCard(card, {
+          renderCard(card, {
             externalFrames: options && options.externalFrames,
             maxWidth: options && options.maxWidth,
           })

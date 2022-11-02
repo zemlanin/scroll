@@ -12,6 +12,7 @@ const cheerio = require("cheerio");
 const faFilePdf = require("@fortawesome/free-solid-svg-icons/faFilePdf.js");
 
 const { getStaticsObject } = require("./render.js");
+const { renderCard } = require("./backstage/render-card.js");
 
 const fsPromises = {
   writeFile: promisify(fs.writeFile),
@@ -75,6 +76,7 @@ function getMimeObj(href, fullMimeType) {
       fullMimeType === "application/javascript" ||
       fullMimeType === "application/json",
     pdf: fullMimeType === "application/pdf",
+    type: fullMimeType,
   };
 }
 
@@ -264,6 +266,19 @@ function localEmbed(embed) {
       embed.href = frameSrc;
       embed.poster = imgSrc;
     }
+  }
+
+  if (hrefIsOwnMedia && embed.poster) {
+    return renderCard({
+      url: prefixOwnMedia(embed.href),
+      img: {
+        src: prefixOwnMedia(embed.poster),
+      },
+      title: embed.title,
+      description: embed.description,
+      mimetype: mimeObj.type,
+      _truncateDescription: false,
+    });
   }
 
   if (hrefIsOwnMedia && mimeObj.text) {
@@ -1080,10 +1095,11 @@ async function loadIcu(db) {
   return db;
 }
 
-const getLinkId = () =>
-  `link-${new Date().getFullYear()}-${(new Date().getMonth() + 1)
+function getLinkId() {
+  return `link-${new Date().getFullYear()}-${(new Date().getMonth() + 1)
     .toString()
     .padStart(2, "0")}-${nanoid.link()}`;
+}
 
 module.exports = {
   BLOG_TITLE,

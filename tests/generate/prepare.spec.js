@@ -744,6 +744,56 @@ test("embed code block", async (t) => {
   );
 });
 
+test("embed code block (image gallery)", async (t) => {
+  const EmbedsLoader = require("../../embeds-loader.js");
+  const embedsLoader = new EmbedsLoader(await getTestDB());
+
+  const result = await prepare(
+    {
+      text: dedent(`
+        \`\`\`embed
+        /media/x.png
+        - poster: /media/x/fit700.png
+        - description: something
+
+        /media/a.png
+        - poster: /media/a/fit700.png
+        - description: else
+        \`\`\`
+      `),
+      id: "9e540796",
+      created: +new Date(),
+    },
+    embedsLoader
+  );
+
+  t.equalHtml(
+    result.html,
+    `
+      <ul data-gallery style="list-style:none;padding:0">
+        <li><figure class="card">
+          <a href="https://example.com/media/x.png">
+            <img src="https://example.com/media/x/fit700.png" />
+          </a>
+
+          <figcaption>
+            <i> something </i>
+          </figcaption>
+        </figure></li>
+        <li><figure class="card">
+          <a href="https://example.com/media/a.png">
+            <img src="https://example.com/media/a/fit700.png" />
+          </a>
+
+          <figcaption>
+            <i> else </i>
+          </figcaption>
+        </figure></li>
+      </ul>
+    `
+  );
+});
+
 test("embed-html code block", async (t) => {
   const EmbedsLoader = require("../../embeds-loader.js");
   const embedsLoader = new EmbedsLoader(await getTestDB());

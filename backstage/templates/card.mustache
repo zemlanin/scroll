@@ -142,5 +142,21 @@
         {{/ card.description }}
       </figcaption>
     {{/title}}
+    {{^title}}
+      {{# card.description }}
+        <figcaption>
+          {{# card._truncateDescription }}
+            <i class="truncated">
+              {{{ card._descriptionFirstLine }}}
+            </i>
+          {{/ card._truncateDescription }}
+          {{^ card._truncateDescription }}
+            <i>
+              {{{ card.description }}}
+            </i>
+          {{/ card._truncateDescription }}
+        </figcaption>
+      {{/ card.description }}
+    {{/title}}
   </figure>
 {{/ card }}

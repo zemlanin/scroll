@@ -1,0 +1,11 @@
+{
+  "subject": "acct:blog@zemlan.in",
+  "aliases": [],
+  "links": [
+    {
+      "rel": "http://webfinger.net/rel/profile-page",
+      "type": "text/html",
+      "href": "https://zemlan.in/"
+    }
+  ]
+}

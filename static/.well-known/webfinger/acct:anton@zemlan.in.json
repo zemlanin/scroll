@@ -1,0 +1,23 @@
+{
+  "subject": "acct:anton@zemlan.in",
+  "aliases": [
+    "https://toot.community/@zemlanin",
+    "https://toot.community/users/zemlanin"
+  ],
+  "links": [
+    {
+      "rel": "http://webfinger.net/rel/profile-page",
+      "type": "text/html",
+      "href": "https://toot.community/@Gargron"
+    },
+    {
+      "rel": "self",
+      "type": "application/activity+json",
+      "href": "https://toot.community/users/Gargron"
+    },
+    {
+      "rel": "http://ostatus.org/schema/1.0/subscribe",
+      "template": "https://mastodon.social/authorize_interaction?uri={uri}"
+    }
+  ]
+}

@@ -256,7 +256,8 @@ const server = http.createServer((req, res) => {
     if (
       req.method === "POST" &&
       (req.headers["content-type"] === "application/x-www-form-urlencoded" ||
-        req.headers["content-type"] === "application/json")
+        req.headers["content-type"] === "application/json" ||
+        req.headers["content-type"] === "application/activity+json")
     ) {
       const ogHandler = handler;
       handler = async () => {

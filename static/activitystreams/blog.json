@@ -16,5 +16,10 @@
   "attachment": [],
   "endpoints": {
     "sharedInbox": "https://zemlan.in/activitystreams/inbox"
+  },
+  "icon": {
+    "type": "Image",
+    "mediaType": "image/png",
+    "url": "https://zemlan.in/favicon.png"
   }
 }

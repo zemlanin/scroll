@@ -1,0 +1,20 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/activitystreams"
+  ],
+  "id": "https://zemlan.in/activitystreams/blog",
+  "type": "Person",
+  "inbox": "https://zemlan.in/activitystreams/blog/inbox",
+  "outbox": "https://zemlan.in/activitystreams/blog/outbox",
+  "preferredUsername": "zemlan.in",
+  "name": "zemlan.in (Anton Verinov)",
+  "summary": "",
+  "url": "https://zemlan.in",
+  "manuallyApprovesFollowers": false,
+  "published": "2022-11-05T00:00:00Z",
+  "tag": [],
+  "attachment": [],
+  "endpoints": {
+    "sharedInbox": "https://zemlan.in/activitystreams/inbox"
+  }
+}

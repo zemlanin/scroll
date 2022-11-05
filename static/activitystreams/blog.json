@@ -6,7 +6,7 @@
   "type": "Person",
   "inbox": "https://zemlan.in/activitystreams/blog/inbox",
   "outbox": "https://zemlan.in/activitystreams/blog/outbox",
-  "preferredUsername": "zemlan.in",
+  "preferredUsername": "blog",
   "name": "zemlan.in (Anton Verinov)",
   "summary": "",
   "url": "https://zemlan.in",

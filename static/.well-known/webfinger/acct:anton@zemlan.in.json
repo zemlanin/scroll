@@ -1,7 +1,6 @@
 {
   "subject": "acct:anton@zemlan.in",
-  "aliases": [
-  ],
+  "aliases": [],
   "links": [
     {
       "rel": "http://webfinger.net/rel/profile-page",

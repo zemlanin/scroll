@@ -1,10 +1,8 @@
 {
-  "@context": [
-    "https://www.w3.org/ns/activitystreams"
-  ],
+  "@context": ["https://www.w3.org/ns/activitystreams"],
   "id": "https://zemlan.in/activitystreams/blog",
   "type": "Person",
-  "inbox": "https://zemlan.in/activitystreams/blog/inbox",
+  "inbox": "https://zemlan.in/activitystreams/inbox?actor=blog",
   "outbox": "https://zemlan.in/activitystreams/blog/outbox",
   "preferredUsername": "blog",
   "name": "zemlan.in (Anton Verinov)",

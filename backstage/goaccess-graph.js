@@ -27,9 +27,9 @@ function getTraffic(days = 31) {
 
   const dataByDate = require(goaccessPath).visitors.data.slice(0, days);
 
-  const maxHits = Math.max(...dataByDate.map((d) => d.hits.data)) || Infinity;
+  const maxHits = Math.max(...dataByDate.map((d) => d.hits.count)) || Infinity;
   const maxVisitors =
-    Math.max(...dataByDate.map((d) => d.hits.data)) || Infinity;
+    Math.max(...dataByDate.map((d) => d.hits.count)) || Infinity;
 
   return require(goaccessPath)
     .visitors.data.slice(0, days)

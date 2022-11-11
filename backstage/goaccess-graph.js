@@ -25,6 +25,12 @@ function getTraffic(days = 31) {
     goaccessTTL = new Date(+new Date() + 60 * 1000);
   }
 
+  const dataByDate = require(goaccessPath).visitors.data.slice(0, days);
+
+  const maxHits = Math.max(...dataByDate.map((d) => d.hits.data)) || Infinity;
+  const maxVisitors =
+    Math.max(...dataByDate.map((d) => d.hits.data)) || Infinity;
+
   return require(goaccessPath)
     .visitors.data.slice(0, days)
     .map((d) => ({
@@ -36,6 +42,8 @@ function getTraffic(days = 31) {
         d.data.slice(6, 8),
       hits: d.hits.count,
       visitors: d.visitors.count,
+      hitsNormalized: d.hits.count / maxHits,
+      visitorsNormalized: d.visitors.count / maxVisitors,
     }));
 }
 
@@ -63,9 +71,6 @@ async function goaccessGraph(req, res) {
   const aspectRatio = 3;
   const height = width / aspectRatio;
 
-  const maxH = Math.max(...traffic.map((d) => Math.max(d.hits, d.visitors)));
-  const hK = maxH ? height / maxH : 0;
-
   res.setHeader("Content-Type", "image/svg+xml");
 
   return `<?xml version="1.0" standalone="no"?>
@@ -88,7 +93,7 @@ async function goaccessGraph(req, res) {
           .join("\n")}
         <polyline
           points="${traffic
-            .map((d) => d.hits * hK)
+            .map((d) => d.hitsNormalized * height)
             .map((h, i) => `${i * 3},${h} ${(i + 1) * 3},${h}`)
             .join(" ")}"
           fill="none"
@@ -97,7 +102,7 @@ async function goaccessGraph(req, res) {
         />
         <polyline
           points="${traffic
-            .map((d) => d.visitors * hK)
+            .map((d) => d.visitorsNormalized * height)
             .map((h, i) => `${i * 3},${h} ${(i + 1) * 3},${h}`)
             .join(" ")}"
           fill="none"

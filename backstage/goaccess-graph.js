@@ -80,14 +80,14 @@ async function goaccessGraph(req, res) {
   }" preserveAspectRatio="xMinYMin meet" version="1.1" xmlns="http://www.w3.org/2000/svg">
       <g transform="translate(${width}, ${height + 2}) scale(-1,-1)">
         <!-- ${JSON.stringify(traffic)} -->
-        <rect fill="gray"  />
+        <rect fill="gray" />
         ${traffic
           .map((d) => new Date(d.date))
           .map((date, i) =>
             weekNumberISO8601(date) % 2
               ? `<rect x="${i * 3}" y="0" width="3" height="${
                   height + 2
-                }" fill="${`hsl(${date.getMonth() * 30}, 100%, 78%)`}" />`
+                }" fill="${`hsl(${date.getMonth() * 30}, 100%, 88%)`}" />`
               : ""
           )
           .join("\n")}

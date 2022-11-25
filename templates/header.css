@@ -653,6 +653,10 @@ article kbd {
   box-shadow: inset 0 -2px 0 var(--color-card-border);
 }
 
+article h1 {
+  font-size: 1.5em;
+}
+
 article h1 a,
 article h2 a,
 article h3 a,
@@ -829,6 +833,7 @@ header {
 
 header h1,
 header h2 {
+  font-size: 1.3em;
   flex-grow: 1;
   flex-shrink: 1;
   display: flex;
@@ -841,17 +846,7 @@ header h1 a:first-child::first-letter,
 header h2 a:first-child::first-letter {
   font-family: Damion-z, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-  font-size: 1.5em;
   letter-spacing: 0.05em;
-}
-
-header h1,
-article h1 {
-  font-size: 1.5em;
-}
-
-header h2 {
-  font-size: 1.3em;
 }
 
 @media print {

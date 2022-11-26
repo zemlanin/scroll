@@ -30,6 +30,7 @@ const {
   generateRSSPage,
   generateIndexPage,
   generateArchivePage,
+  generateActivityStreamPage,
 } = require("./generate-post.js");
 
 const {
@@ -121,6 +122,9 @@ async function generate(db, destination, stdout, stderr, { only } = {}) {
   const tmpFolder = await fsPromises.mkdtemp(path.join(os.tmpdir(), "scroll-"));
   await fsPromises.mkdir(path.join(tmpFolder, "/media"));
   await fsPromises.mkdir(path.join(tmpFolder, "/feeds"));
+  await fsPromises.mkdir(path.join(tmpFolder, "/activitystreams"));
+  await fsPromises.mkdir(path.join(tmpFolder, "/activitystreams/blog"));
+  await fsPromises.mkdir(path.join(tmpFolder, "/activitystreams/blog/outbox"));
 
   stdout.write(`made tmp dir: ${tmpFolder}\n`);
 
@@ -191,7 +195,12 @@ async function generate(db, destination, stdout, stderr, { only } = {}) {
   let _pagination = [];
   let _newestPage;
 
-  if (!only || only.has("pagination") || only.has("linkblog")) {
+  if (
+    !only ||
+    only.has("pagination") ||
+    only.has("linkblog") ||
+    only.has("activitystreams")
+  ) {
     _pagination = await getPagination(db, null);
     _newestPage = _pagination[0] || { index: 0, posts: [] };
 
@@ -225,6 +234,54 @@ async function generate(db, destination, stdout, stderr, { only } = {}) {
     }
 
     stdout.write("pagination done\n");
+  }
+
+  if (!only || only.has("activitystreams")) {
+    for (const page of pagination) {
+      const pageNumber = page.index;
+
+      await writeFileWithGzip(
+        path.join(
+          tmpFolder,
+          `activitystreams/blog/outbox/page-${pageNumber}.json`
+        ),
+        await generateActivityStreamPage(
+          db,
+          blog,
+          pageNumber,
+          page.posts,
+          newestPage
+        ),
+        { flag: "wx" }
+      );
+    }
+
+    const outboxPath = "activitystreams/blog/outbox";
+    const id = new URL(outboxPath, blog.url).toString();
+
+    await writeFileWithGzip(
+      path.join(tmpFolder, outboxPath + ".json"),
+      JSON.stringify({
+        "@context": "https://www.w3.org/ns/activitystreams",
+        id,
+        type: "OrderedCollection",
+        totalItems: pagination.reduce(
+          (acc, page) => acc + page.posts.length,
+          0
+        ),
+        first: new URL(
+          `activitystreams/blog/outbox/page-${newestPage.index}`,
+          blog.url
+        ).toString(),
+        last: new URL(
+          `activitystreams/blog/outbox/page-1`,
+          blog.url
+        ).toString(),
+      }),
+      { flag: "wx" }
+    );
+
+    stdout.write("activitystreams done\n");
   }
 
   if (!only || only.has("linkblog")) {

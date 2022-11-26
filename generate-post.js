@@ -138,6 +138,103 @@ async function generatePaginationPage(
   });
 }
 
+async function generateActivityStreamPage(
+  db,
+  blog,
+  pageNumber,
+  postIds,
+  newestPage
+) {
+  const posts = await getPosts(
+    db,
+    postIds,
+    `id IN (${postIds.map(() => "?").join(", ")})`,
+    postIds.length
+  );
+
+  const pageId = new URL(
+    `activitystreams/blog/outbox/page-${pageNumber}`,
+    blog.url
+  );
+
+  return JSON.stringify({
+    "@context": "https://www.w3.org/ns/activitystreams",
+    type: "OrderedCollectionPage",
+    totalItems: posts.length,
+    id: pageId,
+    next:
+      pageNumber > 1
+        ? new URL(
+            `activitystreams/blog/outbox/page-${pageNumber - 1}`,
+            blog.url
+          )
+        : null,
+    prev:
+      pageNumber <= newestPage.index
+        ? new URL(
+            `activitystreams/blog/outbox/page-${pageNumber + 1}`,
+            blog.url
+          )
+        : null,
+    partOf: new URL(`activitystreams/blog/outbox`, blog.url),
+    summary: `${blog.title} / page ${pageNumber}`,
+    orderedItems: posts.map((post) => {
+      const postASid = new URL(
+        `activitystreams/blog/statuses/${post.id}`,
+        blog.url
+      );
+      const activityASid = new URL(
+        `activitystreams/blog/statuses/${post.id}/activity`,
+        blog.url
+      );
+
+      return {
+        id: activityASid,
+        type: "Create",
+        actor: new URL(`activitystreams/blog`, blog.url),
+        published: post.published,
+        to: ["https://www.w3.org/ns/activitystreams#Public"],
+        cc: [
+          // "https://mastodon.devua.club/users/zemlanin/followers"
+        ],
+        object: {
+          id: postASid,
+          type: "Note",
+          published: post.published,
+          to: ["https://www.w3.org/ns/activitystreams#Public"],
+          cc: [
+            // "https://mastodon.devua.club/users/zemlanin/followers"
+          ],
+          content:
+            `<p>${post.title}</p>` +
+            (post.opengraph.description ? `<p>${post.description}</p>` : "") +
+            `<p><a href="${
+              post.url
+            }" target="_blank" rel="nofollow noopener noreferrer"><span class="invisible">${post.url.replace(
+              /^(https?:\/\/).+$/,
+              "$1"
+            )}</span><span>${post.url.replace(
+              /^https?:\/\//,
+              ""
+            )}</span></a></p>`,
+          updated: post.modified || post.published,
+          attachement: post.opengraph.image
+            ? [
+                {
+                  type: "Image",
+                  url: post.opengraph.image,
+                  // "name": "iOS Home Screen with a fake calendar widget showing 1000th of March 2020",
+                  width: post.opengraph.imageWidth,
+                  height: post.opengraph.imageHeight,
+                },
+              ]
+            : [],
+        },
+      };
+    }),
+  });
+}
+
 async function generateIndexPage(db, blog, newestPage) {
   let indexPostsLimit = newestPage.posts.length;
   let olderPageIndex = Math.max(0, newestPage.index - 1);
@@ -406,6 +503,7 @@ module.exports = {
   generatePostPage,
   getPagination,
   generatePaginationPage,
+  generateActivityStreamPage,
   generateArchivePage,
   generateIndexPage,
   generateRSSPage,

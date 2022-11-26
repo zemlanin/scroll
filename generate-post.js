@@ -212,7 +212,9 @@ async function generateActivityStreamPage(
           ],
           content:
             `<p>${post.title}</p>` +
-            (post.opengraph.description ? `<p>${post.description}</p>` : "") +
+            (post.opengraph.description
+              ? `<p>${post.opengraph.description}</p>`
+              : "") +
             `<p><a href="${
               post.url
             }" target="_blank" rel="nofollow noopener noreferrer"><span class="invisible">${post.url.replace(

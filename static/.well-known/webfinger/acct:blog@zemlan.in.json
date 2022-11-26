@@ -14,6 +14,10 @@
       "rel": "self",
       "type": "application/activity+json",
       "href": "https://zemlan.in/activitystreams/blog"
+    },
+    {
+      "rel": "http://ostatus.org/schema/1.0/subscribe",
+      "template": "https://zemlan.in/ostatus/authorize_interaction?uri={uri}"
     }
   ]
 }

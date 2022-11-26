@@ -81,8 +81,13 @@ async function generatePostPage(post, blog) {
 
 async function removePotentialPagination(newestPage) {
   const pagePath = path.join(DIST, `page-${newestPage.index + 1}.html`);
-
   await unlinkFileWithGzip(pagePath);
+
+  const pageASPath = path.join(
+    DIST,
+    `activitystreams/blog/outbox/page-${newestPage.index + 1}.json`
+  );
+  await unlinkFileWithGzip(pageASPath);
 }
 
 async function generatePaginationPage(
@@ -461,6 +466,24 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated, oldSlug) {
       await generateIndexPage(db, blog, newestPage)
     );
 
+    await writeFileWithGzip(
+      path.join(DIST, "activitystreams/blog/outbox.json"),
+      JSON.stringify({
+        "@context": "https://www.w3.org/ns/activitystreams",
+        id: new URL("activitystreams/blog/outbox", blog.url),
+        type: "OrderedCollection",
+        totalItems: pages.reduce((acc, page) => acc + page.posts.length, 0),
+        first: new URL(
+          `activitystreams/blog/outbox/page-${newestPage.index}`,
+          blog.url
+        ).toString(),
+        last: new URL(
+          `activitystreams/blog/outbox/page-1`,
+          blog.url
+        ).toString(),
+      })
+    );
+
     if (pages.length <= 2) {
       await writeFileWithGzip(
         path.join(DIST, "rss.xml"),
@@ -479,6 +502,17 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated, oldSlug) {
       await writeFileWithGzip(
         path.join(DIST, `page-${pageNumber}.html`),
         await generatePaginationPage(
+          db,
+          blog,
+          pageNumber,
+          page.posts,
+          newestPage
+        )
+      );
+
+      await writeFileWithGzip(
+        path.join(DIST, `activitystreams/blog/outbox/page-${pageNumber}.json`),
+        await generateActivityStreamPage(
           db,
           blog,
           pageNumber,

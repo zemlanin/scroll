@@ -1,9 +1,6 @@
 {
   "subject": "acct:blog@zemlan.in",
-  "aliases": [
-    "https://zemlan.in",
-    "https://zemlan.in/activitystreams/blog"
-  ],
+  "aliases": ["https://zemlan.in", "https://zemlan.in/activitystreams/blog"],
   "links": [
     {
       "rel": "http://webfinger.net/rel/profile-page",

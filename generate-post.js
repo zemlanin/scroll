@@ -474,7 +474,9 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated, oldSlug) {
         "@context": "https://www.w3.org/ns/activitystreams",
         id: new URL("activitystreams/blog/outbox", blog.url),
         type: "OrderedCollection",
-        totalItems: pages.reduce((acc, page) => acc + page.posts.length, 0),
+        totalItems:
+          newestPage.posts.length +
+          Math.max(newestPage.index - 1, 0) * PAGE_SIZE,
         first: new URL(
           `activitystreams/blog/outbox/page-${newestPage.index}`,
           blog.url

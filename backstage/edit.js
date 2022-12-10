@@ -334,14 +334,18 @@ async function notifyWebSub() {
     return;
   }
 
-  await fetch(feed.websub, {
-    method: "post",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      "hub.mode": "publish",
-      "hub.url": feed.url,
-    }).toString(),
-  });
+  try {
+    await fetch(feed.websub, {
+      method: "post",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        "hub.mode": "publish",
+        "hub.url": feed.url,
+      }).toString(),
+    });
+  } catch (e) {
+    console.log(e);
+  }
 }

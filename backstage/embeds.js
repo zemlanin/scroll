@@ -18,6 +18,7 @@ const generatePost = require("../generate-post.js");
 const {
   generateLinkblogPage,
   generateLinkblogRSSPage,
+  notifyWebSub,
 } = require("../linkblog.js");
 
 const { render } = require("./render.js");
@@ -1194,6 +1195,8 @@ async function generateLinkblog(db) {
     path.join(DIST, "index.html"),
     await generatePost.generateIndexPage(db, blog, newestPage)
   );
+
+  await notifyWebSub();
 }
 
 module.exports = {

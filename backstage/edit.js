@@ -1,5 +1,7 @@
 const url = require("url");
-const { nanoid } = require("../common");
+const fetchModule = import("node-fetch");
+
+const { nanoid, getBlogObject } = require("../common");
 const getPostId = () =>
   `post-${new Date().getFullYear()}-${(new Date().getMonth() + 1)
     .toString()
@@ -187,16 +189,7 @@ module.exports = {
         postExists = true;
 
         oldSlug = post.slug;
-
-        if (post.draft) {
-          oldStatus = "draft";
-        } else if (post.internal) {
-          oldStatus = "internal";
-        } else if (post.private) {
-          oldStatus = "private";
-        } else if (post.public) {
-          oldStatus = "public";
-        }
+        oldStatus = getStatusValue(post);
       }
     }
 
@@ -280,6 +273,14 @@ module.exports = {
 
     await generateAfterEdit(db, post.id, oldStatus, oldCreated, oldSlug);
 
+    const newStatus = getStatusValue(post);
+    if (
+      (oldStatus === "public" && oldStatus !== newStatus) ||
+      newStatus === "public"
+    ) {
+      await notifyWebSub();
+    }
+
     if (!existingPostId) {
       res.writeHead(303, {
         Location: url.resolve(req.absolute, `/backstage/edit/?id=${post.id}`),
@@ -305,3 +306,42 @@ module.exports = {
     });
   },
 };
+
+function getStatusValue(post) {
+  if (!post) {
+    return null;
+  }
+
+  if (post.draft) {
+    return "draft";
+  } else if (post.internal) {
+    return "internal";
+  } else if (post.private) {
+    return "private";
+  } else if (post.public) {
+    return "public";
+  }
+
+  return null;
+}
+
+async function notifyWebSub() {
+  const { default: fetch } = await fetchModule;
+
+  const { feed } = await getBlogObject();
+
+  if (!feed.websub) {
+    return;
+  }
+
+  await fetch(feed.websub, {
+    method: "post",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      "hub.mode": "publish",
+      "hub.url": feed.url,
+    }).toString(),
+  });
+}

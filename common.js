@@ -27,6 +27,7 @@ const zlibPromises = {
 const PAGE_SIZE = 10;
 const MINIMUM_INDEX_PAGE_SIZE = 5;
 const RSS_SIZE = 20;
+const WEBSUB_HUB = "https://pubsubhubbub.appspot.com/";
 const BLOG_TITLE = "zemlan.in";
 const PORT = process.env.PORT || 8000;
 const BLOG_BASE_URL = process.env.BLOG_BASE_URL || ".";
@@ -1042,6 +1043,7 @@ async function getBlogObject(baseUrl) {
     feed: {
       description: BLOG_TITLE,
       url: url.resolve(baseUrl, "/rss.xml"),
+      websub: WEBSUB_HUB,
     },
     linkblog: {
       lang,
@@ -1050,6 +1052,7 @@ async function getBlogObject(baseUrl) {
       feed: {
         description: `Linked and Found`,
         url: url.resolve(baseUrl, "/feeds/linkblog.xml"),
+        websub: WEBSUB_HUB,
       },
     },
     archive: {
@@ -1112,6 +1115,7 @@ module.exports = {
   PAGE_SIZE,
   MINIMUM_INDEX_PAGE_SIZE,
   RSS_SIZE,
+  WEBSUB_HUB,
   getMimeObj,
   getBlogObject,
   prepare,

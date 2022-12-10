@@ -13,6 +13,7 @@ const {
   loadIcu,
   embedCallback,
   getLinkId,
+  getBlogObject,
 } = require("./common.js");
 const { render } = require("./render.js");
 const EmbedsLoader = require("./embeds-loader.js");
@@ -218,7 +219,30 @@ async function checkAndUpdate(stdout, stderr) {
       stderr || process.stderr,
       { only: new Set(["linkblog"]) }
     );
+
+    await notifyWebSub();
   }
+}
+
+async function notifyWebSub() {
+  const { default: fetch } = await fetchModule;
+
+  const { feed } = await getBlogObject();
+
+  if (!feed.websub) {
+    return;
+  }
+
+  await fetch(feed.websub, {
+    method: "post",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      "hub.mode": "publish",
+      "hub.url": feed.url,
+    }).toString(),
+  });
 }
 
 function watch() {
@@ -238,6 +262,7 @@ module.exports = {
   generateLinkblogRSSPage,
   generateLinkblogSection,
   getLinkId,
+  notifyWebSub,
 };
 
 if (require.main === module) {

@@ -4,6 +4,7 @@
   <title>{{ blog.linkblog.title }}</title>
   <description>{{ blog.linkblog.feed.description }}</description>
   <link>{{{ blog.linkblog.url }}}</link>
+  {{#blog.linkblog.feed.websub}}<link rel="hub" href="{{{ blog.linkblog.feed.websub }}}" />{{/blog.linkblog.feed.websub}}
   <pubDate>{{ pubDate }}</pubDate>
   <ttl>1800</ttl>
   <atom:link href="{{{ blog.linkblog.feed.url }}}" rel="self" type="application/rss+xml" />

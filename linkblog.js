@@ -227,7 +227,8 @@ async function checkAndUpdate(stdout, stderr) {
 async function notifyWebSub() {
   const { default: fetch } = await fetchModule;
 
-  const { feed } = await getBlogObject();
+  const { linkblog } = await getBlogObject();
+  const { feed } = linkblog;
 
   if (!feed.websub) {
     return;

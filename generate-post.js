@@ -175,7 +175,7 @@ async function generateActivityStreamPage(
           )
         : null,
     prev:
-      pageNumber <= newestPage.index
+      pageNumber < newestPage.index
         ? new URL(
             `activitystreams/blog/outbox/page-${pageNumber + 1}`,
             blog.url

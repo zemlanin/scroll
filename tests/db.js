@@ -12,6 +12,14 @@ module.exports = {
     await db.migrate({
       migrationsPath: path.resolve(__dirname, "../migrations/posts"),
     });
-    return db;
+
+    const asdb = await sqlite.open({
+      filename: ":memory:",
+      driver: sqlite3.Database,
+    });
+    await asdb.migrate({
+      migrationsPath: path.resolve(__dirname, "../migrations/activitystreams"),
+    });
+    return { db, asdb };
   },
 };

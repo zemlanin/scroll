@@ -18,7 +18,7 @@ const noopStream = new require("stream").Writable({
 });
 
 test("shopify product page with secure_url images", async (t) => {
-  const db = await getTestDB();
+  const { db, asdb } = await getTestDB();
 
   await db.run(
     `
@@ -61,7 +61,7 @@ test("shopify product page with secure_url images", async (t) => {
     path.join(os.tmpdir(), "scroll-tests-")
   );
 
-  await generate(db, tmpFolder, noopStream, noopStream);
+  await generate(db, asdb, tmpFolder, noopStream, noopStream);
 
   const post = await fs.promises.readFile(
     path.join(tmpFolder, "ae85f124.html")

@@ -1,6 +1,6 @@
 {
   "subject": "acct:blog@zemlan.in",
-  "aliases": ["https://zemlan.in", "https://zemlan.in/activitystreams/blog"],
+  "aliases": ["https://zemlan.in", "https://zemlan.in/actor/blog"],
   "links": [
     {
       "rel": "http://webfinger.net/rel/profile-page",
@@ -10,11 +10,7 @@
     {
       "rel": "self",
       "type": "application/activity+json",
-      "href": "https://zemlan.in/activitystreams/blog"
-    },
-    {
-      "rel": "http://ostatus.org/schema/1.0/subscribe",
-      "template": "https://zemlan.in/ostatus/authorize_interaction?uri={uri}"
+      "href": "https://zemlan.in/actor/blog"
     }
   ]
 }

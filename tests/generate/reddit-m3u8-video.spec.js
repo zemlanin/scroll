@@ -18,7 +18,7 @@ const noopStream = new require("stream").Writable({
 });
 
 test("reddit post page with m3u8 video", async (t) => {
-  const db = await getTestDB();
+  const { db, asdb } = await getTestDB();
 
   await db.run(
     `
@@ -61,7 +61,7 @@ test("reddit post page with m3u8 video", async (t) => {
     path.join(os.tmpdir(), "scroll-tests-")
   );
 
-  await generate(db, tmpFolder, noopStream, noopStream);
+  await generate(db, asdb, tmpFolder, noopStream, noopStream);
 
   const post = await fs.promises.readFile(
     path.join(tmpFolder, "6ba5fbd5.html")

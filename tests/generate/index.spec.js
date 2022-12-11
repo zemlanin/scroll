@@ -18,19 +18,19 @@ const noopStream = new require("stream").Writable({
 const { generate } = require("../../generate.js");
 
 test("empty database", async (t) => {
-  const db = await getTestDB();
+  const { db, asdb } = await getTestDB();
 
   const tmpFolder = await fs.promises.mkdtemp(
     path.join(os.tmpdir(), "scroll-tests-")
   );
 
-  await generate(db, tmpFolder, noopStream, noopStream);
+  await generate(db, asdb, tmpFolder, noopStream, noopStream);
 
   t.ok(true);
 });
 
 test("internal page", async (t) => {
-  const db = await getTestDB();
+  const { db, asdb } = await getTestDB();
 
   await db.run(
     `
@@ -45,7 +45,7 @@ test("internal page", async (t) => {
     path.join(os.tmpdir(), "scroll-tests-")
   );
 
-  await generate(db, tmpFolder, noopStream, noopStream);
+  await generate(db, asdb, tmpFolder, noopStream, noopStream);
 
   t.rejects(
     () => fs.promises.readFile(path.join(tmpFolder, "1.html")),
@@ -86,7 +86,7 @@ test("internal page", async (t) => {
 });
 
 test("database with posts and embeds", async (t) => {
-  const db = await getTestDB();
+  const { db, asdb } = await getTestDB();
 
   await db.run(
     `
@@ -137,7 +137,7 @@ test("database with posts and embeds", async (t) => {
     jar() {},
   });
 
-  await generate(db, tmpFolder, noopStream, noopStream);
+  await generate(db, asdb, tmpFolder, noopStream, noopStream);
 
   const post1 = await fs.promises.readFile(path.join(tmpFolder, "1.html"));
   t.ok(post1.indexOf("lol") > -1);
@@ -240,7 +240,7 @@ test("database with posts and embeds", async (t) => {
 });
 
 test("database with patched embeds", async (t) => {
-  const db = await getTestDB();
+  const { db, asdb } = await getTestDB();
 
   await db.run(
     `
@@ -288,7 +288,7 @@ test("database with patched embeds", async (t) => {
     jar() {},
   });
 
-  await generate(db, tmpFolder, noopStream, noopStream);
+  await generate(db, asdb, tmpFolder, noopStream, noopStream);
 
   const post10 = (
     await fs.promises.readFile(path.join(tmpFolder, "patched-10.html"))
@@ -396,7 +396,7 @@ test("database with patched embeds", async (t) => {
 });
 
 test("opengraph", async (t) => {
-  const db = await getTestDB();
+  const { db, asdb } = await getTestDB();
 
   await db.run(
     `
@@ -472,7 +472,7 @@ test("opengraph", async (t) => {
     jar() {},
   });
 
-  await generate(db, tmpFolder, noopStream, noopStream);
+  await generate(db, asdb, tmpFolder, noopStream, noopStream);
 
   const post1 = await fs.promises.readFile(path.join(tmpFolder, "1.html"));
   t.ok(post1.indexOf(`<meta property="og:title" content="2019-01-10" />`) > -1);

@@ -37,6 +37,10 @@ const SESSIONS_DB = path.resolve(
   __dirname,
   process.env.SESSIONS_DB || "sessions.db"
 );
+const ACTIVITYSTREAMS_DB = path.resolve(
+  __dirname,
+  process.env.ACTIVITYSTREAMS_DB || "activitystreams.db"
+);
 const LINKLIST_SOURCE_FEED = process.env.LINKLIST_SOURCE_FEED || null;
 const FOOTNOTE_MARKER = "^";
 
@@ -1111,6 +1115,7 @@ module.exports = {
   PORT,
   POSTS_DB,
   SESSIONS_DB,
+  ACTIVITYSTREAMS_DB,
   LINKLIST_SOURCE_FEED,
   PAGE_SIZE,
   MINIMUM_INDEX_PAGE_SIZE,

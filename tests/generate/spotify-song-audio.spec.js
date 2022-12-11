@@ -18,7 +18,7 @@ const noopStream = new require("stream").Writable({
 });
 
 test("spotify embed with <audio>", async (t) => {
-  const db = await getTestDB();
+  const { db, asdb } = await getTestDB();
 
   await db.run(
     `
@@ -58,7 +58,7 @@ test("spotify embed with <audio>", async (t) => {
     path.join(os.tmpdir(), "scroll-tests-")
   );
 
-  await generate(db, tmpFolder, noopStream, noopStream);
+  await generate(db, asdb, tmpFolder, noopStream, noopStream);
 
   const post = await fs.promises.readFile(
     path.join(tmpFolder, "7a61432d.html")

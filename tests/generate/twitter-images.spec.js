@@ -18,7 +18,7 @@ const noopStream = new require("stream").Writable({
 });
 
 test("twitter without user image", async (t) => {
-  const db = await getTestDB();
+  const { db, asdb } = await getTestDB();
 
   await db.run(
     `
@@ -61,7 +61,7 @@ test("twitter without user image", async (t) => {
     path.join(os.tmpdir(), "scroll-tests-")
   );
 
-  await generate(db, tmpFolder, noopStream, noopStream);
+  await generate(db, asdb, tmpFolder, noopStream, noopStream);
 
   const post = await fs.promises.readFile(
     path.join(tmpFolder, "c696f1aa.html")
@@ -83,7 +83,7 @@ test("twitter without user image", async (t) => {
 });
 
 test("twitter with a photo", async (t) => {
-  const db = await getTestDB();
+  const { db, asdb } = await getTestDB();
 
   await db.run(
     `
@@ -123,7 +123,7 @@ test("twitter with a photo", async (t) => {
     path.join(os.tmpdir(), "scroll-tests-")
   );
 
-  await generate(db, tmpFolder, noopStream, noopStream);
+  await generate(db, asdb, tmpFolder, noopStream, noopStream);
 
   const post = await fs.promises.readFile(
     path.join(tmpFolder, "79b46c30.html")
@@ -145,7 +145,7 @@ test("twitter with a photo", async (t) => {
 });
 
 test("twitter with a video", async (t) => {
-  const db = await getTestDB();
+  const { db, asdb } = await getTestDB();
 
   await db.run(
     `
@@ -185,7 +185,7 @@ test("twitter with a video", async (t) => {
     path.join(os.tmpdir(), "scroll-tests-")
   );
 
-  await generate(db, tmpFolder, noopStream, noopStream);
+  await generate(db, asdb, tmpFolder, noopStream, noopStream);
 
   const post = await fs.promises.readFile(
     path.join(tmpFolder, "793877ab.html")

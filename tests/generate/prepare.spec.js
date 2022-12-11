@@ -519,7 +519,8 @@ test("poster as a opengraph image", async (t) => {
 
 test("media", async (t) => {
   const EmbedsLoader = require("../../embeds-loader.js");
-  const embedsLoader = new EmbedsLoader(await getTestDB());
+  const { db } = await getTestDB();
+  const embedsLoader = new EmbedsLoader(db);
 
   const result = await prepare(
     {
@@ -619,7 +620,8 @@ test("media", async (t) => {
 
 test("embed code block", async (t) => {
   const EmbedsLoader = require("../../embeds-loader.js");
-  const embedsLoader = new EmbedsLoader(await getTestDB());
+  const { db } = await getTestDB();
+  const embedsLoader = new EmbedsLoader(db);
 
   const result = await prepare(
     {
@@ -746,7 +748,8 @@ test("embed code block", async (t) => {
 
 test("embed code block (image gallery)", async (t) => {
   const EmbedsLoader = require("../../embeds-loader.js");
-  const embedsLoader = new EmbedsLoader(await getTestDB());
+  const { db } = await getTestDB();
+  const embedsLoader = new EmbedsLoader(db);
 
   const result = await prepare(
     {
@@ -796,7 +799,8 @@ test("embed code block (image gallery)", async (t) => {
 
 test("embed-html code block", async (t) => {
   const EmbedsLoader = require("../../embeds-loader.js");
-  const embedsLoader = new EmbedsLoader(await getTestDB());
+  const { db } = await getTestDB();
+  const embedsLoader = new EmbedsLoader(db);
 
   const result = await prepare(
     {
@@ -925,7 +929,8 @@ test("show embed in teaser", async (t) => {
     jar() {},
   });
 
-  const embedsLoader = new EmbedsLoader(await getTestDB());
+  const { db } = await getTestDB();
+  const embedsLoader = new EmbedsLoader(db);
 
   const result = await prepare(
     {

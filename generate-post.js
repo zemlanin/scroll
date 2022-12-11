@@ -85,7 +85,7 @@ async function removePotentialPagination(newestPage) {
 
   const pageASPath = path.join(
     DIST,
-    `activitystreams/blog/outbox/page-${newestPage.index + 1}.json`
+    `actor/blog/outbox/page-${newestPage.index + 1}.json`
   );
   await unlinkFileWithGzip(pageASPath);
 }
@@ -157,10 +157,7 @@ async function generateActivityStreamPage(
     postIds.length
   );
 
-  const pageId = new URL(
-    `activitystreams/blog/outbox/page-${pageNumber}`,
-    blog.url
-  );
+  const pageId = new URL(`actor/blog/outbox/page-${pageNumber}`, blog.url);
 
   return JSON.stringify({
     "@context": "https://www.w3.org/ns/activitystreams",
@@ -169,34 +166,25 @@ async function generateActivityStreamPage(
     id: pageId,
     next:
       pageNumber > 1
-        ? new URL(
-            `activitystreams/blog/outbox/page-${pageNumber - 1}`,
-            blog.url
-          )
+        ? new URL(`actor/blog/outbox/page-${pageNumber - 1}`, blog.url)
         : null,
     prev:
       pageNumber < newestPage.index
-        ? new URL(
-            `activitystreams/blog/outbox/page-${pageNumber + 1}`,
-            blog.url
-          )
+        ? new URL(`actor/blog/outbox/page-${pageNumber + 1}`, blog.url)
         : null,
-    partOf: new URL(`activitystreams/blog/outbox`, blog.url),
+    partOf: new URL(`actor/blog/outbox`, blog.url),
     summary: `${blog.title} / page ${pageNumber}`,
     orderedItems: posts.map((post) => {
-      const postASid = new URL(
-        `activitystreams/blog/statuses/${post.id}`,
-        blog.url
-      );
+      const postASid = new URL(`actor/blog/notes/${post.id}`, blog.url);
       const activityASid = new URL(
-        `activitystreams/blog/statuses/${post.id}/activity`,
+        `actor/blog/notes/${post.id}/activity`,
         blog.url
       );
 
       return {
         id: activityASid,
         type: "Create",
-        actor: new URL(`activitystreams/blog`, blog.url),
+        actor: new URL(`actor/blog`, blog.url),
         published: post.published,
         to: ["https://www.w3.org/ns/activitystreams#Public"],
         cc: [
@@ -469,22 +457,19 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated, oldSlug) {
     );
 
     await writeFileWithGzip(
-      path.join(DIST, "activitystreams/blog/outbox.json"),
+      path.join(DIST, "actor/blog/outbox.json"),
       JSON.stringify({
         "@context": "https://www.w3.org/ns/activitystreams",
-        id: new URL("activitystreams/blog/outbox", blog.url),
+        id: new URL("actor/blog/outbox", blog.url),
         type: "OrderedCollection",
         totalItems:
           newestPage.posts.length +
           Math.max(newestPage.index - 1, 0) * PAGE_SIZE,
         first: new URL(
-          `activitystreams/blog/outbox/page-${newestPage.index}`,
+          `actor/blog/outbox/page-${newestPage.index}`,
           blog.url
         ).toString(),
-        last: new URL(
-          `activitystreams/blog/outbox/page-1`,
-          blog.url
-        ).toString(),
+        last: new URL(`actor/blog/outbox/page-1`, blog.url).toString(),
       })
     );
 
@@ -515,7 +500,7 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated, oldSlug) {
       );
 
       await writeFileWithGzip(
-        path.join(DIST, `activitystreams/blog/outbox/page-${pageNumber}.json`),
+        path.join(DIST, `actor/blog/outbox/page-${pageNumber}.json`),
         await generateActivityStreamPage(
           db,
           blog,

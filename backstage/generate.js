@@ -112,7 +112,8 @@ module.exports = {
           generateDefaultMedia(await req.db(), DIST, res, res);
         break;
       case "pages":
-        generator = async () => generate(await req.db(), DIST, res, res);
+        generator = async () =>
+          generate(await req.db(), await req.asdb(), DIST, res, res);
         break;
       case "linkblog":
         generator = async () => checkAndUpdate(res, res);

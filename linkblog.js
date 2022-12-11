@@ -9,6 +9,7 @@ const {
   DIST,
   RSS_SIZE,
   POSTS_DB,
+  ACTIVITYSTREAMS_DB,
   LINKLIST_SOURCE_FEED,
   loadIcu,
   embedCallback,
@@ -205,6 +206,11 @@ async function checkAndUpdate(stdout, stderr) {
     .open({ filename: POSTS_DB, driver: sqlite3.Database })
     .then(loadIcu);
 
+  const asdb = await sqlite.open({
+    filename: ACTIVITYSTREAMS_DB,
+    driver: sqlite3.Database,
+  });
+
   const hasNewItems = await loadFreshFeed(
     db,
     stdout || process.stdout,
@@ -214,6 +220,7 @@ async function checkAndUpdate(stdout, stderr) {
   if (hasNewItems) {
     await require("./generate.js").generate(
       db,
+      asdb,
       DIST,
       stdout || process.stdout,
       stderr || process.stderr,

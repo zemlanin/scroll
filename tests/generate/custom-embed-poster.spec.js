@@ -18,7 +18,7 @@ const noopStream = new require("stream").Writable({
 });
 
 test("embed with custom poster", async (t) => {
-  const db = await getTestDB();
+  const { db, asdb } = await getTestDB();
 
   await db.run(
     `
@@ -47,7 +47,7 @@ test("embed with custom poster", async (t) => {
     path.join(os.tmpdir(), "scroll-tests-")
   );
 
-  await generate(db, tmpFolder, noopStream, noopStream);
+  await generate(db, asdb, tmpFolder, noopStream, noopStream);
 
   const post = await fs.promises.readFile(
     path.join(tmpFolder, "39bedb8d.html")

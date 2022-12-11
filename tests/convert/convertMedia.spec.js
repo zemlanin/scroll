@@ -8,7 +8,7 @@ const { getTestDB } = require("../db.js");
 const { convertMedia } = require("../../backstage/convert.js");
 
 test("convertMedia: smoke", async (t) => {
-  const db = await getTestDB();
+  const { db } = await getTestDB();
 
   const tag = "icon128";
   const mediaId = "b638a9ce05cd";

@@ -14,7 +14,14 @@ const UrlPattern = require("url-pattern");
 
 require("dotenv").config();
 
-const { DIST, POSTS_DB, SESSIONS_DB, PORT, loadIcu } = require("./common.js");
+const {
+  DIST,
+  POSTS_DB,
+  SESSIONS_DB,
+  ACTIVITYSTREAMS_DB,
+  PORT,
+  loadIcu,
+} = require("./common.js");
 
 function write404(req, res) {
   if (!res.finished) {
@@ -198,11 +205,6 @@ const handlers = [
   ["GET", "/backstage/embeds", require("./backstage/embeds.js").get],
   ["POST", "/backstage/embeds", require("./backstage/embeds.js").post],
   ["POST", "/activitystreams/inbox", require("./activitystreams/inbox.js")],
-  [
-    "POST",
-    "/activitystreams/blog/inbox",
-    require("./activitystreams/inbox.js"),
-  ],
   ["GET", "/:name(.html)", staticHandler],
 ].map(([m, p, h]) => [m, new UrlPattern(p), h]);
 
@@ -284,6 +286,19 @@ const server = http.createServer((req, res) => {
       return db;
     };
 
+    let asdb;
+    req.asdb = async () => {
+      if (!asdb) {
+        asdb = await sqlite
+          .open({ filename: ACTIVITYSTREAMS_DB, driver: sqlite3.Database })
+          .then(loadIcu);
+
+        res.on("finish", () => asdb.close());
+      }
+
+      return asdb;
+    };
+
     let result;
     let resultPromise;
 
@@ -355,6 +370,16 @@ function start() {
 
       await sessionsDb.migrate({
         migrationsPath: path.resolve(__dirname, "migrations/sessions"),
+      });
+    })
+    .then(async () => {
+      const sessionsDb = await sqlite.open({
+        filename: ACTIVITYSTREAMS_DB,
+        driver: sqlite3.Database,
+      });
+
+      await sessionsDb.migrate({
+        migrationsPath: path.resolve(__dirname, "migrations/activitystreams"),
       });
     })
     .then(() => {

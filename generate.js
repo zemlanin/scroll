@@ -41,6 +41,7 @@ const {
 const {
   DIST,
   POSTS_DB,
+  ACTIVITYSTREAMS_DB,
   loadIcu,
   writeFileWithGzip,
   getBlogObject,
@@ -118,13 +119,13 @@ async function copyStaticContent(
   }
 }
 
-async function generate(db, destination, stdout, stderr, { only } = {}) {
+async function generate(db, asdb, destination, stdout, stderr, { only } = {}) {
   const tmpFolder = await fsPromises.mkdtemp(path.join(os.tmpdir(), "scroll-"));
   await fsPromises.mkdir(path.join(tmpFolder, "/media"));
   await fsPromises.mkdir(path.join(tmpFolder, "/feeds"));
-  await fsPromises.mkdir(path.join(tmpFolder, "/activitystreams"));
-  await fsPromises.mkdir(path.join(tmpFolder, "/activitystreams/blog"));
-  await fsPromises.mkdir(path.join(tmpFolder, "/activitystreams/blog/outbox"));
+  await fsPromises.mkdir(path.join(tmpFolder, "/actor"));
+  await fsPromises.mkdir(path.join(tmpFolder, "/actor/blog"));
+  await fsPromises.mkdir(path.join(tmpFolder, "/actor/blog/outbox"));
 
   stdout.write(`made tmp dir: ${tmpFolder}\n`);
 
@@ -199,7 +200,7 @@ async function generate(db, destination, stdout, stderr, { only } = {}) {
     !only ||
     only.has("pagination") ||
     only.has("linkblog") ||
-    only.has("activitystreams")
+    only.has("actor")
   ) {
     _pagination = await getPagination(db, null);
     _newestPage = _pagination[0] || { index: 0, posts: [] };
@@ -236,15 +237,12 @@ async function generate(db, destination, stdout, stderr, { only } = {}) {
     stdout.write("pagination done\n");
   }
 
-  if (!only || only.has("activitystreams")) {
+  if (!only || only.has("actor")) {
     for (const page of pagination) {
       const pageNumber = page.index;
 
       await writeFileWithGzip(
-        path.join(
-          tmpFolder,
-          `activitystreams/blog/outbox/page-${pageNumber}.json`
-        ),
+        path.join(tmpFolder, `actor/blog/outbox/page-${pageNumber}.json`),
         await generateActivityStreamPage(
           db,
           blog,
@@ -256,27 +254,66 @@ async function generate(db, destination, stdout, stderr, { only } = {}) {
       );
     }
 
-    const outboxPath = "activitystreams/blog/outbox";
-    const id = new URL(outboxPath, blog.url).toString();
+    const outboxPath = "actor/blog/outbox";
+    const outboxId = new URL(outboxPath, blog.url).toString();
 
     await writeFileWithGzip(
       path.join(tmpFolder, outboxPath + ".json"),
       JSON.stringify({
         "@context": "https://www.w3.org/ns/activitystreams",
-        id,
+        id: outboxId,
         type: "OrderedCollection",
         totalItems: pagination.reduce(
           (acc, page) => acc + page.posts.length,
           0
         ),
         first: new URL(
-          `activitystreams/blog/outbox/page-${newestPage.index}`,
+          `actor/blog/outbox/page-${newestPage.index}`,
           blog.url
         ).toString(),
-        last: new URL(
-          `activitystreams/blog/outbox/page-1`,
-          blog.url
-        ).toString(),
+        last: new URL(`actor/blog/outbox/page-1`, blog.url).toString(),
+      }),
+      { flag: "wx" }
+    );
+
+    const actorPath = "actor/blog";
+    const actorId = new URL(actorPath, blog.url).toString();
+    const inboxId = new URL("actor/blog/inbox", blog.url).toString();
+
+    const { key_id: keyId, public_key: publicKeyPem } =
+      (await asdb.get(
+        `SELECT id, key_id, public_key FROM actors WHERE id = ?1`,
+        {
+          1: actorId,
+        }
+      )) || {};
+
+    await writeFileWithGzip(
+      path.join(tmpFolder, actorPath + ".json"),
+      JSON.stringify({
+        "@context": ["https://www.w3.org/ns/activitystreams"],
+        id: actorId,
+        type: "Person",
+        inbox: inboxId,
+        outbox: outboxId,
+        preferredUsername: "blog",
+        name: blog.author.name
+          ? `${blog.title} (${blog.author.name})`
+          : blog.title,
+        summary: "",
+        url: blog.url,
+        publicKey: publicKeyPem
+          ? {
+              id: keyId,
+              owner: actorId,
+              publicKeyPem: publicKeyPem,
+            }
+          : null,
+        icon: {
+          type: "Image",
+          mediaType: "image/png",
+          url: blog.static.favicon.png,
+        },
       }),
       { flag: "wx" }
     );
@@ -403,36 +440,58 @@ async function generate(db, destination, stdout, stderr, { only } = {}) {
 }
 
 function start({ only, stdout, stderr } = {}) {
-  sqlite
-    .open({ filename: POSTS_DB, driver: sqlite3.Database })
-    .then((db) => loadIcu(db))
-    .then((db) =>
-      db
-        .migrate({
-          migrationsPath: path.resolve(__dirname, "migrations/posts"),
-        })
-        .then(() =>
-          generate(
-            db,
-            DIST,
-            stdout || process.stdout,
-            stderr || process.stderr,
-            { only }
-          )
-        )
-        .then(() => {
-          console.log("done");
-          return db.close().then(() => {
-            process.exit(0);
-          });
-        })
-        .catch((err) => {
-          console.error(err);
-          return db.close().then(() => {
-            process.exit(1);
-          });
-        })
-    );
+  const getDB = async () => {
+    const db = await sqlite.open({
+      filename: POSTS_DB,
+      driver: sqlite3.Database,
+    });
+
+    await loadIcu(db);
+
+    await db.migrate({
+      migrationsPath: path.resolve(__dirname, "migrations/posts"),
+    });
+
+    return db;
+  };
+
+  const getAsDB = async () => {
+    const asdb = await sqlite.open({
+      filename: ACTIVITYSTREAMS_DB,
+      driver: sqlite3.Database,
+    });
+
+    await asdb.migrate({
+      migrationsPath: path.resolve(__dirname, "migrations/activitystreams"),
+    });
+
+    return asdb;
+  };
+
+  Promise.all([getDB(), getAsDB()]).then(([db, asdb]) =>
+    generate(
+      db,
+      asdb,
+      DIST,
+      stdout || process.stdout,
+      stderr || process.stderr,
+      { only }
+    )
+      .then(() => {
+        console.log("done");
+
+        return Promise.all([db.close(), asdb.close()]).then(() => {
+          process.exit(0);
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+
+        return Promise.all([db.close(), asdb.close()]).then(() => {
+          process.exit(1);
+        });
+      })
+  );
 }
 
 if (require.main === module) {

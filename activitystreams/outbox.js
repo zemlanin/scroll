@@ -20,6 +20,7 @@ function watch() {
 }
 
 async function attemptDelivery(asdb, id, inbox) {
+  console.log('attemptDelivery')
   const { default: fetch, Request } = await fetchModule;
 
   const blogActor = (await getBlogObject()).activitystream.id;

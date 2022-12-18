@@ -57,8 +57,6 @@ async function attemptDelivery(asdb, id, inbox) {
     body: body,
   })
 
-  req.headers.set('host', new URL(req.url).hostname)
-
   // `httpSignature` depends on `http.Request` methods
   req.getHeader = (name) => { return req.headers.get(name) }
   req.getHeaders = (name) => { return [...req.headers.entries()].reduce((acc, [key, value]) => {
@@ -70,7 +68,7 @@ async function attemptDelivery(asdb, id, inbox) {
   httpSignature.sign(req, {
     key: private_key,
     keyId: key_id,
-    headers: ['(request-target)', 'host', 'date', 'digest'],
+    headers: ['(request-target)', 'date', 'digest'],
     authorizationHeaderName: 'signature'
   });
 

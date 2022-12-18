@@ -101,10 +101,10 @@ async function attemptDelivery(asdb, id, inbox) {
       {
         1: id,
         2: inbox,
-        3: {
+        3: JSON.stringify({
           status: resp.status,
           text: (await resp.text()).slice(0, 1000),
-        },
+        }),
       }
     );
   }

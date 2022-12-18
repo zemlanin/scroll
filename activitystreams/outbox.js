@@ -69,6 +69,8 @@ async function attemptDelivery(asdb, id, inbox) {
     req.headers.set(name, value);
   };
 
+  req._stringToSign = ''
+
   httpSignature.sign(req, {
     key: private_key,
     keyId: key_id,

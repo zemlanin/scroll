@@ -184,7 +184,7 @@ async function generateActivityStreamPage(
         id: activityASid,
         type: "Create",
         actor: new URL(`actor/blog`, blog.url),
-        published: post.published,
+        published: post.created,
         to: ["https://www.w3.org/ns/activitystreams#Public"],
         cc: [
           // "https://mastodon.devua.club/users/zemlanin/followers"
@@ -197,28 +197,30 @@ async function generateActivityStreamPage(
 
 function generateActivityStreamNote(post, blog) {
   const postASid = new URL(`actor/blog/notes/${post.id}`, blog.url);
+  const content =
+    `<p>${post.title}</p>` +
+    (post.opengraph.description ? `<p>${post.opengraph.description}</p>` : "") +
+    `<p><a href="${
+      post.url
+    }" target="_blank" rel="nofollow noopener noreferrer"><span class="invisible">${post.url.replace(
+      /^(https?:\/\/).+$/,
+      "$1"
+    )}</span><span>${post.url.replace(/^https?:\/\//, "")}</span></a></p>`;
 
   return {
     id: postASid,
     type: "Note",
-    published: post.published,
+    published: post.created,
     to: ["https://www.w3.org/ns/activitystreams#Public"],
     cc: [
       // "https://mastodon.devua.club/users/zemlanin/followers"
     ],
     url: new URL(post.slug ? `${post.slug}.html` : `${post.id}.html`, blog.url),
-    content:
-      `<p>${post.title}</p>` +
-      (post.opengraph.description
-        ? `<p>${post.opengraph.description}</p>`
-        : "") +
-      `<p><a href="${
-        post.url
-      }" target="_blank" rel="nofollow noopener noreferrer"><span class="invisible">${post.url.replace(
-        /^(https?:\/\/).+$/,
-        "$1"
-      )}</span><span>${post.url.replace(/^https?:\/\//, "")}</span></a></p>`,
-    updated: post.modified || post.published,
+    content: content,
+    contentMap: {
+      [post.lang || blog.lang]: content,
+    },
+    updated: post.modified || post.created,
     attachement: post.opengraph.image
       ? [
           {

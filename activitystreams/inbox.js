@@ -270,7 +270,7 @@ async function handleUndo(req, res) {
   }
 
   const asdb = await req.asdb();
-  await asdb.run(`DELETE FROM inbox WHERE id = ?1 AND actor = ?2;`, {
+  await asdb.run(`DELETE FROM inbox WHERE id = ?1 AND actor_id = ?2;`, {
     1: object.id,
     2: normalizeActor(actor),
   });

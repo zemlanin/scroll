@@ -22,6 +22,13 @@ async function inbox(req, res) {
   }
 
   if (!(await verify(req))) {
+    // early exit for deleting unknown actors/activity
+    if (req.post.type === "Delete") {
+      res.statusCode = 200;
+
+      return;
+    }
+
     res.statusCode = 401;
 
     console.log("invalid signature");
@@ -64,7 +71,7 @@ async function verify(req) {
   }
 
   // early exit for deleting unknown actors/activity
-  if (req.post.type === "DELETE") {
+  if (req.post.type === "Delete") {
     return false;
   }
 

@@ -26,7 +26,7 @@ async function attemptDelivery(asdb, id, inbox) {
   const blogActor = (await getBlogObject()).activitystream.id;
 
   const { key_id, private_key } = await asdb.get(
-    `SELECT key_id, private_key WHERE id = ?1;`,
+    `SELECT key_id, private_key FROM actors WHERE id = ?1;`,
     { 1: blogActor }
   );
 

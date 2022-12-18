@@ -14,6 +14,12 @@ async function inbox(req, res) {
   console.log(req.url);
   console.log(JSON.stringify(req.post));
 
+  if (!req.headers.authorization && !req.headers.signature) {
+    res.statusCode = 401;
+
+    return { detail: "missing http signature" };
+  }
+
   if (!(await verify(req))) {
     res.statusCode = 401;
 
@@ -44,7 +50,7 @@ async function verify(req) {
   let sigHead;
 
   try {
-    sigHead = httpSignature.parseRequest(req);
+    sigHead = httpSignature.parseRequest({ ...req, originalUrl: req.url });
   } catch (e) {
     return false;
   }

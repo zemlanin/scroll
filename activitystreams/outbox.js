@@ -1,9 +1,10 @@
+const httpSignature = require("http-signature");
 const sqlite = require("sqlite");
 const sqlite3 = require("sqlite3");
 
 const fetchModule = import("node-fetch");
 
-const { ACTIVITYSTREAMS_DB } = require("../common.js");
+const { ACTIVITYSTREAMS_DB, getBlogObject } = require("../common.js");
 
 module.exports = {
   watch,
@@ -19,7 +20,14 @@ function watch() {
 }
 
 async function attemptDelivery(asdb, id, inbox) {
-  const { default: fetch } = await fetchModule;
+  const { default: fetch, Request } = await fetchModule;
+
+  const blogActor = (await getBlogObject()).activitystream.id;
+
+  const { key_id, private_key } = await asdb.get(
+    `SELECT key_id, private_key WHERE id = ?1;`,
+    { 1: blogActor }
+  );
 
   const message = await asdb.get(
     `SELECT id, message FROM outbox WHERE id = ?1`,
@@ -28,7 +36,7 @@ async function attemptDelivery(asdb, id, inbox) {
     }
   );
 
-  const resp = await fetch(inbox, {
+  const req = new Request(inbox, {
     method: "post",
     headers: {
       Accept: "application/activity+json",
@@ -39,7 +47,14 @@ async function attemptDelivery(asdb, id, inbox) {
       id,
       ...message,
     }),
-  }).catch((e) => {
+  });
+
+  httpSignature.sign(req, {
+    key: private_key,
+    keyId: key_id,
+  });
+
+  const resp = await fetch(req).catch((e) => {
     return {
       status: 9999,
       text() {

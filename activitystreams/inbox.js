@@ -50,7 +50,7 @@ async function verify(req) {
   let sigHead;
 
   try {
-    sigHead = httpSignature.parseRequest({ ...req, originalUrl: req.url });
+    sigHead = httpSignature.parseRequest(req);
   } catch (e) {
     return false;
   }

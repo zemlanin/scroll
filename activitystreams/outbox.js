@@ -1,4 +1,4 @@
-const crypto = require('crypto')
+const crypto = require("crypto");
 
 const httpSignature = require("http-signature");
 const sqlite = require("sqlite");
@@ -42,34 +42,38 @@ async function attemptDelivery(asdb, id, inbox) {
     "@context": "https://www.w3.org/ns/activitystreams",
     id,
     ...message,
-  })
-  const digest = crypto.createHash('sha256')
-    .update(body)
-    .digest('base64')
+  });
+  const digest = crypto.createHash("sha256").update(body).digest("base64");
 
   const req = new Request(inbox, {
     method: "post",
     headers: {
       Accept: "application/activity+json",
       "Content-Type": "application/activity+json",
-      Digest: `SHA-256=${digest}`
+      Digest: `SHA-256=${digest}`,
     },
     body: body,
-  })
+  });
 
   // `httpSignature` depends on `http.Request` methods
-  req.getHeader = (name) => { return req.headers.get(name) }
-  req.getHeaders = (name) => { return [...req.headers.entries()].reduce((acc, [key, value]) => {
-    acc[key] = value
-    return acc
-  }, {}) }
-  req.setHeader = (name, value) => { req.headers.set(name, value) }
+  req.getHeader = (name) => {
+    return req.headers.get(name);
+  };
+  req.getHeaders = () => {
+    return [...req.headers.entries()].reduce((acc, [key, value]) => {
+      acc[key] = value;
+      return acc;
+    }, {});
+  };
+  req.setHeader = (name, value) => {
+    req.headers.set(name, value);
+  };
 
   httpSignature.sign(req, {
     key: private_key,
     keyId: key_id,
-    headers: ['(request-target)', 'date', 'digest'],
-    authorizationHeaderName: 'signature'
+    headers: ["(request-target)", "date", "digest"],
+    authorizationHeaderName: "signature",
   });
 
   const resp = await fetch(req).catch((e) => {
@@ -81,12 +85,12 @@ async function attemptDelivery(asdb, id, inbox) {
     };
   });
 
-  console.log(resp.status)
-  console.log(req.getHeaders())
+  console.log(resp.status);
+  console.log(req.getHeaders());
 
   if (resp.status >= 400) {
-    const text = await resp.text()
-    console.error(text)
+    const text = await resp.text();
+    console.error(text);
     await asdb.run(
       `INSERT INTO deliveries (
         message_id,

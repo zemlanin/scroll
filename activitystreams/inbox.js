@@ -323,11 +323,13 @@ async function storeInboxMessage(asdb, message) {
 async function storeReply(_asdb, _note) {}
 
 async function sendAcceptMessage(asdb, { receiver, object }) {
-  const { inbox } = await asdb.get(`SELECT inbox FROM actors WHERE id = ?1`, {
+  const { inbox, shared_inbox } = await asdb.get(`SELECT inbox, shared_inbox FROM actors WHERE id = ?1`, {
     1: receiver,
   });
 
-  if (!inbox) {
+  console.log(receiver, inbox)
+
+  if (!inbox && !shared_inbox) {
     return;
   }
 
@@ -357,5 +359,5 @@ async function sendAcceptMessage(asdb, { receiver, object }) {
     }
   );
 
-  await attemptDelivery(asdb, id, inbox);
+  await attemptDelivery(asdb, id, shared_inbox || inbox);
 }

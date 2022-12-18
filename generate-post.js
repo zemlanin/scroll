@@ -435,7 +435,10 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated, oldSlug) {
     await writeFileWithGzip(path.join(DIST, `${post.slug}.html`), renderedPage);
   } else {
     const renderedPage = await generatePostPage(post, blog);
-    const asNote = generateActivityStreamNote(post, blog);
+    const asNote = {
+      "@context": "https://www.w3.org/ns/activitystreams",
+      ...generateActivityStreamNote(post, blog),
+    };
 
     if (post.slug && post.id !== post.slug) {
       await writeFileWithGzip(

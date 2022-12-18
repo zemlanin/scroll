@@ -187,7 +187,10 @@ async function generate(db, asdb, destination, stdout, stderr, { only } = {}) {
               { flag: "wx" }
             );
 
-            const asNote = generateActivityStreamNote(post, blog);
+            const asNote = {
+              "@context": "https://www.w3.org/ns/activitystreams",
+              ...generateActivityStreamNote(post, blog),
+            };
 
             await writeFileWithGzip(
               path.join(tmpFolder, `actor/blog/notes/${post.id}.json`),

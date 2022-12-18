@@ -1,3 +1,5 @@
+const crypto = require('crypto')
+
 const httpSignature = require("http-signature");
 const sqlite = require("sqlite");
 const sqlite3 = require("sqlite3");
@@ -20,7 +22,6 @@ function watch() {
 }
 
 async function attemptDelivery(asdb, id, inbox) {
-  console.log('attemptDelivery')
   const { default: fetch, Request } = await fetchModule;
 
   const blogActor = (await getBlogObject()).activitystream.id;
@@ -37,17 +38,23 @@ async function attemptDelivery(asdb, id, inbox) {
     }
   );
 
+  const body = JSON.stringify({
+    "@context": "https://www.w3.org/ns/activitystreams",
+    id,
+    ...message,
+  })
+  const digest = crypto.createHash('sha256')
+    .update(body)
+    .digest('base64')
+
   const req = new Request(inbox, {
     method: "post",
     headers: {
       Accept: "application/activity+json",
       "Content-Type": "application/activity+json",
+      Digest: `SHA-256=${digest}`
     },
-    body: JSON.stringify({
-      "@context": "https://www.w3.org/ns/activitystreams",
-      id,
-      ...message,
-    }),
+    body: body,
   })
 
   req.headers.set('host', new URL(req.url).hostname)

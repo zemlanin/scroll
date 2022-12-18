@@ -460,7 +460,9 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated, oldSlug) {
       JSON.stringify(asNote)
     );
   } else {
-    await unlinkFileWithGzip(path.join(DIST, `actor/blog/notes/${post.id}.json`));
+    await unlinkFileWithGzip(
+      path.join(DIST, `actor/blog/notes/${post.id}.json`)
+    );
   }
 
   const becameOrWasPublic = oldStatus === "public" || newStatus === "public";

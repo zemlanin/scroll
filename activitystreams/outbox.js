@@ -53,6 +53,7 @@ async function attemptDelivery(asdb, id, inbox) {
     key: private_key,
     keyId: key_id,
   });
+  console.log(inbox, req.headers)
 
   const resp = await fetch(req).catch((e) => {
     return {

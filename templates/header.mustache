@@ -38,7 +38,14 @@
         <meta name="referrer" content="origin" />
       {{/public}}
     {{/post}}
-    {{#index}}<link rel="canonical" href="{{{blog.url}}}">{{/index}}
+    {{#index}}
+      <link rel="canonical" href="{{{blog.url}}}">
+      <link
+        href="{{{blog.activitystream.id}}}"
+        rel="alternate"
+        type="application/activity+json"
+      >
+    {{/index}}
     {{#pagination}}<meta name="robots" content="noindex" />{{/pagination}}
     {{#archive}}<meta name="robots" content="noindex" />{{/archive}}
     {{#linkblog}}<meta name="robots" content="noindex" />{{/linkblog}}

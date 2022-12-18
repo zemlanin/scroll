@@ -1003,7 +1003,7 @@ async function prepare(post, embedsLoader) {
 
   const activitystream = {
     id: new URL(`actor/blog/notes/${post.id}`, BLOG_BASE_URL).toString(),
-  }
+  };
 
   return {
     id: post.id,
@@ -1040,6 +1040,10 @@ async function getBlogObject(baseUrl) {
   const statics = await getStaticsObject();
   const lang = "uk";
 
+  const activitystream = {
+    id: new URL(`actor/blog`, baseUrl).toString(),
+  };
+
   return {
     title: BLOG_TITLE,
     url: url.resolve(baseUrl, "/"),
@@ -1054,6 +1058,7 @@ async function getBlogObject(baseUrl) {
       url: url.resolve(baseUrl, "/rss.xml"),
       websub: WEBSUB_HUB,
     },
+    activitystream,
     linkblog: {
       lang,
       title: `Linkblog • ${BLOG_TITLE}`,

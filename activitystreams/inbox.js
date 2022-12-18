@@ -2,6 +2,14 @@ const httpSignature = require("http-signature");
 
 const fetchModule = import("node-fetch");
 
+const { attemptDelivery } = require("./outbox.js");
+const { nanoid, getBlogObject } = require("../common.js");
+
+const getMessageId = () =>
+  `message-${new Date().getFullYear()}-${(new Date().getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}-${nanoid.outbox()}`;
+
 module.exports = inbox;
 
 async function inbox(req, res) {
@@ -11,13 +19,8 @@ async function inbox(req, res) {
     return { detail: "invalid @context" };
   }
 
-  console.log(req.url);
-  console.log(JSON.stringify(req.post));
-
   if (!req.headers.authorization && !req.headers.signature) {
     res.statusCode = 401;
-
-    console.log("missing http signature");
     return { detail: "missing http signature" };
   }
 
@@ -30,8 +33,6 @@ async function inbox(req, res) {
     }
 
     res.statusCode = 401;
-
-    console.log("invalid signature");
     return { detail: "invalid signature" };
   }
 
@@ -51,7 +52,6 @@ async function inbox(req, res) {
   }
 
   res.statusCode = 400;
-
   return { detail: "unknown activity type" };
 }
 
@@ -121,34 +121,241 @@ async function getFreshKey(asdb, actorId) {
     `INSERT INTO actors (
       id,
       key_id,
-      public_key
+      public_key,
+
+      inbox,
+      shared_inbox,
+      name,
+      url,
+      icon
     ) VALUES (
       ?1,
       ?2,
-      ?3
+      ?3,
+
+      ?4,
+      ?5,
+      ?6,
+      ?7,
+      ?8
     ) ON CONFLICT DO
     UPDATE SET
       key_id = ?2,
-      public_key = ?3
+      public_key = ?3,
+
+      inbox = ?4,
+      shared_inbox = ?5,
+      name = ?6,
+      url = ?7,
+      icon = ?8
     WHERE id = ?1;`,
     {
       1: actor.id,
       2: actor.publicKey.id,
       3: actor.publicKey.publicKeyPem,
+      4: actor.inbox,
+      5: actor.endpoints?.sharedInbox,
+      6: actor.name || actor.preferredUsername,
+      7: actor.url,
+      8: actor.icon?.type === "Image" ? actor.icon?.url : undefined,
     }
   );
 
   return actor.publicKey.publicKeyPem;
 }
 
-async function handleFollow() {}
+async function handleFollow(req, res) {
+  /*
+    {
+      "@context": "https://www.w3.org/ns/activitystreams",
+      "id": "https://mastodon.devua.club/a6661b47-64f7-4a44-894f-42f9833343ab",
+      "type": "Follow",
+      "actor": "https://mastodon.devua.club/users/zemlanin",
+      "object": "https://zemlan.in/actor/blog"
+    }
+  */
+  const { id, type, actor, object } = req.post;
 
-async function handleAnnounce() {}
+  try {
+    new URL(normalizeActor(actor));
+  } catch (e) {
+    res.statusCode = 400;
+    return { detail: "actor has to be an uri" };
+  }
 
-async function handleLike() {}
+  const blog = await getBlogObject();
+  const blogActor = blog.activitystream.id;
 
-async function handleCreate() {}
+  if (normalizeActor(object) !== blogActor) {
+    res.statusCode = 404;
+    return { detail: "object not found" };
+  }
 
-async function handleUndo() {}
+  const asdb = await req.asdb();
+  await storeInboxMessage(asdb, {
+    id,
+    type,
+    actor_id: normalizeActor(actor),
+    object_id: blogActor,
+  });
 
-async function handleDelete() {}
+  await sendAcceptMessage(asdb, {
+    receiver: normalizeActor(actor),
+    object: id,
+  });
+}
+
+async function handleAnnounce(req, res) {
+  // TODO
+  console.log(req.post);
+
+  res.statusCode = 400;
+  return { detail: "unknown activity type" };
+}
+
+async function handleLike(req, res) {
+  /*
+    {
+      "@context": "https://www.w3.org/ns/activitystreams",
+      "id": "https://mastodon.devua.club/users/zemlanin#likes/222",
+      "type": "Like",
+      "actor": "https://mastodon.devua.club/users/zemlanin",
+      "object": "https://zemlan.in/actor/blog/notes/post-2022-11-Ls4QTeY41Z"
+    }
+  */
+
+  // TODO
+  console.log(req.post);
+
+  res.statusCode = 400;
+  return { detail: "unknown activity type" };
+}
+
+async function handleCreate(req, res) {
+  // TODO
+  console.log(req.post);
+  await storeReply();
+
+  res.statusCode = 400;
+  return { detail: "unknown activity type" };
+}
+
+async function handleUndo(req, res) {
+  /*
+    {
+      "@context": "https://www.w3.org/ns/activitystreams",
+      "id": "https://mastodon.devua.club/users/zemlanin#likes/222/undo",
+      "type": "Undo",
+      "actor": "https://mastodon.devua.club/users/zemlanin",
+      "object": {
+        "id": "https://mastodon.devua.club/users/zemlanin#likes/222",
+        "type": "Like",
+        "actor": "https://mastodon.devua.club/users/zemlanin",
+        "object": "https://zemlan.in/actor/blog/notes/post-2022-11-Ls4QTeY41Z"
+      }
+    }
+  */
+  const { id, actor, object } = req.post;
+
+  if (!object?.id) {
+    res.statusCode = 400;
+    return { detail: "nothing to undo" };
+  }
+
+  try {
+    new URL(normalizeActor(actor));
+  } catch (e) {
+    res.statusCode = 400;
+    return { detail: "actor has to be an uri" };
+  }
+
+  const asdb = await req.asdb();
+  await asdb.run(`DELETE FROM inbox WHERE id = ?1 AND actor = ?2;`, {
+    1: object.id,
+    2: normalizeActor(actor),
+  });
+
+  await sendAcceptMessage(asdb, {
+    receiver: normalizeActor(actor),
+    object: id,
+  });
+}
+
+async function handleDelete(req, res) {
+  // TODO
+  console.log(req.post);
+
+  res.statusCode = 400;
+  return { detail: "unknown activity type" };
+}
+
+function normalizeActor(actor) {
+  return typeof actor === "string" ? actor : actor?.id;
+}
+
+async function storeInboxMessage(asdb, message) {
+  await asdb.run(
+    `INSERT INTO inbox (
+      id,
+      actor_id,
+      type,
+      object_id
+    ) VALUES (
+      ?1,
+      ?3,
+      ?4,
+      ?5
+    ) ON CONFLICT DO
+    UPDATE SET
+      actor_id = ?3,
+      type = ?4,
+      object_id = ?5
+    WHERE id = ?1;`,
+    {
+      1: message.id,
+      3: message.actor_id,
+      4: message.type,
+      5: message.object_id,
+    }
+  );
+}
+
+async function storeReply(_asdb, _note) {}
+
+async function sendAcceptMessage(asdb, { receiver, object }) {
+  const { inbox } = await asdb.get(`SELECT inbox FROM actors WHERE id = ?1`, {
+    1: receiver,
+  });
+
+  if (!inbox) {
+    return;
+  }
+
+  const blog = await getBlogObject();
+  const blogActor = blog.activitystream.id;
+
+  const id = new URL(`#outbox-${getMessageId()}`, blogActor);
+
+  await asdb.run(
+    `INSERT INTO outbox (
+      id,
+      to,
+      message
+    ) VALUES (
+      ?1,
+      ?2,
+      ?3
+    );`,
+    {
+      1: id,
+      2: receiver,
+      3: {
+        type: "Accept",
+        object: object,
+        actor: blogActor,
+      },
+    }
+  );
+
+  await attemptDelivery(asdb, id, inbox);
+}

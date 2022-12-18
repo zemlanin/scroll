@@ -57,6 +57,10 @@ const nanoid = {
     "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
     26
   ),
+  outbox: customAlphabet(
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    26
+  ),
 };
 
 function isOwnMedia(href) {

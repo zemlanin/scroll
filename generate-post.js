@@ -196,7 +196,6 @@ async function generateActivityStreamPage(
 }
 
 function generateActivityStreamNote(post, blog) {
-  const postASid = new URL(`actor/blog/notes/${post.id}`, blog.url);
   const content =
     `<p>${post.title}</p>` +
     (post.opengraph.description ? `<p>${post.opengraph.description}</p>` : "") +
@@ -208,7 +207,7 @@ function generateActivityStreamNote(post, blog) {
     )}</span><span>${post.url.replace(/^https?:\/\//, "")}</span></a></p>`;
 
   return {
-    id: postASid,
+    id: post.activitystream.id,
     type: "Note",
     published: post.created,
     attributedTo: new URL(`actor/blog`, blog.url),

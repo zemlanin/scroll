@@ -1001,6 +1001,10 @@ async function prepare(post, embedsLoader) {
     status = "public";
   }
 
+  const activitystream = {
+    id: new URL(`actor/blog/notes/${post.id}`, BLOG_BASE_URL).toString(),
+  }
+
   return {
     id: post.id,
     slug: post.slug,
@@ -1016,6 +1020,7 @@ async function prepare(post, embedsLoader) {
     longread,
     rss,
     opengraph,
+    activitystream,
     lang: post.lang,
     text: post.text,
     created: created.toISOString().replace(/\.\d{3}Z$/, "Z"),

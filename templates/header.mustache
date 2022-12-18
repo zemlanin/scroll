@@ -25,7 +25,14 @@
   {{#preview}}<meta name="referrer" content="origin-when-cross-origin" />{{/preview}}
   {{^preview}}
     {{#post}}
-      {{#public}}<link rel="canonical" href="{{{post.url}}}">{{/public}}
+      {{#public}}
+        <link rel="canonical" href="{{{post.url}}}">
+        <link
+          href="{{{post.activitystream.id}}}"
+          rel="alternate"
+          type="application/activity+json"
+        >
+      {{/public}}
       {{^public}}
         <meta name="robots" content="noindex" />
         <meta name="referrer" content="origin" />

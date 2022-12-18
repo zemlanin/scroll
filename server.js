@@ -229,7 +229,7 @@ async function processPost(request, response, contentType) {
             : JSON.parse(queryData);
         resolve(request.post);
       } catch (e) {
-        reject(e);
+        reject(new BadRequestError());
       }
     });
   });
@@ -341,6 +341,12 @@ const server = http.createServer((req, res) => {
       })
       .catch((err) => {
         if (!res.finished) {
+          if (err instanceof BadRequestError) {
+            res.writeHead(400, { "Content-Type": "text/plain" });
+            res.end("400");
+            return;
+          }
+
           console.error(err);
 
           res.writeHead(500, { "Content-Type": "text/plain" });
@@ -399,6 +405,8 @@ function start() {
       process.exit(1);
     });
 }
+
+class BadRequestError extends Error {}
 
 if (require.main === module) {
   start();

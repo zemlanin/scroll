@@ -186,7 +186,9 @@ async function generate(db, asdb, destination, stdout, stderr, { only } = {}) {
               renderedPage,
               { flag: "wx" }
             );
+          }
 
+          if (post.public) {
             const asNote = {
               "@context": "https://www.w3.org/ns/activitystreams",
               ...generateActivityStreamNote(post, blog),
@@ -197,14 +199,6 @@ async function generate(db, asdb, destination, stdout, stderr, { only } = {}) {
               JSON.stringify(asNote),
               { flag: "wx" }
             );
-
-            if (post.slug && post.id !== post.slug) {
-              await writeFileWithGzip(
-                path.join(tmpFolder, `actor/blog/notes/${post.slug}.json`),
-                JSON.stringify(asNote),
-                { flag: "wx" }
-              );
-            }
           }
         })
       );

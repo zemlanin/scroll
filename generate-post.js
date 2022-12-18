@@ -413,24 +413,15 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated, oldSlug) {
 
   if (oldSlug && newSlug !== oldSlug) {
     await unlinkFileWithGzip(path.join(DIST, `${oldSlug}.html`));
-    await unlinkFileWithGzip(
-      path.join(DIST, `actor/blog/notes/${oldSlug}.json`)
-    );
   }
 
   if (newStatus === "draft" || newStatus === "internal") {
     await unlinkFileWithGzip(path.join(DIST, `${post.id}.html`));
-    await unlinkFileWithGzip(
-      path.join(DIST, `actor/blog/notes/${post.id}.json`)
-    );
   }
 
   if (newStatus === "draft") {
     if (post.slug) {
       await unlinkFileWithGzip(path.join(DIST, `${post.slug}.html`));
-      await unlinkFileWithGzip(
-        path.join(DIST, `actor/blog/notes/${post.slug}.json`)
-      );
     }
   } else if (newStatus === "internal") {
     const renderedPage = await generatePostPage(post, blog);
@@ -448,11 +439,6 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated, oldSlug) {
         path.join(DIST, `${post.slug}.html`),
         renderedPage
       );
-
-      await writeFileWithGzip(
-        path.join(DIST, `actor/blog/notes/${post.slug}.json`),
-        JSON.stringify(asNote)
-      );
     }
 
     await writeFileWithGzip(path.join(DIST, `${post.id}.html`), renderedPage);
@@ -461,6 +447,20 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated, oldSlug) {
       path.join(DIST, `actor/blog/notes/${post.id}.json`),
       JSON.stringify(asNote)
     );
+  }
+
+  if (newStatus === "public") {
+    const asNote = {
+      "@context": "https://www.w3.org/ns/activitystreams",
+      ...generateActivityStreamNote(post, blog),
+    };
+
+    await writeFileWithGzip(
+      path.join(DIST, `actor/blog/notes/${post.id}.json`),
+      JSON.stringify(asNote)
+    );
+  } else {
+    await unlinkFileWithGzip(path.join(DIST, `actor/blog/notes/${post.id}.json`));
   }
 
   const becameOrWasPublic = oldStatus === "public" || newStatus === "public";

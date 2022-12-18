@@ -56,6 +56,7 @@ async function attemptDelivery(asdb, id, inbox) {
   });
 
   // `httpSignature` depends on `http.Request` methods
+  req.path = new URL(inbox).pathname;
   req.getHeader = (name) => {
     return req.headers.get(name);
   };
@@ -69,16 +70,12 @@ async function attemptDelivery(asdb, id, inbox) {
     req.headers.set(name, value);
   };
 
-  req._stringToSign = ''
-
   httpSignature.sign(req, {
     key: private_key,
     keyId: key_id,
     headers: ["(request-target)", "date", "digest"],
     authorizationHeaderName: "signature",
   });
-
-  console.log(req._stringToSign)
 
   const resp = await fetch(req).catch((e) => {
     return {

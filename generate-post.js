@@ -206,6 +206,7 @@ function generateActivityStreamNote(post, blog) {
     cc: [
       // "https://mastodon.devua.club/users/zemlanin/followers"
     ],
+    url: new URL(post.slug ? `${post.slug}.html` : `${post.id}.html`, blog.url),
     content:
       `<p>${post.title}</p>` +
       (post.opengraph.description

@@ -66,6 +66,8 @@ async function attemptDelivery(asdb, id, inbox) {
     headers: ['(request-target)', 'host', 'date']
   });
 
+  req.headers.set('signature', req.headers.get('authorization').slice('signature '.length))
+
   const resp = await fetch(req).catch((e) => {
     return {
       status: 9999,

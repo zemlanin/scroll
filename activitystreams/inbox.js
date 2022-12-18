@@ -17,12 +17,14 @@ async function inbox(req, res) {
   if (!req.headers.authorization && !req.headers.signature) {
     res.statusCode = 401;
 
+    console.log("missing http signature");
     return { detail: "missing http signature" };
   }
 
   if (!(await verify(req))) {
     res.statusCode = 401;
 
+    console.log("invalid signature");
     return { detail: "invalid signature" };
   }
 

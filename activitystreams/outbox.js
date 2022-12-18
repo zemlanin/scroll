@@ -80,6 +80,8 @@ async function attemptDelivery(asdb, id, inbox) {
   console.log(req.getHeaders())
 
   if (resp.status >= 400) {
+    const text = await resp.text()
+    console.error(text)
     await asdb.run(
       `INSERT INTO deliveries (
         message_id,
@@ -104,7 +106,7 @@ async function attemptDelivery(asdb, id, inbox) {
         2: inbox,
         3: JSON.stringify({
           status: resp.status,
-          text: (await resp.text()).slice(0, 1000),
+          text: text.slice(0, 1000),
         }),
       }
     );

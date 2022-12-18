@@ -76,6 +76,8 @@ async function attemptDelivery(asdb, id, inbox) {
     authorizationHeaderName: "signature",
   });
 
+  console.log(req._stringToSign)
+
   const resp = await fetch(req).catch((e) => {
     return {
       status: 9999,

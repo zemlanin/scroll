@@ -30,6 +30,7 @@ const {
   generateRSSPage,
   generateIndexPage,
   generateArchivePage,
+  generateActivityStreamNote,
   generateActivityStreamPage,
 } = require("./generate-post.js");
 
@@ -125,6 +126,7 @@ async function generate(db, asdb, destination, stdout, stderr, { only } = {}) {
   await fsPromises.mkdir(path.join(tmpFolder, "/feeds"));
   await fsPromises.mkdir(path.join(tmpFolder, "/actor"));
   await fsPromises.mkdir(path.join(tmpFolder, "/actor/blog"));
+  await fsPromises.mkdir(path.join(tmpFolder, "/actor/blog/notes"));
   await fsPromises.mkdir(path.join(tmpFolder, "/actor/blog/outbox"));
 
   stdout.write(`made tmp dir: ${tmpFolder}\n`);
@@ -184,6 +186,22 @@ async function generate(db, asdb, destination, stdout, stderr, { only } = {}) {
               renderedPage,
               { flag: "wx" }
             );
+
+            const asNote = generateActivityStreamNote(post, blog);
+
+            await writeFileWithGzip(
+              path.join(tmpFolder, `actor/blog/notes/${post.id}.json`),
+              JSON.stringify(asNote),
+              { flag: "wx" }
+            );
+
+            if (post.slug && post.id !== post.slug) {
+              await writeFileWithGzip(
+                path.join(tmpFolder, `actor/blog/notes/${post.slug}.json`),
+                JSON.stringify(asNote),
+                { flag: "wx" }
+              );
+            }
           }
         })
       );

@@ -175,9 +175,8 @@ async function generateActivityStreamPage(
     partOf: new URL(`actor/blog/outbox`, blog.url),
     summary: `${blog.title} / page ${pageNumber}`,
     orderedItems: posts.map((post) => {
-      const postASid = new URL(`actor/blog/notes/${post.id}`, blog.url);
       const activityASid = new URL(
-        `actor/blog/notes/${post.id}/activity`,
+        `actor/blog/notes/${post.id}#activity`,
         blog.url
       );
 
@@ -190,44 +189,47 @@ async function generateActivityStreamPage(
         cc: [
           // "https://mastodon.devua.club/users/zemlanin/followers"
         ],
-        object: {
-          id: postASid,
-          type: "Note",
-          published: post.published,
-          to: ["https://www.w3.org/ns/activitystreams#Public"],
-          cc: [
-            // "https://mastodon.devua.club/users/zemlanin/followers"
-          ],
-          content:
-            `<p>${post.title}</p>` +
-            (post.opengraph.description
-              ? `<p>${post.opengraph.description}</p>`
-              : "") +
-            `<p><a href="${
-              post.url
-            }" target="_blank" rel="nofollow noopener noreferrer"><span class="invisible">${post.url.replace(
-              /^(https?:\/\/).+$/,
-              "$1"
-            )}</span><span>${post.url.replace(
-              /^https?:\/\//,
-              ""
-            )}</span></a></p>`,
-          updated: post.modified || post.published,
-          attachement: post.opengraph.image
-            ? [
-                {
-                  type: "Image",
-                  url: post.opengraph.image,
-                  // "name": "iOS Home Screen with a fake calendar widget showing 1000th of March 2020",
-                  width: post.opengraph.imageWidth,
-                  height: post.opengraph.imageHeight,
-                },
-              ]
-            : [],
-        },
+        object: generateActivityStreamNote(post, blog),
       };
     }),
   });
+}
+
+function generateActivityStreamNote(post, blog) {
+  const postASid = new URL(`actor/blog/notes/${post.id}`, blog.url);
+
+  return {
+    id: postASid,
+    type: "Note",
+    published: post.published,
+    to: ["https://www.w3.org/ns/activitystreams#Public"],
+    cc: [
+      // "https://mastodon.devua.club/users/zemlanin/followers"
+    ],
+    content:
+      `<p>${post.title}</p>` +
+      (post.opengraph.description
+        ? `<p>${post.opengraph.description}</p>`
+        : "") +
+      `<p><a href="${
+        post.url
+      }" target="_blank" rel="nofollow noopener noreferrer"><span class="invisible">${post.url.replace(
+        /^(https?:\/\/).+$/,
+        "$1"
+      )}</span><span>${post.url.replace(/^https?:\/\//, "")}</span></a></p>`,
+    updated: post.modified || post.published,
+    attachement: post.opengraph.image
+      ? [
+          {
+            type: "Image",
+            url: post.opengraph.image,
+            // "name": "iOS Home Screen with a fake calendar widget showing 1000th of March 2020",
+            width: post.opengraph.imageWidth,
+            height: post.opengraph.imageHeight,
+          },
+        ]
+      : [],
+  };
 }
 
 async function generateIndexPage(db, blog, newestPage) {
@@ -408,15 +410,24 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated, oldSlug) {
 
   if (oldSlug && newSlug !== oldSlug) {
     await unlinkFileWithGzip(path.join(DIST, `${oldSlug}.html`));
+    await unlinkFileWithGzip(
+      path.join(DIST, `actor/blog/notes/${oldSlug}.json`)
+    );
   }
 
   if (newStatus === "draft" || newStatus === "internal") {
     await unlinkFileWithGzip(path.join(DIST, `${post.id}.html`));
+    await unlinkFileWithGzip(
+      path.join(DIST, `actor/blog/notes/${post.id}.json`)
+    );
   }
 
   if (newStatus === "draft") {
     if (post.slug) {
       await unlinkFileWithGzip(path.join(DIST, `${post.slug}.html`));
+      await unlinkFileWithGzip(
+        path.join(DIST, `actor/blog/notes/${post.slug}.json`)
+      );
     }
   } else if (newStatus === "internal") {
     const renderedPage = await generatePostPage(post, blog);
@@ -424,15 +435,26 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated, oldSlug) {
     await writeFileWithGzip(path.join(DIST, `${post.slug}.html`), renderedPage);
   } else {
     const renderedPage = await generatePostPage(post, blog);
+    const asNote = generateActivityStreamNote(post, blog);
 
     if (post.slug && post.id !== post.slug) {
       await writeFileWithGzip(
         path.join(DIST, `${post.slug}.html`),
         renderedPage
       );
+
+      await writeFileWithGzip(
+        path.join(DIST, `actor/blog/notes/${post.slug}.json`),
+        JSON.stringify(asNote)
+      );
     }
 
     await writeFileWithGzip(path.join(DIST, `${post.id}.html`), renderedPage);
+
+    await writeFileWithGzip(
+      path.join(DIST, `actor/blog/notes/${post.id}.json`),
+      JSON.stringify(asNote)
+    );
   }
 
   const becameOrWasPublic = oldStatus === "public" || newStatus === "public";
@@ -527,6 +549,7 @@ module.exports = {
   getPagination,
   generatePaginationPage,
   generateActivityStreamPage,
+  generateActivityStreamNote,
   generateArchivePage,
   generateIndexPage,
   generateRSSPage,

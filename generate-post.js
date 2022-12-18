@@ -211,6 +211,7 @@ function generateActivityStreamNote(post, blog) {
     id: postASid,
     type: "Note",
     published: post.created,
+    attributedTo: new URL(`actor/blog`, blog.url),
     to: ["https://www.w3.org/ns/activitystreams#Public"],
     cc: [
       // "https://mastodon.devua.club/users/zemlanin/followers"

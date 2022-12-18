@@ -330,8 +330,6 @@ async function sendAcceptMessage(asdb, { receiver, object }) {
     }
   );
 
-  console.log(receiver, inbox);
-
   if (!inbox && !shared_inbox) {
     return;
   }

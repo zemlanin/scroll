@@ -79,7 +79,7 @@ req._stringToSign = ''
     authorizationHeaderName: "signature",
   });
 
-  console.log(req._stringToSign)
+  console.log(JSON.stringify(req._stringToSign))
 
   const resp = await fetch(req).catch((e) => {
     return {

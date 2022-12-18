@@ -53,7 +53,9 @@ async function attemptDelivery(asdb, id, inbox) {
     keyId: key_id,
   });
 
-  const resp = await fetch(req, {
+  const resp = await fetch(inbox, {
+    method: req.method,
+    headers: req.getHeaders(),
     body: JSON.stringify({
       "@context": "https://www.w3.org/ns/activitystreams",
       id,

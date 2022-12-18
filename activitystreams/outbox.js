@@ -52,6 +52,10 @@ async function attemptDelivery(asdb, id, inbox) {
 
   // `httpSignature` depends on `http.Request` methods
   req.getHeader = (name) => { return req.headers.get(name) }
+  req.getHeaders = (name) => { return [...req.headers.entries()].reduce((acc, [key, value]) => {
+    acc[key] = value
+    return acc
+  }, {}) }
   req.setHeader = (name, value) => { req.headers.set(name, value) }
 
   httpSignature.sign(req, {

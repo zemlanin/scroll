@@ -1,6 +1,3 @@
-const http = require("http");
-const https = require("https");
-
 const httpSignature = require("http-signature");
 const sqlite = require("sqlite");
 const sqlite3 = require("sqlite3");
@@ -40,28 +37,30 @@ async function attemptDelivery(asdb, id, inbox) {
     }
   );
 
-  const req = (inbox.startsWith("http:") ? http : https).request(inbox, {
+  const req = new Request(inbox, {
     method: "post",
     headers: {
       Accept: "application/activity+json",
       "Content-Type": "application/activity+json",
     },
-  });
-
-  httpSignature.sign(req, {
-    key: private_key,
-    keyId: key_id,
-  });
-
-  const resp = await fetch(inbox, {
-    method: req.method,
-    headers: req.getHeaders(),
     body: JSON.stringify({
       "@context": "https://www.w3.org/ns/activitystreams",
       id,
       ...message,
     }),
-  }).catch((e) => {
+  })
+
+  // `httpSignature` depends on `http.Request` methods
+  req.getHeader = (name) => { return req.headers.get(name) }
+  req.setHeader = (name, value) => { req.headers.set(name, value) }
+
+  httpSignature.sign(req, {
+    key: private_key,
+    keyId: key_id,
+    headers: ['(request-target)', 'host', 'date']
+  });
+
+  const resp = await fetch(req).catch((e) => {
     return {
       status: 9999,
       text() {

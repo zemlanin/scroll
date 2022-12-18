@@ -41,17 +41,19 @@ async function inbox(req, res) {
 }
 
 async function verify(req) {
-  let parsed;
+  let sigHead;
 
   try {
-    parsed = httpSignature.parseRequest(req);
+    sigHead = httpSignature.parseRequest(req);
   } catch (e) {
     return false;
   }
 
+  console.log(sigHead);
+
   const cachedKey = await getCachedPublicKey(await req.asdb(), parsed.keyId);
 
-  if (cachedKey && httpSignature.verifySignature(parsed, cachedKey)) {
+  if (cachedKey && httpSignature.verifySignature(sigHead, cachedKey)) {
     return true;
   }
 

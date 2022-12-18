@@ -63,10 +63,9 @@ async function attemptDelivery(asdb, id, inbox) {
   httpSignature.sign(req, {
     key: private_key,
     keyId: key_id,
-    headers: ['(request-target)', 'host', 'date']
+    headers: ['(request-target)', 'host', 'date', 'digest'],
+    authorizationHeaderName: 'signature'
   });
-
-  req.headers.set('signature', req.headers.get('authorization').slice('signature '.length))
 
   const resp = await fetch(req).catch((e) => {
     return {

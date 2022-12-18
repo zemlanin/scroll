@@ -206,7 +206,11 @@ const handlers = [
   ["POST", "/backstage/embeds", require("./backstage/embeds.js").post],
   ["POST", "/activitystreams/inbox", require("./activitystreams/inbox.js")],
   ["POST", "/actor/:name/inbox", require("./activitystreams/inbox.js")],
-  ["POST", "/activitystreams/:name/inbox", require("./activitystreams/inbox.js")],
+  [
+    "POST",
+    "/activitystreams/:name/inbox",
+    require("./activitystreams/inbox.js"),
+  ],
   ["GET", "/:name(.html)", staticHandler],
 ].map(([m, p, h]) => [m, new UrlPattern(p), h]);
 

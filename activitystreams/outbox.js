@@ -70,6 +70,9 @@ async function attemptDelivery(asdb, id, inbox) {
     };
   });
 
+  console.log(resp.status)
+  console.log(req.getHeaders())
+
   if (resp.status >= 400) {
     await asdb.run(
       `INSERT INTO deliveries (

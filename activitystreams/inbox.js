@@ -74,7 +74,7 @@ async function verify(req) {
     return false;
   }
 
-  return httpSignature.verifySignature(parsed, freshKey);
+  return httpSignature.verifySignature(sigHead, freshKey);
 }
 
 async function getCachedPublicKey(asdb, keyId) {

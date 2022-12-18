@@ -51,7 +51,7 @@ async function verify(req) {
 
   console.log(sigHead);
 
-  const cachedKey = await getCachedPublicKey(await req.asdb(), parsed.keyId);
+  const cachedKey = await getCachedPublicKey(await req.asdb(), sigHead.keyId);
 
   if (cachedKey && httpSignature.verifySignature(sigHead, cachedKey)) {
     return true;

@@ -58,6 +58,8 @@ async function inbox(req, res) {
 async function verify(req) {
   let sigHead;
 
+  console.log(JSON.stringify(req.headers))
+
   try {
     sigHead = httpSignature.parseRequest(req);
   } catch (e) {

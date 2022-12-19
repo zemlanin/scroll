@@ -58,6 +58,7 @@ async function inbox(req, res) {
 async function verify(req) {
   let sigHead;
 
+  console.log(JSON.stringify(req.url))
   console.log(JSON.stringify(req.headers))
 
   try {

@@ -31,12 +31,14 @@ async function attemptDelivery(asdb, id, inbox) {
     { 1: blogActor }
   );
 
-  const message = await asdb.get(
-    `SELECT id, message FROM outbox WHERE id = ?1`,
+  const { message } = await asdb.get(
+    `SELECT message FROM outbox WHERE id = ?1`,
     {
       1: id,
     }
   );
+
+  console.log(message)
 
   const body = JSON.stringify({
     "@context": "https://www.w3.org/ns/activitystreams",
@@ -82,11 +84,6 @@ async function attemptDelivery(asdb, id, inbox) {
       .join(" ")}",signature="${signature}"`
   );
 
-  console.log(req.url);
-  console.log(JSON.stringify(signedString));
-  console.log(signature);
-  console.log(req.headers.get('signature'))
-
   const resp = await fetch(req).catch((e) => {
     return {
       status: 9999,
@@ -95,8 +92,6 @@ async function attemptDelivery(asdb, id, inbox) {
       },
     };
   });
-
-  console.log(resp.status);
 
   if (resp.status >= 400) {
     const text = await resp.text();

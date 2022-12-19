@@ -58,9 +58,6 @@ async function inbox(req, res) {
 async function verify(req) {
   let sigHead;
 
-  console.log(JSON.stringify(req.url))
-  console.log(JSON.stringify(req.headers))
-
   try {
     sigHead = httpSignature.parseRequest(req);
   } catch (e) {
@@ -355,11 +352,11 @@ async function sendAcceptMessage(asdb, { receiver, object }) {
     {
       1: id,
       2: receiver,
-      3: {
+      3: JSON.stringify({
         type: "Accept",
         object: object,
         actor: blogActor,
-      },
+      }),
     }
   );
 

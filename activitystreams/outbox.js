@@ -61,7 +61,7 @@ async function attemptDelivery(asdb, id, inbox) {
   const { pathname, host } = new URL(req.url);
 
   const signedString = [
-    `(request-target): ${req.method} ${pathname}`,
+    `(request-target): ${req.method.toLowerCase()} ${pathname}`,
     `host: ${host}`,
     `date: ${req.headers.get("date")}`,
     `digest: ${req.headers.get("digest")}`,

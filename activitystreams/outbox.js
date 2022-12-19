@@ -67,14 +67,16 @@ async function attemptDelivery(asdb, id, inbox) {
     `digest: ${req.headers.get("digest")}`,
   ].join("\n");
 
-  const sign = crypto.createSign("SHA256");
-  sign.write(signedString);
-  sign.end();
+  const algorithm = 'rsa-sha256'
 
-  const signature = sign.sign(private_key, "base64");
+  const signer = crypto.createSign(algorithm);
+  signer.write(signedString);
+  signer.end();
+
+  const signature = signer.sign(private_key, "base64");
   req.headers.set(
     "signature",
-    `keyId="${key_id}",headers="${signedString
+    `keyId="${key_id}",algorithm="${algorithm}",headers="${signedString
       .split("\n")
       .map((line) => line.slice(0, line.indexOf(":")))
       .join(" ")}",signature="${signature}"`
@@ -83,6 +85,7 @@ async function attemptDelivery(asdb, id, inbox) {
   console.log(req.url);
   console.log(JSON.stringify(signedString));
   console.log(signature);
+  console.log(req.headers.get('signature'))
 
   const resp = await fetch(req).catch((e) => {
     return {

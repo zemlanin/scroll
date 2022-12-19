@@ -55,8 +55,10 @@ async function attemptDelivery(asdb, id, inbox) {
     body: body,
   });
 
+  console.log(req.url)
+
   // `httpSignature` depends on `http.Request` methods
-  req.path = new URL(inbox).pathname;
+  req.path = new URL(req.url).pathname;
   req.getHeader = (name) => {
     return req.headers.get(name);
   };

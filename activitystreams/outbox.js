@@ -61,7 +61,7 @@ async function attemptDelivery(asdb, id, inbox) {
   const { pathname, host } = new URL(req.url);
 
   const signedString = [
-    `(request-target): ${req} ${pathname}`,
+    `(request-target): ${req.method} ${pathname}`,
     `host: ${host}`,
     `date: ${req.headers.get("date")}`,
     `digest: ${req.headers.get("digest")}`,
@@ -94,7 +94,6 @@ async function attemptDelivery(asdb, id, inbox) {
   });
 
   console.log(resp.status);
-  console.log(req.getHeaders());
 
   if (resp.status >= 400) {
     const text = await resp.text();

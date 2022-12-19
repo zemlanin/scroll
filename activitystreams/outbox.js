@@ -41,10 +41,8 @@ async function attemptDelivery(asdb, id, inbox) {
   const body = JSON.stringify({
     "@context": "https://www.w3.org/ns/activitystreams",
     id,
-    ...message,
+    ...JSON.parse(message),
   });
-
-  console.log(body)
 
   const digestHash = crypto.createHash("sha256");
   digestHash.update(body);

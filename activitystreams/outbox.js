@@ -79,6 +79,7 @@ req._stringToSign = ''
     keyId: key_id,
     headers: ["(request-target)", "date", "digest"],
     authorizationHeaderName: "signature",
+    strict: true,
   });
 
   console.log(JSON.stringify(req._stringToSign))

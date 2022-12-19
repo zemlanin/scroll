@@ -1,6 +1,6 @@
 const crypto = require("crypto");
+const jsprim = require("jsprim");
 
-const httpSignature = require("http-signature");
 const sqlite = require("sqlite");
 const sqlite3 = require("sqlite3");
 
@@ -43,46 +43,46 @@ async function attemptDelivery(asdb, id, inbox) {
     id,
     ...message,
   });
-  const digest = crypto.createHash("sha256").update(body).digest("base64");
+
+  const digestHash = crypto.createHash("sha256");
+  digestHash.update(body);
 
   const req = new Request(inbox, {
     method: "post",
     headers: {
-      Accept: "application/activity+json",
-      "Content-Type": "application/activity+json",
-      Digest: `SHA-256=${digest}`,
+      accept: "application/activity+json",
+      "content-type": "application/activity+json",
+      digest: `sha-256=${digestHash.digest("base64")}`,
+      date: jsprim.rfc1123(new Date()),
     },
     body: body,
   });
 
-  console.log(req.url)
+  const { pathname, host } = new URL(req.url);
 
-  // `httpSignature` depends on `http.Request` methods
-  req.path = new URL(req.url).pathname;
-  req.getHeader = (name) => {
-    return req.headers.get(name);
-  };
-  req.getHeaders = () => {
-    return [...req.headers.entries()].reduce((acc, [key, value]) => {
-      acc[key] = value;
-      return acc;
-    }, {});
-  };
-  req.setHeader = (name, value) => {
-    req.headers.set(name, value);
-  };
+  const signedString = [
+    `(request-target): ${req} ${pathname}`,
+    `host: ${host}`,
+    `date: ${req.headers.get("date")}`,
+    `digest: ${req.headers.get("digest")}`,
+  ].join("\n");
 
-req._stringToSign = ''
+  const sign = crypto.createSign("SHA256");
+  sign.write(signedString);
+  sign.end();
 
-  httpSignature.sign(req, {
-    key: private_key,
-    keyId: key_id,
-    headers: ["(request-target)", "date", "digest"],
-    authorizationHeaderName: "signature",
-    strict: true,
-  });
+  const signature = sign.sign(private_key, "base64");
+  req.headers.set(
+    "signature",
+    `keyId="${key_id}",headers="${signedString
+      .split("\n")
+      .map((line) => line.slice(0, line.indexOf(":")))
+      .join(" ")}",signature="${signature}"`
+  );
 
-  console.log(JSON.stringify(req._stringToSign))
+  console.log(req.url);
+  console.log(JSON.stringify(signedString));
+  console.log(signature);
 
   const resp = await fetch(req).catch((e) => {
     return {

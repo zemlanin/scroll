@@ -46,6 +46,8 @@ async function inbox(req, res) {
       return handleUndo(req, res);
     case "Delete":
       return handleDelete(req, res);
+    case "Update":
+      // TODO
   }
 
   res.statusCode = 400;

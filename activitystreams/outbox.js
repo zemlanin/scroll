@@ -11,6 +11,7 @@ const { ACTIVITYSTREAMS_DB, getBlogObject } = require("../common.js");
 module.exports = {
   watch,
   attemptDelivery,
+  notifyFollowers,
 };
 
 const RETRY_TIMEOUT = 1000 * 5; // 5 seconds
@@ -161,6 +162,46 @@ async function checkAndSend(stdout, stderr) {
 
     messages = await getNextDeliveryAttempts(asdb);
   }
+}
+
+async function notifyFollowers(asdb, messageId, followedActor) {
+  const sharedInboxes = await asdb.all(
+    `
+      SELECT shared_inbox AS inbox FROM actors a
+      LEFT JOIN inbox ON inbox.actor_id = a.id
+      WHERE a.shared_inbox != ''
+        AND a.shared_inbox IS NOT NULL
+        AND a.blocked != 1
+        AND inbox.type = 'Follow'
+        AND inbox.object_id = ?1
+      GROUP BY a.shared_inbox;
+    `,
+    { 1: followedActor }
+  );
+
+  const soloInboxes = await asdb.all(
+    `
+      SELECT a.inbox AS inbox FROM actors a
+      LEFT JOIN inbox ON inbox.actor_id = a.id
+      WHERE (a.shared_inbox = '' OR a.shared_inbox IS NULL)
+        AND a.blocked != 1
+        AND inbox.type = 'Follow'
+        AND inbox.object_id = ?1
+      GROUP BY a.inbox;
+    `,
+    { 1: followedActor }
+  );
+
+  for (const { inbox } of [...sharedInboxes, ...soloInboxes]) {
+    await planDelivery(asdb, messageId, inbox);
+  }
+}
+
+async function planDelivery(asdb, messageId, inbox) {
+  await asdb.run(`INSERT INTO deliveries (message_id, inbox) VALUES (?1, ?2)`, {
+    1: messageId,
+    2: inbox,
+  });
 }
 
 async function getNextDeliveryAttempts(asdb, dt) {

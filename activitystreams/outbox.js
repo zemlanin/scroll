@@ -8,9 +8,12 @@ const fetchModule = import("node-fetch");
 
 const { ACTIVITYSTREAMS_DB, getBlogObject } = require("../common.js");
 
+const { getMessageId } = require("./common.js");
+
 module.exports = {
   watch,
   attemptDelivery,
+  createMessage,
   notifyFollowers,
 };
 
@@ -162,6 +165,22 @@ async function checkAndSend(stdout, stderr) {
 
     messages = await getNextDeliveryAttempts(asdb);
   }
+}
+
+async function createMessage(asdb, { actor, type, object }) {
+  const id = new URL(`#outbox-${getMessageId()}`, actor);
+
+  await asdb.run(`INSERT INTO outbox (id, 'to', message) VALUES (?1, ?2, ?3)`, {
+    1: id,
+    2: "https://www.w3.org/ns/activitystreams#Public",
+    3: JSON.stringify({
+      type,
+      object,
+      actor,
+    }),
+  });
+
+  return id;
 }
 
 async function notifyFollowers(asdb, messageId, followedActor) {

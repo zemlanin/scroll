@@ -2,6 +2,10 @@ const url = require("url");
 const fetchModule = import("node-fetch");
 
 const { nanoid, getBlogObject } = require("../common");
+const {
+  createMessage,
+  notifyFollowers,
+} = require("../activitystreams/outbox.js");
 const getPostId = () =>
   `post-${new Date().getFullYear()}-${(new Date().getMonth() + 1)
     .toString()
@@ -281,6 +285,21 @@ module.exports = {
       await notifyWebSub();
     }
 
+    if (oldStatus === "public" || newStatus === "public") {
+      const asdb = await req.asdb();
+
+      await notifyActivityStreams(
+        asdb,
+        post,
+        newStatus === oldStatus
+          ? "Edit"
+          : newStatus === "public"
+          ? "Create"
+          : // `oldStatus === "public"`
+            "Delete"
+      );
+    }
+
     if (!existingPostId) {
       res.writeHead(303, {
         Location: url.resolve(req.absolute, `/backstage/edit/?id=${post.id}`),
@@ -323,6 +342,17 @@ function getStatusValue(post) {
   }
 
   return null;
+}
+
+async function notifyActivityStreams(asdb, post, type) {
+  const blog = await getBlogObject();
+
+  const messageId = await createMessage(asdb, {
+    type,
+    actor: blog.activitystream.id,
+    object: post.activitystream.id,
+  });
+  await notifyFollowers(asdb, messageId, blog.activitystream.id);
 }
 
 async function notifyWebSub() {

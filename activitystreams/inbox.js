@@ -2,13 +2,10 @@ const httpSignature = require("http-signature");
 
 const fetchModule = import("node-fetch");
 
-const { attemptDelivery } = require("./outbox.js");
-const { nanoid, getBlogObject } = require("../common.js");
+const { getBlogObject } = require("../common.js");
 
-const getMessageId = () =>
-  `message-${new Date().getFullYear()}-${(new Date().getMonth() + 1)
-    .toString()
-    .padStart(2, "0")}-${nanoid.outbox()}`;
+const { getMessageId } = require("./common.js");
+const { attemptDelivery } = require("./outbox.js");
 
 module.exports = inbox;
 

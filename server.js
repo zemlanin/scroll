@@ -404,7 +404,10 @@ function start() {
       console.log(`running on ${PORT}`);
     })
     .then(() => {
-      return require("./linkblog.js").watch(process.stdout, process.stderr);
+      return require("./linkblog.js").watch();
+    })
+    .then(() => {
+      return require("./activitystreams/outbox.js").watch();
     })
     .catch((err) => {
       console.error(err);

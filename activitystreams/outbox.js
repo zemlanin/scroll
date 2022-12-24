@@ -21,7 +21,7 @@ function watch() {
     .catch(() => setTimeout(watch, RETRY_TIMEOUT * (Math.random() + 1)));
 }
 
-async function attemptDelivery(asdb, id, inbox) {
+async function attemptDelivery(asdb, id, inbox, stdout, stderr) {
   const { default: fetch, Request } = await fetchModule;
 
   const blogActor = (await getBlogObject()).activitystream.id;
@@ -67,7 +67,7 @@ async function attemptDelivery(asdb, id, inbox) {
     `digest: ${req.headers.get("digest")}`,
   ].join("\n");
 
-  const algorithm = 'rsa-sha256'
+  const algorithm = "rsa-sha256";
 
   const signer = crypto.createSign(algorithm);
   signer.write(signedString);
@@ -82,6 +82,12 @@ async function attemptDelivery(asdb, id, inbox) {
       .join(" ")}",signature="${signature}"`
   );
 
+  stdout.write(`sending message ${id} to ${inbox}\n`);
+
+  if (process.env.NODE_ENV === "development") {
+    return;
+  }
+
   const resp = await fetch(req).catch((e) => {
     return {
       status: 9999,
@@ -93,7 +99,7 @@ async function attemptDelivery(asdb, id, inbox) {
 
   if (resp.status >= 400) {
     const text = await resp.text();
-    console.error(text);
+    stderr.write(`failed to send message ${id}: ${JSON.stringify(text)}`);
     await asdb.run(
       `INSERT INTO deliveries (
         message_id,
@@ -122,15 +128,53 @@ async function attemptDelivery(asdb, id, inbox) {
         }),
       }
     );
+  } else {
+    await asdb.run(
+      `UPDATE deliveries SET next_try = NULL WHERE message_id = ?1`,
+      { 1: id }
+    );
   }
 }
 
-async function checkAndSend() {
+async function checkAndSend(stdout, stderr) {
   const asdb = await sqlite.open({
     filename: ACTIVITYSTREAMS_DB,
     driver: sqlite3.Database,
   });
 
-  await asdb.run("SELECT 1;");
-  // TODO
+  const dt = new Date();
+
+  let messages = await getNextDeliveryAttempts(asdb, dt);
+
+  while (messages.length) {
+    for (const { message_id, inbox } of messages) {
+      await attemptDelivery(
+        asdb,
+        message_id,
+        inbox,
+        stdout || process.stdout,
+        stderr || process.stderr
+      );
+    }
+
+    messages = await getNextDeliveryAttempts(asdb);
+  }
+}
+
+async function getNextDeliveryAttempts(asdb, dt) {
+  return await asdb.run(
+    `
+      SELECT message_id, inbox
+      FROM deliveries
+      WHERE next_try IS NOT NULL
+        AND next_try < ?1
+        AND retries < ?2
+      ORDER BY next_try ASC
+      LIMIT 20;
+    `,
+    {
+      1: dt,
+      2: 3,
+    }
+  );
 }

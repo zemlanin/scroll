@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS "deliveries" (
   `inbox` TEXT NOT NULL,
   `message_id` TEXT NOT NULL,
   `retries` NUMBER NOT NULL DEFAULT 0,
-  `next_try` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `next_try` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `last_failure` JSON,
   UNIQUE (`message_id`, `inbox`)
 );

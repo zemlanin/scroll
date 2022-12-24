@@ -358,6 +358,20 @@ async function generate(db, asdb, destination, stdout, stderr, { only } = {}) {
       { flag: "wx" }
     );
 
+    await writeFileWithGzip(
+      path.join(tmpFolder, `.well-known/host-meta.xml`),
+      `
+        <?xml version="1.0" encoding="UTF-8"?>
+        <XRD xmlns="http://docs.oasis-open.org/ns/xri/xrd-1.0">
+          <Link rel="lrdd" template="${new URL(
+            "/.well-known/webfinger",
+            blog.url
+          ).toString()}?resource={uri}"/>
+        </XRD>
+      `.trim(),
+      { flag: "wx" }
+    );
+
     stdout.write("activitystreams done\n");
   }
 

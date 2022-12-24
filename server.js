@@ -53,9 +53,27 @@ if (process.env.NODE_ENV !== "production") {
   const staticMiddleware = serveStatic(path.resolve(DIST), {
     index: ["index.html"],
     extensions: ["html"],
+    setHeaders(res, filepath, _stat) {
+      if (
+        filepath.endsWith(".json") &&
+        filepath.startsWith(path.resolve(DIST, "actor"))
+      ) {
+        res.setHeader("content-type", "application/activity+json");
+      }
+    },
   });
 
   staticHandler = function (req, res) {
+    if (req.url.startsWith("/actor/") && !req.url.endsWith(".json")) {
+      req.url = req.url.replace(/\/?$/, ".json");
+    }
+
+    if (req.url === "/.well-known/host-meta") {
+      res.setHeader("Location", "/.well-known/host-meta.xml");
+      res.writeHead(301);
+      return;
+    }
+
     return new Promise((resolve) => {
       return staticMiddleware(req, res, () => {
         res.writeHead(404);
@@ -204,6 +222,8 @@ const handlers = [
   ["GET", "/backstage/goaccess.svg", require("./backstage/goaccess-graph.js")],
   ["GET", "/backstage/embeds", require("./backstage/embeds.js").get],
   ["POST", "/backstage/embeds", require("./backstage/embeds.js").post],
+  ["GET", "/.well-known/*", staticHandler],
+  ["GET", "/actor/*", staticHandler],
   ["POST", "/activitystreams/inbox", require("./activitystreams/inbox.js")],
   ["POST", "/actor/:name/inbox", require("./activitystreams/inbox.js")],
   [

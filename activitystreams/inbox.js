@@ -48,6 +48,13 @@ async function inbox(req, res) {
       return handleDelete(req, res);
     case "Update":
       // TODO
+      break;
+    case "Move":
+      // TODO
+      break;
+    case "Read":
+      // TODO
+      break;
   }
 
   res.statusCode = 400;
@@ -359,5 +366,11 @@ async function sendAcceptMessage(asdb, { receiver, object }) {
     }
   );
 
-  await attemptDelivery(asdb, id, shared_inbox || inbox);
+  await attemptDelivery(
+    asdb,
+    id,
+    shared_inbox || inbox,
+    process.stdout,
+    process.stderr
+  );
 }

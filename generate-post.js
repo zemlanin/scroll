@@ -551,6 +551,7 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated, oldSlug) {
 }
 
 module.exports = {
+  getPost,
   getPosts,
   generateAfterEdit,
   generatePostPage,

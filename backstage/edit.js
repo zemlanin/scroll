@@ -13,7 +13,11 @@ const getPostId = () =>
 
 const { getSession, sendToAuthProvider } = require("./auth.js");
 const { getJson: getMediaJson } = require("./media.js");
-const { generateAfterEdit } = require("../generate-post.js");
+const {
+  generateAfterEdit,
+  generateActivityStreamNote,
+  getPost,
+} = require("../generate-post.js");
 const { render } = require("./render.js");
 
 const SLUG_REGEX = /^[a-zA-Z0-9_-]+$/;
@@ -289,8 +293,9 @@ module.exports = {
       const asdb = await req.asdb();
 
       await notifyActivityStreams(
+        db,
         asdb,
-        post,
+        post.id,
         newStatus === oldStatus
           ? "Edit"
           : newStatus === "public"
@@ -344,13 +349,16 @@ function getStatusValue(post) {
   return null;
 }
 
-async function notifyActivityStreams(asdb, post, type) {
+async function notifyActivityStreams(db, asdb, postId, type) {
+  // `post` here is "prepared" one, while the one in `module.exports.post` is "raw" db one
+  const post = await getPost(db, postId);
   const blog = await getBlogObject();
+  const object = generateActivityStreamNote(post, blog);
 
   const messageId = await createMessage(asdb, {
     type,
     actor: blog.activitystream.id,
-    object: post.activitystream.id,
+    object: type === "Delete" ? object.id : object,
   });
   await notifyFollowers(asdb, messageId, blog.activitystream.id);
 }

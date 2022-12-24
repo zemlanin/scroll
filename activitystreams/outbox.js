@@ -103,7 +103,7 @@ async function attemptDelivery(asdb, id, inbox, stdout, stderr) {
 
   if (resp.status >= 400) {
     const text = await resp.text();
-    stderr.write(`failed to send message ${id}: ${JSON.stringify(text)}`);
+    stderr.write(`failed to send message ${id}: ${JSON.stringify(text)}\n`);
     await asdb.run(
       `INSERT INTO deliveries (
         message_id,

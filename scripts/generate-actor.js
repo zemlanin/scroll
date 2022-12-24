@@ -39,7 +39,7 @@ async function generateActor(name) {
   const { publicKey, privateKey } = generateKeyPairSync("rsa", {
     modulusLength: 2048,
     publicKeyEncoding: {
-      type: "pkcs1",
+      type: "spki",
       format: "pem",
     },
     privateKeyEncoding: {

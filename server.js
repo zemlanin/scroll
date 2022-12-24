@@ -222,6 +222,34 @@ const handlers = [
   ["GET", "/backstage/goaccess.svg", require("./backstage/goaccess-graph.js")],
   ["GET", "/backstage/embeds", require("./backstage/embeds.js").get],
   ["POST", "/backstage/embeds", require("./backstage/embeds.js").post],
+  [
+    "GET",
+    "/.well-known/webfinger",
+    async (req, res) => {
+      const { query } = url.parse(req.url, true);
+      const resource = query.resource || "";
+
+      if (
+        !resource ||
+        !resource.match(/^acct:[a-z0-9-]+@[a-z0-9-]+(\.[a-z0-9-]+)+$/)
+      ) {
+        res.writeHead(404);
+        return;
+      }
+
+      res.setHeader("content-type", "application/jrd+json; charset=utf-8");
+
+      try {
+        return (
+          await fsPromises.readFile(
+            path.resolve(DIST, ".well-known", "webfinger", resource + ".json")
+          )
+        ).toString();
+      } catch (e) {
+        res.writeHead(404);
+      }
+    },
+  ],
   ["GET", "/.well-known/*", staticHandler],
   ["GET", "/actor/*", staticHandler],
   ["POST", "/activitystreams/inbox", require("./activitystreams/inbox.js")],

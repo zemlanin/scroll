@@ -147,22 +147,24 @@ async function checkAndSend(stdout, stderr) {
   let messages = await getNextDeliveryAttempts(asdb, dt);
 
   while (messages.length) {
-    for (const { message_id, inbox } of messages) {
-      await attemptDelivery(
-        asdb,
-        message_id,
-        inbox,
-        stdout || process.stdout,
-        stderr || process.stderr
-      );
-    }
+    await Promise.all(
+      messages.map(({ message_id, inbox }) =>
+        attemptDelivery(
+          asdb,
+          message_id,
+          inbox,
+          stdout || process.stdout,
+          stderr || process.stderr
+        )
+      )
+    );
 
     messages = await getNextDeliveryAttempts(asdb);
   }
 }
 
 async function getNextDeliveryAttempts(asdb, dt) {
-  return await asdb.run(
+  return await asdb.all(
     `
       SELECT message_id, inbox
       FROM deliveries

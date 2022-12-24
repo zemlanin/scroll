@@ -128,6 +128,8 @@ async function generate(db, asdb, destination, stdout, stderr, { only } = {}) {
   await fsPromises.mkdir(path.join(tmpFolder, "/actor/blog"));
   await fsPromises.mkdir(path.join(tmpFolder, "/actor/blog/notes"));
   await fsPromises.mkdir(path.join(tmpFolder, "/actor/blog/outbox"));
+  await fsPromises.mkdir(path.join(tmpFolder, "/.well-known"));
+  await fsPromises.mkdir(path.join(tmpFolder, "/.well-known/webfinger"));
 
   stdout.write(`made tmp dir: ${tmpFolder}\n`);
 
@@ -330,6 +332,29 @@ async function generate(db, asdb, destination, stdout, stderr, { only } = {}) {
           url: blog.static.favicon.png,
         },
       }),
+      { flag: "wx" }
+    );
+
+    const webfinger = {
+      subject: `acct:blog@${new URL(blog.url).hostname}`,
+      aliases: [blog.url, actorId],
+      links: [
+        {
+          rel: "http://webfinger.net/rel/profile-page",
+          type: "text/html",
+          href: blog.url,
+        },
+        {
+          rel: "self",
+          type: "application/activity+json",
+          href: actorId,
+        },
+      ],
+    };
+
+    await writeFileWithGzip(
+      path.join(tmpFolder, `.well-known/webfinger/${webfinger.subject}.json`),
+      JSON.stringify(webfinger),
       { flag: "wx" }
     );
 

@@ -1,4 +1,3 @@
-const url = require("url");
 const https = require("https");
 const cookie = require("cookie");
 const querystring = require("querystring");
@@ -58,16 +57,17 @@ async function verifyAccessToken(access_token) {
 }
 
 module.exports = async (req, res) => {
-  const query = url.parse(req.url, true).query;
+  const { searchParams } = new URL(req.url, req.absolute);
+  const code = searchParams.get("code");
 
-  if (!query.code) {
+  if (!code) {
     res.statusCode = 403;
 
     return `403`;
   }
 
   const postData = querystring.stringify({
-    code: query.code,
+    code,
     client_id: process.env.GITHUB_APP_ID,
     client_secret: process.env.GITHUB_APP_SECRET,
   });
@@ -123,10 +123,12 @@ module.exports = async (req, res) => {
       })
     );
 
+    const next = searchParams.get("next");
+
     res.setHeader(
       "Location",
-      query.next && query.next.startsWith("/backstage")
-        ? decodeURIComponent(query.next)
+      next && next.startsWith("/backstage")
+        ? decodeURIComponent(next)
         : "/backstage"
     );
     return;

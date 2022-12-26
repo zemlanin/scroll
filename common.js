@@ -1,5 +1,4 @@
 const fs = require("fs");
-const url = require("url");
 const path = require("path");
 const zlib = require("zlib");
 const { promisify } = require("util");
@@ -1050,7 +1049,7 @@ async function getBlogObject(baseUrl) {
 
   return {
     title: BLOG_TITLE,
-    url: url.resolve(baseUrl, "/"),
+    url: new URL("/", baseUrl).toString(),
     lang,
     author: {
       name: "Anton Verinov",
@@ -1059,32 +1058,32 @@ async function getBlogObject(baseUrl) {
     },
     feed: {
       description: BLOG_TITLE,
-      url: url.resolve(baseUrl, "/rss.xml"),
+      url: new URL("/rss.xml", baseUrl).toString(),
       websub: WEBSUB_HUB,
     },
     activitystream,
     linkblog: {
       lang,
       title: `Linkblog • ${BLOG_TITLE}`,
-      url: url.resolve(baseUrl, "/linkblog.html"),
+      url: new URL("/linkblog.html", baseUrl).toString(),
       feed: {
         description: `Linked and Found`,
-        url: url.resolve(baseUrl, "/feeds/linkblog.xml"),
+        url: new URL("/feeds/linkblog.xml", baseUrl).toString(),
         websub: WEBSUB_HUB,
       },
     },
     archive: {
       lang,
-      url: url.resolve(baseUrl, "/archive.html"),
+      url: new URL("/archive.html", baseUrl).toString(),
     },
     static: {
       favicon: {
-        ico: url.resolve(baseUrl, statics["/favicon.ico"]),
-        png: url.resolve(baseUrl, statics["/favicon.png"]),
-        svg: url.resolve(baseUrl, statics["/favicon.svg"]),
+        ico: new URL(statics["/favicon.ico"], baseUrl).toString(),
+        png: new URL(statics["/favicon.png"], baseUrl).toString(),
+        svg: new URL(statics["/favicon.svg"], baseUrl).toString(),
       },
       "mask-icon": {
-        svg: url.resolve(baseUrl, statics["/mask-icon.svg"]),
+        svg: new URL(statics["/mask-icon.svg"], baseUrl).toString(),
       },
     },
   };

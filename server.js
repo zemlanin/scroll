@@ -1,5 +1,5 @@
 const fs = require("fs");
-const url = require("url");
+const { format: urlFormat } = require("url");
 const http = require("http");
 const path = require("path");
 const querystring = require("querystring");
@@ -103,12 +103,12 @@ const handlers = [
     "GET",
     "/search",
     async (req, res) => {
-      const { hostname } = url.parse(req.absolute);
-      const { query } = url.parse(req.url, true);
-      const q = query.q || "";
-      const location = new url.URL(
+      const { hostname, searchParams } = new URL(req.url, req.absolute);
+
+      const q = searchParams.get("q") || "";
+      const location = new URL(
         "?" +
-          new url.URLSearchParams({
+          new URLSearchParams({
             q: `${q} site:${hostname}`,
           }).toString(),
         "https://duckduckgo.com"
@@ -226,8 +226,8 @@ const handlers = [
     "GET",
     "/.well-known/webfinger",
     async (req, res) => {
-      const { query } = url.parse(req.url, true);
-      const resource = query.resource || "";
+      const resource =
+        new URL(req.url, req.absolute).searchParams.get("resource") || "";
 
       if (
         !resource ||
@@ -290,7 +290,8 @@ async function processPost(request, response, contentType) {
 }
 
 const server = http.createServer((req, res) => {
-  const pathname = url.parse(req.url).pathname.replace(/(.)\/$/, "$1");
+  const pathname = req.url.replace(/\?.+$/, "").replace(/(.)\/$/, "$1");
+
   let [, , handler] =
     handlers.find(([method, pattern]) => {
       if (req.method == method || (method == "GET" && req.method == "HEAD")) {
@@ -308,7 +309,7 @@ const server = http.createServer((req, res) => {
     const port =
       (host && host.match(/:(\d+)$/) && host.match(/:(\d+)$/)[1]) || null;
 
-    req.absolute = url.format({
+    req.absolute = urlFormat({
       protocol,
       host,
       port,

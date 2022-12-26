@@ -1,4 +1,3 @@
-const url = require("url");
 const crypto = require("crypto");
 
 const cookie = require("cookie");
@@ -116,28 +115,20 @@ module.exports = {
   },
 
   sendToAuthProvider(req, res) {
-    const parsedUrl = url.parse(req.absolute);
+    const redirectURL = new URL(
+      "/backstage/callback?" + new URLSearchParams({ next: req.url }),
+      req.absolute
+    ).toString();
 
-    const redirectURL = url.format({
-      protocol: parsedUrl.protocol,
-      hostname: parsedUrl.hostname,
-      port: parsedUrl.port,
-      pathname: "/backstage/callback",
-      query: {
-        next: req.url,
-      },
-    });
-
-    const githubAuthUrl = url.format({
-      protocol: "https",
-      hostname: "github.com",
-      pathname: "/login/oauth/authorize",
-      query: {
-        scope: "user:email",
-        client_id: process.env.GITHUB_APP_ID,
-        redirect_uri: redirectURL,
-      },
-    });
+    const githubAuthUrl = new URL(
+      "https://github.com/login/oauth/authorize?" +
+        new URLSearchParams({
+          scope: "user:email",
+          client_id: process.env.GITHUB_APP_ID,
+          redirect_uri: redirectURL,
+        }),
+      req.absolute
+    ).toString();
 
     res.statusCode = 303;
     res.setHeader("Location", githubAuthUrl);

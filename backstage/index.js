@@ -221,12 +221,12 @@ module.exports = async (req, res) => {
     suggestion: suggestion,
     goaccess: !!process.env.GOACCESS_JSON,
     urls: {
-      logout: new URL("/backstage/?logout=1", req.absolute).toString(),
+      logout: new URL("/backstage?logout=1", req.absolute).toString(),
       older: morePosts
         ? new URL(
-            `/backstage/?` +
+            `/backstage?` +
               new URLSearchParams({
-                q: query,
+                ...(query ? { q: query } : null),
                 offset: offset + PAGE_SIZE,
               }),
             req.absolute
@@ -235,7 +235,7 @@ module.exports = async (req, res) => {
       newest:
         offset > PAGE_SIZE
           ? new URL(
-              `/backstage/` +
+              `/backstage` +
                 (query
                   ? "?" +
                     new URLSearchParams({
@@ -246,9 +246,9 @@ module.exports = async (req, res) => {
             ).toString()
           : null,
       newer:
-        +offset <= PAGE_SIZE
+        +offset && +offset <= PAGE_SIZE
           ? new URL(
-              `/backstage/` +
+              `/backstage` +
                 (query
                   ? "?" +
                     new URLSearchParams({
@@ -259,9 +259,9 @@ module.exports = async (req, res) => {
             ).toString()
           : +offset
           ? new URL(
-              `/backstage/?` +
+              `/backstage?` +
                 new URLSearchParams({
-                  q: query,
+                  ...(query ? { q: query } : null),
                   offset: Math.max(offset - PAGE_SIZE, 0),
                 }),
               req.absolute

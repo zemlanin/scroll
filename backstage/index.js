@@ -1,5 +1,3 @@
-const url = require("url");
-
 const { getSession, logout, sendToAuthProvider } = require("./auth.js");
 const { render } = require("./render.js");
 const { prepare: commonPrepare } = require("../common.js");
@@ -8,16 +6,17 @@ const EmbedsLoader = require("../embeds-loader.js");
 const PAGE_SIZE = 10;
 
 async function prepare(post, options) {
+  const stats = getHitsAndVisitors(post);
+  const preparedPost = await commonPrepare(post, options.embedsLoader);
+
   const urls = {
-    edit: url.resolve(options.baseUrl, `/backstage/edit/?id=${post.id}`),
-    preview: url.resolve(options.baseUrl, `/backstage/preview/?id=${post.id}`),
-    permalink: url.resolve(options.baseUrl, `/${post.slug || post.id}.html`),
+    edit: new URL(`/backstage/edit/?id=${post.id}`, options.baseUrl),
+    preview: new URL(`/backstage/preview/?id=${post.id}`, options.baseUrl),
+    permalink: preparedPost.url,
   };
 
-  const stats = getHitsAndVisitors(post);
-
   return {
-    ...(await commonPrepare(post, options.embedsLoader)),
+    ...preparedPost,
     urls: urls,
     stats: stats.visitors || stats.hits ? stats : null,
   };
@@ -83,9 +82,9 @@ function getHitsAndVisitors(post) {
 }
 
 module.exports = async (req, res) => {
-  const query = url.parse(req.url, true).query;
+  const { searchParams } = new URL(req.url, req.absolute);
 
-  if (query.logout) {
+  if (searchParams.get("logout")) {
     logout(req, res);
     res.statusCode = 303;
     res.setHeader("Location", "/");
@@ -98,15 +97,20 @@ module.exports = async (req, res) => {
   }
 
   const db = await req.db();
-  const offset = +query.offset || 0;
+  const offset = +searchParams.get("offset") || 0;
 
   let qWhereValue = "";
-  if (query.q) {
+  const query = searchParams.get("q");
+  if (query) {
     try {
-      qWhereValue = decodeURIComponent(query.q).trim().toLowerCase();
+      qWhereValue = decodeURIComponent(query).trim().toLowerCase();
     } catch (e) {
       //
     }
+  } else if (searchParams.has("q")) {
+    res.statusCode = 302;
+    res.setHeader("Location", "/backstage");
+    return;
   }
 
   let qWhereCondition = ``;
@@ -191,7 +195,7 @@ module.exports = async (req, res) => {
   const embedsLoader = new EmbedsLoader(db);
 
   return render("list.mustache", {
-    q: query.q || "",
+    q: query || "",
     drafts: await Promise.all(
       drafts
         .map((p) =>
@@ -217,30 +221,52 @@ module.exports = async (req, res) => {
     suggestion: suggestion,
     goaccess: !!process.env.GOACCESS_JSON,
     urls: {
-      logout: url.resolve(req.absolute, "/backstage/?logout=1"),
+      logout: new URL("/backstage/?logout=1", req.absolute).toString(),
       older: morePosts
-        ? url.resolve(
-            req.absolute,
-            `/backstage/?offset=${offset + PAGE_SIZE}${
-              query.q ? "&q=" + query.q : ""
-            }`
-          )
+        ? new URL(
+            `/backstage/?` +
+              new URLSearchParams({
+                q: query,
+                offset: offset + PAGE_SIZE,
+              }),
+            req.absolute
+          ).toString()
         : null,
       newest:
         offset > PAGE_SIZE
-          ? url.resolve(
-              req.absolute,
-              `/backstage/${query.q ? "?q=" + query.q : ""}`
-            )
+          ? new URL(
+              `/backstage/` +
+                (query
+                  ? "?" +
+                    new URLSearchParams({
+                      q: query,
+                    })
+                  : ""),
+              req.absolute
+            ).toString()
           : null,
-      newer: +offset
-        ? url.resolve(
-            req.absolute,
-            `/backstage/?offset=${Math.max(offset - PAGE_SIZE, 0)}${
-              query.q ? "&q=" + query.q : ""
-            }`
-          )
-        : null,
+      newer:
+        +offset <= PAGE_SIZE
+          ? new URL(
+              `/backstage/` +
+                (query
+                  ? "?" +
+                    new URLSearchParams({
+                      q: query,
+                    })
+                  : ""),
+              req.absolute
+            ).toString()
+          : +offset
+          ? new URL(
+              `/backstage/?` +
+                new URLSearchParams({
+                  q: query,
+                  offset: Math.max(offset - PAGE_SIZE, 0),
+                }),
+              req.absolute
+            ).toString()
+          : null,
     },
   });
 };

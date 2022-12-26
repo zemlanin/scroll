@@ -141,7 +141,7 @@ const numericIfNeeded = ([prop, value]) =>
   !isNumericProp(prop) || value.match(/^[0-9]+$/);
 
 const getURLMimetype = (href) => {
-  const pathname = new URL(href).pathname;
+  const pathname = new URL(href, "https://example.com").pathname;
   return (pathname && mime.getType(pathname)) || null;
 };
 
@@ -810,27 +810,27 @@ async function getEmbedsList(req, _res) {
     q: query.q || "",
     urls: {
       older: moreEmbeds
-        ? url.resolve(
-            req.absolute,
+        ? new URL(
             `/backstage/embeds?offset=${offset + PAGE_SIZE}${
               query.q ? "&q=" + query.q : ""
-            }`
-          )
+            }`,
+            req.absolute
+          ).toString()
         : null,
       newest:
         offset > PAGE_SIZE
-          ? url.resolve(
-              req.absolute,
-              `/backstage/embeds/${query.q ? "?q=" + query.q : ""}`
-            )
+          ? new URL(
+              `/backstage/embeds/${query.q ? "?q=" + query.q : ""}`,
+              req.absolute
+            ).toString()
           : null,
       newer: +offset
-        ? url.resolve(
-            req.absolute,
+        ? new URL(
             `/backstage/embeds?offset=${Math.max(offset - PAGE_SIZE, 0)}${
               query.q ? "&q=" + query.q : ""
-            }`
-          )
+            }`,
+            req.absolute
+          ).toString()
         : null,
     },
   });
@@ -1698,10 +1698,10 @@ module.exports = {
           `,
           {
             1: getLinkId(),
-            2: url.resolve(
-              req.absolute,
-              `/backstage/embeds?url=${encodeURIComponent(original_url)}`
-            ),
+            2: new URL(
+              `/backstage/embeds?url=${encodeURIComponent(original_url)}`,
+              req.absolute
+            ).toString(),
             3: existingEmbed.original_url,
             4: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
           }
@@ -1713,10 +1713,10 @@ module.exports = {
       }
 
       res.writeHead(303, {
-        Location: url.resolve(
-          req.absolute,
-          `/backstage/embeds?url=${encodeURIComponent(original_url)}`
-        ),
+        Location: new URL(
+          `/backstage/embeds?url=${encodeURIComponent(original_url)}`,
+          req.absolute
+        ).toString(),
       });
 
       return;
@@ -1741,10 +1741,10 @@ module.exports = {
       }
 
       res.writeHead(303, {
-        Location: url.resolve(
-          req.absolute,
-          `/backstage/embeds?url=${encodeURIComponent(original_url)}`
-        ),
+        Location: new URL(
+          `/backstage/embeds?url=${encodeURIComponent(original_url)}`,
+          req.absolute
+        ).toString(),
       });
 
       return;
@@ -1767,7 +1767,7 @@ module.exports = {
         }
 
         res.writeHead(303, {
-          Location: url.resolve(req.absolute, `/backstage/embeds`),
+          Location: new URL(`/backstage/embeds`, req.absolute).toString(),
         });
 
         return;
@@ -1823,10 +1823,10 @@ module.exports = {
     }
 
     res.writeHead(303, {
-      Location: url.resolve(
-        req.absolute,
-        `/backstage/embeds?url=${encodeURIComponent(original_url)}`
-      ),
+      Location: new URL(
+        `/backstage/embeds?url=${encodeURIComponent(original_url)}`,
+        req.absolute
+      ).toString(),
     });
 
     return;

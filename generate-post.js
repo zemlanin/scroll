@@ -1,4 +1,3 @@
-const url = require("url");
 const path = require("path");
 
 const chunk = require("lodash.chunk");
@@ -116,7 +115,7 @@ async function generatePaginationPage(
     blog,
     number: pageNumber,
     pagination: {
-      url: url.resolve(blog.url, pageUrl),
+      url: new URL(pageUrl, blog.url).toString(),
       lang: blog.lang, // HACK: provide `lang` for `{{#t}}` block inside `{{#pagination}}`
     },
     url: pageUrl,
@@ -130,14 +129,14 @@ async function generatePaginationPage(
       : {
           lang: blog.lang,
           number: pageNumber + 1,
-          url: url.resolve(blog.url, `page-${pageNumber + 1}.html`),
+          url: new URL(`page-${pageNumber + 1}.html`, blog.url).toString(),
         },
     older:
       pageNumber > 1
         ? {
             lang: blog.lang,
             number: pageNumber - 1,
-            url: url.resolve(blog.url, `page-${pageNumber - 1}.html`),
+            url: new URL(`page-${pageNumber - 1}.html`, blog.url).toString(),
           }
         : null,
   });
@@ -266,7 +265,7 @@ async function generateIndexPage(db, blog, newestPage) {
       ? {
           lang: blog.lang,
           number: olderPageIndex,
-          url: url.resolve(blog.url, `page-${olderPageIndex}.html`),
+          url: new URL(`page-${olderPageIndex}.html`, blog.url).toString(),
         }
       : null,
     index: true,

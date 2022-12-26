@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
   });
 
   res.writeHead(303, {
-    Location: url.resolve(req.absolute, `/backstage`),
+    Location: new URL(`/backstage`, req.absolute).toString(),
   });
 
   return;

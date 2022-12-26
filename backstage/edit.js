@@ -50,10 +50,10 @@ module.exports = {
       );
 
       res.writeHead(302, {
-        Location: url.resolve(
-          req.absolute,
-          `/backstage/edit/?id=${latestPost.id}`
-        ),
+        Location: new URL(
+          `/backstage/edit/?id=${latestPost.id}`,
+          req.absolute
+        ).toString(),
       });
 
       return;
@@ -141,7 +141,7 @@ module.exports = {
     return render("edit.mustache", {
       post: post,
       urls: {
-        logout: url.resolve(req.absolute, "/backstage/?logout=1"),
+        logout: new URL("/backstage/?logout=1", req.absolute).toString(),
       },
       mediaJson: mediaJson,
     });
@@ -307,7 +307,10 @@ module.exports = {
 
     if (!existingPostId) {
       res.writeHead(303, {
-        Location: url.resolve(req.absolute, `/backstage/edit/?id=${post.id}`),
+        Location: new URL(
+          `/backstage/edit/?id=${post.id}`,
+          req.absolute
+        ).toString(),
       });
 
       return;
@@ -324,7 +327,7 @@ module.exports = {
     return render("edit.mustache", {
       post: post,
       urls: {
-        logout: url.resolve(req.absolute, "/backstage/?logout=1"),
+        logout: new URL("/backstage/?logout=1", req.absolute).toString(),
       },
       mediaJson: mediaJson,
     });

@@ -81,13 +81,13 @@ module.exports = async (req, res) => {
   }
 
   const preparedPost = await prepare(post, {
-    url: url.resolve(req.absolute, `/backstage/preview/?id=${post.id}`),
-    baseUrl: url.resolve(req.absolute, "/"),
+    url: new URL(`/backstage/preview/?id=${post.id}`, req.absolute).toString(),
+    baseUrl: new URL("/", req.absolute).toString(),
     embedsLoader: new EmbedsLoader(db, false),
   });
 
   const blog = await getBlogObject(req.absolute);
-  blog.url = url.resolve(req.absolute, "/backstage");
+  blog.url = new URL("/backstage", req.absolute).toString();
 
   if (rss) {
     res.setHeader("content-type", "text/xml");
@@ -99,7 +99,10 @@ module.exports = async (req, res) => {
         feed: {
           ...blog.feed,
           url: rssEscape(
-            url.resolve(req.absolute, `/backstage/preview/?id=${post.id}&rss=1`)
+            new URL(
+              `/backstage/preview/?id=${post.id}&rss=1`,
+              req.absolute
+            ).toString()
           ),
         },
       },

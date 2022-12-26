@@ -1,5 +1,3 @@
-const { URL } = require("url");
-
 const cheerio = require("cheerio");
 const common = require("./common");
 const { renderCard } = require("./backstage/render-card.js");

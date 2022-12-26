@@ -88,18 +88,17 @@ async function attemptDelivery(asdb, id, inbox, stdout, stderr) {
 
   stdout.write(`sending message ${id} to ${inbox}\n`);
 
-  if (process.env.NODE_ENV === "development") {
-    return;
-  }
-
-  const resp = await fetch(req).catch((e) => {
-    return {
-      status: 9999,
-      text() {
-        return e.toString();
-      },
-    };
-  });
+  const resp =
+    process.env.NODE_ENV === "development"
+      ? { status: 200 }
+      : await fetch(req).catch((e) => {
+          return {
+            status: 9999,
+            text() {
+              return e.toString();
+            },
+          };
+        });
 
   if (resp.status >= 400) {
     const text = await resp.text();

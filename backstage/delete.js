@@ -1,5 +1,3 @@
-const url = require("url");
-
 const { getSession, sendToAuthProvider } = require("./auth.js");
 
 module.exports = async (req, res) => {
@@ -8,8 +6,8 @@ module.exports = async (req, res) => {
     return sendToAuthProvider(req, res);
   }
 
-  const query = url.parse(req.url, true).query;
-  const existingPostId = query.id || (req.post && req.post.id);
+  const { searchParams } = new URL(req.url, req.absolute);
+  const existingPostId = searchParams.get("id") || (req.post && req.post.id);
 
   const db = await req.db();
 

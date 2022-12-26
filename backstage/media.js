@@ -1,4 +1,3 @@
-const url = require("url");
 const fs = require("fs");
 const path = require("path");
 const { promisify } = require("util");
@@ -142,7 +141,8 @@ const mediaId = {
       return sendToAuthProvider(req, res);
     }
 
-    const query = url.parse(req.url, true).query;
+    const { searchParams } = new URL(req.url, req.absolute);
+
     const db = await req.db();
     // TODO check the performance hit of multiple `length(data)` in a query
     const m = await db.get(
@@ -159,7 +159,7 @@ const mediaId = {
         WHERE id = ?1
         LIMIT 1
       `,
-      { 1: query.id }
+      { 1: searchParams.get("id") }
     );
 
     if (!m) {
@@ -262,7 +262,8 @@ const mediaId = {
       return sendToAuthProvider(req, res);
     }
 
-    const query = url.parse(req.url, true).query;
+    const { searchParams } = new URL(req.url, req.absolute);
+
     const db = await req.db();
     const m = await db.get(
       `
@@ -271,7 +272,7 @@ const mediaId = {
         WHERE id = ?1
         LIMIT 1
       `,
-      { 1: query.id }
+      { 1: searchParams.get("id") }
     );
 
     if (!m) {
@@ -391,8 +392,9 @@ module.exports = {
     };
   },
   get: async (req, res) => {
-    const query = url.parse(req.url, true).query;
-    if (query.id) {
+    const { searchParams } = new URL(req.url, req.absolute);
+
+    if (searchParams.get("id")) {
       return await mediaId.get(req, res);
     }
 
@@ -402,17 +404,20 @@ module.exports = {
     }
 
     const db = await req.db();
-    const offset = +query.offset || 0;
+    const offset = +searchParams.get("offset") || 0;
 
-    const template = query.bar ? "media-bar.mustache" : "media.mustache";
+    const template = searchParams.get("bar")
+      ? "media-bar.mustache"
+      : "media.mustache";
 
     return render(template, {
       ...(await module.exports.getJson(db, { offset })),
     });
   },
   post: async (req, res) => {
-    const query = url.parse(req.url, true).query;
-    if (query.id) {
+    const { searchParams } = new URL(req.url, req.absolute);
+
+    if (searchParams.get("id")) {
       return await mediaId.post(req, res);
     }
 
@@ -443,7 +448,7 @@ module.exports = {
     }
 
     let location;
-    if (query.bar) {
+    if (searchParams.get("bar")) {
       location = `/backstage/media/?bar=1`;
     } else if (files.length === 1) {
       location = `/backstage/media/?id=${lastMedia.id}`;

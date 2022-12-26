@@ -1,4 +1,3 @@
-const url = require("url");
 const fetchModule = import("node-fetch");
 
 const { nanoid, getBlogObject } = require("../common");
@@ -39,12 +38,14 @@ module.exports = {
       return sendToAuthProvider(req, res);
     }
 
-    const query = url.parse(req.url, true).query;
-    const existingPostId = query.id || (req.post && req.post.id);
+    const { searchParams } = new URL(req.url, req.absolute);
+
+    const id = searchParams.get("id");
+    const existingPostId = id || (req.post && req.post.id);
 
     const db = await req.db();
 
-    if (query.latest != null) {
+    if (searchParams.has("latest")) {
       const latestPost = await db.get(
         `SELECT id FROM posts ORDER BY datetime(created) DESC, id DESC LIMIT 1`
       );
@@ -70,7 +71,7 @@ module.exports = {
       text: "",
     };
 
-    if (query.id) {
+    if (id) {
       const dbPost = await db.get(
         `
           SELECT
@@ -87,7 +88,7 @@ module.exports = {
           FROM posts
           WHERE id = ?1
         `,
-        { 1: query.id }
+        { 1: id }
       );
 
       if (dbPost) {
@@ -97,21 +98,24 @@ module.exports = {
         post = dbPost;
       }
     } else {
-      if (query.text) {
+      const text = searchParams.get("text");
+      if (text) {
         try {
-          post.text = decodeURIComponent(query.text);
+          post.text = text;
         } catch (e) {
           //
         }
       }
 
-      if (query.slug && query.slug.text(SLUG_REGEX)) {
-        post.slug = query.slug;
+      const slug = searchParams.get("slug");
+      if (slug && slug.text(SLUG_REGEX)) {
+        post.slug = slug;
       }
 
-      if (query.created) {
+      const created = searchParams.get("created");
+      if (created) {
         try {
-          const parsedDate = new Date(query.created)
+          const parsedDate = new Date(created)
             .toISOString()
             .replace(/:\d{2}\.\d{3}Z$/, "");
 
@@ -122,11 +126,10 @@ module.exports = {
       }
     }
 
-    if (query.append) {
+    const append = searchParams.get("append");
+    if (append) {
       try {
-        post.text = post.text
-          ? post.text.trimEnd() + "\n\n" + decodeURIComponent(query.append)
-          : decodeURIComponent(query.append);
+        post.text = post.text ? post.text.trimEnd() + "\n\n" + append : append;
       } catch (e) {
         //
       }
@@ -152,9 +155,8 @@ module.exports = {
       return sendToAuthProvider(req, res);
     }
 
-    const query = url.parse(req.url, true).query;
-
-    const existingPostId = query.id || (req.post && req.post.id);
+    const { searchParams } = new URL(req.url, req.absolute);
+    const existingPostId = searchParams.get("id") || (req.post && req.post.id);
 
     let post = {
       id: existingPostId || getPostId(),

@@ -1,4 +1,3 @@
-const url = require("url");
 const path = require("path");
 
 const mime = require("mime");
@@ -655,11 +654,12 @@ async function queryLinkblog(db, original_url) {
 }
 
 async function getSingleEmbed(req, _res) {
-  const query = url.parse(req.url, true).query;
+  const { searchParams } = new URL(req.url, req.absolute);
+  const urlParam = searchParams.get("url");
 
   const db = await req.db();
 
-  const existingEmbed = await queryEmbed(db, query.url);
+  const existingEmbed = await queryEmbed(db, urlParam);
 
   if (existingEmbed) {
     existingEmbed.backstageUrl = `/backstage/embeds?url=${encodeURIComponent(
@@ -671,12 +671,12 @@ async function getSingleEmbed(req, _res) {
   let cardHTML;
   let rawMetadata;
   let requested;
-  let naked = !!query.naked;
-  if (!existingEmbed || query.request) {
+  let naked = !!searchParams.get("naked");
+  if (!existingEmbed || searchParams.get("request")) {
     let error;
     try {
-      rawMetadata = query.url
-        ? await module.exports.loadMetadata(query.url)
+      rawMetadata = urlParam
+        ? await module.exports.loadMetadata(urlParam)
         : null;
     } catch (e) {
       error = e.name;
@@ -684,13 +684,13 @@ async function getSingleEmbed(req, _res) {
       if (e.statusCode) {
         error = error + ": " + e.statusCode;
         rawMetadata = [
-          { name: "url", content: query.url },
+          { name: "url", content: urlParam },
           { header: true, key: "content-type", value: "text/html" },
         ];
       } else if (e instanceof RequestError) {
         error = error + ": " + e.error.code;
         rawMetadata = [
-          { name: "url", content: query.url },
+          { name: "url", content: urlParam },
           { header: true, key: "content-type", value: "text/html" },
         ];
       } else {
@@ -735,11 +735,11 @@ async function getSingleEmbed(req, _res) {
   }
 
   const linkblogEntry = existingEmbed
-    ? await queryLinkblog(db, query.url)
+    ? await queryLinkblog(db, urlParam)
     : null;
 
   return render("embed.mustache", {
-    url: query.url,
+    url: urlParam,
     existingEmbed,
     mimetype,
     cardHTML,
@@ -747,8 +747,9 @@ async function getSingleEmbed(req, _res) {
     rawMetadata,
     rawMetadataJSON: rawMetadata && JSON.stringify(rawMetadata),
     status: {
-      saved: !query.request && Boolean(existingEmbed),
-      requested: cardHTML && (!existingEmbed || Boolean(query.request)),
+      saved: !searchParams.get("request") && Boolean(existingEmbed),
+      requested:
+        cardHTML && (!existingEmbed || Boolean(searchParams.get("request"))),
     },
     linkblog: linkblogEntry && !linkblogEntry.private ? linkblogEntry : null,
   });
@@ -756,15 +757,16 @@ async function getSingleEmbed(req, _res) {
 
 const PAGE_SIZE = 20;
 
-async function getEmbedsList(req, _res) {
+async function getEmbedsList(req, res) {
   const db = await req.db();
-  const query = url.parse(req.url, true).query;
+  const { searchParams } = new URL(req.url, req.absolute);
 
-  const offset = +query.offset || 0;
+  const offset = +searchParams.get("offset") || 0;
 
   let embeds;
+  const query = searchParams.get("q");
 
-  if (query.q) {
+  if (query) {
     embeds = (
       await db.all(
         `
@@ -781,10 +783,14 @@ async function getEmbedsList(req, _res) {
         {
           1: offset,
           2: PAGE_SIZE + 1,
-          3: query.q && decodeURIComponent(query.q),
+          3: query,
         }
       )
     ).map(prepareEmbed);
+  } else if (searchParams.has("q")) {
+    res.statusCode = 302;
+    res.setHeader("Location", "/backstage/embeds");
+    return;
   } else {
     embeds = (
       await db.all(
@@ -807,31 +813,53 @@ async function getEmbedsList(req, _res) {
 
   return render(`embeds.mustache`, {
     embeds,
-    q: query.q || "",
+    q: query || "",
     urls: {
       older: moreEmbeds
         ? new URL(
-            `/backstage/embeds?offset=${offset + PAGE_SIZE}${
-              query.q ? "&q=" + query.q : ""
-            }`,
+            `/backstage/embeds?` +
+              new URLSearchParams({
+                ...(query ? { q: query } : null),
+                offset: offset + PAGE_SIZE,
+              }),
             req.absolute
           ).toString()
         : null,
       newest:
         offset > PAGE_SIZE
           ? new URL(
-              `/backstage/embeds/${query.q ? "?q=" + query.q : ""}`,
+              `/backstage/embeds` +
+                (query
+                  ? "?" +
+                    new URLSearchParams({
+                      q: query,
+                    })
+                  : ""),
               req.absolute
             ).toString()
           : null,
-      newer: +offset
-        ? new URL(
-            `/backstage/embeds?offset=${Math.max(offset - PAGE_SIZE, 0)}${
-              query.q ? "&q=" + query.q : ""
-            }`,
-            req.absolute
-          ).toString()
-        : null,
+      newer:
+        +offset && +offset <= PAGE_SIZE
+          ? new URL(
+              `/backstage/embeds` +
+                (query
+                  ? "?" +
+                    new URLSearchParams({
+                      q: query,
+                    })
+                  : ""),
+              req.absolute
+            ).toString()
+          : +offset
+          ? new URL(
+              `/backstage/embeds?` +
+                new URLSearchParams({
+                  ...(query ? { q: query } : null),
+                  offset: Math.max(offset - PAGE_SIZE, 0),
+                }),
+              req.absolute
+            ).toString()
+          : null,
     },
   });
 }
@@ -1838,9 +1866,9 @@ module.exports = {
       return sendToAuthProvider(req, res);
     }
 
-    const query = url.parse(req.url, true).query;
+    const urlParam = new URL(req.url, req.absolute).searchParams.get("url");
 
-    if (query.url) {
+    if (urlParam) {
       return await getSingleEmbed(req, res);
     }
 

@@ -1,5 +1,4 @@
 const fs = require("fs");
-const url = require("url");
 const path = require("path");
 
 const jsdiff = require("diff");
@@ -23,15 +22,16 @@ function rssEscape(url) {
 }
 
 module.exports = async (req, res) => {
-  const query = url.parse(req.url, true).query;
-  const rss = (req.post && req.post.rss) || query.rss;
+  const { searchParams } = new URL(req.url, req.absolute);
+
+  const rss = (req.post && req.post.rss) || searchParams.get("rss");
 
   const session = await getSession(req, res);
   if (!session && !rss) {
     return `<a href="/backstage">auth</a>`;
   }
 
-  const existingPostId = query.id || (req.post && req.post.id);
+  const existingPostId = searchParams.get("id") || (req.post && req.post.id);
 
   let post = {
     id: existingPostId || `id-${Math.random()}`,
@@ -111,7 +111,7 @@ module.exports = async (req, res) => {
     });
   }
 
-  const naked = (req.post && req.post.naked) || query.naked;
+  const naked = (req.post && req.post.naked) || searchParams.get("naked");
 
   if (naked) {
     return (
@@ -121,7 +121,8 @@ module.exports = async (req, res) => {
     );
   }
 
-  const showTeaser = (req.post && req.post.teaser) || query.teaser;
+  const showTeaser =
+    (req.post && req.post.teaser) || searchParams.get("teaser");
 
   if (showTeaser) {
     return blogRender("list.mustache", {
@@ -135,7 +136,7 @@ module.exports = async (req, res) => {
     });
   }
 
-  const showDiff = (req.post && req.post.diff) || query.diff;
+  const showDiff = (req.post && req.post.diff) || searchParams.get("diff");
 
   if (showDiff) {
     if (!post) {

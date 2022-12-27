@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="origin-when-cross-origin">
+  <style>
+    {{> bulma.css}}
+
+    .drafts-panel .panel-heading {
+      font-size: 0.8em;
+    }
+
+    .drafts-panel .panel-block {
+      font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
+        "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
+        "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
+        "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    {{> header.blog.css}}
+  </style>
+  <script type="text/javascript">
+    {{> header.blog.js}}
+  </script>
+
+  <script type="text/javascript">
+    {{> slash-search.js}}
+    ;window["slash-search"]('input[name="q"]');
+  </script>
+</head>
+<body class="container light" style="margin: 1em auto 80px; max-width: 60em; padding-left: 0.75em; padding-right: 0.75em;">
+    <nav class="field" style="display: flex; flex-flow: row wrap; justify-content: space-between;">
+      <div class="field has-addons">
+        <div class="control">
+          <a class="button" href="/backstage">&larr;</a>
+        </div>
+        <div class="control">
+          <a class="button" href="/backstage/notifications">notifications</a>
+        </div>
+      </div>
+
+      <div class="field has-addons">
+        <form
+          class="control"
+          style="display: inline-flex;"
+          action="/backstage/queue/update-actor"
+          method="POST"
+          disabled
+        >
+          <button class="button" type="submit">{{#fas}}sync{{/fas}}</button>
+        </form>
+        <div class="control">
+          <a class="button" href="/backstage/queue">
+            {{#fas}}inbox{{/fas}}
+            <span style="margin-left: 0.5em">{{queueCount}}</span>
+           </a>
+        </div>
+      </div>
+
+      <form
+        class="field has-addons"
+        style="display: inline-flex;"
+        action="/backstage/notifications"
+        method="GET"
+        disabled
+      >
+        <div class="control">
+          <input name="q" type="text" class="input"
+            {{#q}}value="{{q}}"{{/q}}
+          >
+        </div>
+        <div class="control">
+          <button class="button" type="search">{{#fas}}search{{/fas}}</button>
+        </div>
+      </form>
+    </nav>
+
+    {{#notifications}}
+      <div class="card">
+        <div class="card-content">
+          {{# type=Follow }}
+            <a href="{{ actor.url }}">{{actor.name}}</a> followed <a href="{{object.url}}">{{object.id}}</a>
+          {{/ type=Follow }}
+          {{# type=Like }}
+            <a href="{{ actor.url }}">{{actor.name}}</a> liked <a href="{{object.url}}">{{object.id}}</a>
+          {{/ type=Like }}
+          {{# type=Announce }}
+            <a href="{{ actor.url }}">{{actor.name}}</a> boosted <a href="{{object.url}}">{{object.id}}</a>
+          {{/ type=Announce }}
+          {{# type=Create }}
+            <a href="{{ actor.url }}">{{actor.name}}</a> replied to <a href="{{object.url}}">{{object.id}}</a>
+          {{/ type=Create }}
+          {{# type=unknown }}
+            <a href="{{ actor.url }}">{{actor.name}}</a> {{type}} {{object.id}}
+          {{/ type=unknown }}
+        </div>
+        <footer class="card-footer">
+          <a class="card-footer-item" href="{{urls.permalink}}">
+            {{#fas}}link{{/fas}}
+          </a>
+
+          <form
+            class="card-footer-item"
+            style="display: inline-flex;"
+            action="{{urls.hide}}"
+            method="POST"
+            disabled
+          >
+            <input
+              type="hidden"
+              name="hidden"
+              value="{{#hidden}}0{{/hidden}}{{^hidden}}1{{/hidden}}"
+            />
+            <button class="button" type="submit">
+              {{#hidden}}{{#fas}}eye{{/fas}}{{/hidden}}
+              {{^hidden}}{{#fas}}eye-slash{{/fas}}{{/hidden}}
+            </button>
+          </form>
+
+          <a class="card-footer-item" href="{{urls.author}}">
+            {{#fas}}user{{/fas}}
+          </a>
+        </footer>
+      </div>
+    {{/notifications}}
+
+    <nav class="field" style="margin-top: 0.5em">
+      {{#urls.newest}}<a class="button" href="{{{urls.newest}}}">&#x21E4; newest</a>{{/urls.newest}}
+      {{#urls.newer}}<a class="button" href="{{{urls.newer}}}">&larr; newer</a>{{/urls.newer}}
+      {{^urls.newer}}<button class="button" disabled>&larr; newer</button>{{/urls.newer}}
+      {{#urls.older}}<a class="button" href="{{{urls.older}}}">older &rarr;</a>{{/urls.older}}
+      {{^urls.older}}<button class="button" disabled>older &rarr;</button>{{/urls.older}}
+    </nav>
+</body>
+</html>

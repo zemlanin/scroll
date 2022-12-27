@@ -224,6 +224,11 @@ const handlers = [
   ["POST", "/backstage/embeds", require("./backstage/embeds.js").post],
   [
     "GET",
+    "/backstage/notifications",
+    require("./backstage/notifications.js").index,
+  ],
+  [
+    "GET",
     "/.well-known/webfinger",
     async (req, res) => {
       const resource =

@@ -1,41 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="referrer" content="origin-when-cross-origin">
-    <style>
-        {{> bulma.css}}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="origin-when-cross-origin">
+  <style>
+    {{> bulma.css}}
 
-        .drafts-panel .panel-heading {
-          font-size: 0.8em;
-        }
+    .drafts-panel .panel-heading {
+      font-size: 0.8em;
+    }
 
-        .drafts-panel .panel-block {
-          font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
-            "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
-            "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
-            "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
-          white-space: pre;
-          overflow-x: auto;
-        }
+    .drafts-panel .panel-block {
+      font-family: "SF Mono", "Menlo-Regular", Consolas, "Andale Mono WT",
+        "Andale Mono", "Lucida Console", "Lucida Sans Typewriter",
+        "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono",
+        "Nimbus Mono L", Monaco, "Courier New", Courier, monospace;
+      white-space: pre;
+      overflow-x: auto;
+    }
 
-        {{> header.blog.css}}
-    </style>
-    <script type="text/javascript">
-      {{> header.blog.js}}
-    </script>
+    {{> header.blog.css}}
+  </style>
+  <script type="text/javascript">
+    {{> header.blog.js}}
+  </script>
 
-    <script type="text/javascript">
-      {{> slash-search.js}}
-      ;window["slash-search"]('input[name="q"]');
-    </script>
+  <script type="text/javascript">
+    {{> slash-search.js}}
+    ;window["slash-search"]('input[name="q"]');
+  </script>
 </head>
 <body class="container light" style="margin: 1em auto 80px; max-width: 60em; padding-left: 0.75em; padding-right: 0.75em;">
     <nav class="field" style="display: flex; flex-flow: row wrap; justify-content: space-between;">
       <div class="field has-addons">
         <div class="control"><a href="/" class="button" title="back to blog">{{#fas}}scroll{{/fas}}</a></div>
-        <div class="control"><a href="{{urls.logout}}" class="button" title="logout">{{#fas}}sign-out-alt{{/fas}}</a></div>
+        <div class="control"><a href="/backstage/notifications" class="button" title="notifications">{{#fas}}bell{{/fas}}</a></div>
       </div>
       <div class="field has-addons">
         <div class="control"><a href="/backstage/edit" class="button" title="new post">{{#fas}}pencil-alt{{/fas}}</a></div>
@@ -69,13 +69,13 @@
     </nav>
 
     {{#suggestion}}
-        <article class="message is-link">
-            <div class="message-body">
-              <a href="{{{url}}}">
-                {{text}}
-              </a>
-            </div>
-        </article>
+      <article class="message is-link">
+        <div class="message-body">
+          <a href="{{{url}}}">
+            {{text}}
+          </a>
+        </div>
+      </article>
     {{/suggestion}}
 
     {{#drafts.length}}
@@ -90,45 +90,45 @@
     {{/drafts.length}}
 
     {{#posts}}
-        <div class="card">
-            <article class="card-content">
-                {{{htmlTitle}}}
+      <div class="card">
+        <article class="card-content">
+          {{{htmlTitle}}}
 
-                {{#longread}}
-                  {{{teaser}}}
+          {{#longread}}
+            {{{teaser}}}
 
-                  <a href="{{{urls.permalink}}}" class="more">{{more}} &rarr;</a>
-                {{/longread}}
+            <a href="{{{urls.permalink}}}" class="more">{{more}} &rarr;</a>
+          {{/longread}}
 
-                {{^longread}}
-                  {{{html}}}
-                {{/longread}}
-            </article>
-            <footer class="card-footer">
-                {{#stats}}
-                  <a class="card-footer-item" href="{{urls.edit}}">
-                    {{#fas}}edit{{/fas}}
-                  </a>
-                  <span class="card-footer-item">
-                    {{#fas}}eye{{/fas}}&nbsp;{{stats.hits}}
-                  </span>
-                  <span class="card-footer-item">
-                    {{#fas}}user{{/fas}}&nbsp;{{stats.visitors}}
-                  </span>
-                {{/stats}}
-                {{^stats}}
-                  <a class="card-footer-item" href="{{urls.edit}}">
-                    edit
-                  </a>
-                {{/stats}}
-                {{#draft}}<div class="card-footer-item">draft</div>{{/draft}}
-                {{^draft}}
-                  <a class="card-footer-item" href="{{urls.permalink}}">
-                    {{status}}
-                  </a>
-                {{/draft}}
-            </footer>
-        </div>
+          {{^longread}}
+            {{{html}}}
+          {{/longread}}
+        </article>
+        <footer class="card-footer">
+          {{#stats}}
+            <a class="card-footer-item" href="{{urls.edit}}">
+              {{#fas}}edit{{/fas}}
+            </a>
+            <span class="card-footer-item">
+              {{#fas}}eye{{/fas}}&nbsp;{{stats.hits}}
+            </span>
+            <span class="card-footer-item">
+              {{#fas}}user{{/fas}}&nbsp;{{stats.visitors}}
+            </span>
+          {{/stats}}
+          {{^stats}}
+            <a class="card-footer-item" href="{{urls.edit}}">
+              edit
+            </a>
+          {{/stats}}
+          {{#draft}}<div class="card-footer-item">draft</div>{{/draft}}
+          {{^draft}}
+            <a class="card-footer-item" href="{{urls.permalink}}">
+              {{status}}
+            </a>
+          {{/draft}}
+        </footer>
+      </div>
     {{/posts}}
 
     <nav class="field" style="margin-top: 0.5em">
@@ -137,6 +137,10 @@
       {{^urls.newer}}<button class="button" disabled>&larr; newer</button>{{/urls.newer}}
       {{#urls.older}}<a class="button" href="{{{urls.older}}}">older &rarr;</a>{{/urls.older}}
       {{^urls.older}}<button class="button" disabled>older &rarr;</button>{{/urls.older}}
+    </nav>
+
+    <nav class="field" style="margin-top: 0.5em">
+      <a href="{{urls.logout}}" class="button" title="logout">{{#fas}}sign-out-alt{{/fas}}</a>
     </nav>
 </body>
 </html>

@@ -30,7 +30,8 @@ CREATE TABLE IF NOT EXISTS "replies" (
 CREATE TABLE IF NOT EXISTS "outbox" (
   `id` TEXT NOT NULL,
   `created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `to` TEXT NOT NULL,
+  `from_` TEXT NOT NULL,
+  `to_` TEXT NOT NULL,
   `message` JSON,
   PRIMARY KEY (`id`)
 );

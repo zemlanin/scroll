@@ -6,7 +6,7 @@ const sqlite3 = require("sqlite3");
 
 const fetchModule = import("node-fetch");
 
-const { ACTIVITYSTREAMS_DB, getBlogObject } = require("../common.js");
+const { ACTIVITYSTREAMS_DB } = require("../common.js");
 
 const { getMessageId } = require("./common.js");
 
@@ -22,24 +22,25 @@ const RETRY_TIMEOUT = 1000 * 5; // 5 seconds
 function watch() {
   checkAndSend()
     .then(() => setTimeout(watch, RETRY_TIMEOUT))
-    .catch(() => setTimeout(watch, RETRY_TIMEOUT * (Math.random() + 1)));
+    .catch((e) => {
+      console.error(e);
+      setTimeout(watch, RETRY_TIMEOUT * (Math.random() + 1));
+    });
 }
 
 async function attemptDelivery(asdb, id, inbox, stdout, stderr) {
   const { default: fetch, Request } = await fetchModule;
 
-  const blogActor = (await getBlogObject()).activitystream.id;
-
-  const { key_id, private_key } = await asdb.get(
-    `SELECT key_id, private_key FROM actors WHERE id = ?1;`,
-    { 1: blogActor }
-  );
-
-  const { message } = await asdb.get(
-    `SELECT message FROM outbox WHERE id = ?1`,
+  const { message, sender } = await asdb.get(
+    `SELECT message, from_ AS sender FROM outbox WHERE id = ?1`,
     {
       1: id,
     }
+  );
+
+  const { key_id, private_key } = await asdb.get(
+    `SELECT key_id, private_key FROM actors WHERE id = ?1;`,
+    { 1: sender }
   );
 
   const body = JSON.stringify({
@@ -89,7 +90,7 @@ async function attemptDelivery(asdb, id, inbox, stdout, stderr) {
   stdout.write(`sending message ${id} to ${inbox}\n`);
 
   const resp =
-    process.env.NODE_ENV === "development"
+    process.env.NODE_ENV === "developmentx"
       ? { status: 200 }
       : await fetch(req).catch((e) => {
           return {
@@ -166,18 +167,22 @@ async function checkAndSend(stdout, stderr) {
   }
 }
 
-async function createMessage(asdb, { actor, type, object }) {
-  const id = new URL(`#outbox-${getMessageId()}`, actor);
+async function createMessage(asdb, { from, to, type, object }) {
+  const id = new URL(`#outbox-${getMessageId()}`, from);
 
-  await asdb.run(`INSERT INTO outbox (id, 'to', message) VALUES (?1, ?2, ?3)`, {
-    1: id,
-    2: "https://www.w3.org/ns/activitystreams#Public",
-    3: JSON.stringify({
-      type,
-      object,
-      actor,
-    }),
-  });
+  await asdb.run(
+    `INSERT INTO outbox (id, from_, to_, message) VALUES (?1, ?4, ?2, ?3)`,
+    {
+      1: id,
+      2: to || "https://www.w3.org/ns/activitystreams#Public",
+      3: JSON.stringify({
+        type,
+        object,
+        actor: from,
+      }),
+      4: from,
+    }
+  );
 
   return id;
 }

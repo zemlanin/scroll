@@ -17,8 +17,13 @@ const generatePost = require("../generate-post.js");
 const {
   generateLinkblogPage,
   generateLinkblogRSSPage,
+  generateLinkblogActivityStreamNote,
   notifyWebSub,
 } = require("../linkblog.js");
+const {
+  createMessage,
+  notifyFollowers,
+} = require("../activitystreams/outbox.js");
 
 const { render } = require("./render.js");
 const {
@@ -1696,6 +1701,9 @@ module.exports = {
     }
 
     const db = await req.db();
+    const asdb = await req.asdb();
+
+    const blog = await getBlogObject();
 
     const original_url = req.post.original_url;
 
@@ -1718,6 +1726,9 @@ module.exports = {
       );
 
       if (!existingLinkblogEntry || existingLinkblogEntry.private) {
+        const id = getLinkId();
+        const created = new Date();
+
         await db.run(
           `
             INSERT INTO linklist
@@ -1725,17 +1736,31 @@ module.exports = {
             VALUES ($1, $2, $3, $4)
           `,
           {
-            1: getLinkId(),
+            1: id,
             2: new URL(
               `/backstage/embeds?url=${encodeURIComponent(original_url)}`,
               req.absolute
             ).toString(),
             3: existingEmbed.original_url,
-            4: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+            4: created.toISOString().replace(/\.\d{3}Z$/, "Z"),
           }
         );
 
         await generateLinkblog(db);
+
+        const object = generateLinkblogActivityStreamNote(
+          id,
+          existingEmbed.original_url,
+          created,
+          blog
+        );
+
+        const messageId = await createMessage(asdb, {
+          type: "Create",
+          from: blog.linkblog.activitystream.id,
+          object,
+        });
+        await notifyFollowers(asdb, messageId, blog.linkblog.activitystream.id);
       } else {
         // just ignore public linkblog entry
       }
@@ -1766,6 +1791,20 @@ module.exports = {
         );
 
         await generateLinkblog(db);
+
+        const object = generateLinkblogActivityStreamNote(
+          existingLinkblogEntry.id,
+          existingLinkblogEntry.original_url,
+          new Date(), // `created` is not important when removing the link
+          blog
+        );
+
+        const messageId = await createMessage(asdb, {
+          type: "Delete",
+          from: blog.linkblog.activitystream.id,
+          object: object.id,
+        });
+        await notifyFollowers(asdb, messageId, blog.linkblog.activitystream.id);
       }
 
       res.writeHead(303, {

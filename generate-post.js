@@ -549,6 +549,74 @@ async function generateAfterEdit(db, postId, oldStatus, oldCreated, oldSlug) {
   }
 }
 
+async function generateActivityStreamActor(
+  asdb,
+  folder,
+  { name, title, url, outbox }
+) {
+  const blog = await getBlogObject();
+
+  const actorPath = `actor/${name}`;
+  const actorId = new URL(actorPath, blog.url).toString();
+  const inboxId = new URL(`actor/${name}/inbox`, blog.url).toString();
+
+  const { key_id: keyId, public_key: publicKeyPem } =
+    (await asdb.get(`SELECT key_id, public_key FROM actors WHERE id = ?1`, {
+      1: actorId,
+    })) || {};
+
+  await writeFileWithGzip(
+    path.join(folder, actorPath + ".json"),
+    JSON.stringify({
+      "@context": ["https://www.w3.org/ns/activitystreams"],
+      id: actorId,
+      type: "Person",
+      inbox: inboxId,
+      outbox: outbox,
+      preferredUsername: name,
+      name: blog.author.name ? `${title} (${blog.author.name})` : title,
+      summary: "",
+      url: url,
+      publicKey: publicKeyPem
+        ? {
+            id: keyId,
+            owner: actorId,
+            publicKeyPem: publicKeyPem,
+          }
+        : null,
+      icon: {
+        type: "Image",
+        mediaType: "image/png",
+        url: blog.static.favicon.png,
+      },
+    }),
+    { flag: "wx" }
+  );
+
+  const webfinger = {
+    subject: `acct:${name}@${new URL(blog.url).hostname}`,
+    aliases: [url, actorId],
+    links: [
+      {
+        rel: "http://webfinger.net/rel/profile-page",
+        type: "text/html",
+        href: url,
+      },
+      {
+        rel: "self",
+        type: "application/activity+json",
+        href: actorId,
+      },
+    ],
+  };
+
+  await writeFileWithGzip(
+    path.join(folder, `.well-known/webfinger/${webfinger.subject}.json`),
+    JSON.stringify(webfinger),
+    { flag: "wx" }
+  );
+}
+
 module.exports = {
   getPost,
   getPosts,
@@ -558,6 +626,7 @@ module.exports = {
   generatePaginationPage,
   generateActivityStreamPage,
   generateActivityStreamNote,
+  generateActivityStreamActor,
   generateArchivePage,
   generateIndexPage,
   generateRSSPage,

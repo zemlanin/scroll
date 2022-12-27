@@ -362,7 +362,7 @@ async function notifyActivityStreams(db, asdb, postId, type) {
 
   const messageId = await createMessage(asdb, {
     type,
-    actor: blog.activitystream.id,
+    from: blog.activitystream.id,
     object: type === "Delete" ? object.id : object,
   });
   await notifyFollowers(asdb, messageId, blog.activitystream.id);

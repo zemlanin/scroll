@@ -6,6 +6,11 @@ const fetchModule = import("node-fetch");
 const FeedParser = require("feedparser");
 
 const {
+  createMessage,
+  notifyFollowers,
+} = require("./activitystreams/outbox.js");
+
+const {
   DIST,
   RSS_SIZE,
   POSTS_DB,
@@ -21,7 +26,7 @@ const EmbedsLoader = require("./embeds-loader.js");
 
 const RETRY_TIMEOUT = 1000 * 60 * 30; // 30 minutes
 
-async function loadFreshFeed(db, stdout, _stderr) {
+async function loadFreshFeed(db, asdb, stdout, _stderr) {
   const feedparser = new FeedParser({ normalize: true });
 
   const { default: fetch } = await fetchModule;
@@ -57,6 +62,7 @@ async function loadFreshFeed(db, stdout, _stderr) {
   });
 
   let hasNewItems = false;
+  const blog = await getBlogObject();
 
   for (const item of feed.items) {
     const exists = await db.get(
@@ -69,6 +75,9 @@ async function loadFreshFeed(db, stdout, _stderr) {
 
       stdout.write(`new link item: ${item.link}\n`);
 
+      const id = getLinkId();
+      const created = new Date();
+
       await db.run(
         `
           INSERT INTO linklist
@@ -76,16 +85,52 @@ async function loadFreshFeed(db, stdout, _stderr) {
           VALUES ($1, $2, $3, $4)
         `,
         {
-          1: getLinkId(),
+          1: id,
           2: item.guid,
           3: item.link,
-          4: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
+          4: created.toISOString().replace(/\.\d{3}Z$/, "Z"),
         }
       );
+
+      const object = generateLinkblogActivityStreamNote(id, item.link, blog);
+
+      const messageId = await createMessage(asdb, {
+        type: "Create",
+        from: blog.linkblog.activitystream.id,
+        object,
+      });
+      await notifyFollowers(asdb, messageId, blog.linkblog.activitystream.id);
     }
   }
 
   return hasNewItems;
+}
+
+function generateLinkblogActivityStreamNote(id, link, created, blog) {
+  const content = `<p><a href="${link}" target="_blank" rel="nofollow noopener noreferrer"><span class="invisible">${link.replace(
+    /^(https?:\/\/).+$/,
+    "$1"
+  )}</span><span>${link.replace(/^https?:\/\//, "")}</span></a></p>`;
+
+  const asId = new URL(`actor/linkblog/notes/${id}`, blog.url);
+
+  return {
+    id: asId,
+    type: "Note",
+    published: created,
+    attributedTo: new URL(`actor/linkblog`, blog.url),
+    to: ["https://www.w3.org/ns/activitystreams#Public"],
+    cc: [
+      // "https://mastodon.devua.club/users/zemlanin/followers"
+    ],
+    url: blog.linkblog.url + "#" + id,
+    content: content,
+    contentMap: {
+      [blog.lang]: content,
+    },
+    updated: null,
+    attachement: [],
+  };
 }
 
 async function prepareLink(link, embedsLoader, options) {
@@ -213,6 +258,7 @@ async function checkAndUpdate(stdout, stderr) {
 
   const hasNewItems = await loadFreshFeed(
     db,
+    asdb,
     stdout || process.stdout,
     stderr || process.stderr
   );
@@ -273,6 +319,7 @@ module.exports = {
   generateLinkblogPage,
   generateLinkblogRSSPage,
   generateLinkblogSection,
+  generateLinkblogActivityStreamNote,
   getLinkId,
   notifyWebSub,
 };

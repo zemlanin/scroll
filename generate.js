@@ -32,6 +32,7 @@ const {
   generateArchivePage,
   generateActivityStreamNote,
   generateActivityStreamPage,
+  generateActivityStreamActor,
 } = require("./generate-post.js");
 
 const {
@@ -293,70 +294,12 @@ async function generate(db, asdb, destination, stdout, stderr, { only } = {}) {
       { flag: "wx" }
     );
 
-    const actorPath = "actor/blog";
-    const actorId = new URL(actorPath, blog.url).toString();
-    const inboxId = new URL("actor/blog/inbox", blog.url).toString();
-
-    const { key_id: keyId, public_key: publicKeyPem } =
-      (await asdb.get(
-        `SELECT id, key_id, public_key FROM actors WHERE id = ?1`,
-        {
-          1: actorId,
-        }
-      )) || {};
-
-    await writeFileWithGzip(
-      path.join(tmpFolder, actorPath + ".json"),
-      JSON.stringify({
-        "@context": ["https://www.w3.org/ns/activitystreams"],
-        id: actorId,
-        type: "Person",
-        inbox: inboxId,
-        outbox: outboxId,
-        preferredUsername: "blog",
-        name: blog.author.name
-          ? `${blog.title} (${blog.author.name})`
-          : blog.title,
-        summary: "",
-        url: blog.url,
-        publicKey: publicKeyPem
-          ? {
-              id: keyId,
-              owner: actorId,
-              publicKeyPem: publicKeyPem,
-            }
-          : null,
-        icon: {
-          type: "Image",
-          mediaType: "image/png",
-          url: blog.static.favicon.png,
-        },
-      }),
-      { flag: "wx" }
-    );
-
-    const webfinger = {
-      subject: `acct:blog@${new URL(blog.url).hostname}`,
-      aliases: [blog.url, actorId],
-      links: [
-        {
-          rel: "http://webfinger.net/rel/profile-page",
-          type: "text/html",
-          href: blog.url,
-        },
-        {
-          rel: "self",
-          type: "application/activity+json",
-          href: actorId,
-        },
-      ],
-    };
-
-    await writeFileWithGzip(
-      path.join(tmpFolder, `.well-known/webfinger/${webfinger.subject}.json`),
-      JSON.stringify(webfinger),
-      { flag: "wx" }
-    );
+    await generateActivityStreamActor(asdb, tmpFolder, {
+      name: "blog",
+      title: blog.title,
+      url: blog.url,
+      outbox: outboxId,
+    });
 
     await writeFileWithGzip(
       path.join(tmpFolder, `.well-known/host-meta.xml`),
@@ -372,7 +315,7 @@ async function generate(db, asdb, destination, stdout, stderr, { only } = {}) {
       { flag: "wx" }
     );
 
-    stdout.write("activitystreams done\n");
+    stdout.write("actor done\n");
   }
 
   if (!only || only.has("linkblog")) {
@@ -387,6 +330,13 @@ async function generate(db, asdb, destination, stdout, stderr, { only } = {}) {
       await generateLinkblogRSSPage(db, blog),
       { flag: "wx" }
     );
+
+    await generateActivityStreamActor(asdb, tmpFolder, {
+      name: "linkblog",
+      title: blog.linkblog.title,
+      url: blog.linkblog.url,
+      outbox: undefined,
+    });
 
     stdout.write("linkblog done\n");
   }

@@ -6,6 +6,11 @@
   {{#linkblog}}
     <link rel="alternate" type="application/rss+xml" title="{{ blog.linkblog.feed.description }}" href="{{{ blog.linkblog.feed.url }}}" />
     <link rel="alternate" type="application/rss+xml" title="{{ blog.feed.description }}" href="{{{ blog.feed.url }}}" />
+    <link
+      href="{{{blog.linkblog.activitystream.id}}}"
+      rel="alternate"
+      type="application/activity+json"
+    >
   {{/linkblog}}
   {{^linkblog}}
     <link rel="alternate" type="application/rss+xml" title="{{ blog.feed.description }}" href="{{{ blog.feed.url }}}" />

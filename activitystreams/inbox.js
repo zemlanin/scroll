@@ -4,8 +4,7 @@ const fetchModule = import("node-fetch");
 
 const { getBlogObject } = require("../common.js");
 
-const { getMessageId } = require("./common.js");
-const { attemptDelivery } = require("./outbox.js");
+const { createMessage, attemptDelivery } = require("./outbox.js");
 
 module.exports = inbox;
 
@@ -19,6 +18,11 @@ async function inbox(req, res) {
   if (!req.headers.authorization && !req.headers.signature) {
     res.statusCode = 401;
     return { detail: "missing http signature" };
+  }
+
+  if (!(await getInboxActor(req))) {
+    res.statusCode = 404;
+    return { detail: "inbox not found" };
   }
 
   if (!(await verify(req))) {
@@ -59,6 +63,26 @@ async function inbox(req, res) {
 
   res.statusCode = 400;
   return { detail: "unknown activity type" };
+}
+
+async function getInboxActor(req) {
+  const blog = await getBlogObject();
+
+  if (
+    req.url === "/actor/blog/inbox" ||
+    req.url === "/activitystreams/blog/inbox"
+  ) {
+    return blog.activitystream.id;
+  }
+
+  if (
+    req.url === "/actor/linkblog/inbox" ||
+    req.url === "/activitystreams/linkblog/inbox"
+  ) {
+    return blog.linkblog.activitystream.id;
+  }
+
+  return null;
 }
 
 async function verify(req) {
@@ -189,10 +213,9 @@ async function handleFollow(req, res) {
     return { detail: "actor has to be an uri" };
   }
 
-  const blog = await getBlogObject();
-  const blogActor = blog.activitystream.id;
+  const inboxActor = await getInboxActor(req);
 
-  if (normalizeActor(object) !== blogActor) {
+  if (normalizeActor(object) !== inboxActor) {
     res.statusCode = 404;
     return { detail: "object not found" };
   }
@@ -202,10 +225,11 @@ async function handleFollow(req, res) {
     id,
     type,
     actor_id: normalizeActor(actor),
-    object_id: blogActor,
+    object_id: inboxActor,
   });
 
   await sendAcceptMessage(asdb, {
+    sender: inboxActor,
     receiver: normalizeActor(actor),
     object: id,
   });
@@ -281,7 +305,10 @@ async function handleUndo(req, res) {
     2: normalizeActor(actor),
   });
 
+  const inboxActor = await getInboxActor(req);
+
   await sendAcceptMessage(asdb, {
+    sender: inboxActor,
     receiver: normalizeActor(actor),
     object: id,
   });
@@ -328,7 +355,7 @@ async function storeInboxMessage(asdb, message) {
 
 async function storeReply(_asdb, _note) {}
 
-async function sendAcceptMessage(asdb, { receiver, object }) {
+async function sendAcceptMessage(asdb, { sender, receiver, object }) {
   const { inbox, shared_inbox } = await asdb.get(
     `SELECT inbox, shared_inbox FROM actors WHERE id = ?1`,
     {
@@ -340,31 +367,12 @@ async function sendAcceptMessage(asdb, { receiver, object }) {
     return;
   }
 
-  const blog = await getBlogObject();
-  const blogActor = blog.activitystream.id;
-
-  const id = new URL(`#outbox-${getMessageId()}`, blogActor);
-
-  await asdb.run(
-    `INSERT INTO outbox (
-      id,
-      'to',
-      message
-    ) VALUES (
-      ?1,
-      ?2,
-      ?3
-    );`,
-    {
-      1: id,
-      2: receiver,
-      3: JSON.stringify({
-        type: "Accept",
-        object: object,
-        actor: blogActor,
-      }),
-    }
-  );
+  const id = await createMessage(asdb, {
+    from: sender,
+    to: receiver,
+    type: "Accept",
+    object,
+  });
 
   await attemptDelivery(
     asdb,

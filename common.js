@@ -1071,6 +1071,9 @@ async function getBlogObject(baseUrl) {
         url: new URL("/feeds/linkblog.xml", baseUrl).toString(),
         websub: WEBSUB_HUB,
       },
+      activitystream: {
+        id: new URL(`actor/linkblog`, baseUrl).toString(),
+      },
     },
     archive: {
       lang,

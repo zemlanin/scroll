@@ -68,6 +68,18 @@ async function inbox(req, res) {
 async function getInboxActor(req) {
   const blog = await getBlogObject();
 
+  if (req.url === "/actor/inbox" || req.url === "/activitystreams/inbox") {
+    // might be not enough… maybe, remove shared inboxes altogether?
+    const object = normalizeActor(req.post.object);
+
+    if (
+      object === blog.activitystream.id ||
+      object === blog.linkblog.activitystream.id
+    ) {
+      return object;
+    }
+  }
+
   if (
     req.url === "/actor/blog/inbox" ||
     req.url === "/activitystreams/blog/inbox"

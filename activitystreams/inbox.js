@@ -59,8 +59,7 @@ async function inbox(req, res) {
     case "Delete":
       return handleDelete(req, res);
     case "Update":
-      // TODO
-      break;
+      return handleUpdate(req, res);
     case "Move":
       // TODO
       break;
@@ -516,6 +515,79 @@ async function handleDelete(req, res) {
     1: object.id,
     2: normalizeActor(actor),
   });
+}
+
+async function handleUpdate(req, res) {
+  /*
+    {
+      '@context': [
+        'https://www.w3.org/ns/activitystreams',
+        {
+          ostatus: 'http://ostatus.org#',
+          atomUri: 'ostatus:atomUri',
+          inReplyToAtomUri: 'ostatus:inReplyToAtomUri',
+          conversation: 'ostatus:conversation',
+          sensitive: 'as:sensitive',
+          toot: 'http://joinmastodon.org/ns#',
+          votersCount: 'toot:votersCount'
+        }
+      ],
+      id: 'https://mastodon.devua.club/users/zemlanin/statuses/109596857290164329#updates/1672317018',
+      type: 'Update',
+      actor: 'https://mastodon.devua.club/users/zemlanin',
+      published: '2022-12-29T12:30:18Z',
+      to: [ 'https://7840-139-47-36-230.eu.ngrok.io/actor/blog' ],
+      cc: [],
+      object: {
+        id: 'https://mastodon.devua.club/users/zemlanin/statuses/109596857290164329',
+        type: 'Note',
+        summary: null,
+        inReplyTo: 'https://7840-139-47-36-230.eu.ngrok.io/actor/blog/notes/post-2020-03-ontN1uSG6j',
+        published: '2022-12-29T12:02:07Z',
+        url: 'https://mastodon.devua.club/@zemlanin/109596857290164329',
+        attributedTo: 'https://mastodon.devua.club/users/zemlanin',
+        to: [ 'https://7840-139-47-36-230.eu.ngrok.io/actor/blog' ],
+        cc: [],
+        sensitive: false,
+        atomUri: 'https://mastodon.devua.club/users/zemlanin/statuses/109596857290164329',
+        inReplyToAtomUri: 'https://7840-139-47-36-230.eu.ngrok.io/actor/blog/notes/post-2020-03-ontN1uSG6j',
+        conversation: 'tag:devua.club,2022-12-29:objectId=34984:objectType=Conversation',
+        content: '<p><span class="h-card"><a href="https://7840-139-47-36-230.eu.ngrok.io/" class="u-url mention">@<span>blog</span></a></span> test (edit)</p>',
+        contentMap: {
+          uk: '<p><span class="h-card"><a href="https://7840-139-47-36-230.eu.ngrok.io/" class="u-url mention">@<span>blog</span></a></span> test (edit)</p>'
+        },
+        updated: '2022-12-29T12:30:18Z',
+        attachment: [],
+        tag: [ [Object] ],
+        replies: {
+          id: 'https://mastodon.devua.club/users/zemlanin/statuses/109596857290164329/replies',
+          type: 'Collection',
+          first: [Object]
+        }
+      }
+    }
+  */
+  const { actor, object } = req.post;
+
+  if (!object?.id || !actor) {
+    res.statusCode = 400;
+    return { detail: "nothing to update" };
+  }
+
+  if (object.type !== "Note") {
+    // TODO: update actors
+    return;
+  }
+
+  const asdb = await req.asdb();
+  await asdb.run(
+    `UPDATE replies SET object = ?3 WHERE id = ?1 AND actor_id = ?2;`,
+    {
+      1: object.id,
+      2: normalizeActor(actor),
+      3: JSON.stringify(object),
+    }
+  );
 }
 
 function normalizeActor(actor) {

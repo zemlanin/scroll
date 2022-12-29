@@ -8,8 +8,16 @@ const { createMessage, attemptDelivery } = require("./outbox.js");
 
 module.exports = inbox;
 
+const AS_CONTEXT = "https://www.w3.org/ns/activitystreams";
+
 async function inbox(req, res) {
-  if (req.post?.["@context"] !== "https://www.w3.org/ns/activitystreams") {
+  const context = req.post?.["@context"];
+
+  if (
+    !context || typeof context === "string"
+      ? context !== AS_CONTEXT
+      : !context.some((v) => v === AS_CONTEXT)
+  ) {
     res.statusCode = 400;
 
     return { detail: "invalid @context" };
@@ -70,6 +78,7 @@ async function getInboxActor(req) {
 
   if (req.url === "/actor/inbox" || req.url === "/activitystreams/inbox") {
     // might be not enough… maybe, remove shared inboxes altogether?
+
     const object = normalizeActor(req.post.object);
 
     if (
@@ -78,6 +87,19 @@ async function getInboxActor(req) {
     ) {
       return object;
     }
+
+    if (req.post.type === "Create") {
+      const to = req.post.to?.length ? req.post.to : [];
+      const cc = req.post.cc?.length ? req.post.cc : [];
+
+      return [...to, ...cc].find(
+        (id) =>
+          id === blog.activitystream.id ||
+          id === blog.linkblog.activitystream.id
+      );
+    }
+
+    return null;
   }
 
   if (
@@ -283,54 +305,10 @@ async function handleLike(req, res) {
     return { detail: "object or object.id has to be an uri" };
   }
 
-  const blog = await getBlogObject();
-
-  const { hostname, pathname } = objectURL;
-
-  if (new URL(blog.url).hostname !== hostname) {
-    res.statusCode = 404;
-    return { detail: "object not found" };
-  }
-
-  const [_full, actorName, noteId] =
-    pathname.match(/^\/actor\/([a-z0-9_-]+)\/notes\/([a-z0-9_-]+)$/i) ?? [];
-
-  if ((actorName !== "blog" && actorName !== "linkblog") || !noteId) {
-    res.statusCode = 404;
-    return { detail: "object not found" };
-  }
-
   const db = await req.db();
-  if (actorName === "blog") {
-    const post = await db.get(
-      `
-        SELECT id FROM posts
-        WHERE id = ?1
-          AND draft = 0 AND internal = 0 AND private = 0
-      `,
-      { 1: noteId }
-    );
-
-    if (!post) {
-      res.statusCode = 404;
-      return { detail: "object not found" };
-    }
-  }
-
-  if (actorName === "linkblog") {
-    const post = await db.get(
-      `
-        SELECT id FROM linklist
-        WHERE id = ?1
-          AND draft = 0 AND internal = 0 AND private = 0
-      `,
-      { 1: noteId }
-    );
-
-    if (!post) {
-      res.statusCode = 404;
-      return { detail: "object not found" };
-    }
+  if (!(await getPostFromActivityStreamURL(db, objectURL))) {
+    res.statusCode = 404;
+    return { detail: "object not found" };
   }
 
   const asdb = await req.asdb();
@@ -343,12 +321,115 @@ async function handleLike(req, res) {
 }
 
 async function handleCreate(req, res) {
-  // TODO
-  console.log(req.post);
-  await storeReply();
+  /*
+    {
+      '@context': [
+        'https://www.w3.org/ns/activitystreams',
+        {
+          ostatus: 'http://ostatus.org#',
+          atomUri: 'ostatus:atomUri',
+          inReplyToAtomUri: 'ostatus:inReplyToAtomUri',
+          conversation: 'ostatus:conversation',
+          sensitive: 'as:sensitive',
+          toot: 'http://joinmastodon.org/ns#',
+          votersCount: 'toot:votersCount'
+        }
+      ],
+      id: 'https://mastodon.devua.club/users/zemlanin/statuses/109596632233808512/activity',
+      type: 'Create',
+      actor: 'https://mastodon.devua.club/users/zemlanin',
+      published: '2022-12-29T11:04:53Z',
+      to: [ 'https://7840-139-47-36-230.eu.ngrok.io/actor/blog' ],
+      cc: [],
+      object: {
+        id: 'https://mastodon.devua.club/users/zemlanin/statuses/109596632233808512',
+        type: 'Note',
+        summary: null,
+        inReplyTo: 'https://7840-139-47-36-230.eu.ngrok.io/actor/blog/notes/post-2020-03-ontN1uSG6j',
+        published: '2022-12-29T11:04:53Z',
+        url: 'https://mastodon.devua.club/@zemlanin/109596632233808512',
+        attributedTo: 'https://mastodon.devua.club/users/zemlanin',
+        to: [ 'https://7840-139-47-36-230.eu.ngrok.io/actor/blog' ],
+        cc: [],
+        sensitive: false,
+        atomUri: 'https://mastodon.devua.club/users/zemlanin/statuses/109596632233808512',
+        inReplyToAtomUri: 'https://7840-139-47-36-230.eu.ngrok.io/actor/blog/notes/post-2020-03-ontN1uSG6j',
+        conversation: 'tag:devua.club,2022-12-29:objectId=34984:objectType=Conversation',
+        content: '<p><span class="h-card"><a href="https://7840-139-47-36-230.eu.ngrok.io/" class="u-url mention">@<span>blog</span></a></span> test 2</p>',
+        contentMap: {
+          uk: '<p><span class="h-card"><a href="https://7840-139-47-36-230.eu.ngrok.io/" class="u-url mention">@<span>blog</span></a></span> test 2</p>'
+        },
+        attachment: [],
+        tag: [ [Object] ],
+        replies: {
+          id: 'https://mastodon.devua.club/users/zemlanin/statuses/109596632233808512/replies',
+          type: 'Collection',
+          first: [Object]
+        }
+      }
+    }
+  */
 
-  res.statusCode = 400;
-  return { detail: "unknown activity type" };
+  const { id, type, actor, object } = req.post;
+
+  try {
+    new URL(normalizeActor(actor));
+  } catch (e) {
+    res.statusCode = 400;
+    return { detail: "actor has to be an uri" };
+  }
+
+  if (actor !== object.attributedTo) {
+    res.statusCode = 400;
+    return { detail: "actor must match object.attributedTo" };
+  }
+
+  try {
+    new URL(object.id);
+  } catch (e) {
+    res.statusCode = 400;
+    return { detail: "object.id has to be an uri" };
+  }
+
+  const asdb = await req.asdb();
+  await storeInboxMessage(asdb, {
+    id,
+    type,
+    actor_id: normalizeActor(actor),
+    object_id: object.id,
+  });
+
+  const db = await req.db();
+  const rootId = await getReplyRootId(db, asdb, object.inReplyTo);
+
+  await storeReply(asdb, rootId, {
+    "@context": req.post["@context"],
+    ...object,
+  });
+}
+
+async function getReplyRootId(db, asdb, inReplyTo) {
+  if (!inReplyTo) {
+    return null;
+  }
+
+  try {
+    const inReplyToURL = new URL(inReplyTo);
+    const inReplyToPost = await getPostFromActivityStreamURL(db, inReplyToURL);
+
+    if (inReplyToPost) {
+      return inReplyTo;
+    }
+  } catch (e) {
+    return null;
+  }
+
+  const { root_id } =
+    (await asdb.get(`SELECT root_id FROM replies WHERE id = ?1`, {
+      1: inReplyTo,
+    })) ?? {};
+
+  return root_id ?? null;
 }
 
 async function handleUndo(req, res) {
@@ -398,11 +479,43 @@ async function handleUndo(req, res) {
 }
 
 async function handleDelete(req, res) {
-  // TODO
-  console.log(req.post);
+  /*
+    {
+      '@context': [
+        'https://www.w3.org/ns/activitystreams',
+        { ostatus: 'http://ostatus.org#', atomUri: 'ostatus:atomUri' }
+      ],
+      id: 'https://mastodon.devua.club/users/zemlanin/statuses/109596627840095661#delete',
+      type: 'Delete',
+      actor: 'https://mastodon.devua.club/users/zemlanin',
+      to: [ 'https://www.w3.org/ns/activitystreams#Public' ],
+      object: {
+        id: 'https://mastodon.devua.club/users/zemlanin/statuses/109596627840095661',
+        type: 'Tombstone',
+        atomUri: 'https://mastodon.devua.club/users/zemlanin/statuses/109596627840095661'
+      }
+    }
+  */
 
-  res.statusCode = 400;
-  return { detail: "unknown activity type" };
+  const { actor, object } = req.post;
+
+  if (!object?.id) {
+    res.statusCode = 400;
+    return { detail: "nothing to undo" };
+  }
+
+  try {
+    new URL(normalizeActor(actor));
+  } catch (e) {
+    res.statusCode = 400;
+    return { detail: "actor has to be an uri" };
+  }
+
+  const asdb = await req.asdb();
+  await asdb.run(`DELETE FROM inbox WHERE id = ?1 AND actor_id = ?2;`, {
+    1: object.id,
+    2: normalizeActor(actor),
+  });
 }
 
 function normalizeActor(actor) {
@@ -436,7 +549,61 @@ async function storeInboxMessage(asdb, message) {
   );
 }
 
-async function storeReply(_asdb, _note) {}
+async function storeReply(asdb, rootId, note) {
+  await asdb.run(
+    `
+      INSERT INTO replies (id, published, actor_id, root_id, object)
+      VALUES (?1, ?2, ?3, ?4, ?5)
+    `,
+    {
+      1: note.id,
+      2: note.published,
+      3: note.attributedTo,
+      4: rootId,
+      5: JSON.stringify(note),
+    }
+  );
+}
+
+async function getPostFromActivityStreamURL(db, url) {
+  const blog = await getBlogObject();
+  const { hostname, pathname } = url;
+
+  if (new URL(blog.url).hostname !== hostname) {
+    return null;
+  }
+
+  const [_full, actorName, noteId] =
+    pathname.match(/^\/actor\/([a-z0-9_-]+)\/notes\/([a-z0-9_-]+)$/i) ?? [];
+
+  if (actorName === "blog") {
+    const post = await db.get(
+      `
+        SELECT id FROM posts
+        WHERE id = ?1
+          AND draft = 0 AND internal = 0 AND private = 0
+      `,
+      { 1: noteId }
+    );
+
+    return post || null;
+  }
+
+  if (actorName === "linkblog") {
+    const post = await db.get(
+      `
+        SELECT id FROM linklist
+        WHERE id = ?1
+          AND draft = 0 AND internal = 0 AND private = 0
+      `,
+      { 1: noteId }
+    );
+
+    return post || null;
+  }
+
+  return null;
+}
 
 async function sendAcceptMessage(asdb, { sender, receiver, object }) {
   const { inbox, shared_inbox } = await asdb.get(

@@ -82,16 +82,21 @@
       <div class="card">
         <div class="card-content">
           {{# type=Follow }}
-            <a href="{{ actor.url }}">{{actor.name}}</a> followed <a href="{{object.url}}">{{object.id}}</a>
+            <a href="{{ actor.url }}">{{actor.name}}</a> followed <a href="{{{object.id}}}">{{object.id}}</a>
           {{/ type=Follow }}
           {{# type=Like }}
-            <a href="{{ actor.url }}">{{actor.name}}</a> liked <a href="{{object.url}}">{{object.id}}</a>
+            <a href="{{ actor.url }}">{{actor.name}}</a> liked <a href="{{{object.id}}}">{{object.id}}</a>
           {{/ type=Like }}
           {{# type=Announce }}
-            <a href="{{ actor.url }}">{{actor.name}}</a> boosted <a href="{{object.url}}">{{object.id}}</a>
+            <a href="{{ actor.url }}">{{actor.name}}</a> boosted <a href="{{{object.id}}}">{{object.id}}</a>
           {{/ type=Announce }}
           {{# type=Create }}
-            <a href="{{ actor.url }}">{{actor.name}}</a> replied to <a href="{{object.url}}">{{object.id}}</a>
+            <a href="{{ actor.url }}">{{actor.name}}</a> replied {{#reply.root}}to <a href="{{reply.root}}">{{reply.root}}</a>{{/reply.root}}
+
+            <br/>
+            <br/>
+
+            <div>{{{ reply.html }}}</div>
           {{/ type=Create }}
           {{# type=unknown }}
             <a href="{{ actor.url }}">{{actor.name}}</a> {{type}} {{object.id}}

@@ -1,3 +1,5 @@
+const sanitizeHtml = require("sanitize-html");
+
 const { render } = require("./render.js");
 
 const PAGE_SIZE = 20;
@@ -38,6 +40,7 @@ async function index(req, res) {
           i.object_id,
           i.type,
           i.hidden,
+          r.root_id AS reply_root_id,
           r.object,
           a.name,
           a.icon,
@@ -56,6 +59,7 @@ async function index(req, res) {
           i.object_id,
           i.type,
           i.hidden,
+          r.root_id AS reply_root_id,
           r.object,
           a.name,
           a.icon,
@@ -103,7 +107,14 @@ async function index(req, res) {
         : {
             id: msg.object_id,
           },
-      reply: replyObject,
+      reply: replyObject
+        ? {
+            id: replyObject.id,
+            root: msg.reply_root_id,
+            inReplyTo: replyObject.inReplyTo,
+            html: sanitize(replyObject.content),
+          }
+        : null,
       actor: {
         id: msg.actor_id,
         name: msg.name || msg.actor_id,
@@ -111,6 +122,7 @@ async function index(req, res) {
         url: msg.url,
       },
       urls: {
+        permalink: replyObject ? replyObject.url : null,
         hide: "", // TODO
       },
     };
@@ -123,6 +135,16 @@ async function index(req, res) {
     urls: {
       ...getPaginationUrls(new URL(req.url, req.absolute), totalCount),
     },
+  });
+}
+
+function sanitize(str) {
+  return sanitizeHtml(str, {
+    allowedTags: ["a", "p", "i", "b", "span", "strong", "em", "br"],
+    allowedAttributes: {
+      a: ["href"],
+    },
+    disallowedTagsMode: "recursiveEscape",
   });
 }
 

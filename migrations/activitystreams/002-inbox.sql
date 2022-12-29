@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS "replies" (
   `created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `published` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `actor_id` TEXT NOT NULL,
+  `root_id` TEXT,
   `object` JSON,
   PRIMARY KEY (`id`)
 );

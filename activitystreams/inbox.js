@@ -265,12 +265,81 @@ async function handleLike(req, res) {
       "object": "https://zemlan.in/actor/blog/notes/post-2022-11-Ls4QTeY41Z"
     }
   */
+  const { id, type, actor, object } = req.post;
 
-  // TODO
-  console.log(req.post);
+  try {
+    new URL(normalizeActor(actor));
+  } catch (e) {
+    res.statusCode = 400;
+    return { detail: "actor has to be an uri" };
+  }
 
-  res.statusCode = 400;
-  return { detail: "unknown activity type" };
+  let objectURL;
+
+  try {
+    objectURL = new URL(object?.id || object);
+  } catch (e) {
+    res.statusCode = 400;
+    return { detail: "object or object.id has to be an uri" };
+  }
+
+  const blog = await getBlogObject();
+
+  const { hostname, pathname } = objectURL;
+
+  if (new URL(blog.url).hostname !== hostname) {
+    res.statusCode = 404;
+    return { detail: "object not found" };
+  }
+
+  const [_full, actorName, noteId] =
+    pathname.match(/^\/actor\/([a-z0-9_-]+)\/notes\/([a-z0-9_-]+)$/i) ?? [];
+
+  if ((actorName !== "blog" && actorName !== "linkblog") || !noteId) {
+    res.statusCode = 404;
+    return { detail: "object not found" };
+  }
+
+  const db = await req.db();
+  if (actorName === "blog") {
+    const post = await db.get(
+      `
+        SELECT id FROM posts
+        WHERE id = ?1
+          AND draft = 0 AND internal = 0 AND private = 0
+      `,
+      { 1: noteId }
+    );
+
+    if (!post) {
+      res.statusCode = 404;
+      return { detail: "object not found" };
+    }
+  }
+
+  if (actorName === "linkblog") {
+    const post = await db.get(
+      `
+        SELECT id FROM linklist
+        WHERE id = ?1
+          AND draft = 0 AND internal = 0 AND private = 0
+      `,
+      { 1: noteId }
+    );
+
+    if (!post) {
+      res.statusCode = 404;
+      return { detail: "object not found" };
+    }
+  }
+
+  const asdb = await req.asdb();
+  await storeInboxMessage(asdb, {
+    id,
+    type,
+    actor_id: normalizeActor(actor),
+    object_id: objectURL.toString(),
+  });
 }
 
 async function handleCreate(req, res) {
@@ -317,13 +386,15 @@ async function handleUndo(req, res) {
     2: normalizeActor(actor),
   });
 
-  const inboxActor = await getInboxActor(req);
+  if (object.type === "Follow") {
+    const inboxActor = await getInboxActor(req);
 
-  await sendAcceptMessage(asdb, {
-    sender: inboxActor,
-    receiver: normalizeActor(actor),
-    object: id,
-  });
+    await sendAcceptMessage(asdb, {
+      sender: inboxActor,
+      receiver: normalizeActor(actor),
+      object: id,
+    });
+  }
 }
 
 async function handleDelete(req, res) {

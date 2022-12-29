@@ -500,7 +500,7 @@ async function handleDelete(req, res) {
 
   if (!object?.id) {
     res.statusCode = 400;
-    return { detail: "nothing to undo" };
+    return { detail: "nothing to delete" };
   }
 
   try {
@@ -511,7 +511,11 @@ async function handleDelete(req, res) {
   }
 
   const asdb = await req.asdb();
-  await asdb.run(`DELETE FROM inbox WHERE id = ?1 AND actor_id = ?2;`, {
+  await asdb.run(`DELETE FROM replies WHERE id = ?1 AND actor_id = ?2;`, {
+    1: object.id,
+    2: normalizeActor(actor),
+  });
+  await asdb.run(`DELETE FROM inbox WHERE object_id = ?1 AND actor_id = ?2;`, {
     1: object.id,
     2: normalizeActor(actor),
   });

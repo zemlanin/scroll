@@ -589,7 +589,10 @@ async function handleUpdate(req, res) {
     {
       1: object.id,
       2: normalizeActor(actor),
-      3: JSON.stringify(object),
+      3: JSON.stringify({
+        "@context": req.post["@context"],
+        ...object,
+      }),
     }
   );
 }

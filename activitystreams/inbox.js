@@ -672,8 +672,7 @@ async function getPostFromActivityStreamURL(db, url) {
     const post = await db.get(
       `
         SELECT id FROM linklist
-        WHERE id = ?1
-          AND draft = 0 AND internal = 0 AND private = 0
+        WHERE id = ?1 AND private = 0
       `,
       { 1: noteId }
     );

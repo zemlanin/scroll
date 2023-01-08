@@ -125,6 +125,7 @@ module.exports = {
         res.end("\ndone");
       })
       .catch((e) => {
+        console.error(e);
         res.write(e.toString());
         res.end("\nfail");
       });

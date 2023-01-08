@@ -92,7 +92,12 @@ async function loadFreshFeed(db, asdb, stdout, _stderr) {
         }
       );
 
-      const object = generateLinkblogActivityStreamNote(id, item.link, blog);
+      const object = generateLinkblogActivityStreamNote(
+        id,
+        item.link,
+        created,
+        blog
+      );
 
       const messageId = await createMessage(asdb, {
         type: "Create",

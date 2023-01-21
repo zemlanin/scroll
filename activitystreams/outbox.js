@@ -171,7 +171,7 @@ async function checkAndSend(stdout, stderr) {
       )
     );
 
-    messages = await getNextDeliveryAttempts(asdb);
+    messages = await getNextDeliveryAttempts(asdb, dt);
   }
 }
 

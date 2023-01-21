@@ -136,10 +136,11 @@ async function attemptDelivery(asdb, id, inbox, stdout, stderr) {
     const text = await resp.text();
 
     await asdb.run(
-      `UPDATE deliveries SET next_try = NULL, last_failure = ?2 WHERE message_id = ?1`,
+      `UPDATE deliveries SET next_try = NULL, last_failure = ?3 WHERE message_id = ?1 AND inbox = ?2`,
       {
         1: id,
-        2: JSON.stringify({
+        2: inbox,
+        3: JSON.stringify({
           status: resp.status,
           text: text.slice(0, 1000),
         }),

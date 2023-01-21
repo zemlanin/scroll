@@ -241,7 +241,7 @@ async function getNextDeliveryAttempts(asdb, dt) {
       SELECT message_id, inbox
       FROM deliveries
       WHERE next_try IS NOT NULL
-        AND CAST(datetime(next_try) AS INT) < ?1
+        AND CAST(strftime('%s000', next_try) AS INT) < ?1
         AND retries < ?2
       ORDER BY next_try ASC
       LIMIT 20;

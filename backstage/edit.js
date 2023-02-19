@@ -299,7 +299,7 @@ module.exports = {
         asdb,
         post.id,
         newStatus === oldStatus
-          ? "Edit"
+          ? "Update"
           : newStatus === "public"
           ? "Create"
           : // `oldStatus === "public"`

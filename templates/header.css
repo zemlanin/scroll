@@ -216,6 +216,13 @@ article audio {
   display: block;
 }
 
+article .footnotes audio,
+article .footnotes img,
+article .footnotes video {
+  display: inline-block;
+  vertical-align: text-top;
+}
+
 article figure.card img,
 article figure.card video {
   max-height: 21.375em;

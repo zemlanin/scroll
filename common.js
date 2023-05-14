@@ -829,6 +829,7 @@ async function prepare(post, embedsLoader) {
   let htmlTitle = null;
   let longread = null;
   let html = null;
+  let htmlFootnotes = "";
 
   post.url = getPostUrl(post);
   const rss = {
@@ -888,18 +889,17 @@ async function prepare(post, embedsLoader) {
 
     if (footnotes.length) {
       footnotes.sort(byIndex);
-      html =
-        html +
-        `<div class="footnotes"><hr><ol>${footnotes
-          .map((f) => f.html)
-          .join("\n")}</ol></div>`;
+      htmlFootnotes = `<div class="footnotes"><hr><ol>${footnotes
+        .map((f) => f.html)
+        .join("\n")}</ol></div>`;
     }
 
-    rss.html = await embedsLoader.load(html, {
+    rss.html = await embedsLoader.load(html + htmlFootnotes, {
       externalFrames: true,
       maxWidth: 720,
     });
     html = await embedsLoader.load(html);
+    htmlFootnotes = await embedsLoader.load(htmlFootnotes);
 
     const teaser = await embedsLoader.load(teaserParagraphs.join("\n"));
 
@@ -927,7 +927,10 @@ async function prepare(post, embedsLoader) {
     opengraph.title = title.trim();
 
     if (numberOfParagraphs > 3) {
-      const wordMatches = cheerio.load(html).text().match(WORD_REGEX);
+      const wordMatches = cheerio
+        .load(html + htmlFootnotes)
+        .text()
+        .match(WORD_REGEX);
 
       const wordCount = wordMatches ? wordMatches.length : 0;
 
@@ -956,17 +959,18 @@ async function prepare(post, embedsLoader) {
       },
     });
     if (footnotes.length) {
-      html =
-        html +
-        `<div class="footnotes"><hr><ol>${footnotes
-          .map((f) => f.html)
-          .join("\n")}</ol></div>`;
+      footnotes.sort(byIndex);
+      htmlFootnotes = `<div class="footnotes"><hr><ol>${footnotes
+        .map((f) => f.html)
+        .join("\n")}</ol></div>`;
     }
-    rss.html = await embedsLoader.load(html, {
+
+    rss.html = await embedsLoader.load(html + htmlFootnotes, {
       externalFrames: true,
       maxWidth: 720,
     });
     html = await embedsLoader.load(html);
+    htmlFootnotes = await embedsLoader.load(htmlFootnotes);
 
     if (!post.internal) {
       const parsedPost = cheerio.load(html);
@@ -1020,6 +1024,7 @@ async function prepare(post, embedsLoader) {
     title,
     htmlTitle,
     html,
+    htmlFootnotes: htmlFootnotes ?? "",
     longread,
     rss,
     opengraph,

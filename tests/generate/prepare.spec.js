@@ -86,7 +86,7 @@ test("general", async (t) => {
   );
 
   t.equalHtml(
-    result.html,
+    result.html + result.htmlFootnotes,
     `
       <p>hello<sup><a href="#fn:f69cd51a:1" id="rfn:f69cd51a:1" rel="footnote">1</a></sup></p>
       <h2 id="should-have-id">should have id</h2>
@@ -102,7 +102,7 @@ test("general", async (t) => {
   );
 
   t.equalHtml(
-    result.html,
+    result.html + result.htmlFootnotes,
     `
       <p>hello<sup><a href="#fn:f69cd51a:1" id="rfn:f69cd51a:1" rel="footnote">1</a></sup></p>
       <h2 id="should-have-id">should have id</h2>
@@ -149,7 +149,7 @@ test("footnotes", async (t) => {
   );
 
   t.equalHtml(
-    result.html,
+    result.html + result.htmlFootnotes,
     `
       <p>hello<sup><a href="#fn:a22749bc:hacky" id="rfn:a22749bc:hacky" rel="footnote">1</a></sup></p>
       <p>yep<sup><a href="#fn:a22749bc:2" id="rfn:a22749bc:2" rel="footnote">2</a></sup> <sup><a href="#fn:a22749bc:bignote" id="rfn:a22749bc:bignote" rel="footnote">3</a></sup></p>
@@ -211,7 +211,7 @@ test("footnote inside non-paragraph blocks", async (t) => {
   );
 
   t.equalHtml(
-    result.html,
+    result.html + result.htmlFootnotes,
     `
       <p><em>italic text<sup><a href="#fn:589870e6:1" id="rfn:589870e6:1" rel="footnote">1</a></sup></em></p>
       <p><strong>strong text<sup><a href="#fn:589870e6:2" id="rfn:589870e6:2" rel="footnote">2</a></sup></strong></p>
@@ -261,7 +261,7 @@ test("footnote before ticked code block", async (t) => {
   );
 
   t.equalHtml(
-    result.html,
+    result.html + result.htmlFootnotes,
     `
       <p>lorem <sup><a href="#fn:da4307d5:1" id="rfn:da4307d5:1" rel="footnote">1</a></sup></p>
       <pre><code class="language-js"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">"lorem"</span>);\n</code></pre>
@@ -297,7 +297,7 @@ test("footnote with double squares", async (t) => {
   );
 
   t.equalHtml(
-    result.html,
+    result.html + result.htmlFootnotes,
     `
       <p>double squares<sup><a href="#fn:96289b5d:xx" id="rfn:96289b5d:xx" rel="footnote">1</a></sup></p>
       <div class="footnotes">
@@ -330,7 +330,7 @@ test("footnote with cheese", async (t) => {
   );
 
   t.equalHtml(
-    result.html,
+    result.html + result.htmlFootnotes,
     `
       <ul>
         <li>
@@ -392,13 +392,15 @@ test("footnote in teaser", async (t) => {
 
   t.equal(result.opengraph.description, `aka "The Hard Part"`);
 
+  const completeHtml = result.html + result.htmlFootnotes;
+
   t.ok(
-    result.html.includes(
+    completeHtml.includes(
       `<sup><a href="#fn:6c42981d:1" id="rfn:6c42981d:1" rel="footnote">1</a></sup>`
     )
   );
-  t.ok(result.html.includes(`<li id="fn:6c42981d:1" tabindex="-1">`));
-  t.ok(result.html.includes(`image from somewhere`));
+  t.ok(completeHtml.includes(`<li id="fn:6c42981d:1" tabindex="-1">`));
+  t.ok(completeHtml.includes(`image from somewhere`));
 });
 
 test("inline footnote in teaser", async (t) => {
@@ -435,13 +437,15 @@ test("inline footnote in teaser", async (t) => {
 
   t.equal(result.opengraph.description, "easier part");
 
+  const completeHtml = result.html + result.htmlFootnotes;
+
   t.ok(
-    result.html.includes(
+    completeHtml.includes(
       `<sup><a href="#fn:83674bc3:1" id="rfn:83674bc3:1" rel="footnote">1</a></sup>`
     )
   );
-  t.ok(result.html.includes(`<li id="fn:83674bc3:1" tabindex="-1">`));
-  t.ok(result.html.includes(`hello world`));
+  t.ok(completeHtml.includes(`<li id="fn:83674bc3:1" tabindex="-1">`));
+  t.ok(completeHtml.includes(`hello world`));
 });
 
 test("description after gallery", async (t) => {

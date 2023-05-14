@@ -160,6 +160,10 @@ class OwnMediaDimensionsLoader {
   }
 
   async load(html) {
+    if (!html) {
+      return html;
+    }
+
     const $ = cheerio.load(html);
 
     const urlsToLoad = [];

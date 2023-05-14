@@ -5,6 +5,8 @@
   {{#htmlTitle}}{{{htmlTitle}}}{{/htmlTitle}}
   {{{html}}}
 
+  {{^longread}}{{{htmlFootnotes}}}{{/longread}}
+
   {{^internal}}
   <div class="share-and-time">
     {{#public}}
@@ -24,6 +26,8 @@
     </time>
   </div>
   {{/internal}}
+
+  {{#longread}}{{{htmlFootnotes}}}{{/longread}}
 </article>
 {{/post}}
 

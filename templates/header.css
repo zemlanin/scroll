@@ -376,7 +376,6 @@ article button[data-share][data-share-state="done"] span[data-share-default] {
 article .share-and-time a[href*="buymeacoffee.com/"] {
   background: none;
   border-radius: 4px;
-  padding: 0 0.5em;
   margin-right: 0.25em;
   display: flex;
   align-items: center;
@@ -385,11 +384,32 @@ article .share-and-time a[href*="buymeacoffee.com/"] {
 article .share-and-time a[href*="buymeacoffee.com/"] svg {
   color: #888;
   color: var(--color-deemphasis);
-  margin-right: 0.3em;
+  margin-right: 0.5em;
 }
 
-body.theme-changed article .share-and-time a[href*="buymeacoffee.com/"] svg {
-  transition: color 0.2s ease-in-out;
+article .share-and-time a[href*="buymeacoffee.com/"] svg .bmac-cup {
+  fill: black;
+  fill: var(--color-text);
+}
+
+article .share-and-time a[href*="buymeacoffee.com/"] svg .bmac-drink {
+  fill: rgb(255, 221, 0);
+}
+
+body.theme-changed article .share-and-time a[href*="buymeacoffee.com/"] svg,
+body.theme-changed
+  article
+  .share-and-time
+  a[href*="buymeacoffee.com/"]
+  svg
+  .bmac-cup,
+body.theme-changed
+  article
+  .share-and-time
+  a[href*="buymeacoffee.com/"]
+  svg
+  .bmac-drink {
+  transition: color 0.2s ease-in-out, fill 1s ease-in-out;
 }
 
 @media (max-width: 20em) {

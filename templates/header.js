@@ -632,7 +632,9 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
-  if (!("share" in navigator && "canShare" in navigator)) {
+  var HIDE_SHARE_BUTTON = true;
+
+  if (!("share" in navigator && "canShare" in navigator) || HIDE_SHARE_BUTTON) {
     return;
   }
 

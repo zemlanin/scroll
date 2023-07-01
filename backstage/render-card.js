@@ -120,7 +120,8 @@ function renderCard(card, options) {
     (isYoutubeCard(card.url) ||
       isVimeoCard(card.url) ||
       isGiphyCard(card.url) ||
-      isButtondownEmailCard(card.url));
+      isButtondownEmailCard(card.url) ||
+      isSubstackCard(card.url));
 
   const useSiteNameAsSuffix =
     card.site_name && !card.title.endsWith(card.site_name);
@@ -217,6 +218,11 @@ function isButtondownEmailCard(cardURL) {
   return (
     hostname === "buttondown.email" || hostname.endsWith(".buttondown.email")
   );
+}
+
+function isSubstackCard(cardURL) {
+  const hostname = cardURL ? new URL(cardURL).hostname : "";
+  return hostname === "substack.com" || hostname.endsWith(".substack.com");
 }
 
 function isCoubCard(cardURL) {

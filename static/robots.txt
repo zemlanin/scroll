@@ -1,2 +1,5 @@
 User-agent: *
 Disallow: /backstage/
+
+User-agent: GPTBot
+Disallow: /
